@@ -304,17 +304,7 @@ type InteractiveMode struct {
 	// first Ctrl+C clears the editor, a second within 500ms shuts down.
 	lastSigintTime time.Time
 
-	// activeLoginCancel cancels an in-progress background OAuth login
-	// (github-copilot, anthropic device/PKCE flows) so Esc or Ctrl+C aborts
-	// the polling window, matching the "Ctrl+C to cancel" hint and upstream's
-	// login-dialog abort signal. The codex flow cancels through its modal
-	// dialog instead. Guarded by loginMu because a login can be started from
-	// the main loop (/login) or a turn goroutine (401 re-auth), while the key
-	// handler that cancels it runs on the main loop. activeLoginGen lets a
-	// completing login clear only its own cancel, never a newer one's.
-	loginMu           sync.Mutex
-	activeLoginCancel context.CancelFunc
-	activeLoginGen    int
+	modelSelectionGeneration uint64 // owner-loop generation for pending post-login selection
 
 	// Last assistant message text (for /copy).
 	lastAssistantText string

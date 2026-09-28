@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"slices"
 	"sync"
-	"time"
 
 	"golang.org/x/text/collate"
 	"golang.org/x/text/language"
@@ -167,6 +166,7 @@ func (m *InteractiveMode) loginAPIKeyProvider(providerID string) bool {
 	if m.opts.Llama == nil || providerID != llama.LlamaProviderID {
 		return false
 	}
+	previousModel := m.opts.Model
 	name := m.opts.Llama.Provider().Name
 	parent := m.runCtx
 	if parent == nil {
@@ -174,7 +174,7 @@ func (m *InteractiveMode) loginAPIKeyProvider(providerID string) bool {
 	}
 	loginCtx, cancel := context.WithCancelCause(parent)
 	defer cancel(nil)
-	dialog := tui.NewLoginDialog(name, func() { cancel(errLoginAborted) })
+	dialog := m.newLoginDialog(name, func() { cancel(errLoginAborted) })
 	renderNotify := make(chan struct{}, 1)
 	requestRender := func() {
 		select {
@@ -189,7 +189,12 @@ func (m *InteractiveMode) loginAPIKeyProvider(providerID string) bool {
 		loginErr = m.opts.Llama.Login(llama.AuthInteraction{
 			Ctx: loginCtx,
 			Prompt: func(prompt llama.AuthPrompt) (string, error) {
-				answer := dialog.ShowInput(prompt.Message, prompt.Placeholder)
+				showInput := dialog.ShowInput
+				// pig divergence (D80): preserve secret prompt metadata while allowing the configured Pi-compatible opt-out.
+				if prompt.Type == "secret" {
+					showInput = dialog.ShowSecretInput
+				}
+				answer := showInput(prompt.Message, prompt.Placeholder)
 				requestRender()
 				select {
 				case value, ok := <-answer:
@@ -206,11 +211,11 @@ func (m *InteractiveMode) loginAPIKeyProvider(providerID string) bool {
 	m.runEditorSlotCustom(dialog, renderNotify, nil, done)
 	if loginErr != nil {
 		if loginErr.Error() != errLoginCancelled.Error() {
-			m.showError(fmt.Sprintf("Failed to save API key for %s: %v", name, loginErr))
+			m.showError(dialog.Redact(fmt.Sprintf("Failed to save API key for %s: %v", name, loginErr)))
 		}
 		return true
 	}
-	m.completeLlamaAuthentication(name)
+	m.completeProviderAuthentication(providerID, name, ai.CredentialAPIKey, previousModel, filepath.Join(m.opts.AgentDir, "auth.json"), dialog.Redact)
 	return true
 }
 
@@ -227,46 +232,4 @@ func llamaCppPostLoginGuidance(actionLabel string, loadedModelCount int) string 
 		return actionLabel + ". No llama.cpp models are loaded. Use /llama to load a model, then /model to select it."
 	}
 	return actionLabel + ". Use /model to select a loaded llama.cpp model, or /llama to manage models."
-}
-
-// completeLlamaAuthentication mirrors completeProviderAuthentication for the
-// llama.cpp api-key login: guidance when no model is selected, the saved
-// status, and a background catalog refresh with its warnings.
-func (m *InteractiveMode) completeLlamaAuthentication(providerName string) {
-	actionLabel := "Saved API key for " + providerName
-	selectionError := ""
-	if m.opts.Model == nil {
-		count := 0
-		if m.opts.ModelRegistry != nil {
-			for _, entry := range m.opts.ModelRegistry.GetAvailable() {
-				if entry.ProviderID == llama.LlamaProviderID {
-					count++
-				}
-			}
-		}
-		selectionError = llamaCppPostLoginGuidance(actionLabel, count)
-	}
-	m.updateProviderInfo()
-	m.showStatus(fmt.Sprintf("%s. Credentials saved to %s", actionLabel, filepath.Join(m.opts.AgentDir, "auth.json")))
-	if selectionError != "" {
-		m.showError(selectionError)
-	}
-	parent := m.runCtx
-	if parent == nil {
-		parent = context.Background()
-	}
-	go func() {
-		refreshCtx, cancel := context.WithTimeout(parent, 15*time.Second)
-		defer cancel()
-		result := m.opts.Llama.Refresh(refreshCtx, true)
-		m.postUITask(func() {
-			if result.Aborted {
-				m.showWarning(actionLabel + ", but its model catalog refresh timed out; using cached models.")
-			} else if result.Err != nil {
-				m.showWarning(actionLabel + ", but its model catalog could not be refreshed; using cached models.")
-			}
-			m.updateProviderInfo()
-			m.tuiInst.RequestRender()
-		})
-	}()
 }

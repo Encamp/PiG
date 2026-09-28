@@ -99,50 +99,24 @@ func oauthCredentialStore(providerID string) (ai.OAuthCredentialStore, bool) {
 	return store, ok
 }
 
-// beginLogin registers cancel as the active background-login canceller and
-// returns a generation token. A later endLogin(token) clears it only if no
-// newer login has replaced it.
-func (m *InteractiveMode) beginLogin(cancel context.CancelFunc) int {
-	m.loginMu.Lock()
-	defer m.loginMu.Unlock()
-	m.activeLoginGen++
-	m.activeLoginCancel = cancel
-	return m.activeLoginGen
-}
-
-// endLogin clears the active-login canceller if it still belongs to token,
-// called when a login goroutine finishes so a subsequent Esc/Ctrl+C is not
-// swallowed by a stale login.
-func (m *InteractiveMode) endLogin(token int) {
-	m.loginMu.Lock()
-	defer m.loginMu.Unlock()
-	if m.activeLoginGen == token {
-		m.activeLoginCancel = nil
+func (m *InteractiveMode) maskSecretInput() bool {
+	if m.opts.SettingsManager != nil {
+		return m.opts.SettingsManager.Get().GetMaskSecretInput()
 	}
+	return m.opts.Settings.GetMaskSecretInput()
 }
 
-// cancelActiveLogin aborts an in-progress background login if one is active,
-// returning true when it consumed the request. Safe to call on every
-// interrupt/clear keystroke: it is a no-op when no login is running.
-func (m *InteractiveMode) cancelActiveLogin() bool {
-	m.loginMu.Lock()
-	cancel := m.activeLoginCancel
-	m.activeLoginCancel = nil
-	m.loginMu.Unlock()
-	if cancel == nil {
-		return false
-	}
-	cancel()
-	return true
+func (m *InteractiveMode) newLoginDialog(name string, cancel func()) *tui.LoginDialog {
+	dialog := tui.NewLoginDialog(name, cancel)
+	dialog.SetMaskSecretInput(m.maskSecretInput())
+	return dialog
 }
 
-// runOAuthLogin runs the interactive OAuth login flow for a provider.
-// Mirrors upstream showLoginDialog (interactive-mode.ts:4325-4444).
-// Uses status-line flash + chat messages for the device-flow state.
+// runOAuthLogin runs the provider's interactive OAuth dialog.
 func (m *InteractiveMode) runOAuthLogin(loginCtx context.Context, provider string) error {
 	switch provider {
 	case "github-copilot":
-		return m.runLoginGitHubCopilot(loginCtx)
+		return m.runLoginGitHubCopilotDialog(loginCtx)
 	case "openai-codex":
 		return m.runLoginOpenAICodex(loginCtx)
 	default:
@@ -181,31 +155,6 @@ func (m *InteractiveMode) oauthProviders() []ai.OAuthProviderInterface {
 		providers = append(providers, flow)
 	}
 	return providers
-}
-
-// refreshCatalogAfterLogin mirrors the upstream post-login catalog refresh:
-// the provider's dynamic catalog refreshes in the background for up to 15 s,
-// and a timeout or failure leaves the cached models in use with a warning.
-func (m *InteractiveMode) refreshCatalogAfterLogin(providerID, actionLabel string) {
-	registry := m.opts.ModelRegistry
-	if registry == nil {
-		return
-	}
-	if _, dynamic := registry.RadiusOAuth(providerID); !dynamic {
-		return
-	}
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-		result := registry.RefreshCatalogs(ctx, CatalogRefreshOptions{AllowNetwork: ModelNetworkEnabled(), Providers: []string{providerID}})
-		warning := catalogRefreshWarning(actionLabel, result)
-		m.postUITask(func() {
-			if warning != "" {
-				m.showWarning(warning)
-			}
-			m.updateProviderInfo()
-		})
-	}()
 }
 
 func catalogRefreshWarning(actionLabel string, result CatalogRefreshResult) string {
@@ -256,13 +205,18 @@ func runOAuthProviderLogin(ctx context.Context, provider ai.OAuthProviderInterfa
 }
 
 func (m *InteractiveMode) runLoginRegisteredOAuth(loginCtx context.Context, provider ai.OAuthProviderInterface, selectedMethod string) error {
+	previousModel := m.opts.Model
 	auth, err := ai.NewAuthStorage(filepath.Join(m.opts.AgentDir, "auth.json"))
 	if err != nil {
 		return fmt.Errorf("auth storage: %w", err)
 	}
 
 	loginCtx, loginCancel := context.WithCancel(loginCtx)
-	dlg := tui.NewLoginDialog(provider.Name(), loginCancel)
+	providerName := buildAuthProviderName(provider.ID())
+	if providerName == provider.ID() {
+		providerName = provider.Name()
+	}
+	dlg := m.newLoginDialog(providerName, loginCancel)
 	renderNotify := make(chan struct{}, 16)
 	notify := func() {
 		select {
@@ -342,7 +296,7 @@ func (m *InteractiveMode) runLoginRegisteredOAuth(loginCtx context.Context, prov
 		OnSelectContext: selectMethod,
 	}
 
-	var authPath string
+	authPath := auth.Path()
 	go func() {
 		defer loginCancel()
 
@@ -356,10 +310,10 @@ func (m *InteractiveMode) runLoginRegisteredOAuth(loginCtx context.Context, prov
 		}
 
 		if store, ok := provider.(ai.OAuthCredentialStore); ok {
+			// pig additive (D40): a contributed credential store reports its own saved location.
 			authPath, err = store.StoreOAuthCredentials(cred)
 		} else {
 			err = auth.Set(provider.ID(), ai.Credential{Type: ai.CredentialOAuth, Refresh: cred.Refresh, Access: cred.Access, Expires: cred.Expires, ProjectID: cred.ProjectID, Scope: cred.Scope})
-			authPath = auth.Path()
 		}
 		if err != nil {
 			dlg.ShowProgress(fmt.Sprintf("Failed to store credentials: %v", err))
@@ -376,9 +330,7 @@ func (m *InteractiveMode) runLoginRegisteredOAuth(loginCtx context.Context, prov
 
 	ok := m.runEditorSlotLoginDialog(dlg, renderNotify)
 	if ok {
-		m.showStatus(fmt.Sprintf("Logged in to %s. Credentials saved to %s", provider.Name(), authPath))
-		m.updateProviderInfo()
-		m.refreshCatalogAfterLogin(provider.ID(), "Logged in to "+provider.Name())
+		m.completeProviderAuthentication(provider.ID(), providerName, ai.CredentialOAuth, previousModel, authPath, dlg.Redact)
 	}
 	return nil
 }
@@ -389,6 +341,7 @@ func (m *InteractiveMode) runLoginRegisteredOAuth(loginCtx context.Context, prov
 // The browser path uses the PKCE + localhost callback dialog; the device-code
 // path (RFC 8628) shows the user code while polling.
 func (m *InteractiveMode) runLoginOpenAICodex(loginCtx context.Context) error {
+	previousModel := m.opts.Model
 	// Method selector, matching upstream openai-codex.ts login()'s onSelect call.
 	methodSel := tui.NewExtensionSelector("Select OpenAI Codex login method:", []string{
 		"Browser login (default)",
@@ -409,7 +362,7 @@ func (m *InteractiveMode) runLoginOpenAICodex(loginCtx context.Context) error {
 	}
 
 	loginCtx, loginCancel := context.WithCancel(loginCtx)
-	dlg := tui.NewLoginDialog(buildAuthProviderName("openai-codex"), loginCancel)
+	dlg := m.newLoginDialog(buildAuthProviderName("openai-codex"), loginCancel)
 	renderNotify := make(chan struct{}, 16)
 	notify := func() {
 		select {
@@ -455,10 +408,6 @@ func (m *InteractiveMode) runLoginOpenAICodex(loginCtx context.Context) error {
 		},
 	}
 
-	// authPath is written by the goroutine before dlg.Success() and read after
-	// the dialog closes; the dlg.mu edge in Success -> Done() (observed by
-	// runEditorSlotLoginDialog) publishes it to the post-dialog code below.
-	var authPath string
 	go func() {
 		defer loginCancel()
 
@@ -486,7 +435,6 @@ func (m *InteractiveMode) runLoginOpenAICodex(loginCtx context.Context) error {
 		if m.opts.ModelRegistry != nil {
 			m.opts.ModelRegistry.Refresh()
 		}
-		authPath = auth.Path()
 		dlg.Success()
 		notify()
 	}()
@@ -498,24 +446,21 @@ func (m *InteractiveMode) runLoginOpenAICodex(loginCtx context.Context) error {
 	// select, so it did not drain uiTaskCh and a runOnMain post would deadlock.
 	// ok == !Cancelled() is true only when the goroutine reached dlg.Success().
 	if ok {
-		m.showStatus(fmt.Sprintf("Logged in to OpenAI Codex. Credentials saved to %s", authPath))
-		m.updateProviderInfo()
+		m.completeProviderAuthentication("openai-codex", buildAuthProviderName("openai-codex"), ai.CredentialOAuth, previousModel, auth.Path(), dlg.Redact)
 	}
 	return nil
 }
 
-// runLoginGitHubCopilotDialog runs the user-invoked GitHub Copilot login flow
-// with the upstream LoginDialog surface. Automatic 401 re-auth uses
-// runLoginGitHubCopilot below because it can start from a turn goroutine where a
-// modal input loop would be unsafe.
+// runLoginGitHubCopilotDialog runs the GitHub Copilot login flow in the editor slot.
 func (m *InteractiveMode) runLoginGitHubCopilotDialog(loginCtx context.Context) error {
+	previousModel := m.opts.Model
 	auth, err := ai.NewAuthStorage(filepath.Join(m.opts.AgentDir, "auth.json"))
 	if err != nil {
 		return fmt.Errorf("auth storage: %w", err)
 	}
 
 	loginCtx, loginCancel := context.WithCancel(loginCtx)
-	dlg := tui.NewLoginDialog(buildAuthProviderName("github-copilot"), loginCancel)
+	dlg := m.newLoginDialog(buildAuthProviderName("github-copilot"), loginCancel)
 	renderNotify := make(chan struct{}, 16)
 	notify := func() {
 		select {
@@ -553,7 +498,6 @@ func (m *InteractiveMode) runLoginGitHubCopilotDialog(loginCtx context.Context) 
 		},
 	}
 
-	var authPath string
 	go func() {
 		defer loginCancel()
 
@@ -574,142 +518,59 @@ func (m *InteractiveMode) runLoginGitHubCopilotDialog(loginCtx context.Context) 
 		if m.opts.ModelRegistry != nil {
 			m.opts.ModelRegistry.Refresh()
 		}
-		authPath = auth.Path()
 		dlg.Success()
 		notify()
 	}()
 
 	ok := m.runEditorSlotLoginDialog(dlg, renderNotify)
 	if ok {
-		status := fmt.Sprintf("Logged in to GitHub Copilot. Credentials saved to %s", authPath)
-		m.showStatus(status)
-		m.appendToChat(tui.NewMarkdown("✓ " + status))
-		m.updateProviderInfo()
-		m.tuiInst.ForceFullRender()
-		m.tuiInst.Render()
+		m.completeProviderAuthentication("github-copilot", buildAuthProviderName("github-copilot"), ai.CredentialOAuth, previousModel, auth.Path(), dlg.Redact)
 	}
 	return nil
 }
 
-// runLoginGitHubCopilot runs the GitHub Copilot device flow inline.
-// Mirrors upstream flow: showAuth → poll → store credentials → refresh
-// model registry → auto-select model → status message.
-func (m *InteractiveMode) runLoginGitHubCopilot(loginCtx context.Context) error {
-	auth, err := ai.NewAuthStorage(filepath.Join(m.opts.AgentDir, "auth.json"))
-	if err != nil {
-		return fmt.Errorf("auth storage: %w", err)
+// showAPIKeyInput displays the standard API-key auth method's secret prompt in the editor slot.
+func (m *InteractiveMode) showAPIKeyInput(providerID string) (string, bool) {
+	if m.layout == nil || m.tuiInst == nil {
+		return "", false
 	}
-
-	// Show progress in chat: mirrors upstream LoginDialogComponent.
-	m.appendChatBlock(tui.NewMarkdown("**Login to GitHub Copilot**"))
-
-	// Run login in a goroutine so the TUI stays responsive during the
-	// device code polling window (~60s). Mirrors upstream's async
-	// showLoginDialog (interactive-mode.ts:4325-4444).
-	// Use abortCtx so Ctrl+C during polling cancels the login.
-	loginCtx, loginCancel := context.WithCancel(loginCtx)
-	loginToken := m.beginLogin(loginCancel)
-
-	cb := ai.CopilotLoginCallbacks{
-		OnPrompt: func(_ context.Context) (string, error) {
-			// Automatic reauthentication uses github.com because this path has no enterprise-domain input surface.
-			return "", nil
-		},
-		OnAuth: func(verificationURL, userCode string) {
-			msg := fmt.Sprintf(
-				"1. Open: %s\n2. Enter code: **%s**\n3. Authorize, then come back here.\n\nWaiting for authorization... (Ctrl+C to cancel)",
-				verificationURL, userCode)
-			m.runOnMain(m.runCtx, func() {
-				m.appendChatBlock(tui.NewMarkdown(msg))
-				m.tuiInst.Render()
-			})
-
-			// Try to open browser: mirrors upstream LoginDialogComponent.
-			_ = openBrowser(verificationURL)
-		},
-		OnProgress: func(msg string) {
-			m.runOnMain(m.runCtx, func() {
-				if m.statusLine != nil {
-					m.statusLine.Flash(msg, 5*time.Second)
-				}
-				m.tuiInst.Render()
-			})
-		},
+	dialog := m.newLoginDialog(buildAuthProviderName(providerID), nil)
+	// pig divergence (D80): the API-key method honors the configured input privacy policy.
+	methodName := "API key"
+	if auth, err := ai.BuiltinProviderAuth(providerID); err == nil && auth.APIKey != nil {
+		methodName = auth.APIKey.Name
 	}
-
-	go func() {
-		defer loginCancel()
-		defer m.endLogin(loginToken)
-
-		cred, err := ai.LoginGitHubCopilot(loginCtx, cb)
-		if err != nil {
-			m.runOnMain(m.runCtx, func() {
-				if loginCtx.Err() != nil {
-					// Cancelled: silent, mirrors upstream dialog.signal abort.
-					m.appendChatBlock(tui.NewMarkdown("Login cancelled."))
-				} else {
-					m.appendChatBlock(tui.NewMarkdown(fmt.Sprintf("Login failed: %v", err)))
-				}
-				m.tuiInst.ForceFullRender()
-				m.tuiInst.Render()
-			})
-			return
-		}
-
-		if err := auth.Set("github-copilot", cred); err != nil {
-			m.runOnMain(m.runCtx, func() {
-				m.appendChatBlock(tui.NewMarkdown(fmt.Sprintf("Failed to store credentials: %v", err)))
-				m.tuiInst.ForceFullRender()
-				m.tuiInst.Render()
-			})
-			return
-		}
-
-		// Success: mirror upstream's post-login flow:
-		// refresh model registry → auto-select model → status message.
-		// (interactive-mode.ts:4394-4438)
-		if m.opts.ModelRegistry != nil {
-			m.opts.ModelRegistry.Refresh()
-		}
-
-		// Model selection + status touch shared state the main loop reads.
-		m.runOnMain(m.runCtx, func() {
-			authPath := auth.Path()
-			status := fmt.Sprintf("Logged in to GitHub Copilot. Credentials saved to %s", authPath)
-
-			// Auto-select a model if none is currently set.
-			// Mirrors upstream isUnknownModel check (interactive-mode.ts:4398).
-			if m.opts.Model == nil && m.opts.ModelBuilder != nil {
-				if newModel, err := m.opts.ModelBuilder("github-copilot/gpt-4o"); err == nil {
-					if m.opts.SessionHandle != nil {
-						_ = m.opts.SessionHandle.SetModel(newModel)
-					} else if m.agent != nil {
-						m.agent.SetModel(newModel)
-					}
-					m.opts.Model = newModel
-					m.statusLine.SetModel(newModel)
-					m.refreshThinkingLevel()
-					if m.opts.SettingsManager != nil {
-						_ = m.opts.SettingsManager.SetDefaultModelAndProvider(newModel.Provider.ID(), newModel.ID)
-					}
-					status = fmt.Sprintf("Logged in to GitHub Copilot. Selected %s. Credentials saved to %s", newModel.ID, authPath)
+	answer := dialog.ShowSecretInput("Enter "+methodName, "")
+	m.editorContainer.SetChildren(dialog)
+	m.tuiInst.Render()
+	defer func() { m.editorContainer.SetChildren(m.editor); m.tuiInst.Render() }()
+	inputCh, releaseInput := m.acquireModalInputChannel()
+	defer releaseInput()
+	var done <-chan struct{}
+	if m.runCtx != nil {
+		done = m.runCtx.Done()
+	}
+	for {
+		select {
+		case value, ok := <-answer:
+			return value, ok
+		case buf, ok := <-inputCh:
+			if !ok {
+				return "", false
+			}
+			for _, chunk := range dropKeyReleases(dialog, []string{string(buf)}) {
+				dialog.HandleInput(chunk)
+				select {
+				case value, ok := <-answer:
+					return value, ok
+				default:
 				}
 			}
-
-			if m.statusLine != nil {
-				m.statusLine.Flash(status, 5*time.Second)
-			}
-			m.appendToChat(tui.NewMarkdown("✓ " + status))
-			m.updateProviderInfo()
-			// Force full repaint: the goroutine added chat content AND changed
-			// the status line (provider count, subscription), which can confuse
-			// the differential renderer and leave artifacts in the footer area.
-			m.tuiInst.ForceFullRender()
-			m.tuiInst.Render()
-		})
-	}()
-
-	return nil
+		case <-done:
+			return "", false
+		}
+		m.tuiInst.Render()
+	}
 }
 
 // runOAuthLogout removes stored OAuth credentials for a provider.
