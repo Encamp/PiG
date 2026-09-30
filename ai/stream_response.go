@@ -1,6 +1,7 @@
 package ai
 
 func (builder *assistantStreamBuilder) runResponse(run func() error) {
+	defer recoverStream(builder.partial.Provider, builder.failPanic)
 	if builder.abort != nil {
 		defer builder.abort()
 	}

@@ -43,6 +43,9 @@ func TestContextOverflowMatrixUpstream(t *testing.T) {
 		t.Fatalf("unported matrix change: %d cases, %d specs", len(cases), len(specs))
 	}
 	for index, tc := range cases {
+		if !ai.BedrockBuilt && specs[index].provider == "amazon-bedrock" {
+			continue
+		}
 		t.Run(tc.ID, func(t *testing.T) {
 			t.Logf(".upstream/v0.87.1/packages/ai/test/context-overflow.test.ts:%d", tc.Line)
 			spec := specs[index]

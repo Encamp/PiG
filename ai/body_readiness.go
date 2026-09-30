@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"sync"
+	"sync/atomic"
 )
 
 // bodyReadiness is the transport side of the readiness bridge. It reports whether a body read completes in the current turn or becomes an external completion, using only what the transport knows: bytes its own buffer already holds are ready; a read that must wait for the network is pending. No sleep, goroutine schedule, or channel length decides it.
@@ -23,6 +24,8 @@ type observedBodyReadiness struct {
 	joined   chan struct{}
 	close    sync.Once
 	err      error
+	// inFlight is the read readBody is serving; only readBody's goroutine uses it.
+	inFlight *bodyReadOperation
 }
 
 func newObservedBodyReadiness(body *observedResponseBody) *observedBodyReadiness {
@@ -31,14 +34,33 @@ func newObservedBodyReadiness(body *observedResponseBody) *observedBodyReadiness
 	return readiness
 }
 
+// responseBodyReader names the body-reading goroutines in a recovered panic's error; they serve a response body rather than one provider.
+const responseBodyReader = "response-body"
+
 func (readiness *observedBodyReadiness) readBody() {
-	defer close(readiness.joined)
+	defer recoverStream(responseBodyReader, readiness.failReads)
 	for operation := range readiness.requests {
+		readiness.inFlight = operation
 		buffer := make([]byte, bufio.MaxScanTokenSize)
 		readiness.body.begin(operation)
 		count, err := readiness.body.Read(buffer)
 		readiness.body.clear(operation)
+		readiness.inFlight = nil
 		operation.complete(buffer[:count], err)
+	}
+	close(readiness.joined)
+}
+
+// failReads completes the read a panic interrupted with err, answers every later read with err at once, and joins when Close ends the requests.
+func (readiness *observedBodyReadiness) failReads(err error) {
+	defer close(readiness.joined)
+	if inFlight := readiness.inFlight; inFlight != nil {
+		readiness.inFlight = nil
+		readiness.body.clear(inFlight)
+		inFlight.complete(nil, err)
+	}
+	for operation := range readiness.requests {
+		operation.complete(nil, err)
 	}
 }
 
@@ -67,6 +89,8 @@ type opaqueBodyReadiness struct {
 	readers sync.WaitGroup
 	close   sync.Once
 	err     error
+	// panicked is the error of a read that panicked; every later read returns it at once.
+	panicked atomic.Pointer[error]
 }
 
 func newOpaqueBodyReadiness(body io.ReadCloser) *opaqueBodyReadiness {
@@ -74,9 +98,20 @@ func newOpaqueBodyReadiness(body io.ReadCloser) *opaqueBodyReadiness {
 }
 
 func (readiness *opaqueBodyReadiness) begin(deliver func(bodyReadSignal)) (bodyReadSignal, bool) {
+	if panicked := readiness.panicked.Load(); panicked != nil {
+		return bodyReadSignal{err: *panicked}, true
+	}
+	delivered := false
 	readiness.readers.Go(func() {
+		defer recoverStream(responseBodyReader, func(err error) {
+			readiness.panicked.CompareAndSwap(nil, &err)
+			if !delivered {
+				deliver(bodyReadSignal{err: err})
+			}
+		})
 		buffer := make([]byte, bufio.MaxScanTokenSize)
 		count, err := readiness.body.Read(buffer)
+		delivered = true
 		deliver(bodyReadSignal{data: buffer[:count], err: err})
 	})
 	return bodyReadSignal{}, false

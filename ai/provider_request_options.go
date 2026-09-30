@@ -19,13 +19,18 @@ func (*providerRequestTimeoutError) Error() string { return context.DeadlineExce
 func (*providerRequestTimeoutError) Unwrap() error { return context.DeadlineExceeded }
 
 func withProviderRequestOptions(ctx context.Context, options StreamOptions) context.Context {
+	return context.WithValue(withProviderRetryOptions(ctx, options), providerRequestOptionsKey{}, options)
+}
+
+// withProviderRetryOptions binds the call's maxRetries and maxRetryDelayMs to the requests made with ctx. An unset field keeps the context's or the configured default.
+func withProviderRetryOptions(ctx context.Context, options StreamOptions) context.Context {
 	if options.MaxRetries != nil {
 		ctx = WithProviderMaxRetries(ctx, *options.MaxRetries)
 	}
 	if options.MaxRetryDelayMs != nil {
 		ctx = WithProviderRequestRetry(ctx, ProviderMaxRetries(ctx), options.MaxRetryDelayMs)
 	}
-	return context.WithValue(ctx, providerRequestOptionsKey{}, options)
+	return ctx
 }
 
 // providerRequestTransport owns the SDK timeout for one header-establishment attempt. Like OpenAI/Anthropic fetchWithTimeout, receipt of response headers stops that timer; body lifetime remains owned by the request and body reader.

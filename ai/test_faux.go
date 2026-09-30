@@ -137,7 +137,7 @@ func (p *TestFauxProvider) Stream(ctx context.Context, transcript TranscriptCont
 	messages := transcript.Messages()
 	// test-faux-provider.ts:streamTestFaux emits from `queueMicrotask(emitPlan)`: the turn is reserved at that reaction position and the plan runs in one segment, so a consumer observes every push's shared output only after the last of them.
 	turn := builder.stream.executor.newTurn()
-	go turn.run(func(turn *continuationTurn) {
+	go turn.runRecovered(p.ID(), builder.failPanic, func(turn *continuationTurn) {
 		defer builder.produceUnder(turn)()
 		if err := ctx.Err(); err != nil {
 			builder.fail(StopReasonAborted, err)

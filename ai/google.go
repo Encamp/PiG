@@ -831,8 +831,8 @@ func (p *googleProvider) Stream(ctx context.Context, transcript TranscriptContex
 	urlBuf.WriteString(strings.TrimPrefix(requestModel, "models/"))
 	urlBuf.WriteString(":streamGenerateContent?alt=sse")
 
-	// The request owns a cancelable context so that closing the stream unblocks a body read.
-	requestContext, abort := context.WithCancel(ctx)
+	// The request owns a cancelable context so that closing the stream unblocks a body read. It carries the call's maxRetries and maxRetryDelayMs, which upstream's retryGoogleRequest passes to its retry loop (packages/ai/src/api/google-shared.ts).
+	requestContext, abort := context.WithCancel(withProviderRetryOptions(ctx, opts))
 	streaming := false
 	defer func() {
 		if !streaming {

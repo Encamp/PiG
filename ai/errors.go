@@ -10,11 +10,12 @@ import (
 	"reflect"
 	"strings"
 	"unicode"
-
-	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
 const MaxProviderErrorBodyChars = 4000
+
+// ErrBedrockNotBuilt is the error an Amazon Bedrock stream returns from a binary built without the pig_bedrock build tag, which keeps the AWS SDK out of the link.
+var ErrBedrockNotBuilt = errors.New("amazon-bedrock: Amazon Bedrock support is not built into this binary; rebuild with -tags pig_bedrock")
 
 // NormalizedProviderError separates a provider's HTTP status and body from its error message.
 type NormalizedProviderError struct {
@@ -54,8 +55,8 @@ func NormalizeProviderError(value any) NormalizedProviderError {
 		return NormalizedProviderError{Message: SafeJsonStringify(value)}
 	}
 	result := NormalizedProviderError{Message: err.Error(), MessageCarriesBody: true}
-	if response, ok := errors.AsType[*smithyhttp.ResponseError](err); ok {
-		result.Status = new(response.HTTPStatusCode())
+	if status := smithyResponseStatus(err); status != nil {
+		result.Status = status
 	}
 	return result
 }

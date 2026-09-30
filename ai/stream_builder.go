@@ -29,7 +29,13 @@ type assistantStreamBuilder struct {
 	// modelCost is the requested model's price (StreamOptions.ModelCost).
 	modelCost          ModelCost
 	requestServiceTier string
+
+	// decoderHook observes each event before it is published. Only tests set it, through streamDecoderHookKey on the stream's context.
+	decoderHook func(AssistantMessageEvent)
 }
+
+// streamDecoderHookKey carries a test's decoder hook on a stream's context.
+type streamDecoderHookKey struct{}
 
 type streamToolCall struct {
 	contentIndex int
@@ -52,6 +58,7 @@ func newAssistantStreamBuilder(ctx context.Context, api API, provider, model str
 	if ctx == nil {
 		panic("assistant stream builder: nil context")
 	}
+	hook, _ := ctx.Value(streamDecoderHookKey{}).(func(AssistantMessageEvent))
 	return &assistantStreamBuilder{
 		ctx:    ctx,
 		stream: NewAssistantMessageEventStream(),
@@ -60,6 +67,7 @@ func newAssistantStreamBuilder(ctx context.Context, api API, provider, model str
 			Usage: Usage{}, StopReason: StopReasonPending, Timestamp: time.Now().UnixMilli(),
 		},
 		activeText: -1, activeThinking: -1, toolCalls: map[int]*streamToolCall{},
+		decoderHook: hook,
 	}
 }
 
@@ -426,6 +434,9 @@ func (builder *assistantStreamBuilder) publish() *AssistantMessage {
 }
 
 func (builder *assistantStreamBuilder) push(event AssistantMessageEvent) {
+	if builder.decoderHook != nil {
+		builder.decoderHook(event)
+	}
 	view := builder.publish()
 	if builder.partialCopy != nil {
 		view = builder.partialCopy(view)

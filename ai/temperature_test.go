@@ -63,6 +63,9 @@ func TestProvidersSendExplicitZeroTemperature(t *testing.T) {
 	transcript := NormalizeContext(Context{Messages: []Message{UserMessage{Content: UserText("hi")}}})
 	captureError := errors.New("payload captured")
 	for _, test := range providers {
+		if !BedrockBuilt && test.provider.ID() == "amazon-bedrock" {
+			continue
+		}
 		t.Run(test.name, func(t *testing.T) {
 			capturedZero := false
 			stream, err := test.provider.Stream(context.Background(), transcript, StreamOptions{

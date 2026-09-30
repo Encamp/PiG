@@ -620,47 +620,22 @@ func markCodexWebSocketFinishing(entry *codexWebSocketEntry) {
 }
 
 func (p *openAIResponsesProvider) consumeCodexWebSocket(ctx context.Context, acquired *acquiredCodexWebSocket, first []byte, fullBody map[string]any, grammarProps map[string]string, useCachedContext bool, builder *assistantStreamBuilder, opts StreamOptions) {
+	defer recoverStream(p.cfg.ProviderID, builder.failPanic)
 	reader, writer := io.Pipe()
+	// After a panic, closing the reader unblocks the feeder and the connection is released unkept.
+	defer func() { _ = reader.Close() }()
+	released := false
+	defer func() {
+		if !released {
+			acquired.release(false)
+		}
+	}()
 	feedDone := make(chan struct{})
 	go func() {
+		defer recoverStream(p.cfg.ProviderID, func(err error) { _ = writer.CloseWithError(err) })
 		defer close(feedDone)
-		defer func() { _ = writer.Close() }()
-		stopCancel := context.AfterFunc(ctx, func() {
-			closeCodexWebSocket(acquired.connection, "aborted")
-		})
-		defer stopCancel()
-		message := first
-		for {
-			mapped, mapErr := mapCodexWebSocketEventFrame(message)
-			if mapErr != nil {
-				_ = writer.CloseWithError(mapErr)
-				return
-			}
-			if !mapped.skip {
-				if mapped.terminal {
-					markCodexWebSocketFinishing(acquired.entry)
-				}
-				if _, err := fmt.Fprintf(writer, "data: %s\n\n", mapped.data); err != nil {
-					return
-				}
-				if mapped.terminal {
-					return
-				}
-			}
-			messageType, next, err := readCodexWebSocket(ctx, acquired.connection, optionTimeout(opts.TimeoutMs))
-			if err != nil {
-				if ctx.Err() == nil {
-					recordCodexWebSocketFailure(acquired.sessionID, err)
-				}
-				_ = writer.CloseWithError(err)
-				return
-			}
-			if messageType != websocket.TextMessage && messageType != websocket.BinaryMessage {
-				_ = writer.CloseWithError(fmt.Errorf("unexpected WebSocket message type %d", messageType))
-				return
-			}
-			message = next
-		}
+		p.feedCodexWebSocket(ctx, acquired, first, writer, opts)
+		_ = writer.Close()
 	}()
 
 	p.parseResponsesSSE(ctx, reader, builder, grammarProps)
@@ -683,7 +658,48 @@ func (p *openAIResponsesProvider) consumeCodexWebSocket(ctx context.Context, acq
 			codexWebSocketSessions.mu.Unlock()
 		}
 	}
+	released = true
 	acquired.release(keep)
+}
+
+// feedCodexWebSocket writes each mapped WebSocket frame to writer as an SSE record until the terminal event or a failure, which it passes to writer.CloseWithError. The caller closes writer after a clean return.
+func (p *openAIResponsesProvider) feedCodexWebSocket(ctx context.Context, acquired *acquiredCodexWebSocket, first []byte, writer *io.PipeWriter, opts StreamOptions) {
+	stopCancel := context.AfterFunc(ctx, func() {
+		closeCodexWebSocket(acquired.connection, "aborted")
+	})
+	defer stopCancel()
+	message := first
+	for {
+		mapped, mapErr := mapCodexWebSocketEventFrame(message)
+		if mapErr != nil {
+			_ = writer.CloseWithError(mapErr)
+			return
+		}
+		if !mapped.skip {
+			if mapped.terminal {
+				markCodexWebSocketFinishing(acquired.entry)
+			}
+			if _, err := fmt.Fprintf(writer, "data: %s\n\n", mapped.data); err != nil {
+				return
+			}
+			if mapped.terminal {
+				return
+			}
+		}
+		messageType, next, err := readCodexWebSocket(ctx, acquired.connection, optionTimeout(opts.TimeoutMs))
+		if err != nil {
+			if ctx.Err() == nil {
+				recordCodexWebSocketFailure(acquired.sessionID, err)
+			}
+			_ = writer.CloseWithError(err)
+			return
+		}
+		if messageType != websocket.TextMessage && messageType != websocket.BinaryMessage {
+			_ = writer.CloseWithError(fmt.Errorf("unexpected WebSocket message type %d", messageType))
+			return
+		}
+		message = next
+	}
 }
 
 func codexWebSocketEventErrorCode(message []byte) string {

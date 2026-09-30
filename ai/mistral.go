@@ -454,6 +454,7 @@ func (p *mistralProvider) Stream(ctx context.Context, transcript TranscriptConte
 	_, builder.managed = resp.Body.(*observedResponseBody)
 	streamOwnsRequest = true
 	go func() {
+		defer recoverStream(p.cfg.ProviderID, builder.failPanic)
 		defer finishRequest()
 		_ = builder.responseTurn(func() error {
 			p.streamResponse(requestCtx, resp.Body, responseBody, builder)

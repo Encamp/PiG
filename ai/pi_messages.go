@@ -76,7 +76,11 @@ func (p *piMessagesProvider) Stream(ctx context.Context, transcript TranscriptCo
 	}
 	stream := NewAssistantMessageEventStream()
 	ctx = stream.ObservationContext(ctx)
-	go p.run(ctx, transcript, opts, stream, newPiMessagesEventConverter(p.cfg.ProviderID, p.cfg.Model))
+	convert := newPiMessagesEventConverter(p.cfg.ProviderID, p.cfg.Model)
+	go func() {
+		defer recoverStream(p.cfg.ProviderID, func(err error) { failStreamPanic(stream, APIPiMessages, p.cfg.ProviderID, p.cfg.Model, err) })
+		p.run(ctx, transcript, opts, stream, convert)
+	}()
 	return stream, nil
 }
 

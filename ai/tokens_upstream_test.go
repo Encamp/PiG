@@ -35,6 +35,9 @@ func abortUsageClass(m *GeneratedModel) int {
 
 func TestTokensOnAbortUpstream(t *testing.T) {
 	for _, tc := range tokensUpstreamCases() {
+		if !BedrockBuilt && tc.provider == "amazon-bedrock" {
+			continue
+		}
 		t.Run(tc.provider+"/"+tc.model+"/"+tc.name, func(t *testing.T) {
 			var generated *GeneratedModel
 			if tc.model == "preferred" {

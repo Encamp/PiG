@@ -1,3 +1,5 @@
+//go:build pig_bedrock
+
 package ai
 
 import "testing"

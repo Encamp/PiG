@@ -1,4 +1,4 @@
-//go:build live
+//go:build live && pig_bedrock
 
 package ai
 

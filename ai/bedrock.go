@@ -1,3 +1,5 @@
+//go:build pig_bedrock
+
 package ai
 
 // Ports packages/ai/src/api/bedrock-converse-stream.ts
@@ -186,7 +188,11 @@ func (p *BedrockProvider) Stream(ctx context.Context, transcript TranscriptConte
 
 // streamResponse sends the request and runs the stream loop. A body the transport can observe is read by the provider as an executor turn; any other body is read by the SDK's event-stream reader.
 func (p *BedrockProvider) streamResponse(ctx, requestContext context.Context, converse func(context.Context, *bedrockruntime.ConverseStreamInput, ...func(*bedrockruntime.Options)) (*bedrockruntime.ConverseStreamOutput, error), input *bedrockruntime.ConverseStreamInput, opts StreamOptions, modelMeta *Model, builder *assistantStreamBuilder) {
-	tap := &bedrockBodyTap{}
+	provider := builder.partial.Provider
+	// The tap's goroutines run beside this producer, so a panic there ends the stream without reading the partial.
+	tap := &bedrockBodyTap{provider: provider, failStream: func(err error) {
+		failStreamPanic(builder.stream, APIBedrockConverseStream, provider, p.model, err)
+	}}
 	defer tap.close()
 	resp, err := converse(requestContext, input, tap.option, func(options *bedrockruntime.Options) {
 		if opts.OnResponse != nil {

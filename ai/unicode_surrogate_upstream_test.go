@@ -17,6 +17,9 @@ type unicodeUpstreamCase struct {
 
 func TestUnicodeSurrogateUpstream(t *testing.T) {
 	for _, tc := range unicodeUpstreamCases() {
+		if !BedrockBuilt && tc.provider == "amazon-bedrock" {
+			continue
+		}
 		t.Run(tc.provider+"/"+tc.model+"/"+tc.name, func(t *testing.T) {
 			model, ok := LookupModelExact(tc.provider + "/" + tc.model)
 			if !ok {
