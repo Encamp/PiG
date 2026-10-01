@@ -921,6 +921,9 @@ func (p *mistralProvider) convertAssistantMessage(message AssistantMessage) mist
 			if block.Arguments == nil {
 				arguments = []byte("{}")
 			}
+			if block.RawArguments != nil {
+				arguments = block.RawArguments
+			}
 			toolCalls = append(toolCalls, mistralToolCallMsg{
 				ID: block.ID, Type: "function",
 				Function: mistralToolCallFnMsg{Name: block.Name, Arguments: string(arguments)},

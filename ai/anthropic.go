@@ -505,7 +505,11 @@ func anthConvertMessagesDetailed(messages []Message, isOAuthToken, allowEmptySig
 					if isOAuthToken {
 						name = toClaudeCodeName(name)
 					}
-					blocks = append(blocks, anthContentBlock{Type: "tool_use", ID: normalizeAnthropicToolCallID(content.ID), Name: name, Input: arguments})
+					var input any = arguments
+					if content.RawArguments != nil {
+						input = content.RawArguments
+					}
+					blocks = append(blocks, anthContentBlock{Type: "tool_use", ID: normalizeAnthropicToolCallID(content.ID), Name: name, Input: input})
 				}
 			}
 			if len(blocks) > 0 {
@@ -1578,6 +1582,7 @@ func (p *anthropicProvider) parseAnthropicSSE(ctx context.Context, r io.Reader, 
 			case ToolCall:
 				// Finalize in place and strip the scratch buffer so replay only carries parsed arguments.
 				block.Arguments = parseStreamingJsonObject(block.scratch.partialJson)
+				block.RawArguments = rawToolArguments([]byte(block.scratch.partialJson), block.Arguments)
 				block.scratch = toolCallScratch{}
 				output.Content[index] = block
 				builder.push(ToolCallEndEvent{ContentIndex: index, ToolCall: block, Partial: output})

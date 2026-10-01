@@ -112,6 +112,9 @@ type ToolCall struct {
 	Arguments        JsonObject `json:"arguments"`
 	ThoughtSignature string     `json:"thoughtSignature,omitempty"`
 	Namespace        string     `json:"namespace,omitempty"`
+	// RawArguments is Arguments as JSON text in the model's key order, which a Go map cannot keep.
+	// Serializers send it in place of Arguments, so a writer that replaces Arguments sets it to nil.
+	RawArguments json.RawMessage `json:"-"`
 }
 
 func (ToolCall) contentType() string { return "toolCall" }
@@ -120,11 +123,42 @@ func (content ToolCall) MarshalJSON() ([]byte, error) {
 	if err := validateJsonValue(content.Arguments); err != nil {
 		return nil, fmt.Errorf("tool call arguments: %w", err)
 	}
+	if content.RawArguments != nil {
+		return marshalContent(content.contentType(), struct {
+			ID               string          `json:"id"`
+			Name             string          `json:"name"`
+			Arguments        json.RawMessage `json:"arguments"`
+			ThoughtSignature string          `json:"thoughtSignature,omitempty"`
+			Namespace        string          `json:"namespace,omitempty"`
+			toolCallScratchJSON
+		}{content.ID, content.Name, content.RawArguments, content.ThoughtSignature, content.Namespace, content.scratch.wire()})
+	}
 	type payload ToolCall
 	return marshalContent(content.contentType(), struct {
 		payload
 		toolCallScratchJSON
 	}{payload(content), content.scratch.wire()})
+}
+
+// UnmarshalJSON keeps the order of the arguments object as written.
+func (content *ToolCall) UnmarshalJSON(data []byte) error {
+	type payload ToolCall
+	var decoded struct {
+		payload
+		Arguments json.RawMessage `json:"arguments"`
+	}
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	call := ToolCall(decoded.payload)
+	if decoded.Arguments != nil {
+		if err := json.Unmarshal(decoded.Arguments, &call.Arguments); err != nil {
+			return err
+		}
+		call.RawArguments = rawToolArguments(decoded.Arguments, call.Arguments)
+	}
+	*content = call
+	return nil
 }
 
 func marshalContent(contentType string, content any) ([]byte, error) {

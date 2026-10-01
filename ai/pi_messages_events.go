@@ -188,6 +188,7 @@ func (c *piMessagesEventConverter) endBlock(event PiMessagesEvent) (AssistantMes
 		c.partial.Content[index] = ThinkingContent{Thinking: event.Content, ThinkingSignature: event.ContentSignature, Redacted: event.Redacted}
 		return ThinkingEndEvent{ContentIndex: index, Content: event.Content, Partial: c.partial}, nil
 	case ToolCall:
+		block.RawArguments = rawToolArguments([]byte(c.toolJSON[index]), block.Arguments)
 		if event.ToolCall != nil {
 			block = mergeToolCall(block, *event.ToolCall)
 		}
@@ -209,6 +210,7 @@ func mergeToolCall(existing, incoming ToolCall) ToolCall {
 	}
 	if incoming.Arguments != nil {
 		existing.Arguments = incoming.Arguments
+		existing.RawArguments = incoming.RawArguments
 	}
 	if incoming.ThoughtSignature != "" {
 		existing.ThoughtSignature = incoming.ThoughtSignature

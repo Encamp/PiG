@@ -655,6 +655,9 @@ func (p *openAIResponsesProvider) convertAnchoredMessages(messages []Message, gr
 							itemID = ""
 						}
 						arguments, _ := json.Marshal(block.Arguments)
+						if block.RawArguments != nil {
+							arguments = block.RawArguments
+						}
 						encoded, _ := json.Marshal(string(arguments))
 						items = append(items, respInputItem{Type: "function_call", ID: itemID, CallID: callID, Name: block.Name, Namespace: namespace, Arguments: encoded})
 					}

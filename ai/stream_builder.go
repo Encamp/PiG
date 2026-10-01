@@ -383,6 +383,7 @@ func (builder *assistantStreamBuilder) endToolCall(index int) {
 		}
 	} else {
 		block.Arguments = parseStreamingJsonObject(state.arguments.String())
+		block.RawArguments = rawToolArguments([]byte(state.arguments.String()), block.Arguments)
 	}
 	block.scratch = toolCallScratch{}
 	builder.partial.Content[state.contentIndex] = block

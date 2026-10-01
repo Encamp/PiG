@@ -705,6 +705,9 @@ func convertCompletionsMessages(messages []Message, options completionsConvertOp
 						converted.ToolCalls = append(converted.ToolCalls, oaiRequestToolCall{ID: block.ID, Type: "custom", Custom: &oaiRequestToolCallCustom{Name: block.Name, Input: sanitizeSurrogates(input)}})
 					} else {
 						arguments, _ := json.Marshal(block.Arguments)
+						if block.RawArguments != nil {
+							arguments = block.RawArguments
+						}
 						converted.ToolCalls = append(converted.ToolCalls, oaiRequestToolCall{ID: block.ID, Type: "function", Function: &oaiRequestToolCallFunction{Name: block.Name, Arguments: string(arguments)}})
 					}
 					if detail := parseLegacyOpenAIReasoningDetail(block.ThoughtSignature); detail != nil {

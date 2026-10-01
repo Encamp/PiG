@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -247,6 +248,7 @@ func cloneAssistantContent(blocks []AssistantContentBlock) []AssistantContentBlo
 			if value.Arguments != nil {
 				value.Arguments = JsonObject(cloneJSONValue(value.Arguments).(map[string]any))
 			}
+			value.RawArguments = bytes.Clone(value.RawArguments)
 			out[i] = value
 		default:
 			panic(fmt.Sprintf("unsupported assistant content block %T", block))

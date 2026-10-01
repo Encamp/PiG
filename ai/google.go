@@ -200,26 +200,34 @@ type geminiPart struct {
 }
 
 type geminiFunctionCall struct {
-	Name string         `json:"name"`
-	Args map[string]any `json:"args,omitempty"`
-	ID   string         `json:"id,omitempty"`
+	Name string `json:"name"`
+	Args any    `json:"args,omitempty"`
+	ID   string `json:"id,omitempty"`
 
 	// idName is the text `${part.functionCall.name}` produces for a decoded response, valid when decoded is set.
 	idName  string
 	decoded bool
+	// rawArgs is a decoded response's args in the model's key order.
+	rawArgs json.RawMessage
 }
 
 // UnmarshalJSON records how JavaScript would stringify a missing or null name in a generated tool-call ID: "undefined" and "null" (google-generative-ai.ts:198-200). Name keeps `part.functionCall.name || ""`.
 func (call *geminiFunctionCall) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		Name json.RawMessage `json:"name"`
-		Args map[string]any  `json:"args"`
+		Args json.RawMessage `json:"args"`
 		ID   string          `json:"id"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	*call = geminiFunctionCall{Args: raw.Args, ID: raw.ID, decoded: true, idName: "undefined"}
+	var args map[string]any
+	if raw.Args != nil {
+		if err := json.Unmarshal(raw.Args, &args); err != nil {
+			return err
+		}
+	}
+	*call = geminiFunctionCall{Args: args, ID: raw.ID, decoded: true, idName: "undefined", rawArgs: rawToolArguments(raw.Args, args)}
 	if raw.Name == nil {
 		return nil
 	}
@@ -465,6 +473,9 @@ func geminiConvertMessages(messages []Message, providerID, modelID string, suppo
 					}
 				case ToolCall:
 					call := &geminiFunctionCall{Name: block.Name, Args: block.Arguments}
+					if block.RawArguments != nil {
+						call.Args = block.RawArguments
+					}
 					if requiresToolCallId(modelID) {
 						call.ID = normalizeToolCallId(modelID, block.ID)
 					}
@@ -1053,6 +1064,9 @@ func (state *googleStreamState) handle(chunk *geminiStreamChunk) {
 					toolID := googleToolCallID(builder.partial.API, fc.generatedIDName(), fc.ID, builder.partial.Content)
 
 					argsJSON, _ := json.Marshal(fc.Args)
+					if fc.rawArgs != nil {
+						argsJSON = fc.rawArgs
+					}
 
 					// Pi builds the whole tool call, arguments included, before it pushes toolcall_start (google-generative-ai.ts:200-215).
 					builder.toolCallDelta(streamToolCallDelta{
