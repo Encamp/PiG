@@ -208,6 +208,24 @@ type anthTool struct {
 	// DeferLoading declares a tool that stays inactive until a tool_addition
 	// block surfaces it.
 	DeferLoading bool `json:"defer_loading,omitempty"`
+	// inputSchemaJSON is InputSchema in pi's key order, which MarshalJSON sends in its place.
+	inputSchemaJSON json.RawMessage
+}
+
+func (tool anthTool) MarshalJSON() ([]byte, error) {
+	type payload anthTool
+	if tool.inputSchemaJSON == nil {
+		return json.Marshal(payload(tool))
+	}
+	return json.Marshal(struct {
+		Name             string            `json:"name"`
+		Description      string            `json:"description"`
+		Strict           *bool             `json:"strict,omitempty"`
+		InputSchema      json.RawMessage   `json:"input_schema"`
+		CacheControl     *anthCacheControl `json:"cache_control,omitempty"`
+		EagerInputStream any               `json:"eager_input_streaming,omitempty"`
+		DeferLoading     bool              `json:"defer_loading,omitempty"`
+	}{tool.Name, tool.Description, tool.Strict, tool.inputSchemaJSON, tool.CacheControl, tool.EagerInputStream, tool.DeferLoading})
 }
 
 // deferredToolPlaceholder mirrors upstream DEFERRED_TOOL_PLACEHOLDER: a stable
@@ -221,6 +239,8 @@ func deferredToolPlaceholder() anthTool {
 		Description:  "Reserved placeholder. Never available. Never call this.",
 		InputSchema:  map[string]any{"type": "object", "properties": map[string]any{}, "required": []any{}},
 		DeferLoading: true,
+		// pi declares this schema as a literal, so it goes out in that order.
+		inputSchemaJSON: json.RawMessage(`{"type":"object","properties":{},"required":[]}`),
 	}
 }
 
@@ -631,6 +651,7 @@ func anthConvertTools(tools []ToolSchema, isOAuthToken, supportsEagerToolInputSt
 			"properties": map[string]any{},
 			"required":   []string{},
 		}
+		var schemaJSON json.RawMessage
 		if strict != nil && *strict {
 			maps.Copy(schema, parameters)
 		} else {
@@ -640,16 +661,21 @@ func anthConvertTools(tools []ToolSchema, isOAuthToken, supportsEagerToolInputSt
 			if required, ok := parameters["required"]; ok {
 				schema["required"] = required
 			}
+			// pi writes {type, properties, required}, and properties keeps the declaration's order.
+			if schemaJSON, err = toolSchemaJSON(schema, tool.parameterOrder, "type", "properties", "required"); err != nil {
+				return nil, err
+			}
 		}
 		name := tool.Name
 		if isOAuthToken {
 			name = toClaudeCodeName(name)
 		}
 		out[i] = anthTool{
-			Name:        name,
-			Description: tool.Description,
-			Strict:      strict,
-			InputSchema: schema,
+			Name:            name,
+			Description:     tool.Description,
+			Strict:          strict,
+			InputSchema:     schema,
+			inputSchemaJSON: schemaJSON,
 		}
 		if supportsEagerToolInputStreaming {
 			out[i].EagerInputStream = true

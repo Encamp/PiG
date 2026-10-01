@@ -116,6 +116,21 @@ type mistralToolFn struct {
 	Description string         `json:"description"`
 	Parameters  map[string]any `json:"parameters"`
 	Strict      bool           `json:"strict"`
+	// parametersJSON is Parameters in the declaration's key order, which MarshalJSON sends in its place.
+	parametersJSON json.RawMessage
+}
+
+func (function mistralToolFn) MarshalJSON() ([]byte, error) {
+	type payload mistralToolFn
+	if function.parametersJSON == nil {
+		return json.Marshal(payload(function))
+	}
+	return json.Marshal(struct {
+		Name        string          `json:"name"`
+		Description string          `json:"description"`
+		Parameters  json.RawMessage `json:"parameters"`
+		Strict      bool            `json:"strict"`
+	}{function.Name, function.Description, function.parametersJSON, function.Strict})
 }
 
 // ─── Response wire types ─────────────────────────────────────────────────────
@@ -495,6 +510,14 @@ func toMistralWirePayload(payload any) (map[string]any, error) {
 	var wire map[string]any
 	if err := json.Unmarshal(raw, &wire); err != nil {
 		return nil, err
+	}
+	// The SDK renames no member inside tools, and decoding them into maps would lose each schema's declared key order.
+	var members map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &members); err != nil {
+		return nil, err
+	}
+	if tools, ok := members["tools"]; ok {
+		wire["tools"] = tools
 	}
 	remap := func(object map[string]any, source, target string) {
 		if value, exists := object[source]; exists {
@@ -1006,6 +1029,11 @@ func (p *mistralProvider) convertTools(tools []ToolSchema) ([]mistralTool, error
 				Parameters:  parameters,
 				Strict:      strict != nil && *strict,
 			},
+		}
+		if !result[i].Function.Strict {
+			if result[i].Function.parametersJSON, err = toolSchemaJSON(parameters, tool.parameterOrder); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return result, nil

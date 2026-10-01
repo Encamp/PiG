@@ -233,6 +233,24 @@ type respTool struct {
 	Format *respToolFormat `json:"format,omitempty"`
 	// DeferLoading marks a tool loaded by a synthetic tool_search_output.
 	DeferLoading bool `json:"defer_loading,omitempty"`
+	// parametersJSON is Parameters in the declaration's key order, which MarshalJSON sends in its place.
+	parametersJSON json.RawMessage
+}
+
+func (tool respTool) MarshalJSON() ([]byte, error) {
+	type payload respTool
+	if tool.parametersJSON == nil {
+		return json.Marshal(payload(tool))
+	}
+	return json.Marshal(struct {
+		Type         string          `json:"type"`
+		Name         string          `json:"name"`
+		Description  string          `json:"description"`
+		Parameters   json.RawMessage `json:"parameters,omitempty"`
+		Strict       json.RawMessage `json:"strict,omitempty"`
+		Format       *respToolFormat `json:"format,omitempty"`
+		DeferLoading bool            `json:"defer_loading,omitempty"`
+	}{tool.Type, tool.Name, tool.Description, tool.parametersJSON, tool.Strict, tool.Format, tool.DeferLoading})
 }
 
 // respToolSearchArguments are the synthetic tool_search_call arguments.
@@ -773,6 +791,11 @@ func (p *openAIResponsesProvider) convertTools(tools []ToolSchema, supportsStric
 			Name:        t.Name,
 			Description: t.Description,
 			Parameters:  parameters,
+		}
+		if strict == nil || !*strict {
+			if ft.parametersJSON, err = toolSchemaJSON(parameters, t.parameterOrder); err != nil {
+				return nil, err
+			}
 		}
 		if supportsStrictMode {
 			switch {

@@ -273,6 +273,27 @@ type geminiFuncDecl struct {
 	Description          string         `json:"description"`
 	Parameters           map[string]any `json:"parameters,omitempty"`
 	ParametersJSONSchema map[string]any `json:"parametersJsonSchema,omitempty"`
+	// schemaJSON is whichever of Parameters and ParametersJSONSchema is set, in the declaration's key order; MarshalJSON sends it in that member's place.
+	schemaJSON json.RawMessage
+}
+
+func (decl geminiFuncDecl) MarshalJSON() ([]byte, error) {
+	type payload geminiFuncDecl
+	if decl.schemaJSON == nil {
+		return json.Marshal(payload(decl))
+	}
+	wire := struct {
+		Name                 string          `json:"name"`
+		Description          string          `json:"description"`
+		Parameters           json.RawMessage `json:"parameters,omitempty"`
+		ParametersJSONSchema json.RawMessage `json:"parametersJsonSchema,omitempty"`
+	}{Name: decl.Name, Description: decl.Description}
+	if decl.Parameters != nil {
+		wire.Parameters = decl.schemaJSON
+	} else {
+		wire.ParametersJSONSchema = decl.schemaJSON
+	}
+	return json.Marshal(wire)
 }
 
 type geminiToolConfig struct {
@@ -567,10 +588,17 @@ func geminiConvertTools(tools []ToolSchema, useParameters, supportsStrictMode bo
 		}
 		usesStrictMode = usesStrictMode || strict != nil && *strict
 		decls[i] = geminiFuncDecl{Name: tool.Name, Description: tool.Description}
+		schema := parameters
 		if useParameters {
-			decls[i].Parameters = sanitizeForOpenAPI(parameters).(map[string]any)
+			schema = sanitizeForOpenAPI(parameters).(map[string]any)
+			decls[i].Parameters = schema
 		} else {
-			decls[i].ParametersJSONSchema = parameters
+			decls[i].ParametersJSONSchema = schema
+		}
+		if strict == nil || !*strict {
+			if decls[i].schemaJSON, err = toolSchemaJSON(schema, tool.parameterOrder); err != nil {
+				return nil, false, err
+			}
 		}
 	}
 	return []geminiToolDecl{{FunctionDeclarations: decls}}, usesStrictMode, nil

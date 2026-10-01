@@ -404,6 +404,21 @@ type oaiToolFunction struct {
 	Description string         `json:"description"`
 	Parameters  map[string]any `json:"parameters"`
 	Strict      *bool          `json:"strict,omitempty"`
+	// parametersJSON is Parameters in the declaration's key order, which MarshalJSON sends in its place.
+	parametersJSON json.RawMessage
+}
+
+func (function oaiToolFunction) MarshalJSON() ([]byte, error) {
+	type payload oaiToolFunction
+	if function.parametersJSON == nil {
+		return json.Marshal(payload(function))
+	}
+	return json.Marshal(struct {
+		Name        string          `json:"name"`
+		Description string          `json:"description"`
+		Parameters  json.RawMessage `json:"parameters"`
+		Strict      *bool           `json:"strict,omitempty"`
+	}{function.Name, function.Description, function.parametersJSON, function.Strict})
 }
 
 // oaiCustomTool is a grammar-constrained-sampling tool. Unlike responses, the
@@ -1271,6 +1286,11 @@ func (p *openAIProvider) convertTools(tools []ToolSchema) ([]oaiTool, error) {
 			fn.Parameters = parameters
 			v := strict != nil && *strict
 			fn.Strict = &v
+		}
+		if fn.Strict == nil || !*fn.Strict {
+			if fn.parametersJSON, err = toolSchemaJSON(fn.Parameters, t.parameterOrder); err != nil {
+				return nil, err
+			}
 		}
 		out = append(out, oaiTool{Type: "function", Function: fn})
 	}
