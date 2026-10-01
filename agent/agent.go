@@ -1633,9 +1633,13 @@ func pendingToolCalls(message *AssistantMessage) []pendingToolCall {
 		if !ok {
 			continue
 		}
-		arguments, err := json.Marshal(call.Arguments)
-		if err != nil {
-			arguments = []byte("{}")
+		// RawArguments keeps the model's key order, which a validation error prints as pi does.
+		arguments := []byte(call.RawArguments)
+		if arguments == nil {
+			var err error
+			if arguments, err = json.Marshal(call.Arguments); err != nil {
+				arguments = []byte("{}")
+			}
 		}
 		pending := pendingToolCall{
 			id: call.ID, name: call.Name, thoughtSignature: call.ThoughtSignature,

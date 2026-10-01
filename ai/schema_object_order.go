@@ -135,7 +135,7 @@ func marshalSchemaWithOrder(value any, order schemaObjectOrder, path string) ([]
 			if i > 0 {
 				out.WriteByte(',')
 			}
-			name, _ := json.Marshal(key)
+			name, _ := marshalUnescaped(key)
 			out.Write(name)
 			out.WriteByte(':')
 			encoded, err := marshalSchemaWithOrder(value[key], order, schemaPath(path, key))
@@ -165,8 +165,19 @@ func marshalSchemaWithOrder(value any, order schemaObjectOrder, path string) ([]
 		out.WriteByte(']')
 		return out.Bytes(), nil
 	default:
-		return json.Marshal(value)
+		return marshalUnescaped(value)
 	}
+}
+
+// marshalUnescaped encodes value as JSON.stringify does, leaving <, > and & literal.
+func marshalUnescaped(value any) ([]byte, error) {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(value); err != nil {
+		return nil, err
+	}
+	return bytes.TrimSuffix(buf.Bytes(), []byte("\n")), nil
 }
 
 // UnmarshalJSON keeps schema key order as well as its validated data values.
@@ -203,12 +214,12 @@ func (tool *ToolSchema) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON preserves imported parameter ordering when tool definitions cross a session or SDK boundary.
+// MarshalJSON preserves imported parameter ordering when tool definitions cross a session or SDK boundary. It leaves <, > and & literal, as JSON.stringify does, so a caller that turns HTML escaping off sizes and writes the schema as pi does.
 func (tool ToolSchema) MarshalJSON() ([]byte, error) {
 	var sampling json.RawMessage
 	switch {
 	case tool.ConstrainedSampling != nil:
-		encoded, err := json.Marshal(tool.ConstrainedSampling)
+		encoded, err := marshalUnescaped(tool.ConstrainedSampling)
 		if err != nil {
 			return nil, err
 		}
@@ -217,7 +228,7 @@ func (tool ToolSchema) MarshalJSON() ([]byte, error) {
 		sampling = json.RawMessage("false")
 	}
 	if tool.parameterOrder == nil {
-		return json.Marshal(struct {
+		return marshalUnescaped(struct {
 			Name                string          `json:"name"`
 			Description         string          `json:"description"`
 			Parameters          map[string]any  `json:"parameters"`
@@ -233,7 +244,7 @@ func (tool ToolSchema) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(struct {
+	return marshalUnescaped(struct {
 		Name                string          `json:"name"`
 		Description         string          `json:"description"`
 		Parameters          json.RawMessage `json:"parameters"`
