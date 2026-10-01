@@ -155,6 +155,42 @@ func TestToolCallRawArgumentsResentByteEqual(t *testing.T) {
 	}
 }
 
+// Google's functionCall omitted args for nil and empty argument maps before args could carry ordered text, and still does.
+func TestGoogleToolCallOmitsEmptyArgs(t *testing.T) {
+	for name, arguments := range map[string]JsonObject{"nil": nil, "empty": {}} {
+		t.Run(name, func(t *testing.T) {
+			var mu sync.Mutex
+			var body []byte
+			client := &http.Client{Transport: fetchOptionTransport(func(r *http.Request) (*http.Response, error) {
+				b, _ := io.ReadAll(r.Body)
+				mu.Lock()
+				body = b
+				mu.Unlock()
+				return &http.Response{StatusCode: 400, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(`{"error":{"message":"stop"}}`)), Request: r}, nil
+			})}
+			provider := fetchOptionProvider(APIGoogleGenerativeAI, "https://request.test/v1")
+			provider.(*googleProvider).client = client
+			tool := ToolSchema{Name: "probe", Description: "p", Parameters: map[string]any{"type": "object"}}
+			messages := []Message{
+				UserMessage{Content: UserText("go"), Timestamp: 1},
+				AssistantMessage{Content: []AssistantContentBlock{ToolCall{ID: "call_1", Name: "probe", Arguments: arguments}}, API: APIGoogleGenerativeAI, Provider: "google", Model: "test-model", StopReason: StopReasonToolUse, Timestamp: 2},
+				ToolResultMessage{ToolCallID: "call_1", ToolName: "probe", Content: []ToolResultMessageContent{TextContent{Text: "ok"}}, Timestamp: 3},
+			}
+			if stream, err := provider.Stream(t.Context(), NormalizeContext(Context{Messages: messages, Tools: []ToolSchema{tool}}), StreamOptions{Transport: TransportSSE}); err == nil {
+				stream.Result()
+			}
+			mu.Lock()
+			defer mu.Unlock()
+			if !bytes.Contains(body, []byte(`"functionCall":{"name":"probe"`)) {
+				t.Fatalf("request carries no functionCall: %s", body)
+			}
+			if bytes.Contains(body, []byte(`"args"`)) {
+				t.Fatalf("request sends args for %s arguments: %s", name, body)
+			}
+		})
+	}
+}
+
 func TestToolCallRawArgumentsLineRoundTrip(t *testing.T) {
 	line := func(arguments string) string {
 		return `{"role":"assistant","content":[{"type":"text","text":"ok"},{"type":"toolCall","id":"call_1","name":"probe","arguments":` + arguments + `}],"api":"anthropic-messages","provider":"anthropic","model":"claude-x","usage":{"input":1,"output":2,"cacheRead":0,"cacheWrite":0,"totalTokens":3,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"toolUse","timestamp":1759300000000}`

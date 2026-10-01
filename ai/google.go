@@ -472,9 +472,12 @@ func geminiConvertMessages(messages []Message, providerID, modelID string, suppo
 						parts = append(parts, geminiPart{Text: new(sanitizeSurrogates(block.Thinking))})
 					}
 				case ToolCall:
-					call := &geminiFunctionCall{Name: block.Name, Args: block.Arguments}
+					call := &geminiFunctionCall{Name: block.Name}
+					// Args is an interface so it can carry ordered text, and omitempty omits only a nil interface: assign a map only when it has entries, as the map-typed field omitted nil and empty maps.
 					if block.RawArguments != nil {
 						call.Args = block.RawArguments
+					} else if len(block.Arguments) > 0 {
+						call.Args = block.Arguments
 					}
 					if requiresToolCallId(modelID) {
 						call.ID = normalizeToolCallId(modelID, block.ID)
