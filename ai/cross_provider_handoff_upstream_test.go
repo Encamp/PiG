@@ -43,6 +43,9 @@ func TestCrossProviderHandoffUpstream(t *testing.T) {
 	labels := []string{}
 	models := map[int]ai.GeneratedModel{}
 	for index, pair := range pairs {
+		if !ai.BedrockBuilt && pair.provider == "amazon-bedrock" {
+			continue
+		}
 		found, ok := ai.LookupModelExact(pair.provider + "/" + pair.model)
 		if !ok {
 			t.Logf("upstream generateContext returns null for missing model %s/%s", pair.provider, pair.model)

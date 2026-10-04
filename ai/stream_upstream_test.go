@@ -15,7 +15,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/gorilla/websocket"
 )
 
@@ -46,6 +45,9 @@ func TestStreamUpstream(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tc := range cases {
+		if !BedrockBuilt && tc.API == APIBedrockConverseStream {
+			continue
+		}
 		t.Run(tc.Name, func(t *testing.T) { runUpstreamStreamCase(t, tc) })
 	}
 }
@@ -210,32 +212,9 @@ func runUpstreamStreamCase(t *testing.T, tc upstreamStreamCase) {
 	if tc.Kind == "bedrockSpecial" {
 		options.OnPayload = func(payload any, _ *Model) (any, error) {
 			payloadCalls.Add(1)
-			input, ok := payload.(*bedrockruntime.ConverseStreamInput)
-			if !ok {
-				t.Fatalf("payload = %T", payload)
-			}
-			observed := map[string]any{}
-			if input.AdditionalModelRequestFields != nil {
-				data, err := input.AdditionalModelRequestFields.MarshalSmithyDocument()
-				if err != nil {
-					return nil, err
-				}
-				var fields any
-				if err := json.Unmarshal(data, &fields); err != nil {
-					return nil, err
-				}
-				observed["additionalModelRequestFields"] = fields
-			}
-			if input.RequestMetadata != nil {
-				encoded, err := json.Marshal(input.RequestMetadata)
-				if err != nil {
-					return nil, err
-				}
-				var value any
-				if err := json.Unmarshal(encoded, &value); err != nil {
-					return nil, err
-				}
-				observed["requestMetadata"] = value
+			observed, err := bedrockStreamPayload(t, payload)
+			if err != nil {
+				return nil, err
 			}
 			validateStreamNativeOptions(t, model, rawOptions, observed, tc)
 			return nil, nil

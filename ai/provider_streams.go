@@ -17,12 +17,33 @@ type LazyAPICapabilities struct {
 
 // LazyStream returns before setup runs. Setup starts in the first promise reaction after the call, as the continuation of an async function whose first statement awaits; use LazyStreamSync when Pi's setup has no await before its provider call. The producer owns cancellation and its final event/result; forwarding never replaces an established terminal value with an iterator cancellation.
 func LazyStream(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error)) *AssistantMessageEventStream {
-	return startLazyStream(ctx, model, setup, func(body func()) { go body() })
+	return startLazyStream(ctx, model, setup, nil)
 }
 
 // LazyStreamSync is LazyStream for a setup that never awaits before it returns its stream. Like an async function without an await, setup runs to completion in the caller's synchronous prefix, before LazyStreamSync returns, and only the forwarding reaction is queued (packages/ai/src/api/lazy.ts:48-50). A caller that already owns the shared continuation queue runs setup inline; any other caller first acquires the queue.
 func LazyStreamSync(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error)) *AssistantMessageEventStream {
-	return startLazyStreamSync(ctx, model, setup, func(body func()) { go body() })
+	return startLazyStreamSync(ctx, model, setup, nil)
+}
+
+// launchLazy owns panic recovery for the producer and forwarding reaction, including injected launchers.
+func launchLazy(launch func(func()), outer *AssistantMessageEventStream, model *Model, body func()) {
+	var api API
+	var provider, id string
+	if model != nil {
+		api, provider, id = model.ProviderMeta.API, modelProviderID(model), model.ID
+	}
+	fail := func(err error) { failStreamPanic(outer, api, provider, id, err) }
+	if launch == nil {
+		go func() {
+			defer recoverStream(provider, fail)
+			body()
+		}()
+		return
+	}
+	launch(func() {
+		defer recoverStream(provider, fail)
+		body()
+	})
 }
 
 type lazySetupResult struct {
@@ -36,7 +57,7 @@ func startLazyStream(ctx context.Context, model *Model, setup func(context.Conte
 	outer := NewAssistantMessageEventStream()
 	outer.executor = executor
 	turn := executor.newTurn()
-	launch(func() {
+	launchLazy(launch, outer, model, func() {
 		turn.run(func(turn *continuationTurn) {
 			inner, err := setup(context.WithValue(ctx, continuationTurnKey{}, turn))
 			settled := newContinuationPromise[lazySetupResult](executor)
@@ -68,7 +89,7 @@ func startLazyStreamSync(ctx context.Context, model *Model, setup func(context.C
 	} else {
 		executor.run(func(turn *continuationTurn) { run(context.WithValue(ctx, continuationTurnKey{}, turn)) })
 	}
-	launch(func() {
+	launchLazy(launch, outer, model, func() {
 		forward.run(func(turn *continuationTurn) {
 			forwardLazySetup(ctx, turn, executor, outer, model, prepared.stream, prepared.err)
 		})

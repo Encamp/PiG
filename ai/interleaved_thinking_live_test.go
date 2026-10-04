@@ -9,6 +9,9 @@ import "testing"
 // assertions; only model-generated interleaving is live-only.
 func TestInterleavedThinkingLiveUpstream(t *testing.T) {
 	for _, tc := range interleavedThinkingCases() {
+		if !BedrockBuilt && tc.provider == "amazon-bedrock" {
+			continue
+		}
 		t.Run(tc.name, func(t *testing.T) {
 			var p Provider
 			if tc.provider == "amazon-bedrock" {

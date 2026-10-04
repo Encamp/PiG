@@ -11,8 +11,6 @@ import (
 	"testing"
 	"time"
 	"unicode/utf16"
-
-	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
 )
 
 type tokensUpstreamCase struct {
@@ -35,6 +33,9 @@ func abortUsageClass(m *GeneratedModel) int {
 
 func TestTokensOnAbortUpstream(t *testing.T) {
 	for _, tc := range tokensUpstreamCases() {
+		if !BedrockBuilt && tc.provider == "amazon-bedrock" {
+			continue
+		}
 		t.Run(tc.provider+"/"+tc.model+"/"+tc.name, func(t *testing.T) {
 			var generated *GeneratedModel
 			if tc.model == "preferred" {
@@ -183,23 +184,12 @@ func writeAbortPrefix(t *testing.T, w http.ResponseWriter, m *GeneratedModel) {
 		sse(map[string]any{"candidates": []any{map[string]any{"content": map[string]any{"role": "model", "parts": []any{map[string]any{"text": text}}}}}})
 	case APIBedrockConverseStream:
 		w.Header().Set("Content-Type", "application/vnd.amazon.eventstream")
-		encoder := eventstream.NewEncoder()
+		emit := bedrockMatrixEmitter(t, w)
 		for _, event := range []struct {
 			name string
 			body any
 		}{{"messageStart", map[string]any{"role": "assistant"}}, {"contentBlockDelta", map[string]any{"contentBlockIndex": 0, "delta": map[string]any{"text": text}}}} {
-			raw, err := json.Marshal(event.body)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			headers := eventstream.Headers{}
-			headers.Set(":message-type", eventstream.StringValue("event"))
-			headers.Set(":event-type", eventstream.StringValue(event.name))
-			headers.Set(":content-type", eventstream.StringValue("application/json"))
-			if err := encoder.Encode(w, eventstream.Message{Headers: headers, Payload: raw}); err != nil {
-				t.Error(err)
-			}
+			emit(event.name, event.body)
 		}
 	default:
 		t.Fatalf("unsupported abort API %s", m.API)

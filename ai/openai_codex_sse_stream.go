@@ -54,6 +54,8 @@ type codexBodyReader struct {
 	turn     *continuationTurn
 	requests chan *bodyReadOperation
 	joined   chan struct{}
+	// inFlight is the read serve is serving; only serve's goroutine uses it.
+	inFlight *bodyReadOperation
 	abort    context.CancelFunc
 	// ending is set when the last data arrived together with EOF: the stream closes in a later event-loop turn.
 	ending bool
@@ -70,8 +72,9 @@ func newCodexBodyReader(ctx context.Context, body io.ReadCloser, release func(),
 
 // serve owns every Read on the body so a blocked network read never holds the executor.
 func (reader *codexBodyReader) serve() {
-	defer close(reader.joined)
+	defer recoverStream(responseBodyReader, reader.failReads)
 	for operation := range reader.requests {
+		reader.inFlight = operation
 		buffer := make([]byte, bufio.MaxScanTokenSize)
 		if reader.observed != nil {
 			reader.observed.begin(operation)
@@ -83,7 +86,24 @@ func (reader *codexBodyReader) serve() {
 		if reader.observed != nil {
 			reader.observed.clear(operation)
 		}
+		reader.inFlight = nil
 		operation.complete(buffer[:count], err)
+	}
+	close(reader.joined)
+}
+
+// failReads completes the read a panic interrupted with err, answers every later read with err at once, and joins when close ends the requests.
+func (reader *codexBodyReader) failReads(err error) {
+	defer close(reader.joined)
+	if inFlight := reader.inFlight; inFlight != nil {
+		reader.inFlight = nil
+		if reader.observed != nil {
+			reader.observed.clear(inFlight)
+		}
+		inFlight.complete(nil, err)
+	}
+	for operation := range reader.requests {
+		operation.complete(nil, err)
 	}
 }
 

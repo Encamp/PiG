@@ -16,6 +16,9 @@ func TestMessageTextSanitizesLoneSurrogatesOnTheWire(t *testing.T) {
 	want := "unpaired  end"
 	seen := map[string]bool{}
 	for _, tc := range unicodeUpstreamCases() {
+		if !BedrockBuilt && tc.provider == "amazon-bedrock" {
+			continue
+		}
 		key := tc.provider + "/" + tc.model + "/" + map[bool]string{false: "key", true: "oauth"}[tc.oauth]
 		if tc.kind != 2 || seen[key] {
 			continue

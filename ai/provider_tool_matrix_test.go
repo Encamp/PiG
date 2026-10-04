@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-
-	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
 )
 
 func writeMatrixToolCall(t *testing.T, w http.ResponseWriter, api API, id, name string, args JsonObject) {
@@ -58,21 +56,7 @@ func writeMatrixToolCall(t *testing.T, w http.ResponseWriter, api API, id, name 
 		sse(map[string]any{"candidates": []any{map[string]any{"content": map[string]any{"role": "model", "parts": []any{map[string]any{"functionCall": map[string]any{"id": id, "name": name, "args": args}}}}, "finishReason": "STOP"}}, "usageMetadata": map[string]any{"promptTokenCount": 10, "candidatesTokenCount": 6, "totalTokenCount": 16}})
 	case APIBedrockConverseStream:
 		w.Header().Set("Content-Type", "application/vnd.amazon.eventstream")
-		encoder := eventstream.NewEncoder()
-		emit := func(kind string, value any) {
-			raw, err := json.Marshal(value)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			headers := eventstream.Headers{}
-			headers.Set(":message-type", eventstream.StringValue("event"))
-			headers.Set(":event-type", eventstream.StringValue(kind))
-			headers.Set(":content-type", eventstream.StringValue("application/json"))
-			if err := encoder.Encode(w, eventstream.Message{Headers: headers, Payload: raw}); err != nil {
-				t.Error(err)
-			}
-		}
+		emit := bedrockMatrixEmitter(t, w)
 		emit("messageStart", map[string]any{"role": "assistant"})
 		emit("contentBlockStart", map[string]any{"contentBlockIndex": 0, "start": map[string]any{"toolUse": map[string]any{"toolUseId": id, "name": name}}})
 		emit("contentBlockDelta", map[string]any{"contentBlockIndex": 0, "delta": map[string]any{"toolUse": map[string]any{"input": string(arguments)}}})

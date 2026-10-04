@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/http"
 	"testing"
-
-	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
 )
 
 // newMatrixProvider keeps the catalog's API, identity and compatibility metadata, replacing only authentication and the remote endpoint. Responses are delivered through each production provider parser, not injected as completed assistant messages.
@@ -158,21 +156,7 @@ func writeMatrixUsageResponse(t *testing.T, w http.ResponseWriter, api API, text
 		sse(map[string]any{"candidates": []any{map[string]any{"content": map[string]any{"role": "model", "parts": parts}, "finishReason": "STOP"}}, "usageMetadata": map[string]any{"promptTokenCount": 100, "candidatesTokenCount": 6, "cachedContentTokenCount": nativeCached, "totalTokenCount": 106}})
 	case APIBedrockConverseStream:
 		w.Header().Set("Content-Type", "application/vnd.amazon.eventstream")
-		encoder := eventstream.NewEncoder()
-		emit := func(kind string, value any) {
-			raw, err := json.Marshal(value)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			headers := eventstream.Headers{}
-			headers.Set(":message-type", eventstream.StringValue("event"))
-			headers.Set(":event-type", eventstream.StringValue(kind))
-			headers.Set(":content-type", eventstream.StringValue("application/json"))
-			if err := encoder.Encode(w, eventstream.Message{Headers: headers, Payload: raw}); err != nil {
-				t.Error(err)
-			}
-		}
+		emit := bedrockMatrixEmitter(t, w)
 		emit("messageStart", map[string]any{"role": "assistant"})
 		index := 0
 		if thinking != "" {

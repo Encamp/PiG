@@ -67,7 +67,7 @@ func (p *fauxProvider) fetchDeferred(ctx context.Context, model *Model, handle D
 	builder.partialCopy = (*AssistantMessage).ShallowCopy
 	builder.afterPush = p.afterPush
 	turn := builder.stream.executor.newTurn()
-	go turn.run(func(turn *continuationTurn) {
+	go turn.runRecovered(p.cfg.ProviderID, builder.failPanic, func(turn *continuationTurn) {
 		defer builder.produceUnder(turn)()
 		var hookErr error
 		if options.OnResponse != nil {

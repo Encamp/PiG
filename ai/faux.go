@@ -232,7 +232,7 @@ func (p *fauxProvider) streamStep(ctx context.Context, model *Model, request Tra
 	builder.partialCopy = (*AssistantMessage).ShallowCopy
 	builder.afterPush = p.afterPush
 	turn := builder.stream.executor.newTurn()
-	go turn.run(func(turn *continuationTurn) {
+	go turn.runRecovered(p.cfg.ProviderID, builder.failPanic, func(turn *continuationTurn) {
 		defer builder.produceUnder(turn)()
 		// faux.ts:stream `await streamOptions?.onResponse?.(...)`. The handler's own asynchronous work is a separate scoped wait.
 		var hookErr error
