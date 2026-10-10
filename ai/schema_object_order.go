@@ -266,12 +266,12 @@ func (tool *ToolSchema) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON preserves imported parameter ordering when tool definitions cross a session or SDK boundary.
+// MarshalJSON preserves imported parameter ordering and leaves <, > and & literal, as JSON.stringify does, so callers that disable HTML escaping size the same schema that Pi writes.
 func (tool ToolSchema) MarshalJSON() ([]byte, error) {
 	var sampling json.RawMessage
 	switch {
 	case tool.ConstrainedSampling != nil:
-		encoded, err := json.Marshal(tool.ConstrainedSampling)
+		encoded, err := marshalJSONUnescaped(tool.ConstrainedSampling)
 		if err != nil {
 			return nil, err
 		}
@@ -280,7 +280,7 @@ func (tool ToolSchema) MarshalJSON() ([]byte, error) {
 		sampling = json.RawMessage("false")
 	}
 	if tool.parameterOrder == nil {
-		return json.Marshal(struct {
+		return marshalJSONUnescaped(struct {
 			Name                string          `json:"name"`
 			Description         string          `json:"description"`
 			Parameters          map[string]any  `json:"parameters"`
@@ -296,7 +296,7 @@ func (tool ToolSchema) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(struct {
+	return marshalJSONUnescaped(struct {
 		Name                string          `json:"name"`
 		Description         string          `json:"description"`
 		Parameters          json.RawMessage `json:"parameters"`

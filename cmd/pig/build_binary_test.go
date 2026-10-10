@@ -28,6 +28,9 @@ var releaseTestBinary = sync.OnceValues(func() (string, error) { return compileP
 func compilePigBinary(release bool) (string, error) {
 	name := "pig"
 	args := []string{"build"}
+	if pigTestBuildTags != "" {
+		args = append(args, "-tags", pigTestBuildTags)
+	}
 	if release {
 		name = "pig-release"
 		args = append(args, "-trimpath", "-buildvcs=false")

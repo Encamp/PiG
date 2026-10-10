@@ -7,13 +7,11 @@ import (
 	"slices"
 	"strings"
 	"testing"
-
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 )
 
 func payloadHasZeroTemperature(payload any) bool {
-	if input, ok := payload.(*bedrockruntime.ConverseStreamInput); ok {
-		return input.InferenceConfig != nil && input.InferenceConfig.Temperature != nil && *input.InferenceConfig.Temperature == 0
+	if bedrockPayloadHasZeroTemperature(payload) {
+		return true
 	}
 	encoded, err := json.Marshal(payload)
 	if err != nil {
@@ -63,6 +61,9 @@ func TestProvidersSendExplicitZeroTemperature(t *testing.T) {
 	transcript := NormalizeContext(Context{Messages: []Message{UserMessage{Content: UserText("hi")}}})
 	captureError := errors.New("payload captured")
 	for _, test := range providers {
+		if !BedrockBuilt && test.provider.ID() == "amazon-bedrock" {
+			continue
+		}
 		t.Run(test.name, func(t *testing.T) {
 			capturedZero := false
 			stream, err := test.provider.Stream(context.Background(), transcript, StreamOptions{

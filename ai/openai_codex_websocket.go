@@ -637,70 +637,88 @@ func markCodexWebSocketFinishing(entry *codexWebSocketEntry) {
 }
 
 func (p *openAIResponsesProvider) consumeCodexWebSocket(ctx context.Context, acquired *acquiredCodexWebSocket, first []byte, fullBody map[string]any, grammarProps map[string]string, useCachedContext bool, builder *assistantStreamBuilder, opts StreamOptions) {
+	defer recoverStream(p.cfg.ProviderID, builder.failPanic)
 	reader, writer := io.Pipe()
 	feedDone := make(chan struct{})
 	parseDone := make(chan struct{})
+	stopParser := sync.OnceFunc(func() {
+		close(parseDone)
+		_ = reader.Close()
+	})
+	released := false
+	defer func() {
+		stopParser()
+		if !released {
+			acquired.release(false)
+		}
+		<-feedDone
+	}()
 	// pull carries one token per record the parser asks for. mapCodexEvents observes an event only when processResponsesStream pulls it, after the previous event is
 	// normalized (openai-codex-responses.ts:749-751), so the feeder holds each frame's observation until the parser has finished the frame before it.
 	pull := make(chan struct{}, 1)
 	go func() {
-		defer close(feedDone)
-		defer func() { _ = writer.Close() }()
-		stopCancel := context.AfterFunc(ctx, func() {
-			closeCodexWebSocket(acquired.connection, "aborted")
+		defer recoverStream(p.cfg.ProviderID, func(err error) {
+			_ = writer.CloseWithError(err)
 		})
-		defer stopCancel()
-		message := first
-		// startCodexWebSocketAttempt observed the first frame.
-		observed := true
-		pulled := false
-		for {
-			if !pulled {
-				select {
-				case <-pull:
-					pulled = true
-				case <-parseDone:
+		defer close(feedDone)
+		func() {
+			stopCancel := context.AfterFunc(ctx, func() {
+				closeCodexWebSocket(acquired.connection, "aborted")
+			})
+			defer stopCancel()
+			message := first
+			// startCodexWebSocketAttempt observed the first frame.
+			observed := true
+			pulled := false
+			for {
+				if !pulled {
+					select {
+					case <-pull:
+						pulled = true
+					case <-parseDone:
+						return
+					}
+				}
+				if !observed {
+					if err := builder.observeCodexFrame(message); err != nil {
+						_ = writer.CloseWithError(err)
+						return
+					}
+				}
+				observed = false
+				mapped, mapErr := mapCodexWebSocketEventFrame(message)
+				if mapErr != nil {
+					_ = writer.CloseWithError(mapErr)
 					return
 				}
-			}
-			if !observed {
-				if err := builder.observeCodexFrame(message); err != nil {
+				if !mapped.skip {
+					if mapped.terminal {
+						markCodexWebSocketFinishing(acquired.entry)
+					}
+					if _, err := fmt.Fprintf(writer, "data: %s\n\n", mapped.data); err != nil {
+						return
+					}
+					pulled = false
+					if mapped.terminal {
+						return
+					}
+				}
+				messageType, next, err := readCodexWebSocket(ctx, acquired.connection, optionTimeout(opts.TimeoutMs))
+				if err != nil {
+					if ctx.Err() == nil {
+						recordCodexWebSocketFailure(acquired.sessionID, err)
+					}
 					_ = writer.CloseWithError(err)
 					return
 				}
-			}
-			observed = false
-			mapped, mapErr := mapCodexWebSocketEventFrame(message)
-			if mapErr != nil {
-				_ = writer.CloseWithError(mapErr)
-				return
-			}
-			if !mapped.skip {
-				if mapped.terminal {
-					markCodexWebSocketFinishing(acquired.entry)
-				}
-				if _, err := fmt.Fprintf(writer, "data: %s\n\n", mapped.data); err != nil {
+				if messageType != websocket.TextMessage && messageType != websocket.BinaryMessage {
+					_ = writer.CloseWithError(fmt.Errorf("unexpected WebSocket message type %d", messageType))
 					return
 				}
-				pulled = false
-				if mapped.terminal {
-					return
-				}
+				message = next
 			}
-			messageType, next, err := readCodexWebSocket(ctx, acquired.connection, optionTimeout(opts.TimeoutMs))
-			if err != nil {
-				if ctx.Err() == nil {
-					recordCodexWebSocketFailure(acquired.sessionID, err)
-				}
-				_ = writer.CloseWithError(err)
-				return
-			}
-			if messageType != websocket.TextMessage && messageType != websocket.BinaryMessage {
-				_ = writer.CloseWithError(fmt.Errorf("unexpected WebSocket message type %d", messageType))
-				return
-			}
-			message = next
-		}
+		}()
+		_ = writer.Close()
 	}()
 
 	decoder := newSSEDecoder(reader)
@@ -712,8 +730,7 @@ func (p *openAIResponsesProvider) consumeCodexWebSocket(ctx context.Context, acq
 		}
 	}
 	p.parseResponses(ctx, decoder, builder, grammarProps)
-	close(parseDone)
-	_ = reader.Close()
+	stopParser()
 	<-feedDone
 	result := builder.stream.Result()
 	keep := result != nil && result.StopReason != StopReasonError && result.StopReason != StopReasonAborted
@@ -732,6 +749,7 @@ func (p *openAIResponsesProvider) consumeCodexWebSocket(ctx context.Context, acq
 			codexWebSocketSessions.mu.Unlock()
 		}
 	}
+	released = true
 	acquired.release(keep)
 }
 

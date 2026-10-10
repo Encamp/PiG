@@ -1,3 +1,5 @@
+//go:build pig_bedrock
+
 package ai
 
 import (
@@ -22,6 +24,10 @@ type bedrockBodyTap struct {
 	mu       sync.Mutex
 	owner    *bodyReadOwner
 	observed *observedResponseBody
+
+	// provider and failStream identify and end the call's stream when a goroutine the tap starts panics.
+	provider   string
+	failStream func(error)
 }
 
 type bedrockHTTPClient interface {
@@ -39,7 +45,7 @@ func (tap *bedrockBodyTap) Do(request *http.Request) (*http.Response, error) {
 	var wroteOnce sync.Once
 	if request.Body != nil && request.Body != http.NoBody {
 		// smithy-go's ClientHandler closes the request body as soon as Do returns (transport/http/client.go:112-117). A response that arrives before the transport finished writing would then fail the write, and the transport closes the connection for a failed write, ending the stream. Closing after the write completes keeps the transport's own contract.
-		request.Body = &bedrockRequestBody{ReadCloser: request.Body, wrote: wrote, done: request.Context().Done()}
+		request.Body = &bedrockRequestBody{ReadCloser: request.Body, wrote: wrote, done: request.Context().Done(), failStream: tap.failStream, provider: tap.provider}
 	}
 	trace := &httptrace.ClientTrace{
 		WroteRequest: func(httptrace.WroteRequestInfo) { wroteOnce.Do(func() { close(wrote) }) },
@@ -109,6 +115,9 @@ type bedrockRequestBody struct {
 	wrote <-chan struct{}
 	done  <-chan struct{}
 	once  sync.Once
+	// failStream ends the owning stream when the deferred close panics; nil when the tap has no stream.
+	failStream func(error)
+	provider   string
 }
 
 func (body *bedrockRequestBody) Close() error {
@@ -118,6 +127,7 @@ func (body *bedrockRequestBody) Close() error {
 	default:
 	}
 	go func() {
+		defer recoverStream(body.provider, body.fail)
 		select {
 		case <-body.wrote:
 		case <-body.done:
@@ -125,6 +135,12 @@ func (body *bedrockRequestBody) Close() error {
 		_ = body.closeOnce()
 	}()
 	return nil
+}
+
+func (body *bedrockRequestBody) fail(err error) {
+	if body.failStream != nil {
+		body.failStream(err)
+	}
 }
 
 func (body *bedrockRequestBody) closeOnce() error {
