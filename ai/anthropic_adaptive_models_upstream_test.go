@@ -15,7 +15,7 @@ func TestAnthropicUpstreamAdaptiveThinkingModels(t *testing.T) {
 		"kimi-coding/kimi-for-coding", "kimi-coding/k3", "kimi-coding/kimi-for-coding-highspeed", "opencode/claude-opus-4-8", "opencode/claude-opus-5",
 		"vercel-ai-gateway/anthropic/claude-opus-4.8", "vercel-ai-gateway/anthropic/claude-opus-5", "vercel-ai-gateway/anthropic/claude-sonnet-5",
 	}
-	allowed := regexp.MustCompile(`(opus[-.](4[-.][678]|5)|sonnet[-.]4[-.]6|sonnet[-.]5|fable[-.]5|kimi-coding/)`)
+	allowed := regexp.MustCompile(`(opus[-.](4[-.][678]|5)|sonnet[-.]4[-.]6|sonnet[-.]5|fable[-.]5|haiku[-.]5|kimi-coding/)`)
 	var flagged []string
 	for _, model := range ListModels("") {
 		if model.API != APIAnthropicMessages || model.Compat == nil || model.Compat.ForceAdaptiveThinking == nil || !*model.Compat.ForceAdaptiveThinking {

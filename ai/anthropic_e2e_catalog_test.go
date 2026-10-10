@@ -31,7 +31,7 @@ func assertAnthropicCatalogDenominator(t *testing.T, cases anthropicAcceptanceCa
 	var expected []string
 	for _, provider := range ListProviders() {
 		for _, model := range ListModels(provider) {
-			if model.API == APIAnthropicMessages {
+			if model.API == APIAnthropicMessages && !isForkModel(model) {
 				expected = append(expected, provider+"/"+model.ID)
 			}
 		}

@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-// Filtering keeps the generated provider and model order and returns an owned slice.
+// Filtering keeps the generated provider and model order, with the fork's entries last, and returns an owned slice.
 func TestListModelsAllocatesOnlyFilteredCatalog(t *testing.T) {
 	providers := append(ListProviders(), "", "missing-provider")
 	for _, provider := range providers {
 		t.Run(provider, func(t *testing.T) {
 			want := []GeneratedModel{}
-			for _, model := range GeneratedModels {
+			for _, model := range append(GeneratedModels[:len(GeneratedModels):len(GeneratedModels)], forkModels...) {
 				if provider == "" || model.Provider == provider {
 					want = append(want, model)
 				}

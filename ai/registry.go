@@ -9,7 +9,8 @@ import (
 
 // ─── Model Registry ───────────────────────────────────────────────────────────
 //
-// The registry indexes the codegen'd `GeneratedModels` slice for lookup
+// The registry indexes the codegen'd `GeneratedModels` slice, then the
+// fork's `forkModels` (models_fork.go), for lookup
 // by full id (`provider/model`), bare model id, and model id alone.
 // Status line, /cost, and `--diagnose` all consume from here.
 
@@ -21,15 +22,18 @@ var (
 )
 
 func initRegistry() {
-	registryByFQ = make(map[string]*GeneratedModel, len(GeneratedModels))
-	registryByID = make(map[string][]*GeneratedModel, len(GeneratedModels))
+	size := len(GeneratedModels) + len(forkModels)
+	registryByFQ = make(map[string]*GeneratedModel, size)
+	registryByID = make(map[string][]*GeneratedModel, size)
 	registryByProvider = make(map[string][]*GeneratedModel)
-	for i := range GeneratedModels {
-		m := &GeneratedModels[i]
-		fq := m.Provider + "/" + m.ID
-		registryByFQ[fq] = m
-		registryByID[m.ID] = append(registryByID[m.ID], m)
-		registryByProvider[m.Provider] = append(registryByProvider[m.Provider], m)
+	for _, models := range [...][]GeneratedModel{GeneratedModels, forkModels} {
+		for i := range models {
+			m := &models[i]
+			fq := m.Provider + "/" + m.ID
+			registryByFQ[fq] = m
+			registryByID[m.ID] = append(registryByID[m.ID], m)
+			registryByProvider[m.Provider] = append(registryByProvider[m.Provider], m)
+		}
 	}
 }
 
@@ -152,8 +156,9 @@ func (m *GeneratedModel) ToModel() *Model {
 func ListModels(provider string) []GeneratedModel {
 	registryOnce.Do(initRegistry)
 	if provider == "" {
-		out := make([]GeneratedModel, len(GeneratedModels))
+		out := make([]GeneratedModel, len(GeneratedModels), len(GeneratedModels)+len(forkModels))
 		copy(out, GeneratedModels)
+		out = append(out, forkModels...)
 		return out
 	}
 	models := registryByProvider[provider]
