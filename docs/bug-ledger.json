@@ -2984,7 +2984,6 @@
           "pr": "170"
         }
       ],
-      "commitsFrom": "release note",
       "tests": [
         "coding/cli/rpc_initial_tools_test.go::TestRPCFreshPromptDeclaresStructuredSystemOnce",
         "internal/codingagent/exit_record_test.go::TestBackgroundGroupPanicReachesTheHandlerWithItsStack",
@@ -42398,6 +42397,66 @@
         "tui/word_navigation_pi_test.go::TestFindWordForwardMatchesPi",
         "tui/word_navigation_pi_test.go::TestFindWordNavigationAtomicSegmentsMatchPi"
       ]
+    },
+    {
+      "id": "BF-pending-915",
+      "title": "On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under…",
+      "symptom": "On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under `%ProgramFiles%\\PowerShell\\7` after `PATH`, and Windows PowerShell under `%SystemRoot%\\System32\\WindowsPowerShell\\v1.0` as the last fallback, on any drive (Pi 61060ddf, #9490).",
+      "rootCause": "",
+      "rootCauseSource": "",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "Windows",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under `%ProgramFiles%\\PowerShell\\7` after `PATH`, and Windows PowerShell under `%SystemRoot%\\System32\\WindowsPowerShell\\v1.0` as the last fallback, on any drive (Pi 61060ddf, #9490).",
+      "origin": "release note",
+      "commits": [],
+      "tests": []
+    },
+    {
+      "id": "BF-pending-916",
+      "title": "On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in…",
+      "symptom": "On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in `SystemRoot` (`System32` and `Sysnative`), not only under `C:\\Windows`, so its command goes over stdin (Pi 61060ddf, #9490).",
+      "rootCause": "",
+      "rootCauseSource": "",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "Windows, WSL",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in `SystemRoot` (`System32` and `Sysnative`), not only under `C:\\Windows`, so its command goes over stdin (Pi 61060ddf, #9490).",
+      "origin": "release note",
+      "commits": [],
+      "tests": []
+    },
+    {
+      "id": "BF-pending-917",
+      "title": "On Windows, an empty `SystemRoot` takes `C:\\Windows` for `taskkill.exe`, as an unset one already did, in the…",
+      "symptom": "On Windows, an empty `SystemRoot` takes `C:\\Windows` for `taskkill.exe`, as an unset one already did, in the shell tools and the Durable node environment (Pi 61060ddf, #9490).",
+      "rootCause": "",
+      "rootCauseSource": "",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "Windows",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "On Windows, an empty `SystemRoot` takes `C:\\Windows` for `taskkill.exe`, as an unset one already did, in the shell tools and the Durable node environment (Pi 61060ddf, #9490).",
+      "origin": "release note",
+      "commits": [],
+      "tests": []
+    },
+    {
+      "id": "BF-pending-918",
+      "title": "On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path…",
+      "symptom": "On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path, `bash.exe` and `pwsh.exe` found by `where`, and the Git Bash locations are checked with an attribute check (`access(F_OK)`) instead of a stat that follows the alias (Pi 28bea006, nodejs/node#36790).",
+      "rootCause": "",
+      "rootCauseSource": "",
+      "userImpact": "Wrong output or ordering",
+      "platform": "Windows",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path, `bash.exe` and `pwsh.exe` found by `where`, and the Git Bash locations are checked with an attribute check (`access(F_OK)`) instead of a stat that follows the alias (Pi 28bea006, nodejs/node#36790). Not yet run on a Windows host.",
+      "origin": "release note",
+      "commits": [],
+      "tests": []
     }
   ],
   "divergences": [

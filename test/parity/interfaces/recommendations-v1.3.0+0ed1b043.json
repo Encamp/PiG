@@ -263808,22 +263808,24 @@
     {
       "id": "pkg:coding-agent/.#getShellConfig",
       "upstreamShapeHash": "sha256:aa8c9d4dc4bd378ff8bcd9a432eb78b034b5e1ede755e122c22d10c136a90bcb",
-      "recommendedDisposition": "partial",
+      "recommendedDisposition": "pending",
       "confidence": "low",
       "basis": [
-        "Exactly one normalized declared Go symbol name matches; package context, semantic shape, and production closure remain unverified."
+        "2 normalized-name Pig candidates are ambiguous."
       ],
       "alternatives": [
         "ported",
-        "pending",
+        "partial",
         "deferred",
         "designed-out",
         "divergence"
       ],
       "pigCandidates": [
-        "go:github.com/MichaelKinsy/PiG/internal/codingagent/tools#GetShellConfig"
+        "go:github.com/MichaelKinsy/PiG/internal/codingagent/tools#GetShellConfig",
+        "go:github.com/MichaelKinsy/PiG/internal/codingagent/tools#getShellConfig"
       ],
       "missingClosure": [
+        "candidate-disambiguation",
         "shape-translation-review",
         "production-reachability",
         "required-layers",

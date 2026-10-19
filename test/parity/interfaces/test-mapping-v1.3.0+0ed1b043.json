@@ -4347,8 +4347,13 @@
     },
     {
       "path": "packages/coding-agent/test/powershell-config.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:0c225b44e782266296c027badd9b8197d99b70b16dc71333c890c87fdaf8737a"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:0c225b44e782266296c027badd9b8197d99b70b16dc71333c890c87fdaf8737a",
+      "evidence": [
+        "internal/codingagent/tools/powershell_config_upstream_test.go#TestUpstreamPowerShellConfig",
+        "internal/codingagent/tools/powershell_config_upstream_test.go#TestPowerShellInstallationCandidatesUseWindowsPathRules"
+      ],
+      "rationale": "All 5 cases, one Go subtest each in TestUpstreamPowerShellConfig with Pi's titles and the same drives, directories and PATH results. Pi mocks accessSync and spawnSync; powerShellConfigFor takes the PATH lookup, the environment and the existence check as parameters, so the cases run on every host and the installation-directory candidates are joined with Windows path rules (nodepath.Win32Join, compared with Node's path.win32 in internal/nodepath), which TestPowerShellInstallationCandidatesUseWindowsPathRules asserts. Added test, not in Pi: unset ProgramFiles and SystemRoot probe nothing. The Go code that the cases drive was added with the cases; the earlier code looked on PATH only."
     },
     {
       "path": "packages/coding-agent/test/powershell-tool.test.ts",
@@ -4972,8 +4977,16 @@
     },
     {
       "path": "packages/coding-agent/test/shell-path-exists.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:fc6c6a21cbded0df578509953649ae3491d0e99129b3414e170df2c681ffe5db"
+      "disposition": "partial",
+      "upstreamTestHash": "sha256:fc6c6a21cbded0df578509953649ae3491d0e99129b3414e170df2c681ffe5db",
+      "evidence": [
+        "internal/codingagent/tools/shell_path_exists_upstream_test.go#TestUpstreamWindowsStoreShellAliases",
+        "internal/codingagent/tools/shell_path_exists_upstream_test.go#TestUpstreamUnixShellExistenceChecks",
+        "internal/shellconfig/default_unix_test.go#TestUpstreamUnixShellExistenceChecks",
+        "internal/shellconfig/shellconfig_test.go#TestFirstMatch",
+        "internal/nodefs/access_windows_test.go#TestAccessAcceptsReparsePointWithMissingTarget"
+      ],
+      "rationale": "Missing: the Windows Store alias cases are not run against a real Windows host. Pi mocks accessSync and spawnSync around getShellConfig() and getPowerShellConfig(); here the same four cases (bash.exe and pwsh.exe found on PATH, an explicitly configured alias, a PATH result that fails the existence check) run on the parsing of `where` output (shellconfig.FirstMatch) and the shell resolvers with the existence check as a parameter, and the three Unix cases run with the same seam. The production Windows check, nodefs.Access (GetFileAttributes, as libuv's fs__access), is asserted natively only by TestAccessAcceptsReparsePointWithMissingTarget, a junction standing in for a Store alias, which has not run on Windows in this change; a real Store alias has not been tried. Native Windows run: go test ./internal/nodefs ./internal/shellconfig ./internal/codingagent/tools."
     },
     {
       "path": "packages/coding-agent/test/skills.test.ts",
@@ -5649,8 +5662,15 @@
     },
     {
       "path": "packages/coding-agent/test/suite/regressions/6596-taskkill-enoent.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:b5cb7285220a3c0181fcf4b40c27d6f9b8f3f5c79511a19cde649f4864eaabb8"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:b5cb7285220a3c0181fcf4b40c27d6f9b8f3f5c79511a19cde649f4864eaabb8",
+      "evidence": [
+        "internal/codingagent/tools/taskkill_port_test.go#TestTaskkillSpawnFailurePort",
+        "internal/codingagent/tools/taskkill_port_windows_test.go#TestWindowsTaskkillSpawnOptions",
+        "test/parity/scenarios/tools/22-taskkill-path-and-errors.toml",
+        "test/parity/unit-evidence/pt-tools-builtin-native-windows.md"
+      ],
+      "rationale": "The complete case retains the trusted SystemRoot/System32 path, exact /F /T /PID argv, ignored stdio, detached hidden Windows attributes, and consumed spawn failure. Shared ownership passes on Linux and matches Pi with the same spawn mock; bare-name and unhandled-error mutations compile and fail. Native Windows evidence at ace100c3eadd875c5cd07269995350100e2c7fb3:native-proof/pending/pt-tools-builtin-W3.log records both tests passing on unmodified source 4f5e1c075c with Go 1.27.1 windows/amd64 and Node 24.19.0. The test bytes are unchanged in integration. No real PID is killed by these mock tests, and no case or assertion is omitted; the explicit native-validation obligation is closed. 0.5.2 (Pi 61060ddf, #9490): the case becomes a three-row table over SystemRoot (set, unset, empty; D:\\CustomWindows replaces C:\\CustomWindows), and taskkill takes `||` instead of `??`, so an empty SystemRoot takes C:\\Windows. TestTaskkillSpawnFailurePort has the same three rows and fails on the empty one against the earlier `??` code (it joined \"\" and System32\\taskkill.exe); scenario 22 compares the three TASKKILL lines with the pinned Pi's killProcessTree. The Windows console attributes row, TestWindowsTaskkillSpawnOptions, is unchanged and was not re-run natively for 0.5.2."
     },
     {
       "path": "packages/coding-agent/test/suite/regressions/6647-compaction-retries-transient-stream-drop.test.ts",
@@ -6433,8 +6453,13 @@
     },
     {
       "path": "packages/coding-agent/test/windows-shell-config.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:1c0041edebd6d601504a1febada1bed9b8dfbdc6af6257079fdd24de8876065e"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:1c0041edebd6d601504a1febada1bed9b8dfbdc6af6257079fdd24de8876065e",
+      "evidence": [
+        "internal/shellconfig/shellconfig_test.go#TestUpstreamLegacyWSLBashDetection",
+        "internal/shellconfig/shellconfig_test.go#TestEmptySystemRootFallsBackToConventionalLauncherPaths"
+      ],
+      "rationale": "All 6 rows of the table, as subtests of TestUpstreamLegacyWSLBashDetection with the same SystemRoot and shell values; Pi stubs SystemRoot with vitest and mocks accessSync, here ForBash reads SystemRoot from the environment (set, unset or empty with t.Setenv/os.Unsetenv) and no existence check is involved. The three rows with a custom Windows directory, and the relative-SystemRoot row, fail against the earlier fixed C:\\Windows pattern. TestEmptySystemRootFallsBackToConventionalLauncherPaths adds the empty-SystemRoot fallback Pi's `if (systemRoot)` takes."
     },
     {
       "path": "packages/durable/test-workers/storage.test.ts",
@@ -6523,8 +6548,14 @@
     },
     {
       "path": "packages/durable/test/env-node.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:27d23c2473c758952a9023e8462c59287952a9f1f03dea06e73cbf6881927cd0"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:27d23c2473c758952a9023e8462c59287952a9f1f03dea06e73cbf6881927cd0",
+      "evidence": [
+        "durable/env/node/filesystem_test.go",
+        "durable/env/node/shell_test.go",
+        "durable/env/line_scan_test.go"
+      ],
+      "rationale": "All cases of the filesystem, text line reader and shell describes ported with their upstream titles as Go test names (durable/env/node/filesystem_test.go, shell_test.go). Unrepresentable in Go and handled as follows: the truncateFile sizes 1.5, NaN and Infinity cannot be passed to the int64 parameter, so the type rejects them (-1 and MAX_SAFE_INTEGER+1 are tested); the vi.spyOn(FileHandle.prototype) cases use the package seams syncFile and readFileAt; the legacy WSL case does not replace process.platform (the stdin transport depends only on the path); the win32-only detached-descendant case runs on every platform with a background sleep; 'ignores asynchronous taskkill spawn errors during abort' is not ported because Go's Start returns that error synchronously and every killProcessTree caller discards it; Node one-liners (process.execPath) are replaced by bash printf/head producing the same bytes. Not upstream cases, added to pin behavior: BOM dropped at the start of a text line reader and of each output stream, partial final line counted against the spill line threshold. The decoder cases moved with the decoder to durable/env/line_scan_test.go. Pi 1.0.3: the cwd case now also proves the command ran in the cwd (cwd-marker.txt, shell_test.go) and flushFile on a directory is is_directory on every platform (filesystem_test.go; the Windows branch that expected permission_denied is gone). removeTempDir (retries removal while Windows taskkill leaves descendants holding the directory) is designed out: t.TempDir's cleanup retries on Windows. Not upstream cases: a U+FEFF after a chunk boundary stays in the text line reader, and Exec refuses a command that is neither a string nor an argv. 0.5.2 (Pi 61060ddf, #9490): the legacy-WSL case is a five-row table over the shell path and SystemRoot (unset, a custom directory for System32 and Sysnative, empty, and a launcher on another drive). TestShellUsesStdinCommandTransportForLegacyWSLBashPaths runs the five rows as subtests with Pi's titles; the three D:\\WinNT rows fail against the earlier fixed C:\\Windows pattern. durable/env/node now reads the launcher test from internal/shellconfig, the one function coding-agent's shell.ts also uses, and its taskkill uses `||` for SystemRoot."
     },
     {
       "path": "packages/durable/test/env-truncate.test.ts",

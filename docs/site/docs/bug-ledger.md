@@ -15,7 +15,7 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 ## Summary
 
-914 bugs. 864 own defects, 29 fixed ahead of Pi, 21 Pi fixes ported. 136 bugs have no recorded test.
+918 bugs. 868 own defects, 29 fixed ahead of Pi, 21 Pi fixes ported. 140 bugs have no recorded test.
 
 | ID | Bug | Source | Platform | Fixed in |
 |---|---|---|---|---|
@@ -933,6 +933,10 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 | [BF-c2cdd5b-2](#bf-c2cdd5b-2) | The terminal width and height the extension host tells extensions during `/reload`, and when one starts or… | PiG's own defect | All platforms | Unreleased |
 | [BF-6ef10b6](#bf-6ef10b6) | Deleting members of a large Durable core JSON object no longer costs time proportional to its size for each… | PiG's own defect | All platforms | Unreleased |
 | [BF-b341a82](#bf-b341a82) | `go install github.com/MichaelKinsy/PiG/cmd/pig@latest` works again | PiG's own defect | All platforms | Unreleased |
+| [BF-pending-915](#bf-pending-915) | On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under… | PiG's own defect | Windows | Unreleased |
+| [BF-pending-916](#bf-pending-916) | On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in… | PiG's own defect | Windows, WSL | Unreleased |
+| [BF-pending-917](#bf-pending-917) | On Windows, an empty `SystemRoot` takes `C:\Windows` for `taskkill.exe`, as an unset one already did, in the… | PiG's own defect | Windows | Unreleased |
+| [BF-pending-918](#bf-pending-918) | On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path… | PiG's own defect | Windows | Unreleased |
 
 ## Entries
 
@@ -2040,7 +2044,7 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 - **User impact:** Crash, hang or runaway process
 - **Platform:** All platforms
 - **Fixed in:** 0.5.0
-- **Commit that wrote the release note (the fix commit is not identified):** `a4753ec61e` (2026-10-06, #170)
+- **Fix commits:** `a4753ec61e` (2026-10-06, #170)
 - **Tests:** `coding/cli/rpc_initial_tools_test.go::TestRPCFreshPromptDeclaresStructuredSystemOnce`, `internal/codingagent/exit_record_test.go::TestBackgroundGroupPanicReachesTheHandlerWithItsStack`, `internal/codingagent/exit_record_test.go::TestBackgroundTaskPanicEndsTheSessionWithACrashRecord`, `internal/codingagent/exit_record_test.go::TestCacheWarmerDecisionPanicKeepsPisDecision`, `internal/codingagent/exit_record_test.go::TestCacheWarmerRefreshPanicOutsideTheCaughtRequestReachesTheUncaughtHandler`, `internal/codingagent/exit_record_test.go::TestCacheWarmerRefreshRequestPanicIsCaughtAndReschedules`, `internal/codingagent/exit_record_test.go::TestCleanEndLeavesNoMarker`, `internal/codingagent/exit_record_test.go::TestDeadTerminalExitLeavesALineWithTheReason` and 13 more in docs/bug-ledger.json
 - **Release note:** The prompt-cache refresh that fires minutes after a prompt now treats a panic in the extension decision or in the refresh request as Pi treats a thrown error there: it keeps Pi's decision or skips that refresh and keeps warming, instead of ending the session.
 
@@ -13675,6 +13679,62 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 - **Fix commits:** `2ab79ce358` (2026-10-06, #166), `2e0f88f794` (2026-10-06, #160), `4fc8c2e65f` (2026-10-06, #169), `56c3f85350` (2026-10-06, #172), `65b7c13e09` (2026-10-06, #168), `9a95b36b11` (2026-10-06, #162), `a4753ec61e` (2026-10-06, #170), `ba9c37b247` (2026-10-06, #171), `c019ea9155` (2026-10-06, #163), `e2db9318fa` (2026-10-06, #173), `165cf5884d` (2026-10-07, #180), `3094ee00ca` (2026-10-07, #185), `3499c2bea7` (2026-10-07, #181), `9b63b2bc4e` (2026-10-07, #176), `ce8587ef40` (2026-10-07, #179), `c80500f022` (2026-10-08, #199), `f680b9591a` (2026-10-08, #197), `74f806c799` (2026-10-10, #203), `e63c61c338` (2026-10-12, #208), `6af0806f7a` (2026-10-19, #213), `b341a82e9d` (2026-10-19, #221)
 - **Tests:** `agent/abort_before_first_request_test.go::TestAbortBeforeTheFirstRequestSendsNoProviderRequest`, `agent/agent_class_pi_oracle_test.go::TestAgentClassMatchesPi`, `agent/agent_event_stream_test.go::TestAgentEventStream_EndResolvesTheResultAndStopsDelivery`, `agent/agent_event_stream_test.go::TestAgentEventStream_PushedAgentEndCompletesTheStream`, `agent/agent_events_quiet_test.go::TestMessageUpdateObserverAppearingMidStreamSeesEveryLaterUpdate`, `agent/agent_events_quiet_test.go::TestStreamingMessageAfterAnUnobservedUpdate`, `agent/agent_events_quiet_test.go::TestUnobservedMessageUpdatesAreNotDelivered`, `agent/agent_loop_pi_oracle_test.go::TestAgentLoopMatchesPi` and 11229 more in docs/bug-ledger.json
 - **Release note:** `go install github.com/MichaelKinsy/PiG/cmd/pig@latest` works again. The 0.5.0 Go module was larger than the Go module size limit because it carried parity ledgers for every earlier Pi pin; only the current pin's ledgers ship now, and v0.5.0 is retracted.
+
+### BF-pending-915
+
+**On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under…**
+
+- **Source:** PiG's own defect
+- **Symptom:** On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under `%ProgramFiles%\PowerShell\7` after `PATH`, and Windows PowerShell under `%SystemRoot%\System32\WindowsPowerShell\v1.0` as the last fallback, on any drive (Pi 61060ddf, #9490).
+- **Root cause:** Not recorded.
+- **User impact:** Behavior differed from Pi
+- **Platform:** Windows
+- **Fixed in:** Unreleased
+- **Fix commits:** Not yet committed.
+- **Tests:** None recorded.
+- **Release note:** On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under `%ProgramFiles%\PowerShell\7` after `PATH`, and Windows PowerShell under `%SystemRoot%\System32\WindowsPowerShell\v1.0` as the last fallback, on any drive (Pi 61060ddf, #9490).
+
+### BF-pending-916
+
+**On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in…**
+
+- **Source:** PiG's own defect
+- **Symptom:** On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in `SystemRoot` (`System32` and `Sysnative`), not only under `C:\Windows`, so its command goes over stdin (Pi 61060ddf, #9490).
+- **Root cause:** Not recorded.
+- **User impact:** Behavior differed from Pi
+- **Platform:** Windows, WSL
+- **Fixed in:** Unreleased
+- **Fix commits:** Not yet committed.
+- **Tests:** None recorded.
+- **Release note:** On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in `SystemRoot` (`System32` and `Sysnative`), not only under `C:\Windows`, so its command goes over stdin (Pi 61060ddf, #9490).
+
+### BF-pending-917
+
+**On Windows, an empty `SystemRoot` takes `C:\Windows` for `taskkill.exe`, as an unset one already did, in the…**
+
+- **Source:** PiG's own defect
+- **Symptom:** On Windows, an empty `SystemRoot` takes `C:\Windows` for `taskkill.exe`, as an unset one already did, in the shell tools and the Durable node environment (Pi 61060ddf, #9490).
+- **Root cause:** Not recorded.
+- **User impact:** Behavior differed from Pi
+- **Platform:** Windows
+- **Fixed in:** Unreleased
+- **Fix commits:** Not yet committed.
+- **Tests:** None recorded.
+- **Release note:** On Windows, an empty `SystemRoot` takes `C:\Windows` for `taskkill.exe`, as an unset one already did, in the shell tools and the Durable node environment (Pi 61060ddf, #9490).
+
+### BF-pending-918
+
+**On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path…**
+
+- **Source:** PiG's own defect
+- **Symptom:** On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path, `bash.exe` and `pwsh.exe` found by `where`, and the Git Bash locations are checked with an attribute check (`access(F_OK)`) instead of a stat that follows the alias (Pi 28bea006, nodejs/node#36790).
+- **Root cause:** Not recorded.
+- **User impact:** Wrong output or ordering
+- **Platform:** Windows
+- **Fixed in:** Unreleased
+- **Fix commits:** Not yet committed.
+- **Tests:** None recorded.
+- **Release note:** On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path, `bash.exe` and `pwsh.exe` found by `where`, and the Git Bash locations are checked with an attribute check (`access(F_OK)`) instead of a stat that follows the alias (Pi 28bea006, nodejs/node#36790). Not yet run on a Windows host.
 
 ## Divergences from Pi added in this release
 

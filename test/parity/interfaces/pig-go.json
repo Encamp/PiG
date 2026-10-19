@@ -261928,6 +261928,17 @@
       "shapeHash": "sha256:49e17cb0489ffa355c1711b590bf7712823ded289fccf69ade932866416e410d"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/internal/codingagent/tools#getShellConfig",
+      "package": "github.com/MichaelKinsy/PiG/internal/codingagent/tools",
+      "name": "getShellConfig",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(customShellPath string, exists func(string) bool) (ShellConfig, error)"
+      },
+      "shapeHash": "sha256:67217222f041511e15a262acc956a4e15247234f629e486a75f6239633f2cab2"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/internal/codingagent/tools#grepArgumentSchema",
       "package": "github.com/MichaelKinsy/PiG/internal/codingagent/tools",
       "name": "grepArgumentSchema",
@@ -262803,9 +262814,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(goos string, lookPath func(string) (string, error)) (ShellConfig, error)"
+        "type": "func(goos string, lookPath func(string) (string, error), getenv func(string) string, exists func(string) bool) (ShellConfig, error)"
       },
-      "shapeHash": "sha256:46f865c327dfee5a295525a3f40b732e00e68dde462cb0a9f68f3ea8f3603e40"
+      "shapeHash": "sha256:c875675a75eafd2161e1f48aa50ca5646dd42ffc81b650c18770f647146d7fd2"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/internal/codingagent/tools#powerShellUTF8OutputPrefix",

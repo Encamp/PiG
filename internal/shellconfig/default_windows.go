@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/MichaelKinsy/PiG/internal/nodefs"
 )
 
 // Default resolves bash on Windows, mirroring upstream getShellConfig's win32
@@ -21,7 +23,7 @@ func Default() (Config, error) {
 		}
 		p := base + `\Git\bin\bash.exe`
 		searched = append(searched, "  "+p)
-		if _, err := os.Stat(p); err == nil {
+		if nodefs.Access(p) {
 			return ForBash(p), nil
 		}
 	}

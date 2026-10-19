@@ -924,7 +924,7 @@
       ],
       "rationale": "Selected Provider catalog, credentials, request conversion, streaming, replay, or error handling. SCRUTINIZED:approved by the lead ruling LEAD-RULINGS 13:05Z 2026-10-09 (compat-schema: only the type-level cases are designed out): the case asserts TypeScript Static<> property types with expectTypeOf, which has no runtime behavior; the Go compat structs are typed and the compiler checks their property types.",
       "designedOutCases": [
-        "compatibility schemas › preserves property types in the provider superset"
+        "compatibility schemas \u203a preserves property types in the provider superset"
       ]
     },
     {
@@ -1174,7 +1174,7 @@
         "hot-path"
       ],
       "designedOutCases": [
-        "Models with image models › rejects chat models at the image entry point at runtime"
+        "Models with image models \u203a rejects chat models at the image entry point at runtime"
       ],
       "rationale": "Selected Provider catalog, credentials, request conversion, streaming, replay, or error handling. SCRUTINIZED:approved by owner Michael Kinsy on 2026-10-01 (lead session, 'Yes go with recommendations'): the case 'rejects chat models at the image entry point at runtime' is designed out because it is unreachable in Go: GenerateImages takes *ImageModel, so a chat model cannot reach the image entry point."
     },
@@ -2342,7 +2342,7 @@
       ],
       "rationale": "Production-path review at Pi 1.2.0: chord replicatedState, which Pi Durable's harness attaches for its task graph and conversation view (harness/task-graph.ts, harness/view.ts) and updates on every durable turn; area follows the reviewed sessions rows of chord/delta and state.test.ts. SCRUTINIZED:approved by the tern lead ruling 2026-10-13 (tests-120-b): :46 is designed out (a Go change callback returns an error and cannot return a PromiseLike).",
       "designedOutCases": [
-        "transactional replicated state › rejects PromiseLike callbacks and aborts their draft"
+        "transactional replicated state \u203a rejects PromiseLike callbacks and aborts their draft"
       ]
     },
     {
@@ -2520,9 +2520,9 @@
       ],
       "rationale": "Codemode sandbox execution reached on coding turns: the built-in codemode tool runs every script through codemode.NewSandbox (coding/extension/builtin/codemode/execute.go); the inline and remote backends serve the durable and Cloudflare hosts. SCRUTINIZED:approved by owner Michael Kinsy on 2026-10-01 (lead session, 'Yes go with recommendations'): the cases 'accepts a worker path string' and 'reports a missing worker file as a sandbox error' are designed out because the Go engine runs QuickJS on wazero in process and has no worker file. Carried to 1.2.0: both cases are unchanged in the 1.2.0 'worker host' describe and the Go engine still has no worker file. The 1.2.0 case 'ignores Node --watch notifications from the worker' is designed out on the same mechanic: the in-process wazero QuickJS engine has no worker message channel, so no Node --watch notification can arrive (nodejs/node#65044 is the Node behavior the case guards against). SCRUTINIZED:approved by the lead ruling of 2026-10-11T18:42Z (Q5, commit 4c6bb3897f), confirmed for 1.2.0 by the lead on 2026-10-12.",
       "designedOutCases": [
-        "worker host › accepts a worker path string",
-        "worker host › ignores Node --watch notifications from the worker",
-        "worker host › reports a missing worker file as a sandbox error"
+        "worker host \u203a accepts a worker path string",
+        "worker host \u203a ignores Node --watch notifications from the worker",
+        "worker host \u203a reports a missing worker file as a sandbox error"
       ]
     },
     {
@@ -3132,10 +3132,10 @@
         "hot-path"
       ],
       "designedOutCases": [
-        "shouldRunFirstTimeSetup › returns true when experimental, default agent dir, and no settings.json",
-        "shouldRunFirstTimeSetup › returns false when experimental features are disabled",
-        "shouldRunFirstTimeSetup › returns false when a custom agent dir is set",
-        "shouldRunFirstTimeSetup › returns false when settings.json already exists"
+        "shouldRunFirstTimeSetup \u203a returns true when experimental, default agent dir, and no settings.json",
+        "shouldRunFirstTimeSetup \u203a returns false when experimental features are disabled",
+        "shouldRunFirstTimeSetup \u203a returns false when a custom agent dir is set",
+        "shouldRunFirstTimeSetup \u203a returns false when settings.json already exists"
       ],
       "rationale": "CLI startup, selected execution mode, settings, or command routing. Four official-distribution cases are designed out, SCRUTINIZED:approved by owner Michael Kinsy on 2026-09-29: Pi shows first-time setup only for its official distribution identity (src/cli/startup-ui.ts:122-140; caller src/main.ts:661), which PiG never has. The mapping row test-mapping-v0.99.1.json#packages/coding-agent/test/first-time-setup.test.ts must list exactly these ids."
     },
@@ -3662,6 +3662,15 @@
       "rationale": "Explicit example extension or Worker-only adapter; not a Stock native text-session mechanism. Retain the underlying test disposition."
     },
     {
+      "path": "packages/coding-agent/test/powershell-config.test.ts",
+      "upstreamTestHash": "sha256:0c225b44e782266296c027badd9b8197d99b70b16dc71333c890c87fdaf8737a",
+      "area": "tools",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Tool execution on coding turns: which shell the bash and powershell tools run through on Windows."
+    },
+    {
       "path": "packages/coding-agent/test/powershell-tool.test.ts",
       "upstreamTestHash": "sha256:9c958f676e44ea9fcf77e9bda616bdb74c72581bf8c0102298c64548a91cc054",
       "area": "cli",
@@ -4079,6 +4088,15 @@
         "hot-path"
       ],
       "rationale": "Main Screen input, message/tool rendering, terminal integration, or selected presentation."
+    },
+    {
+      "path": "packages/coding-agent/test/shell-path-exists.test.ts",
+      "upstreamTestHash": "sha256:fc6c6a21cbded0df578509953649ae3491d0e99129b3414e170df2c681ffe5db",
+      "area": "tools",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Tool execution on coding turns: which shell the bash and powershell tools run through on Windows."
     },
     {
       "path": "packages/coding-agent/test/skills.test.ts",
@@ -5231,6 +5249,15 @@
       "rationale": "New in 0.99.1; area and tags follow the sibling tests under packages/coding-agent/test/ until the production-path review."
     },
     {
+      "path": "packages/coding-agent/test/windows-shell-config.test.ts",
+      "upstreamTestHash": "sha256:1c0041edebd6d601504a1febada1bed9b8dfbdc6af6257079fdd24de8876065e",
+      "area": "tools",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Tool execution on coding turns: which shell the bash and powershell tools run through on Windows."
+    },
+    {
       "path": "packages/durable/test-workers/storage.test.ts",
       "upstreamTestHash": "sha256:7396929be7361f01dc10b73a1bb2705b5213d1e876c5e70e876a1555a4fb4c58",
       "area": "sessions",
@@ -6006,7 +6033,7 @@
       ],
       "rationale": "New in 0.99.1 (D-B, docs/plan/upgrade-0.99.1.md): mcp behavior that coding turns reach through the built-in extension; tagged hot-path until the production-path review. SCRUTINIZED:approved by owner Michael Kinsy on 2026-10-01 (lead session, 'Yes go with recommendations'): the receiver assertion of 'calls fetch without a receiver' is designed out because Go has no receiver binding; the observable remainder is ported.",
       "designedOutCases": [
-        "StreamableHttpTransport › calls fetch without a receiver"
+        "StreamableHttpTransport \u203a calls fetch without a receiver"
       ]
     },
     {
