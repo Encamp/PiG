@@ -22,7 +22,7 @@ export function buildBaseOptions(model, context, options, apiKey) {
         samplingParams,
         maxTokens: clampMaxTokensToContext(model, context, options?.maxTokens ?? model.maxTokens),
         signal: options?.signal,
-        telemetryContext: options?.telemetryContext,
+        telemetry: options?.telemetry,
         apiKey: apiKey || options?.apiKey,
         fetch: options?.fetch,
         transport: options?.transport,

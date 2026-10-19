@@ -3,10 +3,12 @@ import { defaultProviderAuthContext as defaultAuthContext } from "./auth/context
 import { InMemoryCredentialStore } from "./auth/credential-store.js";
 import { ModelsError, refreshStoredOAuthCredential, resolveProviderAuth, } from "./auth/resolve.js";
 import { InMemoryModelsStore } from "./models-store.js";
+import { observeModelRequest } from "./telemetry.js";
 import { operationSignal, raceWithAbortSignal } from "./utils/abort.js";
 import { assertChatModel, assertClassifierInputSupported, assertClassifierModel, assertImageModel, classifierErrorResult, getModelType, imageErrorResult, isModelType, } from "./utils/model-operations.js";
 import { normalizeContext } from "./utils/transcript.js";
 export { ModelsError } from "./auth/resolve.js";
+export { AI_TELEMETRY_SCHEMA } from "./telemetry.js";
 export { getModelType, isModelType } from "./utils/model-operations.js";
 const KNOWN_MODEL_TYPES = { chat: true, image: true, classifier: true };
 /** Models from stores and remote sources may have types that only newer versions know. */
@@ -447,7 +449,7 @@ class ModelsImpl {
             const provider = this.requireChatProvider(model);
             const { requestModel, requestOptions } = await this.applyAuth(model, options);
             return provider.stream(requestModel, transcript, requestOptions);
-        });
+        }, observeModelRequest(model, options, false));
     }
     async complete(model, context, options) {
         return this.stream(model, context, options).result();
@@ -458,7 +460,7 @@ class ModelsImpl {
             const provider = this.requireChatProvider(model);
             const { requestModel, requestOptions } = await this.applyAuth(model, options);
             return provider.streamSimple(requestModel, transcript, requestOptions);
-        });
+        }, observeModelRequest(model, options, false));
     }
     async completeSimple(model, context, options) {
         return this.streamSimple(model, context, options).result();
@@ -471,7 +473,7 @@ class ModelsImpl {
             }
             const { requestModel, requestOptions } = await this.applyAuth(model, options);
             return provider.fetchDeferred(requestModel, handle, requestOptions);
-        });
+        }, observeModelRequest(model, options, true));
     }
     async fetchDeferred(model, handle, options) {
         return this.streamDeferred(model, handle, options).result();

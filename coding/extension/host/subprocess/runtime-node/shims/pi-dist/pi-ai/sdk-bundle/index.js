@@ -28,12 +28,13 @@ import {
   uuidv7,
   validateToolArguments,
   validateToolCall
-} from "./chunk-CJFE2WDE.js";
+} from "./chunk-Q5FNNVQN.js";
 import {
   envApiKeyAuth,
   lazyOAuth
 } from "./chunk-VLLDVPPZ.js";
 import {
+  AI_TELEMETRY_SCHEMA,
   InMemoryCredentialStore,
   InMemoryModelsStore,
   ModelsError,
@@ -70,9 +71,10 @@ import {
   resolveTranscriptTools,
   toToolDeclaration,
   withoutInitialSystemMessage
-} from "./chunk-6C2VLFYL.js";
+} from "./chunk-MVP5L3OW.js";
 import "./chunk-SHUYVCID.js";
 export {
+  AI_TELEMETRY_SCHEMA,
   AssistantMessageEventStream,
   DEFAULT_MAX_AGENT_RETRY_DELAY_MS,
   EventStream,

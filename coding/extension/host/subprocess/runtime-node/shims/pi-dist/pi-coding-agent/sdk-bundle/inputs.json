@@ -907,7 +907,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/utils/shell.js",
-      "sha256": "c8378f2b0566e35f90dfbb622a2214acf5cf45d15107c44b260cad897b539f72"
+      "sha256": "f1e61708c725a337882bb08abac995bafc7a42883558ea1c46cc1917aff5d778"
     },
     {
       "path": "pi-dist/pi-coding-agent/utils/sleep.js",
@@ -927,7 +927,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/utils/tools-manager.js",
-      "sha256": "28e24a2022460ed4e17ac10d0766984b878c4f69eb6286efed9382b958eb2963"
+      "sha256": "81b8dd8d3898441f6db70ddf189ab437574f373ee19f1449a664c81f27995eb2"
     },
     {
       "path": "pi-dist/pi-coding-agent/utils/version-check.js",

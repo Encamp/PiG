@@ -23,6 +23,7 @@ hljs="$agent/node_modules/highlight.js"
 jiti="$agent/node_modules/jiti"
 core="$agent/node_modules/@earendil-works/pi-agent-core"
 codemode="$agent/node_modules/@earendil-works/pi-codemode"
+telemetry="$agent/node_modules/@earendil-works/pi-telemetry"
 mcp="$agent/node_modules/@earendil-works/pi-mcp"
 ignore="$agent/node_modules/ignore"
 jsdiff="$agent/node_modules/diff"
@@ -55,6 +56,11 @@ sed 's#^import { eastAsianWidth } from "get-east-asian-width";$#import { eastAsi
 sed 's#^import { Marked, Tokenizer } from "marked";$#import { Marked, Tokenizer } from "../../../marked/lib/marked.esm.js";#' \
   "$tui/dist/components/markdown.js" >"$dist/pi-tui/components/markdown.js"
 
+# pi-telemetry: the runtime modules pi-ai's telemetry.ts imports (the testing entry is test support).
+while IFS= read -r file; do
+  copy "$telemetry/dist" "$dist/pi-telemetry" "$file"
+done < <(cd "$telemetry/dist" && find . -name '*.js' -not -path './testing/*' | sed 's#^\./##' | sort)
+
 # pi-ai: the whole release (its compat entry is what Pi serves for the pi-ai
 # root), except the builtin API implementations, which are bridge stubs.
 bridged_apis="anthropic-messages azure-openai-responses bedrock-converse-stream google-generative-ai google-vertex mistral-conversations openai-codex-responses openai-completions openai-responses pi-messages"
@@ -75,6 +81,7 @@ for api in $bridged_apis; do
 done
 printf '// PiG: image generation has no host provider (D74); see automation/gen/vendor-pi-dist.sh.\nimport { bridgeImages } from "../../../pi-ai-bridge.mjs";\nexport const generateImages = bridgeImages("openrouter-images");\n' >"$dist/pi-ai/api/openrouter-images.js"
 sed 's#^export { Type } from "typebox";$#export { Type } from "../../typebox.mjs";#' "$ai/dist/index.js" >"$dist/pi-ai/index.js"
+sed 's#^\(import .* from \)"@earendil-works/pi-telemetry";$#\1"../pi-telemetry/index.js";#' "$ai/dist/telemetry.js" >"$dist/pi-ai/telemetry.js"
 sed 's#^import { parse as partialParse } from "partial-json";$#import { parse as partialParse } from "../../../partial-json/dist/index.js";#' \
   "$ai/dist/utils/json-parse.js" >"$dist/pi-ai/utils/json-parse.js"
 sed -e 's#^import { Compile } from "typebox/compile";$#import { Compile } from "../../../typebox-compile.mjs";#' \
@@ -106,6 +113,7 @@ node "$root/automation/gen/vendor-pi-closure.mjs" "$shims" "$(cat <<JSON
     "@earendil-works/pi-agent-core": { "root": "$core", "to": "pi-dist/pi-agent-core" },
     "@earendil-works/pi-codemode": { "root": "$codemode", "to": "pi-dist/pi-codemode" },
     "@earendil-works/pi-mcp": { "root": "$mcp", "to": "pi-dist/pi-mcp" },
+    "@earendil-works/pi-telemetry": { "root": "$telemetry", "to": "pi-dist/pi-telemetry", "vendored": true },
     "@earendil-works/pi-ai": { "root": "$ai", "to": "pi-dist/pi-ai", "vendored": true }
   },
   "overrides": {
@@ -187,6 +195,7 @@ rewrote "$dist/pi-ai/utils/validation.js" "$ai/dist/utils/validation.js" typebox
 rewrote "$dist/pi-ai/utils/validation.js" "$ai/dist/utils/validation.js" typebox/value ../../../typebox-value.mjs
 rewrote "$dist/pi-ai/utils/typebox-helpers.js" "$ai/dist/utils/typebox-helpers.js" typebox ../../../typebox.mjs
 rewrote "$dist/pi-ai/index.js" "$ai/dist/index.js" typebox ../../typebox.mjs
+rewrote "$dist/pi-ai/telemetry.js" "$ai/dist/telemetry.js" @earendil-works/pi-telemetry ../pi-telemetry/index.js
 rewrote "$dist/pi-coding-agent/utils/frontmatter.js" "$agent/dist/utils/frontmatter.js" yaml ../../../yaml/index.js
 rewrote "$dist/pi-coding-agent/utils/syntax-highlight.js" "$agent/dist/utils/syntax-highlight.js" highlight.js/lib/core.js ../../../highlight.js/lib/core.js
 rewrote "$dist/pi-coding-agent/core/settings-manager.js" "$agent/dist/core/settings-manager.js" proper-lockfile ../../../proper-lockfile.mjs

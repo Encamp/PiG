@@ -28,7 +28,7 @@ function record(output, source, pkg, rewrite) {
 }
 const piPackages = [
   ["pi-coding-agent", agent],
-  ...["pi-ai", "pi-agent-core", "pi-tui", "pi-codemode", "pi-mcp"].map(name => [name, join(agent, "node_modules/@earendil-works", name)]),
+  ...["pi-ai", "pi-agent-core", "pi-tui", "pi-codemode", "pi-mcp", "pi-telemetry"].map(name => [name, join(agent, "node_modules/@earendil-works", name)]),
 ];
 for (const [name, pkg] of piPackages) {
   for (const output of files(join(shims, "pi-dist", name))) {

@@ -28,7 +28,7 @@ import {
   uuidv7,
   validateToolArguments,
   validateToolCall
-} from "./chunk-CJFE2WDE.js";
+} from "./chunk-Q5FNNVQN.js";
 import {
   ANTHROPIC_API_KEY_ENV,
   ANTHROPIC_AUTH_TOKEN_ENV,
@@ -52,16 +52,17 @@ import {
   openAICodexResponsesApi,
   openAIResponsesApi,
   piMessagesApi
-} from "./chunk-FJD5SETT.js";
+} from "./chunk-PICSIN2B.js";
 import {
   anthropicMessagesApi,
   openAICompletionsApi
-} from "./chunk-PKG7C7T3.js";
+} from "./chunk-A7GF4W3W.js";
 import {
   envApiKeyAuth,
   lazyOAuth
 } from "./chunk-VLLDVPPZ.js";
 import {
+  AI_TELEMETRY_SCHEMA,
   InMemoryCredentialStore,
   InMemoryModelsStore,
   ModelsError,
@@ -98,7 +99,7 @@ import {
   resolveTranscriptTools,
   toToolDeclaration,
   withoutInitialSystemMessage
-} from "./chunk-6C2VLFYL.js";
+} from "./chunk-MVP5L3OW.js";
 import {
   __name
 } from "./chunk-SHUYVCID.js";
@@ -406,6 +407,7 @@ async function completeSimple(model, context, options) {
 }
 __name(completeSimple, "completeSimple");
 export {
+  AI_TELEMETRY_SCHEMA,
   ANTHROPIC_API_KEY_ENV,
   ANTHROPIC_AUTH_TOKEN_ENV,
   ANTHROPIC_FEDERATION_RULE_ID_ENV,

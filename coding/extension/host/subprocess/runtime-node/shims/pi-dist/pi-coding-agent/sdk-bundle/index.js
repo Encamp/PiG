@@ -6,7 +6,7 @@ import {
   loadMcpConfig,
   openBrowser,
   updateMcpServerConfig
-} from "./chunk-QXZMA627.js";
+} from "./chunk-LHJGQZZX.js";
 import {
   ArminComponent
 } from "./chunk-S7TFHYGY.js";
@@ -123,7 +123,7 @@ import {
   wrapRegisteredTools,
   writeBugReportArchive,
   writeRawStdout
-} from "./chunk-JV5ZIIBA.js";
+} from "./chunk-G4XTQGPV.js";
 import {
   convertToPng,
   createBashToolDefinition,
@@ -157,13 +157,13 @@ import {
   resolveReadPath,
   withFileMutationQueue,
   writeRenderers
-} from "./chunk-NF4F5DMY.js";
+} from "./chunk-6HW2EHDY.js";
 import {
   CODEMODE_TOOL_NAME,
   TOOL_SEARCH_TOOL_NAME,
   createCodemodeToolDefinition,
   createToolSearchToolDefinition
-} from "./chunk-XTKQ4MSE.js";
+} from "./chunk-YEXAUOVW.js";
 import {
   SETTINGS_DEFAULTS,
   addUsageToTotals,
@@ -186,7 +186,7 @@ import {
   truncateTail,
   truncateToVisualLines,
   writeOutputFile
-} from "./chunk-4XCBZNRK.js";
+} from "./chunk-QJIK7HVQ.js";
 import {
   SYSTEM_THEME_NAME,
   THEME_TOKENS,
@@ -231,12 +231,12 @@ import {
   mcpNamespace,
   raceWithAbortSignal,
   readStoredCredential
-} from "./chunk-E7M6DDVC.js";
+} from "./chunk-RTGDH7DA.js";
 import {
   getPowerShellConfig,
   getShellConfig,
   killTrackedDetachedChildren
-} from "./chunk-PCYDWUGN.js";
+} from "./chunk-RVJYK3FO.js";
 import {
   APP_NAME,
   APP_TITLE,
@@ -827,7 +827,7 @@ function createMcpResourceToolDefinitions(options) {
 __name(createMcpResourceToolDefinitions, "createMcpResourceToolDefinitions");
 
 // pi-dist/pi-coding-agent/extensions/mcp/runtime.lazy.js
-var loadMcpRuntime = /* @__PURE__ */ __name(() => import("./chunk-PEIU5R4Q.js"), "loadMcpRuntime");
+var loadMcpRuntime = /* @__PURE__ */ __name(() => import("./chunk-H73TEJEY.js"), "loadMcpRuntime");
 
 // pi-dist/pi-coding-agent/extensions/mcp/ui.js
 import { Container as Container3, Input, SelectList, Spacer as Spacer2, Text as Text3, truncateToWidth, visibleWidth } from "../../../pi-tui.mjs";
@@ -6154,7 +6154,7 @@ var builtInExtensions = [
 ];
 
 // pi-dist/pi-coding-agent/extensions/mcp/cli.lazy.js
-var loadMcpCommand = /* @__PURE__ */ __name(() => import("./chunk-A3LIKKFL.js"), "loadMcpCommand");
+var loadMcpCommand = /* @__PURE__ */ __name(() => import("./chunk-HPTAF5RP.js"), "loadMcpCommand");
 
 // pi-dist/pi-coding-agent/migrations.js
 import chalk4 from "../../../chalk/source/index.js";
