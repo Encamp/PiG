@@ -456,6 +456,13 @@ evidence = []
 rationale = "PORT_MAP marks this file 🟡 partial: `ai/models_generated.go + ai/registry.go (0.87.1 published catalog retained; runtime discovery and construction fail closed until the PiG-owned service and pi-messages transport are implemented)`; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
 
 [[files]]
+path = "packages/ai/src/telemetry.ts"
+disposition = "deferred"
+contracts = []
+evidence = []
+rationale = "Pi 2ec55d80 adds the pi.ai.request/pi.ai.poll span schema and the lazy-stream observer. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f): PiG emits no pi.ai spans, so no observer ordering, cancellation or error contract exists to translate yet."
+
+[[files]]
 path = "packages/ai/src/types.ts"
 disposition = "pending"
 contracts = []
@@ -636,6 +643,20 @@ disposition = "translated"
 contracts = ["awaited", "microtask-ordering"]
 evidence = ["test:chord/replicated_state_delivery_upstream_test.go#TestReplicatedStatePublicDelivery", "test:chord/replicated_state_delivery_upstream_test.go#TestAttachedReplicatedStateListenerErrors", "test:chord/replicated_state_delivery_upstream_test.go#TestMutableReplicatedStateReportsRejectedCallbacksThroughItsDefaultReporter", "test:chord/replicated_state_upstream_test.go#TestTransactionalReplicatedState", "test:chord/replicated_state_upstream_test.go#TestAuthoritativeReplicatedStateSources"]
 rationale = "Async uses in state.ts. (1) StateSubscriber.drain (:126-148): a listener's PromiseLike result suspends that subscription only. A void Promise.resolve(result).then resumes the drain when it settles and reports a rejection first (:133-141). The producer never awaits it. Overflow keeps at most 100 pending deliveries (:115-124), and close() drops pending work without aborting or joining the running callback (:154-157). In Go a listener passed to SubscribeAsync returns a Completion (a <-chan error, chord/state.go:48). stateSubscriber.drain (:199) starts `go subscriber.await(completion)` and returns, and await (:226) reports a non-nil error, clears running and drains again, so delivery stays serialized per subscription and the producer does not block. Like Pi's unawaited then, nothing joins that goroutine; it ends when the completion settles (portlint golifetime note at :216). It may still report after unsubscribe, as Pi does (the 'still observes a callback rejection after unsubscribe' subtest). (2) reportErrorAsync (:394-398) rethrows in a queueMicrotask, so a listener or source failure never reaches the publishing caller or the source and becomes an uncaught exception afterwards. In Go, reportErrorAsync (:152) calls the reporter installed with SetUncaughtErrorReporter (:147). The default (init :135) runs exitOnUncaught on its own goroutine, so the publishing call is not interrupted. Publish, Replace and receive never return listener failures (TestMutableReplicatedStateReportsRejectedCallbacksThroughItsDefaultReporter; 'reports listener failures without throwing them into the source'). The tests replace the reporter. No test observes that the default reporter fires after the call returns. (3) change() (:262-266) rejects a PromiseLike callback result: it swallows the result's rejection with .catch, aborts the draft and throws a TypeError. Go's mutate is func(draft) error, so an asynchronous callback cannot be expressed. replicated-state.test.ts:46 has no Go form and its slot tests a panicking callback. (4) Publisher.publish (:215-238) is reentrancy-serialized by #delivering, so publications made during delivery are delivered by the running loop in sequence order. Go's statePublisher.deliver (:349) keeps that loop under a mutex that it never holds across a listener, and also accepts publications from other goroutines into the running loop. MutableReplicatedState.change detects reentrancy per goroutine (goroutineid, :499-531) and serializes concurrent changes with changeMu, enqueuing the revision before releasing the lock, so concurrent changes publish in adoption order. These are Go additions with no Pi counterpart, because Pi has one thread. There are no timers, AbortSignals, or Promise.all/race."
+
+[[files]]
+path = "packages/chord/src/telemetry-sqlite/index.ts"
+disposition = "deferred"
+contracts = []
+evidence = []
+rationale = "Pi d9025a5f adds the SQLite telemetry sink with a bounded queue and a 1 s batched flush. Deferred to a later milestone with the telemetry commits: PiG has no sink, so the flush, drop-counting and shutdown-drain contracts are not yet translated."
+
+[[files]]
+path = "packages/chord/src/telemetry-sqlite/store.ts"
+disposition = "deferred"
+contracts = []
+evidence = []
+rationale = "Pi d9025a5f adds the Chord SQLite telemetry store queries. Deferred to a later milestone with the telemetry commits: PiG has no telemetry store yet."
 
 [[files]]
 path = "packages/chord/src/types.ts"
