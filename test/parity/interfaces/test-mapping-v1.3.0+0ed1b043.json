@@ -6497,8 +6497,13 @@
     },
     {
       "path": "packages/durable/test/codemode-checkpoints.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:9409c19a882393d3bf656648691b74157de8bc179dd21137d58fa3a9e0415445"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:9409c19a882393d3bf656648691b74157de8bc179dd21137d58fa3a9e0415445",
+      "evidence": [
+        "durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
+      ],
+      "rationale": "Both cases, as subtests of TestBuiltInDocumentCheckpointPolicies with Pi's titles: NestedCallDoc, CodemodeRunDoc and CodemodeJournalDoc never checkpoint at 1000 deltas, and CodemodeStoreDoc writes a base after 64 deltas (the 65th commit stores a base, deltasSinceBase 0, then 1) without changing the as-of read or the fork. Red against the earlier code: the built-in predicates were absent (nil dereference) and the store never checkpointed. TestDefinitionsRequireACheckpointPolicy adds the Go validation."
     },
     {
       "path": "packages/durable/test/codemode-describe.test.ts",
@@ -6650,8 +6655,26 @@
     },
     {
       "path": "packages/durable/test/harness-conversations.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:187f69400ac0c219594d88368288c6bf97086596d1d15d3edc45b02b4a63990d"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:187f69400ac0c219594d88368288c6bf97086596d1d15d3edc45b02b4a63990d",
+      "evidence": [
+        "durable/core/driver/harness_conversations_core_test.go#TestCoreConversationsCreateTheRootLazilyWithItsAgentChangeAndInitInOneCommit",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreAgentReplacesWholeFieldsClearsThemAndLeavesUnsetFieldsAlone",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsBindCommitsAndTaskCreationToTheConversation",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsCreateAtomicallyWithInitAndRollBackFailures",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsCreatedThroughTxGetTheirDocuments",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsForkAtAConcreteEntryWithTheAsOfAgentAndOverrides",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsForwardGenericSessionDocumentAPIs",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsKeepRootAndConversationIdentityAndStateAcrossReopen",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsPaginateForkAwareHistoryThroughAncestorCapsAndSameCommitPrefixes",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsReturnStatelessHandlesAndRejectOperationsAfterClose",
+        "durable/core/driver/harness_conversations_more_core_test.go#TestCoreConversationsRunConversationCreatedInEveryCreatingCommit",
+        "durable/harness/harness_conversations_test.go#TestHarnessAgent",
+        "durable/harness/harness_conversations_test.go#TestHarnessLifecycleHandles",
+        "durable/harness/harness_conversations_test.go#TestHarnessRootAndConversations",
+        "durable/harness/harness_tool_snapshot_as_of_test.go#TestToolExecutionApiSnapshotAsOfReadsTheDocumentAsOfTheEntry"
+      ],
+      "rationale": "12/12 cases ported; :445 now checks the closed-harness errors contain \"is closed\". 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-events.test.ts",
@@ -6686,8 +6709,13 @@
     },
     {
       "path": "packages/durable/test/harness-generation.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:652cba25da6ded07c920cf17e85748f208230197a5a73ecb6ae5733d8177ea7e"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:652cba25da6ded07c920cf17e85748f208230197a5a73ecb6ae5733d8177ea7e",
+      "evidence": [
+        "durable/harness/harness_generation_test.go#TestGeneration",
+        "durable/harness/harness_generation_test.go#resolves settings over the built-in defaults"
+      ],
+      "rationale": "24 cases, all in TestGeneration under Pi's names. 1.0.4 to 1.1.0 adds contextRetentionMs: 600_000 to the resolveSettings defaults of :487; 1.1.0 to 1.2.0 adds documentRetentionMs: expect.any(Number). The Go subtest 'resolves settings over the built-in defaults' asserts ContextRetentionMs 600_000 and DocumentRetentionMs 600_000 (the built-in value, a number as Pi requires). Pi 482c1381 adds afterFailedRun 'keep' and restartLimit 5 to those defaults and a restartLimit that is not 1 or more means the default, Infinity kept (:498); the subtest asserts both. All 24 pass (go test -run '^TestGeneration$' ./durable/harness). 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-host-inputs.test.ts",
@@ -6700,8 +6728,14 @@
     },
     {
       "path": "packages/durable/test/harness-inbox.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:f8d5b55aceb0db209bca9bddab8f3ab80b87837b44aff8e863a2ab9b7070a9f4"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:f8d5b55aceb0db209bca9bddab8f3ab80b87837b44aff8e863a2ab9b7070a9f4",
+      "evidence": [
+        "durable/harness/harness_inbox_test.go#TestInbox",
+        "durable/harness/harness_inbox_test.go#TestUsage",
+        "durable/harness/harness_inbox_test.go#func queuedNote"
+      ],
+      "rationale": "32 cases: 27 inbox cases in TestInbox and 5 usage cases (:768-:908) in TestUsage, under Pi's names. 1.0.4 to 1.1.0 changes :236's expected request order to system baseline before the follow-up ([\"system:\", \"user:f\"]), which the Go subtest asserts. Pi 1.2.0 renames ToolExecutionResult content to output in the hold tool (Go's tool results are durable.ToolExecutionResult, unchanged in meaning) and replaces the data-only {kind: \"note\"} writes of :111, :390, :456, :491 with queuedNote(text), a write with a model message, since a data-only write is now appended at once instead of queueing (submissions.go IsDisplayOnly); :111 and :491 expect transcript line note:w. harness_inbox_test.go's queuedNote builds the same EntryDraft (user message, timestamp 0) and the four subtests use it with Pi's expected transcripts and positional ops. All 32 pass. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-input-entries.test.ts",
@@ -6726,8 +6760,17 @@
     },
     {
       "path": "packages/durable/test/harness-lifecycle.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:589a8fd20c4592cefabc0ad887a0e7c1342e44ffbf9cb2c4614f6e0d9ed0e5ec"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:589a8fd20c4592cefabc0ad887a0e7c1342e44ffbf9cb2c4614f6e0d9ed0e5ec",
+      "evidence": [
+        "durable/core/driver/harness_lifecycle_core_test.go#TestCoreHarnessCloseJoinsATaskHandlerThatIgnoresItsSignal",
+        "durable/core/driver/harness_lifecycle_core_test.go#TestCoreHarnessCloseJoinsAToolAndAHookThatIgnoreTheirSignal",
+        "durable/harness/harness_lifecycle_test.go#TestHarnessClose",
+        "durable/harness/harness_lifecycle_test.go#TestHarnessOpen",
+        "durable/harness/harness_lifecycle_test.go#TestRegistryChangesBeforeResume",
+        "durable/harness/harness_lifecycle_test.go#TestSchedulingOnAPausedHarness"
+      ],
+      "rationale": "14/14 cases ported; a failed open reports only its open error (1.2.0); :276 checks the graph state {\"tasks\":{}}. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-live-deltas.test.ts",
@@ -6814,8 +6857,18 @@
     },
     {
       "path": "packages/durable/test/harness-ownership.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:960c7397f87a40a3670e0b79fc62059ec532259694302e0968a9c2315bc3d2d6"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:960c7397f87a40a3670e0b79fc62059ec532259694302e0968a9c2315bc3d2d6",
+      "evidence": [
+        "durable/harness/harness_ownership_test.go#TestOwnership",
+        "durable/harness/harness_ownership_tools_test.go#TestOwnedConversationsFromTools",
+        "durable/harness/scheduler_scale_test.go#TestSchedulerScaling",
+        "durable/harness/harness_ownership_ended_test.go#TestOwnershipBelowEndedTasks",
+        "durable/harness/harness_ownership_ended_test.go#TestOwnershipFailedCascadeCommits",
+        "durable/harness/harness_ownership_ended_test.go#keeps ownership queries off finished subtrees",
+        "durable/harness/harness_ownership_ended_test.go#finalizes many held siblings that end together in one pass"
+      ],
+      "rationale": "37 it() sites (:419, :430, :482 and :764 parameterized). Unchanged from 1.0.4 to 1.1.0. Pi 1.2.0 adds 12 sites (:213, :236, :261, :314, :336, :369, :419, :430, :446, :482, :525, :580), renames :929 and :970 (a failed cascade commit fails the Harness and reopening applies the marks, replacing retry-on-rejection), switches queued writes to queuedNote, and adds the Spawner task. Before this review TestOwnership, TestOwnedConversationsFromTools and TestSchedulerScaling (:213, :236, :314) covered 26 sites, the deleted 1.1.0 rejection cases were not replaced, and 11 sites were missing. harness_ownership_ended_test.go ports them with Pi's trees and expectations: TestOwnershipBelowEndedTasks (:261, :336 on SQLite with reopen, :369, :419 and :430 for depth 2 and 5, :446, :482 for both endings, :525, :580 with ownSpawner and Pi's message regexp) and TestOwnershipFailedCascadeCommits (:929 on SQLite, :970). Go's scheduler (scheduler_index.go walkDownLocked through ended nodes, scheduler.go cascade marks, finalizeLocked, failSession) and session/transaction.go validateOwners already implement them. The Set-iteration bounds of :261 (entries \u003c chains) and :525 (entries \u003c count * 20) patch Set.prototype[Symbol.iterator], a JavaScript mechanic with no Go counterpart; the trees, the commits and the owners' outcomes of both cases are asserted. Red by named mutations (each reverted): no entering ended tasks in walkDownLocked fails :336, :369, :430, :446, :482 and hangs :419; cascade marks off fails :929 and :970; finalizeLocked off hangs :261 and :525; skipping the completing/terminal owner check for conversations hangs :580. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-prompt.test.ts",
@@ -6924,8 +6977,19 @@
     },
     {
       "path": "packages/durable/test/harness-structured.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:752f6115974cae8420bfce84658abd2fd1117ffa2bef4d18221ffc534e463ffe"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:752f6115974cae8420bfce84658abd2fd1117ffa2bef4d18221ffc534e463ffe",
+      "evidence": [
+        "durable/harness/harness_structured_test.go#TestTaskOwnership",
+        "durable/harness/harness_structured_test.go#TestWaiting",
+        "durable/harness/harness_structured_test.go#TestCompleting",
+        "durable/harness/harness_structured_test.go#rejects the wait that closes a cycle",
+        "durable/harness/harness_structured_test.go#rejects a cycle of a hold and two waits that each look reasonable",
+        "durable/harness/harness_structured_test.go#follows no wait of an abort-marked task, which waits only for its owned work",
+        "durable/harness/harness_structured_test.go#keeps run control with a faulted generation until its owned work drains, and fails the Harness on a failed final commit",
+        "durable/harness/harness_structured_test.go#fails the Harness on a failed finalization, which reopening applies"
+      ],
+      "rationale": "56 it() sites (:369 and :800 parameterized), all ported under Pi's names. Unchanged from 1.0.4 to 1.1.0. Pi 1.2.0 changes: :461's self wait and child wait fault with 'is a wait cycle' (harness_structured_test.go:750, :783); 8 new TestWaiting cases from #10411 (:499, :516, :535, :556, :574, :615, :636, :679), with the same trees, gates and expected outcomes, and the cycle text 'W -\u003e R -\u003e O -\u003e W is a wait cycle' in :574; :1328 and :1628 are rewritten so that a failed final commit or finalization fails the Harness (closed {failed, error}, SessionFailed for waiters) and reopening finalizes; tool results use output. Production: durable/harness/scheduler.go validateWaitLocked/waitCycleLocked (6d0ec024f2, Pi eb2fce43): an edge runs from a waiting task that is not abort-marked to its on, and from a task to its live ordinary owned work, and a wait that reaches the waiter is rejected with the named cycle. Red by four mutants of the rule, each reverted. No cycle found: :461, :499, :516, :535, :574 and :679 time out. Abort-marked waits followed: :636 fails at :1009. Hold edges dropped: :516, :535 and :574 time out. Background work counted as a hold: :556 fails at :884. :615, the diamond, passes under every mutant tried, including 'a task reached twice closes a cycle'; it only checks that a non-cycle is not rejected. The core kernel (durable/core/session/sched_run.go) still has the owner-chain rule; the Harness does not run on it. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-submissions.test.ts",
@@ -6947,13 +7011,63 @@
     },
     {
       "path": "packages/durable/test/harness-tasks-recovery.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:89176944cccaf505eb8306caaae4a72188bbf3e4de4df274fef92a2f0389078f"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:89176944cccaf505eb8306caaae4a72188bbf3e4de4df274fef92a2f0389078f",
+      "evidence": [
+        "durable/harness/harness_tasks_recovery_test.go#TestTaskRecovery",
+        "durable/harness/harness_tasks_times_test.go#TestTaskTimes"
+      ],
+      "rationale": "All 24 cases are ported; the 1.1.0 case keeps startedAt across close and reopen and stamps endedAt (#10549). Pi 440a5fcd asserts the report of a failed migration is migration_failed of the task (:735) and each outdated task a task_outdated report with its reason (:759); TestDefinitionHandover asserts both. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-tasks.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:1d3c0dcda8e00c0c852ebc59e85860b6eee0b02aca058100c3d16c11ae19620f"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:1d3c0dcda8e00c0c852ebc59e85860b6eee0b02aca058100c3d16c11ae19620f",
+      "evidence": [
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultCloseStopsWithoutOutcomesAndStartsNoFreshPhaseOrAbortInvocation",
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultJoinsAReservationThatSettlesWhileClosingWithoutStartingItsHandler",
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultLetsAnAbortMarkWinOverAFaultThatRacesIt",
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultNeverStartsPhaseOneWhenTheAbortLandsWhileTheReservationSettles",
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultOrdersRuntimeCommitsAgainstTheStep",
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultRejectsARuntimeCommitQueuedOnTheLineWhenCloseSealedIt",
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultStartsNoAbortHandlerWhoseReservationSettlesWhileClosing",
+        "durable/core/driver/fault_tasks_core_test.go#TestCoreFaultWritesNoFaultWhenCloseSealsWhileTheStepAfterAFailedPhaseIsQueued",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreAbortingATaskSignalsItsPhaseAndRunsItsAbortHandler",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreRegistrySnapshotToolsPairEachToolWithItsExtensionInInstallOrder",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskAbortSignalsAndJoinsTheRunBeforeReturning",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskAbortsWaitingWorkAndFaultsAbortHandlersThatThrowOrSettleNothing",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskFaultsAPhaseWithoutDurableProgressAndAThrowingPhase",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskKeepsACommittedTerminalOutcomeWhenTheHandlerThrowsAfterwards",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskKeepsOneRegistrySnapshotPerPhase",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskRejectsRuntimeOperationsAfterTheInvocationEndsAndStopsItsWatches",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskRejectsTheRunsCommitsAndMemoWritesAfterTheMark",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskResolvesTheAgentAtFirstUseKeepsItForThePhaseAndAnewAtTheNext",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskRunsPhasesOfOneInvocationOnOneRuntime",
+        "durable/core/driver/harness_tasks_core_test.go#TestCoreTaskStartsNoFurtherPhaseAfterAMarkDuringAPhaseWithProgress",
+        "durable/core/driver/harness_tasks_more_core_test.go#TestCoreTaskDoesNotSignalARunningAbortHandlerWhenAbortedAgainAndACancelledCallerLeavesTheMarkDurable",
+        "durable/core/driver/harness_tasks_more_core_test.go#TestCoreTaskKeepsATerminalOutcomeCommittedByAnAbortHandlerThatThrowsAfterwards",
+        "durable/core/driver/harness_tasks_more_core_test.go#TestCoreTaskRejectsACancelledWaitWithItsReasonAndPendingWaitsOnClose",
+        "durable/core/driver/harness_tasks_more_core_test.go#TestCoreTaskRejectsUnknownTasksAndReportsTerminalOnes",
+        "durable/core/driver/harness_tasks_more_core_test.go#TestCoreTaskResumesAWaitingTaskOnceEveryTaskInOnIsTerminalWhateverTheOutcome",
+        "durable/core/driver/harness_tasks_more_core_test.go#TestCoreTaskStampsStartedAtAndEndedAtKeepingStartedAtThroughAWait",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreCloseSealsAdmissionBeforeSignallingHandlersAndStopsWatchesBeforeJoiningThem",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreConversationContextDecodesItsMessages",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreTaskCommitsResultsWithEntriesKeepsMemosUntilTerminalAndRetiresDocuments",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreTaskComparesCheckpointsByValueIncludingArrays",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreTaskObservesAFailedAgentResolutionWhoseOnlyCallerStoppedWaiting",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreTaskReadsCommittedDocumentsAndContextThroughTheRuntimeAndForwardsClockAndReports",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreTaskRejectsAnAgentWaitWhoseCallerIsCancelledWithoutAffectingTheResolution",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreTaskScanPagesTheNewestFirst",
+        "durable/core/driver/harness_tasks_port2_core_test.go#TestCoreWaitForIdleCountsBlockedWorkAndIgnoresBackgroundTasks",
+        "durable/harness/harness_tasks_scheduling_test.go#TestTaskAbort",
+        "durable/harness/harness_tasks_scheduling_test.go#TestTaskClose",
+        "durable/harness/harness_tasks_scheduling_test.go#TestTaskCloseSignalsHandlersOnlyAfterEveryCloseListenerRan",
+        "durable/harness/harness_tasks_scheduling_test.go#TestTaskRuntime",
+        "durable/harness/harness_tasks_scheduling_test.go#TestTaskScanPagesTheNewestFirst",
+        "durable/harness/harness_tasks_scheduling_test.go#TestTaskScheduling",
+        "durable/harness/harness_tasks_test.go#TestTaskPhases"
+      ],
+      "rationale": "38/38 cases ported against 1.2.0; :745/:777 assert the run counts 1 and 2 after reopening. Pi f75b3240ab removes the two TaskRuntime.sleep cases (:691, :711) with the method; the ended-invocation case now calls sleepUntil. The Go ports of the removed cases are removed with them (harness_tasks_scheduling_test.go, harness_tasks_port2_core_test.go); sleeping is covered by harness-sleep.test.ts. Pi 91b33cab: close writes the stopped task back as pending with any abort mark kept, no outcome and no fault (:1148, :1222, :1250, :1288, :1355); the Go close tests assert the extra pending write. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/harness-telemetry-options.test.ts",
@@ -6995,8 +7109,12 @@
     },
     {
       "path": "packages/durable/test/harness-view.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:8ff123ba9a9416563498ba2eedc7e1eb5032c7736d2ee7d1de7f72252255ed0f"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:8ff123ba9a9416563498ba2eedc7e1eb5032c7736d2ee7d1de7f72252255ed0f",
+      "evidence": [
+        "durable/harness/harness_view_test.go#TestConversationView"
+      ],
+      "rationale": "All 14 upstream cases are ported; each Go case cites its upstream line. Ported against durable/harness/view.go. Frames are replayed with chord/delta ApplyImmutable over the view's JSON form; toBe identity is backing-array or map-pointer identity. drained() is a no-op Session line job plus WaitDeliveries instead of setTimeout(0); a queued acquisition is detected with SessionImpl.LineJobs. Compiling mutations of the head cut, the mount drop and the closed check fail them; ops order between documents and entries and a version mismatch are not asserted upstream. Pi 1.0.2 mounts the pi.provider document between Inbox and Usage. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/images-wasm-module.test.ts",
@@ -7038,48 +7156,122 @@
     },
     {
       "path": "packages/durable/test/session-checkpoints-migrations.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:31064eeda2f0ec79f923a435fab6a9b786c5d46a539310954ee01d43ae917849"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:31064eeda2f0ec79f923a435fab6a9b786c5d46a539310954ee01d43ae917849",
+      "evidence": [
+        "durable/session/session_checkpoints_migrations_test.go#TestSessionDocumentCheckpoints",
+        "durable/session/session_checkpoints_migrations_test.go#TestSessionDocumentMigrations",
+        "durable/session/session_checkpoints_migrations_test.go#TestSessionHistoricalDocumentSnapshots",
+        "durable/session/session_checkpoints_migrations_test.go#TestSessionTrackerCacheAcrossDefinitionVersions"
+      ],
+      "rationale": "All 20 cases ported. checkpointWhen's `this` receiver (:20) is a closure over the definition's initial in Go. The invalid migration result of :547 is a Date upstream and a channel value in Go. Compiling mutations: ignoring the predicate's base decision fails :20, :41 and :102; treating every version as equal in observedOperations fails :463 and :794; dropping the array structural flag in chord/delta fails :146 and :218. Shared support: packages/durable/test/session-support.ts is durable/session/sessiontest/support.go (ControlledStorage over storage.MemoryStorage with held commits/lookups, crash and injected failures). Go mapping: a Promise-returning Tx call is a blocking call, Promise.all is goroutines, upstream's flush() is SessionImpl.WaitDeliveries (deliveries upstream queues as microtasks run on Session-tracked goroutines), a Draft is a revocable *delta.Object whose use after settlement panics with delta.ErrRevoked, and toBe is reference identity of the JSON containers. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/session-definitions.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:faca4d65d0dd18c5dc4e88e1db53397af8870742d85ab612d474313d40ea319b"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:faca4d65d0dd18c5dc4e88e1db53397af8870742d85ab612d474313d40ea319b",
+      "evidence": [
+        "durable/session/session_definitions_test.go#TestDocumentDefinitions"
+      ],
+      "rationale": "All 3 cases run against durable/session and durable/documents.go. :68 version 0 panics with 'positive integer', an empty kind is kept, and version 1.5 is a compile error (Version is an int). :77 and :140 compile every owner/key/seed overload through the typed helpers (TxDoc, TxRetireDoc, Snapshot, SnapshotAsOf, TxEntry, TxAppendEntry) and Session.DocumentStateErased/WatchDocErased, then run each overload. The negatives Go reports are asserted: a conversation document without its ID, and snapshotAsOf of a Session, a task and a latest conversation document, are Session errors (upstream throws the same at run time); the typed-entry negatives are type-checked (data is typed by the token, the token supplies the kind, an entry kind without data takes none); the marker entry and the raw append are run. Ported as a Go equivalence test (owner direction): the @ts-expect-error negatives of :77 and :140 that only the document token's scope and family-ness type rejects (a Session document takes an owner, family access without a seed, a mistyped seed, a seed on retirement, a seed on a snapshot, a watch of a Session document with an owner, a data entry without its data) run on the same inputs as Pi 1.0.0's runtime handles them. resolveAddress reads only the arguments its scope needs, so Pi ignores the extra owner (tx.doc, session.watchDoc, documentState resolve the Session document; the draft is the one tx.doc(SessionDoc) returns) and the extra seed (retireDoc retires the member; snapshot reads it), and Go's erased variadic arguments go through the same resolver and give the same results (TestDocumentDefinitions, 'ignores the owner and seed arguments the token's scope does not take'). A missing family seed is the `undefined` argument that Pi's copyJson rejects (transaction.ts doc, chord json.ts copy: 'Value contains a non-JSON undefined; expected strict JSON', nothing created), and Go's Transaction.Doc rejects a missing variadic seed with the same error (an explicit nil stays JSON null). The two inputs that are JavaScript-only: a seed of another type is stored by Pi and rejected by Go's typed Initial with no document created; an entry without data holds the zero value of the data type. A mutation that makes a Session document consume an owner argument turns the case red, and so does reading a missing seed as null (the earlier Go behavior). Shared support: packages/durable/test/session-support.ts is durable/session/sessiontest/support.go (ControlledStorage over storage.MemoryStorage with held commits/lookups, crash and injected failures). Go mapping: a Promise-returning Tx call is a blocking call, Promise.all is goroutines, upstream's flush() is SessionImpl.WaitDeliveries (deliveries upstream queues as microtasks run on Session-tracked goroutines), a Draft is a revocable *delta.Object whose use after settlement panics with delta.ErrRevoked, and toBe is reference identity of the JSON containers. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/session-document-retention.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:074423af50b5a339f17aa7084db087a9c066890ba68974789d9ff6a6e66042b0"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:074423af50b5a339f17aa7084db087a9c066890ba68974789d9ff6a6e66042b0",
+      "evidence": [
+        "durable/session/session_document_retention_test.go#TestSessionDocumentCacheRetention",
+        "durable/harness/document_retention_test.go#TestHarnessDocumentRetentionFollowsSettings",
+        "durable/harness/document_retention_test.go#TestTheEventsAreTheSameWithDocumentsEvictedRightAfterUseAsWithDocumentsKept"
+      ],
+      "rationale": "20 of the 21 Pi 1.2.0 cases are ported one to one, each named by its Pi title and cited with its 1.2.0 line: 18 as subtests of TestSessionDocumentCacheRetention, :477 as TestHarnessDocumentRetentionFollowsSettings and :497 as TestTheEventsAreTheSameWithDocumentsEvictedRightAfterUseAsWithDocumentsKept. In :426 the NaN, -5 and Infinity retentions are ported; Pi's third input is the string \"soon\" cast to a number, which the Go retention type (*float64) cannot hold. Designed out (t.Skip naming the mechanic): :451 'keeps no timer where timers cannot be unreferenced, and evicts on commits' replaces globalThis.setTimeout with a function returning timers without unref (as in Cloudflare Workers); Go has no global timer function to replace and its timers never keep the process alive, so the no-unref branch of Pi's session.ts cannot occur. The case tests Node's unreferenced-timer mechanism, so it is runtime mechanics. SCRUTINIZED:approved by the tern lead ruling 2026-10-13 (tests-120-b). No case differed from Pi; no source change. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi).",
+      "designedOutCases": [
+        "document cache retention › keeps no timer where timers cannot be unreferenced, and evicts on commits"
+      ]
     },
     {
       "path": "packages/durable/test/session-documents.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:3961ee091c195571877fcbfc80cb85daa859f8b12d5dee17e58dbd7c62039b82"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:3961ee091c195571877fcbfc80cb85daa859f8b12d5dee17e58dbd7c62039b82",
+      "evidence": [
+        "durable/session/session_documents_test.go#TestSessionDocumentTransactions",
+        "durable/session/subscribe_close_test.go#TestSessionSubscribeCloseRunsListenersWhenCloseBeginsAndSupportsUnsubscription",
+        "durable/core/driver/docs_core_test.go#TestCoreFamilyDocumentsUseTheFirstSeedAndIgnoreSeedsForExistingMembers",
+        "durable/core/driver/docs_core_test.go#TestCoreRejectsTokensWhoseSemanticsOrVersionDisagreeWithTheStoredIncarnation",
+        "durable/core/driver/docs_core_test.go#TestCoreRetiredDocumentsGetANewIncarnationAtTheSameAddress",
+        "durable/core/driver/docs_core_test.go#TestCoreRetiresWithoutAcquisitionAndRecreatesExistingAndAbsentAddresses",
+        "durable/core/driver/docs_core_test.go#TestCoreEscapedDraftsAreRevokedWhenTheCallbackSettles",
+        "durable/core/driver/docs_core_test.go#TestCoreACallbackFailureAbortsEveryChange",
+        "durable/core/driver/docs_core_test.go#TestCoreTxUseAfterTheCallbackSettlesIsRejected",
+        "durable/core/driver/docs_core_test.go#TestCoreNonJSONPlacementsAreRejectedBeforeAnythingIsStored",
+        "durable/core/driver/docs_core_test.go#TestCoreAnUncertainStorageFailurePoisonsTheSession",
+        "durable/core/driver/docs_core_test.go#TestCoreASnapshotStaysUnchangedThroughALaterCommit",
+        "durable/core/driver/docs_core_test.go#TestCoreRetirementBetweenTwoAcquisitionsCreatesAFreshIncarnation",
+        "durable/core/driver/docs_core_test.go#TestCoreCloseListenersRunOnceAndSupportUnsubscription",
+        "durable/core/driver/docs_core_test.go#TestCoreCloseSettlesAdmittedCommitsAndRejectsLaterAdmission"
+      ],
+      "rationale": "All 27 Pi 1.2.0 cases are ported one to one as subtests of TestSessionDocumentTransactions named by their Pi titles and cited with their 1.2.0 lines (the close-listener case also in subscribe_close_test.go); the driver-level counterparts in docs_core_test.go carry the same citations. The 1.1.0 to 1.2.0 changes (StorageRejected replaced by SessionFailed, three renamed cases) were already in the Go tests. The 1.2.0 audit made :78 check the whole value Pi's toMatchObject checks (message, items, nested). No case differed from Pi; no source change. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/session-forks.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:21f40b78204ea8c61c6456856274df0c3c47d53695d69b2113105373dc7da1f9"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:21f40b78204ea8c61c6456856274df0c3c47d53695d69b2113105373dc7da1f9",
+      "evidence": [
+        "durable/session/session_forks_test.go#TestSessionConversationDocumentForks",
+        "durable/core/driver/docs_core_test.go#TestCoreForkCopiesAsOfAndCurrentSingletonAndFamilyBasesAndLeavesInitialDocumentsAbsent",
+        "durable/core/driver/docs_core_test.go#TestCoreForkUsesTheFinalDocumentStateOfTheEntryCommitAndExcludesLaterSameCommitEntries",
+        "durable/core/driver/docs_core_test.go#TestCoreForkSelectsTheEntryOwningAncestorForAsOfAndTheImmediateParentForCurrent",
+        "durable/core/driver/docs_core_test.go#TestCoreForkCopiesTheStoredVersionWithoutConsultingMigrations",
+        "durable/core/driver/docs_core_test.go#TestCoreForkCoalescesATypedMigrationAndOverrideIntoTheCopiedCreationBase",
+        "durable/core/driver/docs_core_test.go#TestCoreForkCopiesTheIncarnationAliveAtTheForkPoint",
+        "durable/core/driver/docs_core_test.go#TestCoreForkRejectsInvisibleForkPointsAndRemainsUsable",
+        "durable/core/driver/docs_core_test.go#TestCoreForkRejectsDuplicateAsOfAndCurrentSelectionsForOneChildAddress",
+        "durable/core/driver/docs_core_test.go#TestCoreForkRejectsCurrentAndAsOfSourceWritesInTheForkTransaction",
+        "durable/core/driver/docs_core_test.go#TestCoreForkRollsEveryCopiedBaseBackWhenLaterAssemblyFails",
+        "durable/core/driver/docs_core_test.go#TestCoreForkRetiresACopiedDocumentAndRecreatesTheAddressInTheForkTransaction",
+        "durable/core/driver/docs_core_test.go#TestCoreForkCopiesEveryFamilyMemberAcrossScanPages",
+        "durable/core/driver/docs_core_test.go#TestCoreARejectedForkCommitFailsTheSessionAndLeavesNoEffect"
+      ],
+      "rationale": "All 14 Pi 1.2.0 cases are ported one to one as subtests of TestSessionConversationDocumentForks named by their Pi titles and cited with their 1.2.0 lines; driver-level counterparts in docs_core_test.go carry 1.2.0 citations. The 1.2.0 audit made :552 check error identity as Pi does: the commit error is the storage rejection itself (toBe), a later operation fails with SessionFailed whose cause is that rejection, and the Session end carries it; the driver counterpart TestCoreARejectedForkCommitFailsTheSessionAndLeavesNoEffect replaces the 1.1.0 not-ported note. No case differed from Pi; no source change. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/session-states.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:21f9aa6ff2d46338df899e6145f986e76f0900cceb7749d5bee1e8aa35f4e5e3"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:21f9aa6ff2d46338df899e6145f986e76f0900cceb7749d5bee1e8aa35f4e5e3",
+      "evidence": [
+        "durable/session/session_states_test.go#TestSessionDocumentStates",
+        "durable/session/session_states_test.go#shares exact committed value references with Chord",
+        "durable/session/session_states_test.go#publishes null retirement and never follows a replacement incarnation"
+      ],
+      "rationale": "10 cases, unchanged from 1.0.4 to 1.1.0; the prior reviewed row (all 10 ported against durable/session/session.go DocumentStateErased, observation.go CommittedStateSource and chord/state.go AttachReplicatedStateSource; the isFrozen half of :212 has no Go counterpart, as Go values cannot be frozen, and its shared-reference half is asserted) still holds. Pi 1.2.0 drops the getReplicatedStateInternals import and, in :83 (renamed 'shares exact committed value references with Chord') and :110, the subscriptions that captured Chord's operation batches (receivedOps, retirementOps [[\"r\", null]]); the value-reference and null-retirement assertions stay. TestSessionDocumentStates carries the same two edits: the renamed subtest asserts only the value references and the retirement subtest only the null value. All 10 cases pass (go test -run '^TestSessionDocumentStates$' ./durable/session). 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/session-tables.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:cdaf4388c08ed849d8017fe9ed649d1071768a3b6feed323d936e5d290f3888f"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:cdaf4388c08ed849d8017fe9ed649d1071768a3b6feed323d936e5d290f3888f",
+      "evidence": [
+        "durable/session/session_tables_test.go#TestSessionTransactionTables"
+      ],
+      "rationale": "All 12 cases ported against durable/session/transaction.go. Table records are Go structs, so the reference identity of a published table change with its admitted write and created record (:144-:155) is asserted as equality. Compiling mutation: disabling the ReadAfterWrite check fails :84 and :120. Shared support: packages/durable/test/session-support.ts is durable/session/sessiontest/support.go (ControlledStorage over storage.MemoryStorage with held commits/lookups, crash and injected failures). Go mapping: a Promise-returning Tx call is a blocking call, Promise.all is goroutines, upstream's flush() is SessionImpl.WaitDeliveries (deliveries upstream queues as microtasks run on Session-tracked goroutines), a Draft is a revocable *delta.Object whose use after settlement panics with delta.ErrRevoked, and toBe is reference identity of the JSON containers. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/session-watches.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:98110c63662749bcd31e9fda8d2a5141f9bed6c704a4e216609ee068aebd644f"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:98110c63662749bcd31e9fda8d2a5141f9bed6c704a4e216609ee068aebd644f",
+      "evidence": [
+        "durable/session/session_watches_test.go#TestSessionDocumentWatches"
+      ],
+      "rationale": "All 21 cases ported against durable/session/observation.go CommittedWatch. Red: the overflow fold of a retirement replayed as [\"r\", \u003ctyped nil map\u003e] instead of [\"r\", null] (:166) until observation.go advance emitted an untyped null. Compiling mutation: disabling the 100-frame overflow fails :124, :143 and :166. Shared support: packages/durable/test/session-support.ts is durable/session/sessiontest/support.go (ControlledStorage over storage.MemoryStorage with held commits/lookups, crash and injected failures). Go mapping: a Promise-returning Tx call is a blocking call, Promise.all is goroutines, upstream's flush() is SessionImpl.WaitDeliveries (deliveries upstream queues as microtasks run on Session-tracked goroutines), a Draft is a revocable *delta.Object whose use after settlement panics with delta.ErrRevoked, and toBe is reference identity of the JSON containers. 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/spec-usage.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:96ba047526b6151640ca74890d4584d7c423968a4d2606b0bf49ea207d2ba47e"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:96ba047526b6151640ca74890d4584d7c423968a4d2606b0bf49ea207d2ba47e",
+      "evidence": [
+        "durable/examples/spec_usage_upstream_test.go#TestSpecUsageCompilesTheHarnessExamples",
+        "durable/spec_usage_upstream_test.go#TestSpecUsageCompilesTheRootExamples"
+      ],
+      "rationale": "The single case is ported in two compile tests (root and harness examples). 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi)."
     },
     {
       "path": "packages/durable/test/sqlite-cloudflare.test.ts",

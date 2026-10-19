@@ -1412,19 +1412,17 @@ func (tx *Transaction) assemble() ([]durable.StorageWrite, error) {
 		change := plan.change
 		// Checkpoint predicates run last, after every validation.
 		if content, ok := plan.content.(durable.DocumentChangeWrite); ok && content.Content.Kind == durable.ContentDelta && change != nil && change.loaded != nil {
-			if change.definition != nil && change.definition.CheckpointWhen != nil {
-				info := durable.CheckpointInfo{DeltasSinceBase: change.loaded.deltaCount()}
-				var base bool
-				err := callDefinition(func() (err error) {
-					base, err = change.definition.CheckpointWhen(change.prepared.Value(), change.prepared.Ops(), info)
-					return err
-				})
-				if err != nil {
-					return nil, err
-				}
-				if base {
-					plan.content = durable.DocumentChangeWrite{Id: content.Id, Content: durable.DocumentContent{Version: change.version, Kind: durable.ContentBase, Value: change.prepared.Value()}}
-				}
+			info := durable.CheckpointInfo{DeltasSinceBase: change.loaded.deltaCount()}
+			var base bool
+			err := callDefinition(func() (err error) {
+				base, err = change.definition.CheckpointWhen(change.prepared.Value(), change.prepared.Ops(), info)
+				return err
+			})
+			if err != nil {
+				return nil, err
+			}
+			if base {
+				plan.content = durable.DocumentChangeWrite{Id: content.Id, Content: durable.DocumentContent{Version: change.version, Kind: durable.ContentBase, Value: change.prepared.Value()}}
 			}
 		}
 		if plan.content != nil {

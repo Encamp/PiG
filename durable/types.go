@@ -135,12 +135,12 @@ type CommonDocDefinition[T any] struct {
 	Initial func() T
 	// Migrate converts a value stored by an older version; nil when absent.
 	Migrate func(value JsonObject, fromVersion int) (T, error)
-	// CheckpointWhen returns true to store this ordinary change as a complete base instead of a delta; nil when
-	// absent.
+	// CheckpointWhen is the required policy: it returns true to store this ordinary change as a complete base instead of
+	// a delta. There is no default; a definition without CheckpointWhen and CheckpointWhenRaw is rejected by DefineDoc.
 	CheckpointWhen func(value T, ops []Op, info CheckpointInfo) bool
-	// CheckpointWhenRaw is CheckpointWhen over the exact prepared JSON object, with no typed decode. It takes
-	// precedence over CheckpointWhen when both are set; a definition that sets both must make them agree. Built-in
-	// documents set it so the per-commit predicate costs nothing in the size of the value.
+	// CheckpointWhenRaw is CheckpointWhen over the exact prepared JSON object, with no typed decode, and satisfies the
+	// requirement in its place. It takes precedence over CheckpointWhen when both are set; a definition that sets both
+	// must make them agree. Built-in documents set it so the per-commit predicate costs nothing in the size of the value.
 	CheckpointWhenRaw func(value JsonObject, ops []Op, info CheckpointInfo) bool
 }
 
@@ -159,8 +159,8 @@ type DocFamilyDefinition[T, I any] struct {
 	Version int
 	// Migrate converts a value stored by an older version; nil when absent.
 	Migrate func(value JsonObject, fromVersion int) (T, error)
-	// CheckpointWhen returns true to store this ordinary change as a complete base instead of a delta; nil when
-	// absent.
+	// CheckpointWhen is the required policy: it returns true to store this ordinary change as a complete base instead of
+	// a delta. There is no default; DefineDocFamily rejects a definition without it.
 	CheckpointWhen func(value T, ops []Op, info CheckpointInfo) bool
 	DocumentSemantics
 	// Family is upstream's required literal `family: true` (documents.ts FamilyInput); DefineDocFamily panics when it is false.

@@ -42,6 +42,8 @@ var NestedCallDoc = durable.DefineDocFamily(durable.DocFamilyDefinition[NestedCa
 	DocumentSemantics: durable.DocumentSemantics{Scope: durable.ScopeTask},
 	Family:            true,
 	Initial:           func(any) NestedCallState { return NestedCallState{} },
+	// The document retires with its task.
+	CheckpointWhen: func(NestedCallState, []durable.Op, durable.CheckpointInfo) bool { return false },
 })
 
 // nestedCallIds are the live nested tool calls the task owns, in task ID order: also those an earlier attempt made and this one
