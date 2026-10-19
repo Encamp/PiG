@@ -53,6 +53,10 @@ func TestUpstreamTerminalImageCapabilities(t *testing.T) {
 		{"enables hyperlinks and Kitty images for Herdr", map[string]string{"TERM_PROGRAM": "herdr", "TERM": "xterm-256color", "COLORTERM": "truecolor", "KITTY_WINDOW_ID": "1"}, false, TerminalCapabilities{Images: ImageProtocolKitty, TrueColor: true, Hyperlinks: true}},
 		// .upstream/v1.2.0/packages/tui/test/terminal-image.test.ts:328 (#10573): PI_HYPERLINKS=0 still wins
 		{"lets PI_HYPERLINKS=0 disable Herdr hyperlinks", map[string]string{"TERM_PROGRAM": "herdr", "PI_HYPERLINKS": "0"}, false, TerminalCapabilities{Images: ImageProtocolKitty}},
+		// .upstream/v1.3.0+0ed1b043/packages/tui/test/terminal-image.test.ts:334 (#11131): Rex is checked before KITTY_WINDOW_ID, and images stay off because Rex lacks Unicode placeholders
+		{"enables hyperlinks without images for Rex", map[string]string{"TERM_PROGRAM": "rex", "TERM": "xterm-256color", "KITTY_WINDOW_ID": "1"}, false, TerminalCapabilities{TrueColor: true, Hyperlinks: true}},
+		// .upstream/v1.3.0+0ed1b043/packages/tui/test/terminal-image.test.ts:341 (#11131): PI_HYPERLINKS=0 still wins
+		{"lets PI_HYPERLINKS=0 disable Rex hyperlinks", map[string]string{"TERM_PROGRAM": "rex", "PI_HYPERLINKS": "0"}, false, TerminalCapabilities{TrueColor: true}},
 		// .upstream/v0.87.1/packages/tui/test/terminal-image.test.ts:326
 		{"does not disable Ghostty images solely because cmux is present", map[string]string{"TERM_PROGRAM": "ghostty", "CMUX_WORKSPACE_ID": "workspace"}, false, TerminalCapabilities{Images: ImageProtocolKitty, TrueColor: true, Hyperlinks: true}},
 		// .upstream/v0.87.1/packages/tui/test/terminal-image.test.ts:334
