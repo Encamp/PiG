@@ -99,7 +99,7 @@ func TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream(t *testing.T) {
 	})
 	// .upstream/v0.87.1/packages/ai/test/openai-completions-tool-choice.test.ts:1763
 	t.Run("uses OpenRouter reasoning object instead of reasoning_effort", func(t *testing.T) {
-		payload, _, _ := captureToolChoiceRequest(t, toolChoiceModel(t, "openrouter", "deepseek/deepseek-r1", false), toolChoiceHi(), StreamOptions{Thinking: ThinkingLevelHigh}, nil)
+		payload, _, _ := captureToolChoiceRequest(t, toolChoiceModel(t, "openrouter", "deepseek/deepseek-r1-0528", false), toolChoiceHi(), StreamOptions{Thinking: ThinkingLevelHigh}, nil)
 		requireToolChoiceField(t, payload, "reasoning", `{"effort":"high"}`)
 		forbidToolChoiceFields(t, payload, "reasoning_effort")
 	})

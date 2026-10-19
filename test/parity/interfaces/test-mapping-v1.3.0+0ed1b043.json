@@ -61,8 +61,14 @@
     },
     {
       "path": "packages/ai/test/anthropic-adaptive-thinking-models.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:5c9c329c4ede9a3d3f445b719f8924ee8d67a8bc7dd7a9093d8801929d5964c9"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:5c9c329c4ede9a3d3f445b719f8924ee8d67a8bc7dd7a9093d8801929d5964c9",
+      "evidence": [
+        "ai/anthropic_adaptive_models_upstream_test.go#TestAnthropicUpstreamAdaptiveThinkingModels",
+        "ai/minimax_models_upstream_test.go#TestMiniMaxDirectProvidersFollowTheUpstreamGeneratorStage",
+        "ai/minimax_models_upstream_test.go#TestMiniMaxM31FlashSendsEffortAsOutputConfig"
+      ],
+      "rationale": "The one case (:30): every built-in anthropic-messages model with compat.forceAdaptiveThinking contains the 17 expected ids including the 1.1.0 anthropic/claude-haiku-5-5 (:7), and every flagged id is fireworks/ or matches the 1.1.0 pattern with haiku[-.]5[-.]5 (:44). It runs against the catalog generated from the published pi-ai 1.1.0 package; removing forceAdaptiveThinking from anthropic/claude-haiku-5-5 fails it. Pi 3daa2028→b06c1f2c: Pi b06c1f2c moves kimi-coding to Chat Completions, so its three models leave the adaptive-thinking list and the allowed pattern; TestAnthropicUpstreamAdaptiveThinkingModels follows. 0.5.2 (Pi d2e7d8b7, #11121): the expected list gains minimax/MiniMax-M3.1-Flash and minimax-cn/MiniMax-M3.1-Flash, and the allowed set gains the minimax/ and minimax-cn/ prefixes; both are ported in the same case. It fails against the 0.5.1 catalog (missing both ids) and passes against the regenerated one. ai/minimax_models_upstream_test.go adds the catalog and payload assertions for the model (not in Pi)."
     },
     {
       "path": "packages/ai/test/anthropic-auth-token.test.ts",
@@ -1229,8 +1235,16 @@
     },
     {
       "path": "packages/ai/test/openai-completions-tool-choice.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:70172da775a35d63a8e39cae509be9cf30f9b534a96ee6b3e4a9ba1353304aab"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:70172da775a35d63a8e39cae509be9cf30f9b534a96ee6b3e4a9ba1353304aab",
+      "evidence": [
+        "ai/openai_tool_choice_payload_upstream_test.go#TestOpenAICompletionsToolChoicePayloadUpstream",
+        "ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream",
+        "ai/openai_tool_choice_stream_upstream_test.go#TestOpenAICompletionsToolChoiceStreamUpstream",
+        "test/parity/scenarios/providers-faux-streaming/22-completions-tool-choice.toml",
+        "test/parity/scenarios/providers-faux-streaming/23-completions-interleaved-deltas.toml"
+      ],
+      "rationale": "All 49 upstream cases and their model/provider rows are ported with original request, metadata, replay, usage and stream assertions. Independent event blocks, first tool identity, function/custom presence, native efforts, provider controls and strict property order have regression guards and compiling mutations; exact Pi scenarios exercise payload and event paths. No cases are omitted. Pi 0.99.2 review: the 0.99.1 fixture changes are ported: opencode-go/kimi-k2.6 became opencode-go/kimi-k3 in the replay and stream fixtures (:1323,:1370,:1380,:1522) and the two thinking cases now use OpenCode Kimi K2.6 (:1428,:1450) - openai_tool_choice_formats_upstream_test.go:54-56,75-77,200-201 and openai_tool_choice_stream_upstream_test.go:26. Pi 3daa2028→b06c1f2c: Pi 63035734 and 381a2d8e reorder thinking before text in the expected stream events and update the Xiaomi replay; TestOpenAICompletionsToolChoiceStreamUpstream and the formats test follow. Pi 99fe1489/90d863f7 rename the Xiaomi model to mimo-v2.6-pro in this file; the Go cases use it (71023aec→8efd314f). 0.5.2 (Pi e86b0547): \"uses OpenRouter reasoning object instead of reasoning_effort\" uses openrouter deepseek/deepseek-r1-0528, which is what the case in ai/openai_tool_choice_formats_upstream_test.go now loads; the catalog still lists deepseek/deepseek-r1 too (the frozen OpenRouter data of this pin is not Pi's of that day), so the change is a model-id switch with no behavior difference."
     },
     {
       "path": "packages/ai/test/openai-completions-tool-result-images.test.ts",
