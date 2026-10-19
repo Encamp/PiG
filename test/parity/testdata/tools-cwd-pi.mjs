@@ -1,11 +1,12 @@
+import { PI_PACKAGE_VERSION } from "./pi-version.mjs";
 import assert from "node:assert/strict";
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { readFileSync, mkdtempSync, realpathSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const root = process.env.PI_PACKAGE_ROOT ?? resolve("extensions/sdk-ts/node_modules/@earendil-works/pi-coding-agent");
-assert.equal(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version, "1.0.3");
+assert.equal(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version, PI_PACKAGE_VERSION);
 const cases = [
   ["read", "ctx-cwd-read.txt", "hello from ctx.cwd", {path:"ctx-cwd-read.txt"}],
   ["write", "", "", {path:"ctx-cwd-write.txt",content:"written via ctx.cwd"}, "written via ctx.cwd"],
@@ -16,7 +17,8 @@ const cases = [
   ["bash", "", "", {command:"pwd"}],
 ];
 for (const [name,file,content,args,persisted] of cases) {
-  const dir = mkdtempSync(join(tmpdir(),"tools-cwd-"));
+  // bash's pwd prints the canonical directory, and macOS spells its temporary directory through a symlink (/var is /private/var): the directory the tool is given must be spelled as the shell reports it.
+  const dir = realpathSync(mkdtempSync(join(tmpdir(),"tools-cwd-")));
   const fallback = mkdtempSync(join(tmpdir(),"tools-fallback-"));
   try {
     if(file) writeFileSync(join(dir,file),content);

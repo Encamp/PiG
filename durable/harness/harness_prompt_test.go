@@ -22,7 +22,7 @@ func promptSection(key string, render func(ctx context.Context, input durable.Pr
 
 var promptInput = durable.PromptInput{
 	ConversationId: 1,
-	Agent:          durable.Agent{ThinkingLevel: "off", Extensions: []*durable.Extension{}, Tools: []*durable.ToolRegistration{}, Sections: []*durable.PromptSection{}},
+	Agent:          durable.Agent{ThinkingLevel: "off", Extensions: []*durable.Extension{}, Tools: []*durable.ToolRegistration{}, Callable: []*durable.ToolRegistration{}, Deferred: []*durable.ToolRegistration{}, Sections: []*durable.PromptSection{}},
 	Shown:          map[string]string{},
 	Read:           emptyReader{},
 }
@@ -72,8 +72,8 @@ func TestSystemPromptPreparation(t *testing.T) {
 		}))
 		var reports []error
 		shown := orderedOf([2]string{"failing", "<failing>\nold\n</failing>"}, [2]string{"cwd", "stale"})
-		agent := ResolveAgent(nil, registry.Snapshot(), ResolveSettings(nil), func(err error) { panic(err) })
-		desired, err := RenderSections(context.Background(), agent.Sections, promptInput, shown, func(err error) { reports = append(reports, err) })
+		agent := ResolveAgent(nil, registry.Snapshot(), ResolveSettings(nil), func(err error, _ string) { panic(err) })
+		desired, err := RenderSections(context.Background(), agent.Sections, promptInput, shown, func(err error, _ *durable.PromptSection) { reports = append(reports, err) })
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -91,7 +91,7 @@ func TestSystemPromptPreparation(t *testing.T) {
 	t.Run("propagates section errors after cancellation", func(t *testing.T) {
 		cancelled, cancel := context.WithCancelCause(context.Background())
 		cancel(errors.New("cancelled"))
-		_, err := RenderSections(cancelled, []*durable.PromptSection{promptSection("a", failing("cancelled"))}, promptInput, NewOrderedMap[string](), func(error) {})
+		_, err := RenderSections(cancelled, []*durable.PromptSection{promptSection("a", failing("cancelled"))}, promptInput, NewOrderedMap[string](), func(error, *durable.PromptSection) {})
 		if err == nil || err.Error() != "cancelled" {
 			t.Fatalf("got %v", err)
 		}

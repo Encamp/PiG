@@ -36,6 +36,7 @@ make parity-family FAMILY=compaction
 make parity-driver DRIVER=cli-mode,print-mode,rpc-mode
 make parity-durable
 make parity-perf
+make test-timing
 make coverage
 make lint-scenarios
 make normalization-inventory
@@ -45,7 +46,10 @@ make schedule-report
 `make parity-fast` runs one PiG/Pi pair for each hermetic scenario. `make
 parity` uses each scenario's declared durability. `make parity-perf` runs the
 performance scenarios serially because parallel CPU contention invalidates
-runtime comparisons.
+runtime comparisons. `make test-timing` is its Go-test counterpart: it runs every wall-clock and speed-ratio gate
+listed in `automation/perf/timing-gates.json` (the tests that call `testenv.TimingGate`) as a blocking, serial gate for the release perf run on quiet
+hardware, with `PIG_PERF_TIMING_REPORT_ONLY` removed. Pull-request CI sets it to `1`, so a missed timing bar there is a warning annotation, not a
+failure; allocation, byte, size, descriptor, goroutine, process and temp-entry gates block everywhere.
 
 Every parity target fails when the run compares no scenario. The runner fails, rather than skips, when it cannot find the pinned Pi or the PiG binary under test, and each target reads the results file through `require-parity-ran`. Set `PIG_PARITY_ALLOW_ZERO=1` to accept a run that compares nothing, for example on a host that has no Pi install. A version mismatch of the comparator has its own opt-out, `PIG_PARITY_ALLOW_VERSION_SKEW=1`.
 
@@ -132,7 +136,7 @@ scenario in the same family as the closest example.
 
 RPC lifecycle scenarios set `terminate = true` to send SIGTERM after their final output barrier while stdin remains open. The driver waits for process exit instead of sending EOF. Use `exit_code = 143` for Pi's SIGTERM shutdown contract. RPC captures stdout without trimming and retains stderr separately. Set `stderr_equal = true` to compare the complete diagnostic stream.
 
-RPC steps search only complete new output after the command is sent. `wait_event = '{"type":"response","id":"request-id"}'` matches those fields together in one parsed record and ignores object-member ordering. Use a unique request ID when a response is the barrier. `wait_contains` also searches only new complete lines; it is synchronization, not an acceptance comparator. Tmux `wait_contains` requires every requested marker to be new after the step starts. Use `wait_visible_contains` for retained visible state or startup state instead. `wait_stable_milliseconds = N` waits, after the step's other waits, until the visible pane has not changed for N ms. Use it as the completion barrier for an animation that emits no completion output; choose N longer than the animation's longest idle gap between frames of motion, and cite the source that bounds that gap.
+RPC steps search only complete new output after the command is sent. `wait_event = '{"type":"response","id":"request-id"}'` matches those fields together in one parsed record and ignores object-member ordering. Use a unique request ID when a response is the barrier. `wait_contains` also searches only new complete lines; it is synchronization, not an acceptance comparator. Tmux `wait_contains` requires every requested marker to be new after the step starts. Use `wait_visible_contains` for retained visible state or startup state instead. `wait_stable_milliseconds = N` waits, after the step's other waits, until the visible pane has not changed for N ms. Use it as the completion barrier for an animation that emits no completion output; choose N longer than the animation's longest idle gap between frames of motion, and cite the source that bounds that gap. When work has no event to wait for (a prompt run on a disposed Session emits none), `poll_until = '{"type":"response","data":{"messageCount":5}}'` on a step whose `line` is a read-only query with a request id resends that query until a response contains the object (nested objects match as subsets) within `wait_timeout_seconds`; the driver leaves every response to that query out of the compared and raw output, so the next step's commands prove the settled state.
 
 Tmux steps that send Escape before literal text use a visible state barrier between those inputs. Without a barrier, the terminal decoder can combine `ESC` and the first character into one Alt-modified key. Wait for the actual state transition, such as the cleared tree query, rather than delaying input by an arbitrary duration.
 
@@ -143,6 +147,8 @@ Tmux steps that send Escape before literal text use a visible state barrier betw
 `provider_fixture = "<api>"` serves the same fixture for another provider API: `anthropic-messages`, `google-generative-ai`, `mistral-conversations`, or `openai-completions`. It excludes `openai_fixture`, which remains the spelling for `openai-completions`. The runner writes the `strict-wire/strict` model with that `api` and the base URL the provider SDK expects (`/v1beta` for Google, the server root for Anthropic and Mistral, `/v1` for OpenAI). Each API uses its own request reader and SSE shape, and every reply is one `Content-Length` write so headers and the whole body arrive together. `READ`, tool-result echo and `HTTP_ERROR` behave as for the OpenAI fixture. Google generates tool-call IDs from the clock, so its scenarios alias the `read_<ms>_<counter>` IDs with an `id` alias.
 
 The `cli-mode` driver connects both stdout and stderr to one temporary regular file. Node writes to files synchronously, so Pi's immediate `process.exit()` cannot discard queued pipe output from large one-shot listings. The driver reads the file after process exit and removes it with the run's temporary directory. This preserves complete combined-output bytes without changing the oracle, filtering rows, or normalizing output. Print and RPC drivers keep their existing transports.
+
+A `cli-mode` pig side can be a Go probe, and the runner builds it before the first timed run, so a run's runtime and timeout cover the probe rather than the Go toolchain. Write a program as `pig_bin = "/usr/bin/env"` and `override_base_args = true` with `pig_args = ["go", "run", "./PACKAGE", ARGS...]`, in `[env]` or `[cli]` (env's `-u NAME` operands may come first): the timed runs start the binary built from `./PACKAGE` with the same arguments. A pig script runs Go tests through `./test/parity/testdata/prebuilt-go-test.sh ./PACKAGE... -run REGEXP -count N -v` instead of `go test`, and the scenario lists those packages in `[env] pig_go_tests`. The helper runs each prebuilt test binary in its package directory and prints `go test -v` output. `TestParityGoProbesAreBuiltBeforeTheTimedRun` rejects a scenario that starts the Go toolchain in a timed run or whose `pig_go_tests` differs from the packages its scripts test. One parity run builds each package once and removes the binaries when it ends.
 
 RPC scenarios can set `rpc.artifact_path` to capture a command-owned file after process shutdown.
 Use an RPC step that waits for a post-write notification before closing stdin.

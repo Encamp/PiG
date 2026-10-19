@@ -15,10 +15,10 @@ func TestUIBridge_Snapshot_ReadsCallbacks(t *testing.T) {
 	b.SetActions(&HostCallbacks{
 		GetActiveTools: func() []string { return []string{"read", "write"} },
 		GetAllTools: func() []ToolInfo {
-			return []ToolInfo{{Name: "read"}, {Name: "bash", Description: "Run bash", Parameters: json.RawMessage(`{"type":"object"}`), PromptGuidelines: []string{"g"}, SourceInfo: map[string]any{"path": "<builtin:bash>"}}}
+			return []ToolInfo{{Name: "read"}, {Name: "bash", Description: "Run bash", Parameters: json.RawMessage(`{"type":"object"}`), PromptGuidelines: []string{"g"}, SourceInfo: extension.SourceInfo{Path: "<builtin:bash>"}}}
 		},
 		GetCommands: func() []CommandInfo {
-			return []CommandInfo{{Name: "help", Description: "Help", Source: "extension", SourceInfo: map[string]any{"path": "/ext.ts"}}}
+			return []CommandInfo{{Name: "help", Description: "Help", Source: "extension", SourceInfo: extension.SourceInfo{Path: "/ext.ts"}}}
 		},
 		GetThinkingLevel:   func() string { return "high" },
 		IsIdle:             func() bool { return false },
@@ -38,15 +38,8 @@ func TestUIBridge_Snapshot_ReadsCallbacks(t *testing.T) {
 	})
 
 	state := b.Snapshot([]string{"feature", "missing"}, 0, false)
-	if len(state.ActiveTools) != 2 || state.ActiveTools[0] != "read" {
-		t.Errorf("ActiveTools = %v", state.ActiveTools)
-	}
-	// The Node runtime answers pi.getAllTools() and pi.getCommands() from
-	// this replica, so it carries the whole ToolInfo and SlashCommandInfo.
-	if raw, _ := json.Marshal(state.AllTools); string(raw) != `[{"name":"read","description":"","parameters":null,"sourceInfo":null},{"name":"bash","description":"Run bash","parameters":{"type":"object"},"promptGuidelines":["g"],"sourceInfo":{"path":"\u003cbuiltin:bash\u003e"}}]` {
-		t.Errorf("AllTools = %s", raw)
-	}
-	if raw, _ := json.Marshal(state.Commands); string(raw) != `[{"name":"help","description":"Help","source":"extension","sourceInfo":{"path":"/ext.ts"}}]` {
+	// The runtime answers pi.getCommands() from this replica, so it carries the whole SlashCommandInfo. The tool registry is not replicated: pi.getAllTools() and pi.getActiveTools() are host calls.
+	if raw, _ := json.Marshal(state.Commands); string(raw) != `[{"name":"help","description":"Help","source":"extension","sourceInfo":{"path":"/ext.ts","source":"","scope":"","origin":""}}]` {
 		t.Errorf("Commands = %s", raw)
 	}
 	if state.ThinkingLevel != "high" {
@@ -88,7 +81,6 @@ func TestUIBridge_Snapshot_NilActions(t *testing.T) {
 func TestStatePayload_RoundTrip(t *testing.T) {
 	tokens, percent := 1, 0.5
 	state := &StatePayload{
-		ActiveTools:   []string{"a"},
 		ThinkingLevel: "medium",
 		IsIdle:        true,
 		ContextUsage:  &extensionContextUsageDTO{Tokens: &tokens, ContextWindow: 2, Percent: &percent},
@@ -108,36 +100,29 @@ func TestStatePayload_RoundTrip(t *testing.T) {
 	}
 }
 
-// Node extensions read ToolInfo from the state replica, which is exactly
-// upstream's shape. The getAllTools host call the Go, Rust and Python SDKs
-// use also carries PiG's per-tool source, which their ToolInfo exposed
-// before sourceInfo existed.
+// The getAllTools host call carries PiG's per-tool source, which the Go, Rust and Python SDKs' ToolInfo exposed before sourceInfo existed.
 func TestGetAllToolsHostCallKeepsTheSDKSourceField(t *testing.T) {
 	b := NewUIBridge(func() {})
 	b.SetActions(&HostCallbacks{GetAllTools: func() []ToolInfo {
-		return []ToolInfo{{Name: "lookup", Description: "Look up", Parameters: json.RawMessage(`{"type":"object"}`), SourceInfo: map[string]any{"path": "/ext.ts"}, Source: "mcp:docs"}}
+		return []ToolInfo{{Name: "lookup", Description: "Look up", Parameters: json.RawMessage(`{"type":"object"}`), SourceInfo: extension.SourceInfo{Path: "/ext.ts"}, Source: "mcp:docs"}}
 	}})
 	result, err := b.HandleCall("ext", &CallPayload{Method: "getAllTools"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := `{"tools":[{"name":"lookup","description":"Look up","parameters":{"type":"object"},"sourceInfo":{"path":"/ext.ts"},"source":"mcp:docs"}]}`; string(result.Result) != want {
+	if want := `{"tools":[{"name":"lookup","description":"Look up","parameters":{"type":"object"},"sourceInfo":{"path":"/ext.ts","source":"","scope":"","origin":""},"source":"mcp:docs"}]}`; string(result.Result) != want {
 		t.Errorf("getAllTools result = %s, want %s", result.Result, want)
-	}
-	state, _ := json.Marshal(b.Snapshot(nil, 0, false).AllTools)
-	if want := `[{"name":"lookup","description":"Look up","parameters":{"type":"object"},"sourceInfo":{"path":"/ext.ts"}}]`; string(state) != want {
-		t.Errorf("replicated allTools = %s, want %s", state, want)
 	}
 }
 
-// The host call and the replicated state both carry a tool's exposure, namespace and annotations, which Node extensions read as pi.getAllTools() and the Go, Rust and Python SDKs decode.
+// The host call carries a tool's exposure, namespace and annotations, which every SDK reads as getAllTools.
 // upstream: types.ts:2063 (ToolInfo)
 func TestGetAllToolsCarriesExposureNamespaceAndAnnotations(t *testing.T) {
 	hint := true
 	b := NewUIBridge(func() {})
 	b.SetActions(&HostCallbacks{GetAllTools: func() []ToolInfo {
 		return []ToolInfo{{
-			Name: "lookup", Description: "Look up", Parameters: json.RawMessage(`{"type":"object"}`), SourceInfo: map[string]any{"path": "/ext.ts"},
+			Name: "lookup", Description: "Look up", Parameters: json.RawMessage(`{"type":"object"}`), SourceInfo: extension.SourceInfo{Path: "/ext.ts"},
 			Exposure: extension.ToolExposureDeferred, Namespace: &extension.ToolNamespace{Name: "docs"}, Annotations: &extension.ToolAnnotations{ReadOnlyHint: &hint},
 		}}
 	}})
@@ -145,7 +130,7 @@ func TestGetAllToolsCarriesExposureNamespaceAndAnnotations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `[{"name":"lookup","description":"Look up","parameters":{"type":"object"},"sourceInfo":{"path":"/ext.ts"},"exposure":"deferred","namespace":{"name":"docs"},"annotations":{"readOnlyHint":true}}]`
+	want := `[{"name":"lookup","description":"Look up","parameters":{"type":"object"},"sourceInfo":{"path":"/ext.ts","source":"","scope":"","origin":""},"exposure":"deferred","namespace":{"name":"docs"},"annotations":{"readOnlyHint":true}}]`
 	var call struct {
 		Tools json.RawMessage `json:"tools"`
 	}
@@ -153,8 +138,31 @@ func TestGetAllToolsCarriesExposureNamespaceAndAnnotations(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertJSONEqual(t, "getAllTools tools", call.Tools, want)
-	state, _ := json.Marshal(b.Snapshot(nil, 0, false).AllTools)
-	assertJSONEqual(t, "replicated allTools", state, want)
+}
+
+// An extension that registers a namespace with `aliases: []` reads it back from pi.getAllTools(): upstream returns the definition's namespace object as authored, so the empty array survives, and a namespace without aliases has no aliases member.
+// upstream: agent-session.ts:1505 (namespace: definition.namespace)
+func TestGetAllToolsKeepsANamespacesEmptyAliases(t *testing.T) {
+	b := NewUIBridge(func() {})
+	b.SetActions(&HostCallbacks{GetAllTools: func() []ToolInfo {
+		return []ToolInfo{
+			{Name: "lookup", Description: "Look up", Parameters: json.RawMessage(`{"type":"object"}`), SourceInfo: extension.SourceInfo{Path: "/ext.ts"}, Namespace: &extension.ToolNamespace{Name: "docs", Aliases: []string{}}},
+			{Name: "plain", Description: "Plain", Parameters: json.RawMessage(`{"type":"object"}`), SourceInfo: extension.SourceInfo{Path: "/ext.ts"}, Namespace: &extension.ToolNamespace{Name: "bare"}},
+		}
+	}})
+	result, err := b.HandleCall("ext", &CallPayload{Method: "getAllTools"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var call struct {
+		Tools json.RawMessage `json:"tools"`
+	}
+	if err := json.Unmarshal(result.Result, &call); err != nil {
+		t.Fatal(err)
+	}
+	want := `[{"name":"lookup","description":"Look up","parameters":{"type":"object"},"sourceInfo":{"path":"/ext.ts","source":"","scope":"","origin":""},"namespace":{"name":"docs","aliases":[]}},` +
+		`{"name":"plain","description":"Plain","parameters":{"type":"object"},"sourceInfo":{"path":"/ext.ts","source":"","scope":"","origin":""},"namespace":{"name":"bare"}}]`
+	assertJSONEqual(t, "getAllTools tools", call.Tools, want)
 }
 
 func assertJSONEqual(t *testing.T, what string, got json.RawMessage, want string) {
@@ -179,7 +187,7 @@ func TestGetAllToolsKeepsUpstreamMemberOrder(t *testing.T) {
 	b.SetActions(&HostCallbacks{GetAllTools: func() []ToolInfo {
 		return []ToolInfo{{
 			Name: "lookup", Description: "Look up", Parameters: json.RawMessage(`{"type":"object"}`), PromptGuidelines: []string{"Use it."},
-			SourceInfo: map[string]any{"path": "/ext.ts"}, Exposure: extension.ToolExposureDeferred,
+			SourceInfo: extension.SourceInfo{Path: "/ext.ts"}, Exposure: extension.ToolExposureDeferred,
 			Namespace: &extension.ToolNamespace{Name: "docs"}, Annotations: &extension.ToolAnnotations{ReadOnlyHint: &hint}, Source: "ext",
 		}}
 	}})
@@ -196,10 +204,6 @@ func TestGetAllToolsKeepsUpstreamMemberOrder(t *testing.T) {
 	upstream := []string{"name", "description", "parameters", "promptGuidelines", "exposure", "namespace", "annotations", "sourceInfo"}
 	if got, want := objectKeys(t, call.Tools[0]), append(slices.Clone(upstream), "source"); !slices.Equal(got, want) {
 		t.Errorf("getAllTools members = %v, want %v", got, want)
-	}
-	state, _ := json.Marshal(b.Snapshot(nil, 0, false).AllTools[0])
-	if got := objectKeys(t, state); !slices.Equal(got, upstream) {
-		t.Errorf("replicated allTools members = %v, want %v", got, upstream)
 	}
 }
 
@@ -224,8 +228,8 @@ func objectKeys(t *testing.T, object json.RawMessage) []string {
 	return keys
 }
 
-// A session narrowed to no tools by SetActiveTools([]) is a value on the wire, not absent state: both the getActiveTools
-// reply and the replicated snapshot carry [], never null, which every SDK rejects as a missing field.
+// A session narrowed to no tools by SetActiveTools([]) is a value on the wire, not absent state: the getActiveTools
+// reply carries [], never null, which every SDK rejects as a missing field.
 func TestActiveToolsNarrowedToNoneIsAnEmptyListOnTheWire(t *testing.T) {
 	for name, getter := range map[string]func() []string{
 		"empty": func() []string { return []string{} },
@@ -240,19 +244,6 @@ func TestActiveToolsNarrowedToNoneIsAnEmptyListOnTheWire(t *testing.T) {
 			}
 			if got := string(result.Result); got != `{"tools":[]}` {
 				t.Errorf("getActiveTools reply = %s, want {\"tools\":[]}", got)
-			}
-			raw, err := json.Marshal(b.Snapshot(nil, 0, false))
-			if err != nil {
-				t.Fatal(err)
-			}
-			var decoded struct {
-				ActiveTools []string `json:"activeTools"`
-			}
-			if err := json.Unmarshal(raw, &decoded); err != nil {
-				t.Fatal(err)
-			}
-			if !bytes.Contains(raw, []byte(`"activeTools":[]`)) || decoded.ActiveTools == nil {
-				t.Errorf("snapshot = %s, want activeTools []", raw)
 			}
 		})
 	}

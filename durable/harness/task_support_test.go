@@ -80,17 +80,28 @@ type openTasksOptions struct {
 	registry Registry
 	now      func() float64
 	settings func() *HarnessSettings
+	onWake   func(Wake)
+	setTimer durable.SetTimer
 }
 
 type reportLog struct {
 	mu      sync.Mutex
 	reports []error
+	infos   []durable.ReportInfo
 }
 
-func (log *reportLog) add(err error) {
+func (log *reportLog) add(err error, info durable.ReportInfo) {
 	log.mu.Lock()
 	defer log.mu.Unlock()
 	log.reports = append(log.reports, err)
+	log.infos = append(log.infos, info)
+}
+
+// allInfos is the info of every report, in order (task-support.ts openTasks infos).
+func (log *reportLog) allInfos() []durable.ReportInfo {
+	log.mu.Lock()
+	defer log.mu.Unlock()
+	return append([]durable.ReportInfo(nil), log.infos...)
 }
 
 func (log *reportLog) all() []error {
@@ -120,6 +131,8 @@ func openTasks(t *testing.T, storage durable.Storage, tasks []durable.AnyTask, o
 		OnReport: reports.add,
 		Now:      option.now,
 		Settings: option.settings,
+		OnWake:   option.onWake,
+		SetTimer: option.setTimer,
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/MichaelKinsy/PiG/ai"
 	"github.com/MichaelKinsy/PiG/durable"
@@ -25,9 +24,8 @@ type todos struct {
 // 11-extension-state.ts: an extension keeps its own document, written by its tool and rendered into the prompt.
 func TestExample11ExtensionState(t *testing.T) {
 	todosDoc := durable.DefineDoc(durable.DocDefinition[todos]{
-		CommonDocDefinition: durable.CommonDocDefinition[todos]{Kind: "example.todos", Version: 1},
+		CommonDocDefinition: durable.CommonDocDefinition[todos]{Kind: "example.todos", Version: 1, Initial: func() todos { return todos{Items: []string{}} }},
 		DocumentSemantics:   durable.DocumentSemantics{Scope: durable.ScopeConversation, History: durable.HistoryRewindable, Fork: durable.ForkAsOf},
-		Initial:             func() todos { return todos{Items: []string{}} },
 	})
 	todoTool := &durable.ToolRegistration{
 		ToolSchema: ai.ToolSchema{
@@ -51,7 +49,7 @@ func TestExample11ExtensionState(t *testing.T) {
 			}); err != nil {
 				return durable.ToolExecutionResult{}, err
 			}
-			return durable.ToolExecutionResult{Content: []ai.ToolResultMessageContent{ai.TextContent{Text: "added " + item}}}, nil
+			return durable.ToolExecutionResult{Output: []ai.ToolResultMessageContent{ai.TextContent{Text: "added " + item}}}, nil
 		},
 	}
 	todoExtension := new(durable.Extension{
@@ -85,7 +83,7 @@ func TestExample11ExtensionState(t *testing.T) {
 		return ai.FauxStaticStep(ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText(text)}})
 	}
 	faux.SetResponses([]ai.FauxResponseStep{
-		ai.FauxStaticStep(ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxToolCall("todo", map[string]any{"item": "fix the build"}, "t1")}, StopReason: "toolUse"}),
+		ai.FauxStaticStep(ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxToolCall("todo", map[string]any{"item": "fix the build"}, &ai.FauxToolCallOptions{ID: "t1"})}, StopReason: "toolUse"}),
 		answer("Noted."),
 		answer("Working on it."),
 	})
@@ -107,7 +105,7 @@ func TestExample11ExtensionState(t *testing.T) {
 	expectEqual(t, "todos", current.Items, []string{"fix the build"})
 
 	say("What is next?")
-	view := must(root.Context(background))
+	view := must(root.Context(background, nil))
 	var sections []map[string]string
 	for _, message := range view.Messages {
 		system, isSystem := message.(ai.SystemMessage)
@@ -179,7 +177,7 @@ func TestExample12Tasks(t *testing.T) {
 		},
 	})
 	registry := harness.CreateRegistry()
-	installed(t, registry, new(durable.Extension{Name: "payments", Tasks: []durable.AnyTask{payment}}))
+	installed(t, registry, new(durable.Extension{Name: "payments", Tasks: []durable.AnyTask{payment.Erased()}}))
 	opened := openHarness(t, registry, nil)
 	root := must(opened.Root(background, nil))
 	paymentId := commit(t, root, func(tx durable.Tx) (durable.TaskId, error) {
@@ -206,6 +204,7 @@ type tickState struct {
 
 // 13-recovery.ts: a task survives a close and a reopen of its storage. A memo keeps the visible effect (the print)
 // from repeating when a phase reruns.
+// upstream: packages/durable/src/harness/types.ts:192-193 memo reads or sets a named memo entry, and types.ts:200 getTask reads a task record, through the tool execution API after recovery.
 func TestExample13Recovery(t *testing.T) {
 	databasePath := filepath.Join(t.TempDir(), "session.sqlite")
 	var printed []int
@@ -230,16 +229,15 @@ func TestExample13Recovery(t *testing.T) {
 					printed = append(printed, n) // console.log(`tick ${n}`)
 				}
 				reachedTick.Store(int64(n))
-				if err := runtime.Commit(ctx, func(durable.Tx, durable.RunningTask[tickInput, tickState, string]) (*durable.NextTaskState[tickState, string], error) {
-					if n == task.Input.To {
+				// Save the final result, or the next tick after a short sleep. The sleep is stored with the checkpoint, so the task holds no
+				// invocation meanwhile, and a Harness opened later continues it once its time has come (13-recovery.ts).
+				if n == task.Input.To {
+					return runtime.Commit(ctx, func(durable.Tx, durable.RunningTask[tickInput, tickState, string]) (*durable.NextTaskState[tickState, string], error) {
 						result := fmt.Sprintf("counted to %d", n)
 						return &durable.NextTaskState[tickState, string]{Status: durable.TaskTerminal, Outcome: &durable.TaskOutcome[string]{Status: durable.OutcomeCompleted, Result: &result}}, nil
-					}
-					return &durable.NextTaskState[tickState, string]{Status: durable.TaskRunning, Checkpoint: &tickState{Phase: "tick", N: n + 1}}, nil
-				}); err != nil {
-					return err
+					})
 				}
-				return runtime.Sleep(ctx, float64(time.Now().UnixMilli()+50))
+				return runtime.SleepUntil(ctx, runtime.Now()+50, tickState{Phase: "tick", N: n + 1})
 			},
 		},
 		Abort: func(ctx context.Context, _ durable.RunningTask[tickInput, tickState, string], runtime durable.TaskRuntime[tickInput, tickState, string, any]) error {
@@ -249,7 +247,7 @@ func TestExample13Recovery(t *testing.T) {
 		},
 	})
 	registry := harness.CreateRegistry()
-	installed(t, registry, new(durable.Extension{Name: "ticker", Tasks: []durable.AnyTask{ticker}}))
+	installed(t, registry, new(durable.Extension{Name: "ticker", Tasks: []durable.AnyTask{ticker.Erased()}}))
 	open := func() harness.Harness {
 		t.Helper()
 		store, err := sqlitenode.OpenNodeSqliteStorage(databasePath, sqlitenode.NodeSqliteStorageOptions{})

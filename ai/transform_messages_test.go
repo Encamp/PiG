@@ -10,7 +10,7 @@ import (
 func TestCompletionsToolOnlyContentUsesCompatNullability(t *testing.T) {
 	for _, required := range []bool{false, true} {
 		provider := &openAIProvider{cfg: OpenAIConfig{Compat: &OpenAICompat{RequiresAssistantAfterToolResult: new(required)}}}
-		messages, err := provider.convertMessagesWithCompat([]Message{AssistantMessage{Content: []AssistantContentBlock{ToolCall{ID: "call", Name: "tool", Arguments: JsonObject{}}}}}, nil, "system", false)
+		messages, err := provider.convertMessagesWithCompat([]Message{AssistantMessage{Content: []AssistantContentBlock{ToolCall{ID: "call", Name: "tool", Arguments: JsonObject{}}}}}, nil, "system", false, false)
 		if err != nil || len(messages) != 1 {
 			t.Fatalf("messages=%#v err=%v", messages, err)
 		}
@@ -39,8 +39,8 @@ func BenchmarkTransformMessagesHistory(b *testing.B) {
 }
 
 func TestTransformMessagesUsesJavaScriptThinkingWhitespace(t *testing.T) {
-	result := TransformMessages([]Message{AssistantMessage{Model: "foreign", Content: []AssistantContentBlock{ThinkingContent{Thinking: "\ufeff"}, ThinkingContent{Thinking: "\u0085"}}}}, replayTarget(), nil)
-	want := []AssistantContentBlock{TextContent{Text: "\u0085"}}
+	result := TransformMessages([]Message{AssistantMessage{Provider: "openai", API: APIOpenAIResponses, Model: "target", Content: []AssistantContentBlock{ThinkingContent{Thinking: "\ufeff"}, ThinkingContent{Thinking: "\u0085"}}}}, replayTarget(), nil)
+	want := []AssistantContentBlock{ThinkingContent{Thinking: "\u0085"}}
 	if got := result[0].(AssistantMessage).Content; !reflect.DeepEqual(got, want) {
 		t.Fatalf("blocks=%#v want=%#v", got, want)
 	}
@@ -81,7 +81,7 @@ func TestTransformMessagesThinkingIdentityAndIncompleteHistory(t *testing.T) {
 						t.Fatal(got)
 					}
 				} else {
-					want := []AssistantContentBlock{TextContent{Text: "useful"}, TextContent{Text: "answer"}, ToolCall{ID: "call", Name: "tool", Arguments: JsonObject{}}}
+					want := []AssistantContentBlock{TextContent{Text: "answer"}, ToolCall{ID: "call", Name: "tool", Arguments: JsonObject{}}}
 					if !reflect.DeepEqual(got, want) {
 						t.Fatalf("foreign blocks=%#v want=%#v", got, want)
 					}
@@ -134,6 +134,26 @@ func TestTransformMessagesImageDowngradeAndNilContent(t *testing.T) {
 		t.Fatal("nil content survived")
 	}
 }
+
+// A model without image input leaves text-only content as it is, and still turns a typed nil block slice into an empty one, as the placeholder pass does.
+func TestTransformMessagesTextOnlyContentForTextModel(t *testing.T) {
+	model := replayTarget()
+	model.Input = []string{"text"}
+	user := UserContentBlocks{TextContent{Text: "a"}, TextContent{Text: "(image omitted: model does not support images)"}, TextContent{Text: "b"}}
+	tool := []ToolResultMessageContent{TextContent{Text: "r"}}
+	result := TransformMessages([]Message{UserMessage{Content: user}, UserMessage{Content: UserContentBlocks(nil)}, UserMessage{Content: UserContentBlocks{}}, ToolResultMessage{ToolCallID: "x", Content: tool}}, model, nil)
+	if got := result[0].(UserMessage).Content; !reflect.DeepEqual(got, user) {
+		t.Fatalf("text-only user content = %#v", got)
+	}
+	for _, i := range []int{1, 2} {
+		if got, ok := result[i].(UserMessage).Content.(UserContentBlocks); !ok || got == nil || len(got) != 0 {
+			t.Fatalf("message %d content = %#v, want an empty block slice", i, result[i].(UserMessage).Content)
+		}
+	}
+	if got := result[3].(ToolResultMessage).Content; !reflect.DeepEqual(got, tool) {
+		t.Fatalf("text-only tool result content = %#v", got)
+	}
+}
 func TestTransformMessagesClosesPriorCallsBeforeDroppedAssistantAndAtEOF(t *testing.T) {
 	model := replayTarget()
 	call := AssistantMessage{Content: []AssistantContentBlock{ToolCall{ID: "one", Name: "tool", Arguments: JsonObject{}}}, StopReason: StopReasonToolUse}
@@ -143,5 +163,20 @@ func TestTransformMessagesClosesPriorCallsBeforeDroppedAssistantAndAtEOF(t *test
 		if len(result) < 2 || result[1].(ToolResultMessage).ToolCallID != "one" {
 			t.Fatalf("result=%#v", result)
 		}
+	}
+}
+
+// transform-messages.ts: a message is "the same model" only when provider, api and model id all match; the same provider and model id over another API (for example one catalog entry served by two endpoints) replays as a foreign message.
+func TestTransformMessagesTreatsADifferentAPIAsAForeignModel(t *testing.T) {
+	model := replayTarget()
+	source := AssistantMessage{Provider: "openai", API: APIOpenAICompletions, Model: "target", StopReason: StopReasonStop, Content: []AssistantContentBlock{
+		ThinkingContent{Thinking: "plan", ThinkingSignature: "encrypted"},
+		TextContent{Text: "answer", TextSignature: "text-sig"},
+		ToolCall{ID: "call", Name: "tool", ThoughtSignature: "thought-sig", Arguments: JsonObject{}},
+	}}
+	result := TransformMessages([]Message{source, ToolResultMessage{ToolCallID: "call", Content: []ToolResultMessageContent{TextContent{Text: "ok"}}}}, model, nil)
+	want := []AssistantContentBlock{TextContent{Text: "answer"}, ToolCall{ID: "call", Name: "tool", Arguments: JsonObject{}}}
+	if got := result[0].(AssistantMessage).Content; !reflect.DeepEqual(got, want) {
+		t.Fatalf("blocks = %#v, want the foreign replay %#v", got, want)
 	}
 }

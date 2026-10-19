@@ -8,6 +8,7 @@ import (
 	"github.com/MichaelKinsy/PiG/ai"
 	"github.com/MichaelKinsy/PiG/durable"
 	"github.com/MichaelKinsy/PiG/durable/env"
+	"github.com/MichaelKinsy/PiG/telemetry"
 )
 
 // HookApi is what a hook may use: committed reads and the asking task's memos, which hooks and the task share.
@@ -15,6 +16,8 @@ type HookApi interface {
 	durable.DocumentReader
 	TaskId() durable.TaskId
 	ConversationId() durable.ConversationId
+	// Models is HarnessOptions.models.
+	Models() durable.Models
 	// Memo reads a memo; ok is false when absent.
 	Memo(ctx context.Context, name string) (value durable.JsonValue, ok bool, err error)
 	// MemoCandidate stores candidate unless a memo already exists and returns the durable winner.
@@ -43,18 +46,38 @@ type GenerationHooks struct {
 	AfterTools func(ctx context.Context, assistant durable.EntryId, results []durable.EntryId, api HookApi) error
 }
 
+// ToolParent is the calling task and call ID of a nested call.
+type ToolParent struct {
+	TaskId durable.TaskId
+	CallId string
+}
+
+// ToolHookCall is a call as tool hooks see it; Parent is set for a nested call, one a running tool made through
+// ExecuteTool (types.ts ToolHookCall).
+type ToolHookCall struct {
+	// Type is "toolCall": the discriminator of pi-ai's ToolCall, which Go carries as the type of the call.
+	Type string
+	ai.ToolCall
+	Parent *ToolParent
+}
+
+// NewToolHookCall is the ToolHookCall for call, with parent set for a nested call.
+func NewToolHookCall(call ai.ToolCall, parent *ToolParent) ToolHookCall {
+	return ToolHookCall{Type: "toolCall", ToolCall: call, Parent: parent}
+}
+
 // BeforeToolResult is a beforeTool decision: a non-nil Block blocks the call, otherwise non-nil Arguments replace its arguments.
 type BeforeToolResult struct {
-	Arguments durable.JsonObject
+	Arguments map[string]any
 	Block     *string
 }
 
 // ToolHooks are the hooks of the built-in tool task. A nil member does not run. Register them as *ToolHooks.
 type ToolHooks struct {
 	// BeforeTool runs before intent; the first block wins, otherwise arguments replace the call's arguments. An error blocks.
-	BeforeTool func(ctx context.Context, call ai.ToolCall, api HookApi) (*BeforeToolResult, error)
+	BeforeTool func(ctx context.Context, call ToolHookCall, api HookApi) (*BeforeToolResult, error)
 	// AfterTool runs after execution, before the result entry; a non-nil result replaces the result.
-	AfterTool func(ctx context.Context, call ai.ToolCall, result durable.ToolExecutionResult, api HookApi) (*durable.ToolExecutionResult, error)
+	AfterTool func(ctx context.Context, call ToolHookCall, result durable.ToolExecutionResult, api HookApi) (*durable.ToolExecutionResult, error)
 }
 
 // CompactionRequest is what a beforeCompact hook sees: Entries are the active entries the summary replaces, the head marker first, and Messages their model context, the summarizer's source; FirstKept is the first entry kept verbatim.
@@ -111,19 +134,60 @@ type EnvTarget struct {
 
 // HarnessOptions are the options of OpenHarness.
 type HarnessOptions struct {
-	// Models is the pi-ai model access used by generation and compaction: a Model Runtime or a pi-ai collection.
-	Models   durable.Models
-	Registry RegistryReader
+	// Telemetry is the host-owned adapter, HarnessOptions.telemetry: a telemetry.TelemetryContext that may also implement
+	// telemetry.TelemetryPropagation and telemetry.TelemetryMetrics. Durable instrumentation is not yet emitted: the option
+	// reserves the configuration boundary, and a nil Telemetry is the omitted option.
+	// Pi types it as `TelemetryContext & Partial<TelemetryPropagation & TelemetryMetrics>`, an object that may define any
+	// subset of the propagation and metrics members. Go has no partial interface: the optional capabilities are the
+	// interfaces themselves, found by asserting Telemetry to telemetry.TelemetryPropagation and telemetry.TelemetryMetrics,
+	// and an adapter either implements all members of one or none of them.
+	Telemetry telemetry.TelemetryContext
+	// Models is the pi-ai model access used by generation, compaction, hooks and tools: a Model Runtime or a pi-ai
+	// collection. ModelsFunc, when set, replaces it: it returns the current one and is called at each use, so a host can
+	// replace its model configuration without reopening the Harness (HarnessOptions.models as a function, Pi 7ec1f648).
+	Models     durable.Models
+	ModelsFunc func() durable.Models
+	Registry   RegistryReader
 	// Settings returns the current settings at every resolution; nil uses the defaults. Upstream reads a settings object whose fields may be getters.
+	// It is called from the Harness's own goroutines (the Session line, the scheduler, task runtimes, graph views), concurrently with the host and
+	// with itself, and the returned value is read after the call returns. It must be safe for concurrent use and the value must not be written once
+	// returned. Publish a change by returning a new value, for example from an atomic.Pointer.
 	Settings func() *HarnessSettings
 	// Env builds a conversation's environment at each use. It never runs on the Session line. Nil means no environment.
 	Env func(ctx context.Context, target EnvTarget) (env.ExecutionEnv, error)
 	// ConversationCreated runs in every commit that creates or forks a conversation, raw tx.CreateConversation included, after the built-in pi.* documents and before the conveniences apply the agent change and run init. A fork already has its copies. Table reads fail with ReadAfterWrite; an error fails the creating commit.
 	ConversationCreated func(tx durable.Tx, conversation durable.ConversationRecord) error
-	// Now is the Harness clock in milliseconds; nil uses the wall clock.
+	// Now is the Harness clock, epoch milliseconds; nil uses the wall clock. Sleeping tasks store deadlines on it, so
+	// every process that opens the same storage must use the same clock.
 	Now func() float64
-	// OnReport receives extension failures that do not fail the calling operation. It must not panic.
-	OnReport func(err error)
+	// SetTimer arms the timers of the Session, the scheduler, and its tasks: pacing progress commits, freeing idle
+	// memory (background), and, without OnWake, resuming sleeping tasks; and the timers of TaskRuntime.SetTimer. The
+	// Node.js environment, file watcher, and image worker keep their own timers. Nil uses Go timers. Tests can pass fake
+	// timers; a host can keep timers off a process that should hibernate.
+	SetTimer durable.SetTimer
+	// OnWake wakes the process for sleeping tasks instead of a SetTimer timer. Without it, while scheduling runs, a timer
+	// that keeps the process alive resumes sleeping tasks when they are due. With it, the Harness arms no timer for
+	// them: it calls OnWake after open and whenever Harness.Wake() changes, and the host arms its own wakeup, such as a
+	// Durable Object alarm, and calls Resume() when it fires. Called off the Session line, after the commit that changed
+	// the value, so a host arms a recovery wakeup before calls that can start work. It may call Wake and Resume, and
+	// must not block. A panic is reported, and the value is offered again at the next change.
+	OnWake func(wake Wake)
+	// OnReport receives failures that do not fail the calling operation, such as a panicking hook or listener, a task
+	// that faulted, and the error that fails the Session, once. info says what happened: a host can tell a failed
+	// Session (ReportSessionFailed, often a platform reset) from a faulted task (ReportTaskFaulted) or a parked one
+	// (ReportTaskParked). A panic of its own is dropped.
+	OnReport func(err error, info durable.ReportInfo)
+}
+
+// Wake is when a Session next needs a running process (Harness.Wake). Active: some task can run now or is running, so a
+// process that dies must be woken again soon, for example by a recovery alarm. At: the earliest sleep not yet due, when
+// there is one. Neither: nothing needs a process until new work is submitted. Tasks blocked on a missing or unmigratable
+// definition, completing tasks, and waits on live tasks do not count; the work they wait for does. Active is also set while
+// a reconcile pass, such as the recovery of Open, has not landed yet: it may finalize held outcomes and mark cascades.
+type Wake struct {
+	Active bool
+	// At is the earliest sleep not yet due; nil when there is none.
+	At *float64
 }
 
 // TaskInspectionKind is the kind of a TaskInspectionState.
@@ -133,17 +197,20 @@ const (
 	TaskInspectionRunning    TaskInspectionKind = "running"
 	TaskInspectionReady      TaskInspectionKind = "ready"
 	TaskInspectionWaiting    TaskInspectionKind = "waiting"
+	TaskInspectionSleeping   TaskInspectionKind = "sleeping"
 	TaskInspectionCompleting TaskInspectionKind = "completing"
 	TaskInspectionBlocked    TaskInspectionKind = "blocked"
 )
 
-// TaskInspectionState is what the scheduler would do with a live task: running (an invocation is active); ready (the next scheduling pass reserves it; Migrates when its definition is newer and has a migration); waiting (on these live tasks: the live part of its on, or, when abort-marked, its live ordinary owned work); completing (outcome held until its ordinary owned work drains); blocked (no registered definition can take it, with Reason missing_task, task_too_old, or migration_failed and an optional Error).
+// TaskInspectionState is what the scheduler would do with a live task: running (an invocation is active); ready (the next scheduling pass reserves it; Migrates when its definition is newer and has a migration); waiting (on these live tasks: the live part of its on, or, when abort-marked, its live ordinary owned work); sleeping (until the Harness clock reaches Until); completing (outcome held until its ordinary owned work drains); blocked (no registered definition can take it, or the restart limit parked it, with Reason missing_task, task_too_old, migration_failed, or restart_limit and an optional Error).
 type TaskInspectionState struct {
 	Kind     TaskInspectionKind
 	Migrates bool
 	On       []durable.TaskId
-	Reason   string
-	Error    error
+	// Until is the time a sleeping task wakes at.
+	Until  float64
+	Reason string
+	Error  error
 }
 
 // TaskInspection is a live task and what the scheduler would do with it under the current registry.
@@ -177,8 +244,11 @@ type Conversation interface {
 	Compact(ctx context.Context, instructions *string) (durable.TaskId, error)
 	// Commit runs a Session commit whose tx.CreateTask defaults to this conversation.
 	Commit(ctx context.Context, change func(tx durable.Tx) (any, error)) (any, error)
-	Context(ctx context.Context) (durable.ContextView, error)
-	// Entries returns the newest-first fork-aware history of this conversation; query.ConversationId is ignored.
+	// Context returns the committed raw active transcript and model context. With options.At, it returns the context as
+	// of that visible entry: the same view Fork(at) would start with, without creating a conversation.
+	Context(ctx context.Context, options *durable.ContextOptions) (durable.ContextView, error)
+	// Entries returns the fork-aware history of this conversation, newest first unless query.Order is ScanAscending;
+	// query.ConversationId is ignored.
 	Entries(ctx context.Context, query durable.EntryQuery, limit int, cursor durable.Cursor) (durable.Page[durable.EntryRecord, durable.Cursor], error)
 	Fork(ctx context.Context, at durable.EntryId, options ConversationCreateOptions) (Conversation, error)
 	// Abort withdraws queued inputs (queued writes stay), marks every live non-background task of the ordinary ownership scope, signals them, and returns once the scope is idle. Background subtrees survive unless options.Background is set.
@@ -196,6 +266,10 @@ type Harness interface {
 	durable.Session
 	// Resume enables task scheduling. It is idempotent and panics after close. Calls that ask for progress enable it too: Conversation.Submit, Compact, Abort, WaitForIdle, Submission.Wait, WaitForTask, and Harness.WaitForIdle. Read-only viewers never do.
 	Resume()
+	// Wake is when this Session next needs a running process, from the scheduler's memory: Active while some task can run
+	// now or is running, At for the earliest sleep. Answers also while scheduling is paused. A host that wakes the
+	// process itself, such as a Durable Object alarm, arms from it and calls Resume when woken; see HarnessOptions.OnWake.
+	Wake() Wake
 	// Root returns the reserved root conversation, creating it with options.Agent and options.Init in one commit when absent.
 	Root(ctx context.Context, options *RootOptions) (Conversation, error)
 	// Conversation returns nil when absent.
@@ -209,9 +283,14 @@ type Harness interface {
 	Submission(ctx context.Context, id durable.SubmissionId) (durable.Submission, error)
 	// AbortSubmission returns not_found for an unknown submission or one of another conversation than conversationId, when given.
 	AbortSubmission(ctx context.Context, id durable.SubmissionId, conversationId *durable.ConversationId) (durable.SubmissionAbortResult, error)
+	// RetryTask runs a task parked by settings.restartLimit again: it clears its restart count and enables scheduling. It
+	// does nothing for a task that is not parked, and fails for an unknown one.
+	RetryTask(ctx context.Context, id durable.TaskId) error
 	// AbortTask commits the abort mark, signals and joins an active run invocation, and schedules the abort invocation. A task whose definition cannot take it settles as orphaned instead. It returns marked or terminal.
 	AbortTask(ctx context.Context, id durable.TaskId) (string, error)
-	// WaitForTask returns the terminal receipt; cancelling ctx cancels only this wait.
+	// WaitForTask returns the terminal receipt; cancelling ctx cancels only this wait. A conversation-owned task nothing waits for commits in
+	// an order set by goroutine scheduling against its conversation's generation, so its record can still be live when the answer settles
+	// (D181); wait for it, or for WaitForIdle, before reading its state.
 	WaitForTask(ctx context.Context, id durable.TaskId) (durable.SettledTask[durable.JsonValue], error)
 	// WaitForIdle returns when the ordinary ownership scope of every ownerless conversation has no live non-background task.
 	WaitForIdle(ctx context.Context) error
@@ -221,4 +300,12 @@ type Harness interface {
 	TaskGraph(ctx context.Context) (durable.AttachedReplicatedState[TaskGraph], error)
 	// WatchTaskGraph returns the task graph as a serialized exact-frame watch with bounded pending frames.
 	WatchTaskGraph(ctx context.Context) (TaskGraphWatch, error)
+}
+
+// CurrentModels is HarnessOptions.models at this use: ModelsFunc's answer when set, else Models.
+func (options HarnessOptions) CurrentModels() durable.Models {
+	if options.ModelsFunc != nil {
+		return options.ModelsFunc()
+	}
+	return options.Models
 }

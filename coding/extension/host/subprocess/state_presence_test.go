@@ -1,3 +1,5 @@
+//go:build !pig_strip_node_extensions
+
 package subprocess
 
 import (
@@ -77,9 +79,9 @@ r.applyState({contextUsage: {tokens: 0, contextWindow: 128000, percent: 0}});
 assert.equal(r.ctx.getContextUsage().tokens, 0, "measured zero");
 r.applyState({editorText: "unrelated"});
 assert.equal(r.ctx.getContextUsage().contextWindow, 128000, "partial update retains usage");
-r.applyState({allTools:[{name:"read"}], commands:[{name:"x"}], allThemes:[{name:"dark"}], flags:{flag:true}});
-r.applyState({allTools:null, commands:null, allThemes:null, flags:null});
-assert.deepEqual([r.state.allTools, r.state.commands, r.state.allThemes, r.state.flags], [[], [], [], {}]);
+r.applyState({commands:[{name:"x"}], allThemes:[{name:"dark"}], flags:{flag:true}});
+r.applyState({commands:null, allThemes:null, flags:null});
+assert.deepEqual([r.state.commands, r.state.allThemes, r.state.flags], [[], [], {}]);
 assert.equal(r.footerDataProvider().getGitBranch(), null, "absent git branch");
 r.applyState({footerData:{gitBranch:"main"}});
 assert.equal(r.footerDataProvider().getGitBranch(), "main");
@@ -107,7 +109,7 @@ func TestNodeSnapshotClearsPreviousSessionState(t *testing.T) {
 			prompt := "old prompt"
 			b.SetActions(&HostCallbacks{
 				GetSessionID: func() string { return "session" }, GetSessionName: func() string { return name }, GetSessionFile: func() string { return file },
-				GetModelInfo: func() map[string]any { return model }, GetActiveTools: func() []string { return tools }, GetSystemPrompt: func() string { return prompt },
+				GetModelInfo: func() json.RawMessage { return modelJSON(model) }, GetActiveTools: func() []string { return tools }, GetSystemPrompt: func() string { return prompt },
 			})
 			entry := filepath.Join(t.TempDir(), "state.mjs")
 			write(t, entry, `export default function(pi) { pi.registerCommand("state", {handler: (args, ctx) => {

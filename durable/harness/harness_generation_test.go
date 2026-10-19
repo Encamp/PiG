@@ -2,6 +2,8 @@
 
 package harness
 
+// pi: packages/durable/src/harness/generation.ts
+
 import (
 	"context"
 	"encoding/json"
@@ -113,7 +115,16 @@ func (collected *livePublications) all() []LiveState {
 }
 
 // messageText decodes a stored message and returns its text.
-func messageText(t *testing.T, message durable.JsonObject) (string, bool) {
+func messageText(t *testing.T, message *ai.AssistantMessage) (string, bool) {
+	t.Helper()
+	if message == nil {
+		return "", false
+	}
+	return textOf(*message)
+}
+
+// messageTextJSON is messageText of a partial message read from an erased watch, which delivers the document as JSON.
+func messageTextJSON(t *testing.T, message durable.JsonObject) (string, bool) {
 	t.Helper()
 	if message == nil {
 		return "", false
@@ -203,7 +214,7 @@ func TestGeneration(t *testing.T) {
 
 	t.Run("stores partials as deltas and a complete base once nothing is in flight", func(t *testing.T) {
 		// upstream: packages/durable/test/harness-generation.test.ts:119
-		setup := chatSetup(t, ai.FauxConfig{TokensPerSecond: 200, MinTokenSize: 1, MaxTokenSize: 1})
+		setup := chatSetup(t, ai.FauxConfig{TokensPerSecond: 200, TokenSize: &ai.FauxTokenSize{Min: new(1), Max: new(1)}})
 		setup.Faux.SetResponses([]ai.FauxResponseStep{fauxAnswer(strings.Repeat("w", 200))})
 		store := newControlledStorage()
 		harness, root := openChat(t, store, setup)
@@ -407,7 +418,7 @@ func TestGeneration(t *testing.T) {
 
 	t.Run("converts the committed partial when aborted during streaming", func(t *testing.T) {
 		// upstream: packages/durable/test/harness-generation.test.ts:291
-		setup := chatSetup(t, ai.FauxConfig{TokensPerSecond: 20, MinTokenSize: 1, MaxTokenSize: 1})
+		setup := chatSetup(t, ai.FauxConfig{TokensPerSecond: 20, TokenSize: &ai.FauxTokenSize{Min: new(1), Max: new(1)}})
 		setup.Faux.SetResponses([]ai.FauxResponseStep{fauxAnswer(strings.Repeat("x", 400))})
 		harness, root := openChat(t, storage.NewMemoryStorage(), setup)
 		harness.Resume()
@@ -501,11 +512,11 @@ func TestGeneration(t *testing.T) {
 		var mu sync.Mutex
 		seen := []ai.StreamOptions{}
 		record := func(answer string) ai.FauxResponseStep {
-			return ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.FauxResponse, error) {
+			return ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.AssistantMessage, error) {
 				mu.Lock()
 				seen = append(seen, options)
 				mu.Unlock()
-				return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText(answer)}}, nil
+				return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText(answer)}}.AssistantMessage(), nil
 			})
 		}
 		setup.Faux.SetResponses([]ai.FauxResponseStep{record("a"), record("b")})
@@ -554,7 +565,7 @@ func TestGeneration(t *testing.T) {
 		setup := chatSetup(t)
 		var mu sync.Mutex
 		seen := map[string][]string{}
-		capture := ai.FauxFactoryStep(func(transcript ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.FauxResponse, error) {
+		capture := ai.FauxFactoryStep(func(transcript ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.AssistantMessage, error) {
 			text := ""
 			messages := transcript.Messages()
 			for _, message := range slices.Backward(messages) {
@@ -568,7 +579,7 @@ func TestGeneration(t *testing.T) {
 			mu.Lock()
 			seen[text] = append(seen[text], options.SessionID)
 			mu.Unlock()
-			return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText("answer:" + text)}}, nil
+			return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText("answer:" + text)}}.AssistantMessage(), nil
 		})
 		setup.Faux.SetResponses([]ai.FauxResponseStep{capture, capture, capture, capture})
 		harness, root := openChat(t, storage.NewMemoryStorage(), setup)
@@ -610,11 +621,11 @@ func TestGeneration(t *testing.T) {
 		setup := chatSetup(t)
 		var mu sync.Mutex
 		sent := ""
-		setup.Faux.SetResponses([]ai.FauxResponseStep{ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.FauxResponse, error) {
+		setup.Faux.SetResponses([]ai.FauxResponseStep{ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.AssistantMessage, error) {
 			mu.Lock()
 			sent = options.SessionID
 			mu.Unlock()
-			return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText("ok")}}, nil
+			return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText("ok")}}.AssistantMessage(), nil
 		})})
 		harness, root := openChat(t, storage.NewMemoryStorage(), setup)
 		retireProviderDoc(t, root)
@@ -646,17 +657,17 @@ func TestGeneration(t *testing.T) {
 			}
 		}
 		setup.Faux.SetResponses([]ai.FauxResponseStep{
-			ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.FauxResponse, error) {
+			ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.AssistantMessage, error) {
 				observe(options)
 				// The user changes the setting while the first attempt runs.
 				mu.Lock()
 				timeoutMs = 222
 				mu.Unlock()
-				return ai.FauxResponse{StopReason: "error", ErrorMessage: "503 Service Unavailable"}, nil
+				return ai.FauxResponse{StopReason: "error", ErrorMessage: "503 Service Unavailable"}.AssistantMessage(), nil
 			}),
-			ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.FauxResponse, error) {
+			ai.FauxFactoryStep(func(_ ai.TranscriptContext, options ai.StreamOptions, _ *ai.FauxProviderState, _ *ai.Model) (ai.AssistantMessage, error) {
 				observe(options)
-				return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText("ok")}}, nil
+				return ai.FauxResponse{Content: []ai.FauxContentBlock{ai.FauxText("ok")}}.AssistantMessage(), nil
 			}),
 		})
 		settings := func() *HarnessSettings {
@@ -688,9 +699,25 @@ func TestGeneration(t *testing.T) {
 			ToolExecution: durable.ToolExecutionParallel,
 			SteeringMode:  durable.QueueOneAtATime,
 			FollowUpMode:  durable.QueueOneAtATime,
+
+			ContextRetentionMs:  600_000,
+			DocumentRetentionMs: 600_000,
+			AfterFailedRun:      durable.AfterFailedRunKeep,
+			RestartLimit:        5,
+		}
+		// agent.ts:19 DEFAULT_RETRY_POLICY is the retry policy of unset host settings.
+		if !reflect.DeepEqual(DefaultRetryPolicy, want.Retry) {
+			t.Fatalf("DefaultRetryPolicy = %+v, want %+v", DefaultRetryPolicy, want.Retry)
 		}
 		if got := ResolveSettings(nil); !reflect.DeepEqual(got, want) {
 			t.Fatalf("settings = %+v, want %+v", got, want)
+		}
+		// harness-generation.test.ts:498: a restart limit that is not a number of restarts, 1 or more, means the default; Infinity never parks.
+		if limit := ResolveSettings(&HarnessSettings{RestartLimit: new(0.0)}).RestartLimit; limit != 5 {
+			t.Fatalf("restartLimit 0 resolved to %v, want 5", limit)
+		}
+		if limit := ResolveSettings(&HarnessSettings{RestartLimit: new(math.Inf(1))}).RestartLimit; !math.IsInf(limit, 1) {
+			t.Fatalf("restartLimit Infinity resolved to %v, want Infinity", limit)
 		}
 		resolved := ResolveSettings(&HarnessSettings{Retry: &RetryPolicyPatch{Enabled: new(false)}, Compaction: &CompactionPolicyPatch{BackgroundTokens: new(0)}})
 		if resolved.Retry.Enabled || resolved.Retry.MaxRetries != 3 || resolved.Retry.BaseDelayMs != 2000 {
@@ -744,9 +771,8 @@ func TestGeneration(t *testing.T) {
 			Kind string `json:"kind"`
 		}
 		agentDoc := durable.DefineDoc(durable.DocDefinition[agentState]{
-			CommonDocDefinition: durable.CommonDocDefinition[agentState]{Kind: "test.agent", Version: 1},
+			CommonDocDefinition: durable.CommonDocDefinition[agentState]{Kind: "test.agent", Version: 1, Initial: func() agentState { return agentState{Cwd: "/", Kind: "main"} }},
 			DocumentSemantics:   durable.DocumentSemantics{Scope: durable.ScopeConversation, History: durable.HistoryLatest, Fork: durable.ForkCurrent},
-			Initial:             func() agentState { return agentState{Cwd: "/", Kind: "main"} },
 		})
 		read := func(ctx context.Context, input durable.PromptInput) (*agentState, error) {
 			return durable.Snapshot(ctx, input.Read, agentDoc, input.ConversationId)
@@ -970,31 +996,7 @@ func (snapshot generationlessSnapshot) Tasks() []durable.AnyTask {
 
 func (snapshot generationlessSnapshot) Task(name string) durable.AnyTask {
 	if name == "pi.generation" {
-		return nil
+		return durable.AnyTask{}
 	}
 	return snapshot.RegistrySnapshot.Task(name)
-}
-
-// Not an upstream case: streamResponse arms its partial throttle with setTimeout(flush, partialIntervalMs), and Node
-// truncates the delay to whole milliseconds and replaces one below 1 ms, above 2147483647 ms, or NaN with 1 ms.
-func TestPartialThrottleDelayFollowsSetTimeout(t *testing.T) {
-	for _, step := range []struct {
-		milliseconds float64
-		want         time.Duration
-	}{
-		{100, 100 * time.Millisecond},
-		{150.9, 150 * time.Millisecond},
-		{1, time.Millisecond},
-		{0.5, time.Millisecond},
-		{0, time.Millisecond},
-		{-5, time.Millisecond},
-		{math.NaN(), time.Millisecond},
-		{2_147_483_647, 2_147_483_647 * time.Millisecond},
-		{2_147_483_648, time.Millisecond},
-		{math.Inf(1), time.Millisecond},
-	} {
-		if got := millisecondsDuration(step.milliseconds); got != step.want {
-			t.Errorf("millisecondsDuration(%v) = %v, want %v", step.milliseconds, got, step.want)
-		}
-	}
 }

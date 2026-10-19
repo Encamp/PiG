@@ -147,14 +147,15 @@ type assertBlock struct {
 }
 
 type jsonAliasRule struct {
-	Pig     string   `toml:"pig"`
-	Pi      string   `toml:"pi"`
-	Roots   []string `toml:"roots"`
-	Paths   []string `toml:"paths"`
-	Kind    string   `toml:"kind"`
-	Group   string   `toml:"group"`
-	Pattern string   `toml:"pattern"`
-	Reason  string   `toml:"reason"`
+	Pig      string   `toml:"pig"`
+	Pi       string   `toml:"pi"`
+	Roots    []string `toml:"roots"`
+	Paths    []string `toml:"paths"`
+	Kind     string   `toml:"kind"`
+	Group    string   `toml:"group"`
+	Pattern  string   `toml:"pattern"`
+	Optional bool     `toml:"optional"`
+	Reason   string   `toml:"reason"`
 }
 
 type normalizeReplaceBlock struct {
@@ -180,6 +181,7 @@ type envBlock struct {
 	PigExtensions    []string `toml:"pig_extensions"`
 	PiExtensions     []string `toml:"pi_extensions"`
 	PigBin           string   `toml:"pig_bin"`
+	PigGoTests       []string `toml:"pig_go_tests"`
 	PiBin            string   `toml:"pi_bin"`
 	OverrideBaseArgs bool     `toml:"override_base_args"`
 }
@@ -252,6 +254,7 @@ type rpcInputStep struct {
 	Line               string   `toml:"line"`
 	WaitContains       []string `toml:"wait_contains"`
 	WaitTimeoutSeconds int      `toml:"wait_timeout_seconds"`
+	PollUntil          string   `toml:"poll_until"`
 }
 
 type extensionHostBlock struct {
@@ -424,7 +427,10 @@ func lintScenario(path, source string, sc *scenario, known map[string]bool, know
 		if strings.TrimSpace(step.Line) == "" {
 			out = append(out, violation{path, "rpc-step-line", fmt.Sprintf("rpc step %d requires line", i+1)})
 		}
-		if (len(step.WaitContains) > 0 || step.WaitEvent != "") && step.WaitTimeoutSeconds <= 0 {
+		if step.PollUntil != "" && (step.WaitEvent != "" || len(step.WaitContains) > 0) {
+			out = append(out, violation{path, "rpc-step-poll", fmt.Sprintf("rpc step %d poll_until replaces wait_event and wait_contains", i+1)})
+		}
+		if (len(step.WaitContains) > 0 || step.WaitEvent != "" || step.PollUntil != "") && step.WaitTimeoutSeconds <= 0 {
 			out = append(out, violation{path, "rpc-step-timeout", fmt.Sprintf("rpc step %d with wait_contains requires wait_timeout_seconds", i+1)})
 		}
 	}
@@ -574,6 +580,12 @@ func lintScenario(path, source string, sc *scenario, known map[string]bool, know
 	if hasTag(sc.Tags, "fixture-auth") && (!hasTag(sc.Tags, "hermetic") || hasTag(sc.Tags, "requires-auth")) {
 		out = append(out, violation{path, "fixture-auth-contract",
 			fmt.Sprintf("scenario %q uses fixture-auth without an exclusively hermetic auth contract", sc.Name)})
+	}
+	// A real model call needs real provider credentials, which only the owner holds. The scenario carries owner-credentials:
+	// `make parity-live` names it as not run there, and `make parity-live-owner` runs it on the owner's machine.
+	if hasTag(sc.Tags, "real-llm") && !hasTag(sc.Tags, "owner-credentials") {
+		out = append(out, violation{path, "real-llm-owner-credentials",
+			fmt.Sprintf("scenario %q makes a real model call; tag it owner-credentials so the owner runs it with make parity-live-owner", sc.Name)})
 	}
 
 	// Rule 16: a behavioral scenario must make a behavioral assertion. Merely
@@ -809,7 +821,13 @@ func hasTag(tags []string, tag string) bool {
 	return slices.Contains(tags, tag)
 }
 
-var portMapRowRE = regexp.MustCompile(`^\|\s+` + "`" + `([^` + "`" + `]+)` + "`" + `\s+\|`)
+// A PORT_MAP row is | `upstream path` | Pig cell | status |. The Pig cell is whatever sits between the upstream span and the status: empty, code spans, or code spans followed by prose.
+var (
+	portMapRowRE        = regexp.MustCompile("^\\|\\s+`([^`]+)`\\s+\\|.*\\|\\s+(?:✅|🟡|⬜|⏸|🔴|n/a)\\s+\\|\\s*$")
+	portMapSeparatorRE  = regexp.MustCompile(`^\|[\s:|-]+\|\s*$`)
+	portMapHeaderRE     = regexp.MustCompile(`^\|\s+[Uu]pstream\s+\|`)
+	portMapDownstreamRE = regexp.MustCompile(`^\|\s+_\(downstream: [^)]*\)_\s+\|`)
+)
 
 var speculativeCoverageRE = regexp.MustCompile(`(?i)\b(?:may|might|possibly)\s+exercise\b`)
 
@@ -852,17 +870,22 @@ func parseDivergenceIDs(path string) (map[string]bool, error) {
 	return out, nil
 }
 
+// parsePortMapPaths returns every upstream path PORT_MAP names. Header, separator and downstream rows are skipped by shape; any other line that starts with `|` and does not parse is an error, so no row is dropped silently.
 func parsePortMapPaths(path string) (map[string]bool, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 	out := make(map[string]bool)
-	for line := range strings.SplitSeq(string(data), "\n") {
-		m := portMapRowRE.FindStringSubmatch(line)
-		if m != nil {
-			out[m[1]] = true
+	for i, line := range strings.Split(string(data), "\n") {
+		if !strings.HasPrefix(line, "|") || portMapSeparatorRE.MatchString(line) || portMapHeaderRE.MatchString(line) || portMapDownstreamRE.MatchString(line) {
+			continue
 		}
+		m := portMapRowRE.FindStringSubmatch(line)
+		if m == nil {
+			return nil, fmt.Errorf("%s:%d: malformed PORT_MAP row (want | `upstream path` | pig cell | status |): %s", path, i+1, line)
+		}
+		out[m[1]] = true
 	}
 	return out, nil
 }

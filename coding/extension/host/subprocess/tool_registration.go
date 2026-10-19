@@ -39,23 +39,6 @@ func (h *Host) handleToolRegistration(ctx context.Context, me *managedExt, conn 
 	if _, err := h.uiBridge.handleCall(ctx, me.config.Name, conn, &CallPayload{Method: "refreshTools"}); err != nil {
 		return nil, err
 	}
-	all, err := h.uiBridge.handleCall(ctx, me.config.Name, conn, &CallPayload{Method: "getAllTools"})
-	if err != nil {
-		return nil, err
-	}
-	active, err := h.uiBridge.handleCall(ctx, me.config.Name, conn, &CallPayload{Method: "getActiveTools"})
-	if err != nil {
-		return nil, err
-	}
-	var allTools, activeTools struct {
-		Tools json.RawMessage `json:"tools"`
-	}
-	if err := json.Unmarshal(all.Result, &allTools); err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(active.Result, &activeTools); err != nil {
-		return nil, err
-	}
-	result, err := json.Marshal(map[string]any{"allTools": allTools.Tools, "activeTools": activeTools.Tools})
-	return &CallResultPayload{Result: result}, err
+	// The registry is read through getAllTools and getActiveTools, which every SDK answers with a host call, so the reply carries none of it: a registration costs the same at any catalog size.
+	return &CallResultPayload{}, nil
 }

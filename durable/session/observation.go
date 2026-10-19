@@ -5,10 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"sync"
 
 	"github.com/MichaelKinsy/PiG/chord"
 	"github.com/MichaelKinsy/PiG/durable"
+	"github.com/MichaelKinsy/PiG/internal/entered"
+	"github.com/MichaelKinsy/PiG/internal/goroutineid"
 )
 
 // Ports packages/durable/src/session/observation.ts
@@ -38,10 +41,27 @@ func isRetiredValue(value any) bool {
 // pending counts deliveries upstream runs from the microtask queue, so a
 // caller can wait until every scheduled delivery has drained.
 type pending struct {
-	mu     sync.Mutex
-	count  int
-	idle   *sync.Cond
-	drains []func()
+	mu         sync.Mutex
+	count      int
+	idle       *sync.Cond
+	drains     []func()
+	deliveries []*delivery
+}
+
+// delivery is one scheduled delivery goroutine. started is closed once id is set; done once the goroutine ended.
+type delivery struct {
+	id      uint64
+	started chan struct{}
+	done    chan struct{}
+}
+
+func (d *delivery) finished() bool {
+	select {
+	case <-d.done:
+		return true
+	default:
+		return false
+	}
 }
 
 func newPending() *pending {
@@ -119,13 +139,52 @@ func (tracker *pending) run(drains []func()) {
 }
 
 // schedule runs job off the caller's goroutine, as upstream's queueMicrotask
-// runs it outside the publishing call.
+// runs it outside the publishing call. awaitEntered waits for what it scheduled.
 func (tracker *pending) schedule(job func()) {
+	d := &delivery{started: make(chan struct{}), done: make(chan struct{})}
 	tracker.begin()
+	tracker.mu.Lock()
+	tracker.deliveries = append(slices.DeleteFunc(tracker.deliveries, (*delivery).finished), d)
+	tracker.mu.Unlock()
+	//portlint:allow asyncorder joined by pending.wait (begin/end count); watch frames are taken under watch.mu in publish order and one runs at a time, as observation.ts:239-275 #schedule/#drain
 	go func() {
+		d.id = goroutineid.Current()
+		close(d.started)
+		defer close(d.done)
 		defer tracker.end()
 		job()
 	}()
+}
+
+// awaitEntered blocks until every delivery scheduled before the call has entered: its callback returned or is parked in a
+// wait or blocked behind a lock (internal/entered.AwaitBlocked), never until it finishes a wait of its own. Upstream's
+// drain microtask enters the listener, up to the listener's first await, before the code that awaited a commit's promise
+// resumes; a Go caller that resumes on another goroutine awaits the deliveries it would otherwise outrun. A Go listener
+// that waits for a lock is the analogue of an upstream listener's await, and the caller may be the holder: it is not
+// waited for. A delivery on the caller's own goroutine is skipped, and a listener that waits for the Harness is parked
+// in that wait, so waiting listeners never wait for each other. It returns the cause of ctx when ctx ends the wait.
+func (tracker *pending) awaitEntered(ctx context.Context) error {
+	tracker.mu.Lock()
+	scheduled := slices.DeleteFunc(slices.Clone(tracker.deliveries), (*delivery).finished)
+	tracker.mu.Unlock()
+	if len(scheduled) == 0 {
+		return nil
+	}
+	self := goroutineid.Current()
+	for _, d := range scheduled {
+		select {
+		case <-d.started:
+		case <-ctx.Done():
+			return context.Cause(ctx)
+		}
+		if d.id == self {
+			continue
+		}
+		if err := entered.AwaitBlocked(ctx, d.id, d.done); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // CommittedStateSource is the Session-to-Chord bridge owned one-to-one by one
@@ -366,6 +425,8 @@ type CommittedWatch[T any] struct {
 	scheduler *pending
 	detach    func()
 	replace   func() T
+	// report receives a listener's failure, which also ends the watch; nil drops it.
+	report    func(error)
 	pending   []watchFrame[T]
 	closed    chan struct{}
 	value     T
@@ -384,7 +445,9 @@ type CommittedWatch[T any] struct {
 // when the watch ends; replace gives the value an overflow delivers, and nil delivers the newest value. Ports
 // observation.ts:174 CommittedWatch constructor (view.ts:104, events.ts:132).
 func NewCommittedWatch[T any](session *SessionImpl, value T, detach func(), replace func() T) *CommittedWatch[T] {
-	return newCommittedWatch(value, detach, replace, session.scheduler)
+	watch := newCommittedWatch(value, detach, replace, session.scheduler)
+	watch.report = session.reportListener
+	return watch
 }
 
 func newCommittedWatch[T any](value T, detach func(), replace func() T, scheduler *pending) *CommittedWatch[T] {
@@ -455,7 +518,12 @@ func (watch *CommittedWatch[T]) Cancel() {
 	watch.terminate(durable.WatchEnd{Reason: durable.WatchCancelled})
 }
 
-func (watch *CommittedWatch[T]) CloseSession() {
+// CloseSession ends the watch with session_closed, or with session_failed and the error when the Session failed.
+func (watch *CommittedWatch[T]) CloseSession(failure error) {
+	if failure != nil {
+		watch.terminate(durable.WatchEnd{Reason: durable.WatchSessionFailed, Error: failure})
+		return
+	}
 	watch.terminate(durable.WatchEnd{Reason: durable.WatchSessionClosed})
 }
 
@@ -541,7 +609,14 @@ func (watch *CommittedWatch[T]) drain(frame watchFrame[T]) {
 		watch.mu.Lock()
 		if err != nil {
 			if watch.end == nil {
-				watch.terminateLocked(durable.WatchEnd{Reason: durable.WatchListenerError, Error: err})
+				if watch.report != nil {
+					watch.mu.Unlock()
+					watch.report(err)
+					watch.mu.Lock()
+				}
+				if watch.end == nil {
+					watch.terminateLocked(durable.WatchEnd{Reason: durable.WatchListenerError, Error: err})
+				}
 			}
 			break
 		}
@@ -609,3 +684,30 @@ func (watch *CommittedWatch[T]) finishIfReadyLocked() {
 	}
 	close(watch.closed)
 }
+
+// DeliveryScheduler runs watch deliveries for a host that has no SessionImpl: each scheduled delivery is queued as upstream's
+// microtask is, and Wait returns once every scheduled delivery has drained.
+type DeliveryScheduler struct{ pending *pending }
+
+// NewDeliveryScheduler returns an idle delivery scheduler.
+func NewDeliveryScheduler() *DeliveryScheduler { return &DeliveryScheduler{pending: newPending()} }
+
+// Wait blocks until no scheduled delivery is queued or running.
+func (s *DeliveryScheduler) Wait() { s.pending.wait() }
+
+// NewCommittedWatchOn is NewCommittedWatch for a host whose deliveries run on scheduler (the native Durable core driver).
+// report receives a listener's failure, which also ends the watch, as the Session's report does for NewCommittedWatch.
+func NewCommittedWatchOn[T any](scheduler *DeliveryScheduler, value T, detach func(), replace func() T, report func(error)) *CommittedWatch[T] {
+	watch := newCommittedWatch(value, detach, replace, scheduler.pending)
+	watch.report = report
+	return watch
+}
+
+// NewCommittedStateSourceOn is NewCommittedStateSource for a host whose deliveries run on scheduler (the native Durable core driver).
+func NewCommittedStateSourceOn[T any](scheduler *DeliveryScheduler, value T, release func()) *CommittedStateSource[T] {
+	return newCommittedStateSource(value, release, scheduler.pending)
+}
+
+// RunDrains runs the queued state attachment drains on the calling goroutine: upstream's drain microtask, which the publishing
+// commit runs before its caller resumes.
+func (s *DeliveryScheduler) RunDrains() { s.pending.runDrains() }

@@ -9,6 +9,7 @@ package runner
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -109,6 +110,11 @@ type RPCInputStep struct {
 	Line               string   `toml:"line"`
 	WaitContains       []string `toml:"wait_contains"`
 	WaitTimeoutSeconds int      `toml:"wait_timeout_seconds"`
+	// PollUntil turns the step into a state barrier for work that has no event: the driver resends Line, a read-only query whose
+	// request id names the step, until a response record contains this JSON object (nested objects match as subsets), within
+	// WaitTimeoutSeconds. Every response to the polled id is left out of the compared output and the raw output (the JSON comparator reads the raw one), because how many polls ran depends
+	// on timing; the scenario's own later commands prove the settled state.
+	PollUntil string `toml:"poll_until"`
 }
 
 // ExtensionHostDriverConfig configures the pig-only extension host validation
@@ -206,6 +212,9 @@ type EnvOverrides struct {
 	// subcommands like `pi config` / `pig config` that must appear as
 	// argv[0] for the dispatcher to recognise them.
 	OverrideBaseArgs bool `toml:"override_base_args"`
+	// PigGoTests lists the packages (./-relative to cli.cwd) whose test binaries a cli-mode pig script runs through
+	// test/parity/testdata/prebuilt-go-test.sh. The runner builds them before the timed runs (go_prebuild.go).
+	PigGoTests []string `toml:"pig_go_tests"`
 }
 
 // AssertSpec lists the assertions to evaluate against driver results.
@@ -343,6 +352,19 @@ func validate(sc *Scenario) error {
 	}
 	if sc.CLI.SnapshotCWD && sc.CLI.CWD == "" {
 		return fmt.Errorf("cli.snapshot_cwd requires cli.cwd")
+	}
+	if len(sc.Env.PigGoTests) > 0 {
+		if sc.Driver != "cli-mode" {
+			return fmt.Errorf("pig_go_tests requires the cli-mode driver")
+		}
+		if sc.CLI.CWD == "" || strings.Contains(sc.CLI.CWD, "{{") {
+			return fmt.Errorf("pig_go_tests requires a fixed cli.cwd: its packages are relative to it")
+		}
+		for _, pkg := range sc.Env.PigGoTests {
+			if !isLocalGoPackage(pkg) {
+				return fmt.Errorf("pig_go_tests entry %q must be a ./-relative package directory inside cli.cwd", pkg)
+			}
+		}
 	}
 	return nil
 }

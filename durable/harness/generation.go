@@ -8,30 +8,33 @@ import (
 	"fmt"
 	"math"
 	"sync"
-	"time"
 
 	"github.com/MichaelKinsy/PiG/ai"
 	"github.com/MichaelKinsy/PiG/chord/delta"
 	"github.com/MichaelKinsy/PiG/durable"
 )
 
-// GenerationInput is the input of the built-in generation task; the run's inputs live in pi.live.run.
-type GenerationInput struct{}
+// GenerationInput is the input of the built-in generation task, Pi's Record<string, never> (generation.ts:49): an object
+// with no members, created as {} (generation.ts:675). The run's inputs live in pi.live.run.
+type GenerationInput map[string]struct{}
 
-// GenerationPhase names a phase of the generation task.
+// GenerationPhase names a phase of the generation task (generation.ts:49-90).
+type GenerationPhase string
+
 const (
-	generationPrepare = "prepare"
-	generationRequest = "request"
-	generationRetry   = "retry"
-	generationPoll    = "poll"
-	generationTools   = "tools"
+	generationPrepare GenerationPhase = "prepare"
+	generationRequest GenerationPhase = "request"
+	generationRetry   GenerationPhase = "retry"
+	generationPoll    GenerationPhase = "poll"
+	generationTools   GenerationPhase = "tools"
 )
 
 // GenerationCheckpoint is the durable checkpoint of the generation task (generation.ts:49-90). Phase selects the
 // members in use:
 //   - prepare: Attempt; Compacted is the blocking compaction this generation waited for, which starts no other
 //     compaction (spec §8.3); Overflow is the error text of the overflow that started Compacted, checked once when
-//     prepare resumes.
+//     prepare resumes; Threshold is set when the blocking threshold started Compacted, whose outcome is checked once
+//     when prepare resumes.
 //   - request: Attempt, Compacted, Model, ThinkingLevel, StreamOptions (the settings' request options when
 //     preparation committed; a resend after recovery uses them unchanged), and Cutoff, the newest entry included in
 //     the request.
@@ -40,10 +43,11 @@ const (
 //   - tools: Assistant (the tool-calling answer), Tools (tool tasks created so far, in call order) and Pending (calls of
 //     a sequential round not started yet, in call order). The generation owns the tool tasks (spec §8.5).
 type GenerationCheckpoint struct {
-	Phase         string                             `json:"phase"`
+	Phase         GenerationPhase                    `json:"phase"`
 	Attempt       int                                `json:"attempt,omitempty"`
 	Compacted     *durable.TaskId                    `json:"compacted,omitempty"`
 	Overflow      *string                            `json:"overflow,omitempty"`
+	Threshold     bool                               `json:"threshold,omitempty"`
 	Model         *durable.ModelRef                  `json:"model,omitempty"`
 	ThinkingLevel ai.ModelThinkingLevel              `json:"thinkingLevel,omitempty"`
 	StreamOptions *durable.ConversationStreamOptions `json:"streamOptions,omitempty"`
@@ -63,7 +67,7 @@ func (checkpoint GenerationCheckpoint) MarshalJSON() ([]byte, error) {
 		return marshalPlain(plain(checkpoint))
 	}
 	return marshalPlain(struct {
-		Phase     string           `json:"phase"`
+		Phase     GenerationPhase  `json:"phase"`
 		Assistant *durable.EntryId `json:"assistant,omitempty"`
 		Tools     []durable.TaskId `json:"tools"`
 		Pending   []string         `json:"pending"`
@@ -112,11 +116,11 @@ func init() {
 			return GenerationCheckpoint{Phase: generationPrepare, Attempt: 1}
 		},
 		Phases: map[string]durable.PhaseHandler[GenerationInput, GenerationCheckpoint, GenerationResult, *GenerationHooks]{
-			generationPrepare: generationPrepareHandler,
-			generationRequest: generationRequestHandler,
-			generationRetry:   generationRetryHandler,
-			generationPoll:    generationPollHandler,
-			generationTools:   generationToolsHandler,
+			string(generationPrepare): generationPrepareHandler,
+			string(generationRequest): generationRequestHandler,
+			string(generationRetry):   generationRetryHandler,
+			string(generationPoll):    generationPollHandler,
+			string(generationTools):   generationToolsHandler,
 		},
 		Abort: generationAbortHandler,
 	})
@@ -127,6 +131,10 @@ func checkpointOf(task durable.RunningTask[GenerationInput, GenerationCheckpoint
 		return GenerationCheckpoint{}
 	}
 	return *task.State.Checkpoint
+}
+
+func sleepingState[S, R any](checkpoint S, until float64) *durable.NextTaskState[S, R] {
+	return &durable.NextTaskState[S, R]{Status: durable.TaskSleeping, Checkpoint: &checkpoint, Until: &until}
 }
 
 func runningState[S, R any](checkpoint S) *durable.NextTaskState[S, R] {
@@ -182,18 +190,28 @@ func generationPrepareHandler(ctx context.Context, task durable.RunningTask[Gene
 			return failGenerationModelError(ctx, runtime, *checkpoint.Overflow)
 		}
 	}
-	view, err := runtime.Context(ctx, conversationId, nil)
+	// A threshold compaction that found nothing to compact or was declined leaves a request that may still fit. One
+	// that failed left a context it judged too large: sending it would at best leave no room for the answer.
+	if compacted != nil && checkpoint.Threshold {
+		outcomes, err := runtime.Outcomes(ctx, []durable.TaskId{*compacted})
+		if err != nil {
+			return err
+		}
+		if outcomes[0].Status != durable.OutcomeCompleted {
+			return failGenerationModelError(ctx, runtime, compactionFailure(outcomes[0]))
+		}
+	}
+	view, err := runtime.Context(sharedReads(ctx), conversationId, nil)
 	if err != nil {
 		return err
 	}
 	shown := ReplaySections(view.Messages)
-	report := func(err error) { runtime.Report(err) }
 	environment, err := runtime.Env(ctx)
 	if err != nil {
 		if ctx.Err() != nil {
 			return err
 		}
-		report(err)
+		runtime.Report(err, durable.ReportFrom{Type: durable.ReportFromHost, Callback: durable.HostCallbackEnv})
 		environment = nil
 	}
 	shownMap := map[string]string{}
@@ -201,7 +219,9 @@ func generationPrepareHandler(ctx context.Context, task durable.RunningTask[Gene
 		shownMap[key], _ = shown.Get(key)
 	}
 	input := durable.PromptInput{ConversationId: conversationId, Agent: agent, Env: environment, Shown: shownMap, Read: runtime}
-	desired, err := RenderSections(ctx, agent.Sections, input, shown, report)
+	desired, err := RenderSections(ctx, agent.Sections, input, shown, func(err error, section *durable.PromptSection) {
+		runtime.Report(err, durable.ReportFrom{Type: durable.ReportFromExtension, Extension: SectionExtension(agent, section.Key)})
+	})
 	if err != nil {
 		return err
 	}
@@ -216,7 +236,7 @@ func generationPrepareHandler(ctx context.Context, task durable.RunningTask[Gene
 		for _, entry := range entries {
 			planned = append(planned, entry.Model...)
 		}
-		threshold = thresholdCompaction(view, planned, resolved.Capabilities.ContextWindow, settings.Compaction)
+		threshold = thresholdCompaction(view, planned, resolved.Capabilities.ContextWindow, settings.Compaction.PolicyFor(*ref))
 	}
 	if threshold == "blocking" {
 		// Compact first and prepare again; the transcript is unchanged until the compaction appends.
@@ -226,7 +246,7 @@ func generationPrepareHandler(ctx context.Context, task durable.RunningTask[Gene
 			if err != nil {
 				return nil, err
 			}
-			next := GenerationCheckpoint{Phase: generationPrepare, Attempt: attempt, Compacted: &child}
+			next := GenerationCheckpoint{Phase: generationPrepare, Attempt: attempt, Compacted: &child, Threshold: true}
 			return waitingState[GenerationCheckpoint, GenerationResult](next, []durable.TaskId{child}, durable.JoinAllSettled), nil
 		})
 	}
@@ -289,7 +309,7 @@ func generationRequestHandler(ctx context.Context, task durable.RunningTask[Gene
 		if err := ConvertPartial(tx, live, conversationId); err != nil {
 			return nil, err
 		}
-		return nil, live.Set("generation", map[string]any{"attempt": float64(checkpoint.Attempt)})
+		return nil, live.Set("generation", delta.JsonObjectOf("attempt", float64(checkpoint.Attempt)))
 	}); err != nil {
 		return err
 	}
@@ -298,14 +318,19 @@ func generationRequestHandler(ctx context.Context, task durable.RunningTask[Gene
 	if model == nil {
 		return failGenerationNoModel(ctx, runtime, &ref)
 	}
-	view, err := runtime.Context(ctx, conversationId, checkpoint.Cutoff)
+	view, err := runtime.Context(sharedReads(ctx), conversationId, &durable.ContextOptions{At: checkpoint.Cutoff})
 	if err != nil {
 		return err
 	}
-	messages := view.Messages
+	// view.Messages is shared with the kept context range. A hook may modify what it receives, so the first one gets a copy;
+	// until then the request is frozen and the provider path shares the messages.
+	messages, shared := view.Messages, true
 	if err := runtime.Hooks().Each("beforeRequest", func(hooks *GenerationHooks) error {
 		if hooks == nil || hooks.BeforeRequest == nil {
 			return nil
+		}
+		if shared {
+			messages, shared = ai.NormalizeContext(ai.Context{Messages: messages}).Messages(), false
 		}
 		replaced, err := hooks.BeforeRequest(ctx, GenerationRequest{Messages: messages}, runtime)
 		if err != nil {
@@ -326,7 +351,7 @@ func generationRequestHandler(ctx context.Context, task durable.RunningTask[Gene
 	if options.SessionID, err = ensureProviderSessionId(ctx, runtime); err != nil {
 		return err
 	}
-	message, err := streamResponse(ctx, runtime, model, messages, options, checkpoint.Attempt)
+	message, err := streamResponse(ctx, runtime, model, messages, shared, options, checkpoint.Attempt)
 	if err != nil {
 		return err
 	}
@@ -336,15 +361,16 @@ func generationRequestHandler(ctx context.Context, task durable.RunningTask[Gene
 
 func generationRetryHandler(ctx context.Context, task durable.RunningTask[GenerationInput, GenerationCheckpoint, GenerationResult], runtime generationRuntime) error {
 	checkpoint := checkpointOf(task)
-	if err := runtime.Sleep(ctx, *checkpoint.Until); err != nil {
-		return err
+	// After the backoff's sleep; a run before Until (an early wake, or a record of an earlier version) sleeps again.
+	if *checkpoint.Until > runtime.Now() {
+		return runtime.SleepUntil(ctx, *checkpoint.Until, checkpoint)
 	}
 	return runtime.Commit(ctx, func(tx durable.Tx, _ durable.RunningTask[GenerationInput, GenerationCheckpoint, GenerationResult]) (*generationNext, error) {
 		live, err := docDraft(tx, LiveDoc, runtime.ConversationId())
 		if err != nil {
 			return nil, err
 		}
-		if err := live.Set("generation", map[string]any{"attempt": float64(checkpoint.Attempt + 1)}); err != nil {
+		if err := live.Set("generation", delta.JsonObjectOf("attempt", float64(checkpoint.Attempt+1))); err != nil {
 			return nil, err
 		}
 		next := GenerationCheckpoint{Phase: generationPrepare, Attempt: checkpoint.Attempt + 1, Compacted: checkpoint.Compacted}
@@ -355,12 +381,13 @@ func generationRetryHandler(ctx context.Context, task durable.RunningTask[Genera
 func generationPollHandler(ctx context.Context, task durable.RunningTask[GenerationInput, GenerationCheckpoint, GenerationResult], runtime generationRuntime) error {
 	checkpoint := checkpointOf(task)
 	ref := *checkpoint.Model
+	// After the sleep until PollAt; a run before it (an early wake, or a record of an earlier version) sleeps again.
+	if *checkpoint.PollAt > runtime.Now() {
+		return runtime.SleepUntil(ctx, *checkpoint.PollAt, checkpoint)
+	}
 	model := runtime.Models().GetModel(ref.Provider, ref.ModelId)
 	if model == nil {
 		return failGenerationNoModel(ctx, runtime, &ref)
-	}
-	if err := runtime.Sleep(ctx, *checkpoint.PollAt); err != nil {
-		return err
 	}
 	signal := runtime.Signal()
 	message := runtime.Models().FetchDeferred(signal, model, *checkpoint.Handle, ai.DeferredFetchOptions{StreamOptions: ai.StreamOptions{Signal: signal}})
@@ -413,7 +440,7 @@ func generationAbortHandler(ctx context.Context, task durable.RunningTask[Genera
 		if model := runtime.Models().GetModel(checkpoint.Model.Provider, checkpoint.Model.ModelId); model != nil {
 			signal := runtime.Signal()
 			if err := runtime.Models().CancelDeferred(signal, model, *checkpoint.Handle, ai.DeferredCancelOptions{Signal: signal}); err != nil {
-				runtime.Report(err)
+				runtime.Report(err, durable.ReportFrom{Type: durable.ReportFromHost, Callback: durable.HostCallbackModels})
 			}
 		}
 	}
@@ -436,7 +463,7 @@ func generationAbortHandler(ctx context.Context, task durable.RunningTask[Genera
 		}
 		for _, call := range unstarted {
 			result := HarnessError(abortedResultCode, fmt.Sprintf("Tool %s was aborted", call.Name))
-			if _, err := AppendToolResult(tx, conversationId, call, result, runtime.Now()); err != nil {
+			if _, err := AppendToolResult(tx, conversationId, call, result, runtime.Now(), nil); err != nil {
 				return nil, err
 			}
 		}
@@ -449,12 +476,12 @@ func generationAbortHandler(ctx context.Context, task durable.RunningTask[Genera
 
 // readCalls returns the calls callIds of the assistant entry, in the given order.
 func readCalls(ctx context.Context, runtime generationRuntime, assistant durable.EntryId, callIds []string) ([]ai.ToolCall, error) {
-	entry, err := runtime.Entry(ctx, assistant)
+	entry, err := durable.TaskEntry(ctx, runtime, durable.AssistantEntry, assistant)
 	if err != nil {
 		return nil, err
 	}
 	var calls []ai.ToolCall
-	if durable.AssistantEntry.Is(entry) && len(entry.Model) > 0 {
+	if entry != nil && len(entry.Model) > 0 {
 		if message, ok := entry.Model[0].(ai.AssistantMessage); ok {
 			calls = toolCallsOf(message)
 		}
@@ -486,11 +513,11 @@ func toolCallsOf(message ai.AssistantMessage) []ai.ToolCall {
 
 // createToolTask creates a tool task for call callId, owned by the generation.
 func createToolTask(tx durable.Tx, owner durable.TaskId, assistant durable.EntryId, callId string) (durable.TaskId, error) {
-	input, err := durable.ToJsonValue(ToolTaskInput{Assistant: assistant, CallId: callId})
+	input, err := durable.ToJsonValue(ToolTaskInput{Kind: ToolTaskModel, Assistant: assistant, CallId: callId})
 	if err != nil {
 		return 0, err
 	}
-	return tx.CreateTaskErased(ToolTask, input, durable.TaskOptions{Ownership: durable.TaskOwnership{Kind: durable.TaskOwnedByTask, TaskId: owner}})
+	return tx.CreateTaskErased(ToolTask.Erased(), input, durable.TaskOptions{Ownership: durable.TaskOwnership{Kind: durable.TaskOwnedByTask, TaskId: owner}})
 }
 
 // thresholdCompaction returns which threshold compaction preparation starts before its request (spec §8.3,
@@ -521,15 +548,62 @@ func thresholdCompaction(view durable.ContextView, planned []ai.Message, context
 // failGenerationModelError settles the run's inputs unanswered with model_error and fails with text.
 func failGenerationModelError(ctx context.Context, runtime generationRuntime, text string) error {
 	return runtime.Commit(ctx, func(tx durable.Tx, _ durable.RunningTask[GenerationInput, GenerationCheckpoint, GenerationResult]) (*generationNext, error) {
+		failure, err := prepareFailure(tx, runtime)
+		if err != nil {
+			return nil, err
+		}
 		live, err := docDraft(tx, LiveDoc, runtime.ConversationId())
 		if err != nil {
 			return nil, err
 		}
-		if err := EndRun(tx, live, runtime.TaskId(), durable.SubmissionSettlement{Status: durable.SubmissionUnanswered, Reason: modelErrorReason, Detail: text}); err != nil {
+		if err := endFailedRun(tx, runtime, live, failure, durable.SubmissionSettlement{Status: durable.SubmissionUnanswered, Reason: modelErrorReason, Detail: text}); err != nil {
 			return nil, err
 		}
 		return failedState[GenerationCheckpoint, GenerationResult](text, modelErrorReason), nil
 	})
+}
+
+// failure is what a failed run's end needs from the table, read before the commit's first table write.
+type failure struct {
+	policy   durable.AfterFailedRun
+	boundary *Boundary
+}
+
+// prepareFailure reads the boundary a failed run's end may apply, only under the continue policy (generation.ts
+// prepareFailure).
+func prepareFailure(tx durable.Tx, runtime generationRuntime) (failure, error) {
+	policy := runtime.Settings().AfterFailedRun
+	if policy != durable.AfterFailedRunContinue {
+		return failure{policy: policy}, nil
+	}
+	boundary, err := PrepareBoundary(tx, runtime.ConversationId(), QueueModesOf(runtime.Settings()))
+	return failure{policy: policy, boundary: boundary}, err
+}
+
+// endFailedRun ends a failed run, settling its inputs with settlement, and does with the inputs queued behind it what
+// settings.afterFailedRun says (spec section 6): keep them, start the next run with them, or withdraw them (generation.ts
+// endFailedRun).
+func endFailedRun(tx durable.Tx, runtime generationRuntime, live *delta.Object, failed failure, settlement durable.SubmissionSettlement) error {
+	conversationId := runtime.ConversationId()
+	if err := EndRun(tx, live, runtime.TaskId(), settlement); err != nil {
+		return err
+	}
+	if failed.policy == durable.AfterFailedRunWithdraw {
+		if err := WithdrawQueuedInputsFor(tx, conversationId, "run_failed"); err != nil {
+			return err
+		}
+	}
+	if failed.boundary == nil {
+		return nil
+	}
+	placed, err := ApplyBoundary(tx, failed.boundary, BoundaryFinal, runtime.Now())
+	if err != nil {
+		return err
+	}
+	if len(placed.Users) > 0 {
+		return StartRun(tx, conversationId, live, placed.Users)
+	}
+	return nil
 }
 
 // noModelMessage is the failure text when a model is unset or unknown.
@@ -544,11 +618,15 @@ func noModelMessage(ref *durable.ModelRef) string {
 func failGenerationNoModel(ctx context.Context, runtime generationRuntime, ref *durable.ModelRef) error {
 	message := noModelMessage(ref)
 	return runtime.Commit(ctx, func(tx durable.Tx, _ durable.RunningTask[GenerationInput, GenerationCheckpoint, GenerationResult]) (*generationNext, error) {
+		failed, err := prepareFailure(tx, runtime)
+		if err != nil {
+			return nil, err
+		}
 		live, err := docDraft(tx, LiveDoc, runtime.ConversationId())
 		if err != nil {
 			return nil, err
 		}
-		if err := EndRun(tx, live, runtime.TaskId(), durable.SubmissionSettlement{Status: durable.SubmissionUnanswered, Reason: noModelReason}); err != nil {
+		if err := endFailedRun(tx, runtime, live, failed, durable.SubmissionSettlement{Status: durable.SubmissionUnanswered, Reason: noModelReason}); err != nil {
 			return nil, err
 		}
 		return failedState[GenerationCheckpoint, GenerationResult](message, noModelReason), nil
@@ -578,11 +656,14 @@ func ConvertPartial(tx durable.Tx, live *delta.Object, conversationId durable.Co
 // streamResponse streams one request and returns the terminal message (generation.ts:354-405). Partials commit as
 // trailing writes at most every Settings.Progress.PartialIntervalMs (default 100 ms) with one commit in flight; stopping the throttle waits for that commit, so no
 // stale partial lands after the outcome.
-func streamResponse(ctx context.Context, runtime generationRuntime, model *ai.Model, messages []ai.Message, options ai.StreamOptions, attempt int) (ai.AssistantMessage, error) {
-	throttle := &partialThrottle{runtime: runtime, ctx: ctx, attempt: attempt, interval: millisecondsDuration(runtime.Settings().Progress.PartialIntervalMs)}
+func streamResponse(ctx context.Context, runtime generationRuntime, model *ai.Model, messages []ai.Message, frozen bool, options ai.StreamOptions, attempt int) (ai.AssistantMessage, error) {
+	throttle := &partialThrottle{runtime: runtime, ctx: ctx, attempt: attempt, interval: runtime.Settings().Progress.PartialIntervalMs}
 	defer throttle.stop()
 	signal := runtime.Signal()
-	stream := runtime.Models().StreamSimple(signal, model, ai.Context{Messages: append([]ai.Message{}, messages...)}, options)
+	if !frozen {
+		messages = append([]ai.Message{}, messages...)
+	}
+	stream := runtime.Models().StreamSimple(signal, model, ai.Context{Messages: messages, Frozen: frozen}, options)
 	for event := range stream.Events(signal) {
 		switch event.(type) {
 		case ai.DoneEvent, *ai.DoneEvent, ai.ErrorEvent, *ai.ErrorEvent:
@@ -632,24 +713,15 @@ func partialOf(event ai.AssistantMessageEvent) *ai.AssistantMessage {
 	return nil
 }
 
-// millisecondsDuration is the delay setTimeout waits for milliseconds: a delay below 1 ms, above maxTimerDelay, or NaN
-// is 1 ms, and a fractional delay is truncated to whole milliseconds.
-func millisecondsDuration(milliseconds float64) time.Duration {
-	if !(milliseconds >= 1 && milliseconds <= maxTimerDelay) {
-		milliseconds = 1
-	}
-	return time.Duration(math.Trunc(milliseconds)) * time.Millisecond
-}
-
 // partialThrottle commits the newest partial at most every interval with one commit in flight.
 type partialThrottle struct {
 	runtime  generationRuntime
 	ctx      context.Context
 	attempt  int
-	interval time.Duration
+	interval float64
 	mu       sync.Mutex
 	pending  *ai.AssistantMessage
-	timer    *time.Timer
+	disarm   func()
 	inFlight chan struct{}
 	stopped  bool
 }
@@ -661,14 +733,14 @@ func (throttle *partialThrottle) offer(partial *ai.AssistantMessage) {
 	throttle.mu.Lock()
 	defer throttle.mu.Unlock()
 	throttle.pending = partial
-	if throttle.timer == nil && throttle.inFlight == nil && !throttle.stopped {
-		throttle.timer = time.AfterFunc(throttle.interval, throttle.flush)
+	if throttle.disarm == nil && throttle.inFlight == nil && !throttle.stopped {
+		throttle.disarm = throttle.runtime.SetTimer(throttle.flush, throttle.interval)
 	}
 }
 
 func (throttle *partialThrottle) flush() {
 	throttle.mu.Lock()
-	throttle.timer = nil
+	throttle.disarm = nil
 	partial := throttle.pending
 	throttle.pending = nil
 	if partial == nil || throttle.stopped {
@@ -690,7 +762,7 @@ func (throttle *partialThrottle) flush() {
 				}
 				generation := live.Object("generation")
 				if generation == nil {
-					if err := live.Set("generation", map[string]any{"attempt": float64(throttle.attempt)}); err != nil {
+					if err := live.Set("generation", delta.JsonObjectOf("attempt", float64(throttle.attempt))); err != nil {
 						return nil, err
 					}
 					generation = live.Object("generation")
@@ -705,7 +777,7 @@ func (throttle *partialThrottle) flush() {
 		throttle.mu.Lock()
 		throttle.inFlight = nil
 		if throttle.pending != nil && !throttle.stopped {
-			throttle.timer = time.AfterFunc(throttle.interval, throttle.flush)
+			throttle.disarm = throttle.runtime.SetTimer(throttle.flush, throttle.interval)
 		}
 		throttle.mu.Unlock()
 	}()
@@ -715,9 +787,9 @@ func (throttle *partialThrottle) flush() {
 func (throttle *partialThrottle) stop() {
 	throttle.mu.Lock()
 	throttle.stopped = true
-	if throttle.timer != nil {
-		throttle.timer.Stop()
-		throttle.timer = nil
+	if throttle.disarm != nil {
+		throttle.disarm()
+		throttle.disarm = nil
 	}
 	inFlight := throttle.inFlight
 	throttle.mu.Unlock()
@@ -750,11 +822,11 @@ func classify(ctx context.Context, runtime generationRuntime, request generation
 			if err != nil {
 				return nil, err
 			}
-			if err := live.Set("generation", map[string]any{"attempt": float64(attempt), "deferred": map[string]any{"pollAt": pollAt}}); err != nil {
+			if err := live.Set("generation", delta.JsonObjectOf("attempt", float64(attempt), "deferred", delta.JsonObjectOf("pollAt", pollAt))); err != nil {
 				return nil, err
 			}
 			next := GenerationCheckpoint{Phase: generationPoll, Attempt: attempt, Compacted: compacted, Model: &ref, Cutoff: &cutoff, Handle: &handle, PollAt: &pollAt}
-			return runningState[GenerationCheckpoint, GenerationResult](next), nil
+			return sleepingState[GenerationCheckpoint, GenerationResult](next, pollAt), nil
 		})
 	}
 	if err := runtime.Hooks().Each("afterResponse", func(hooks *GenerationHooks) error {
@@ -775,13 +847,14 @@ func classify(ctx context.Context, runtime generationRuntime, request generation
 	// The retry and compaction policies govern the next attempt, so they are read now rather than pinned at
 	// preparation.
 	settings := runtime.Settings()
+	compaction := settings.Compaction.PolicyFor(ref)
 	overflow := message.StopReason == ai.StopReasonError && ai.IsContextOverflow(message, 0)
-	if overflow && compacted == nil && settings.Compaction.Enabled {
-		view, err := runtime.Context(ctx, conversationId, &cutoff)
+	if overflow && compacted == nil && compaction.Enabled {
+		view, err := runtime.Context(ctx, conversationId, &durable.ContextOptions{At: &cutoff})
 		if err != nil {
 			return err
 		}
-		if _, ok := SelectCut(view, settings.Compaction.KeepRecentTokens); ok {
+		if _, ok := SelectCut(view, compaction.KeepRecentTokens); ok {
 			text := message.ErrorMessage
 			if text == "" {
 				text = "Context overflow"
@@ -810,9 +883,17 @@ func classify(ctx context.Context, runtime generationRuntime, request generation
 	retry := message.StopReason == ai.StopReasonError && !overflow && ai.IsRetryableAssistantError(message) && policy.Enabled && attempt <= policy.MaxRetries
 	until := 0.0
 	if retry {
-		until = runtime.Now() + float64(ai.RetryDelayMs(policy.BaseDelayMs, policy.MaxAgentDelayMs, attempt))
+		until = runtime.Now() + float64(ai.RetryDelayMs(ai.RetryPolicy{BaseDelayMs: policy.BaseDelayMs, MaxAgentDelayMs: policy.MaxAgentDelayMs}, attempt))
 	}
 	return runtime.Commit(ctx, func(tx durable.Tx, _ durable.RunningTask[GenerationInput, GenerationCheckpoint, GenerationResult]) (*generationNext, error) {
+		// Read before the first table write; only a failure uses it.
+		var failed failure
+		if !retry {
+			var err error
+			if failed, err = prepareFailure(tx, runtime); err != nil {
+				return nil, err
+			}
+		}
 		live, err := docDraft(tx, LiveDoc, conversationId)
 		if err != nil {
 			return nil, err
@@ -821,17 +902,17 @@ func classify(ctx context.Context, runtime generationRuntime, request generation
 			return nil, err
 		}
 		if retry {
-			if err := live.Set("generation", map[string]any{"attempt": float64(attempt), "retry": map[string]any{"at": until, "error": message.ErrorMessage}}); err != nil {
+			if err := live.Set("generation", delta.JsonObjectOf("attempt", float64(attempt), "retry", delta.JsonObjectOf("at", until, "error", message.ErrorMessage))); err != nil {
 				return nil, err
 			}
 			next := GenerationCheckpoint{Phase: generationRetry, Attempt: attempt, Compacted: compacted, Until: &until}
-			return runningState[GenerationCheckpoint, GenerationResult](next), nil
+			return sleepingState[GenerationCheckpoint, GenerationResult](next, until), nil
 		}
 		text := message.ErrorMessage
 		if text == "" {
 			text = fmt.Sprintf("Model response ended with stop reason %s", message.StopReason)
 		}
-		if err := EndRun(tx, live, runtime.TaskId(), durable.SubmissionSettlement{Status: durable.SubmissionUnanswered, Reason: modelErrorReason, Detail: text}); err != nil {
+		if err := endFailedRun(tx, runtime, live, failed, durable.SubmissionSettlement{Status: durable.SubmissionUnanswered, Reason: modelErrorReason, Detail: text}); err != nil {
 			return nil, err
 		}
 		return failedState[GenerationCheckpoint, GenerationResult](text, modelErrorReason), nil
@@ -912,7 +993,7 @@ func startToolRound(ctx context.Context, runtime generationRuntime, request gene
 	conversationId := runtime.ConversationId()
 	messages := request.messages
 	if messages == nil {
-		view, err := runtime.Context(ctx, conversationId, &request.cutoff)
+		view, err := runtime.Context(ctx, conversationId, &durable.ContextOptions{At: &request.cutoff})
 		if err != nil {
 			return err
 		}
@@ -956,7 +1037,7 @@ func startToolRound(ctx context.Context, runtime generationRuntime, request gene
 		for _, call := range calls {
 			if !offered[call.Name] {
 				unavailable := HarnessError(toolUnavailable, fmt.Sprintf("Tool %s is not available", call.Name))
-				result, err := AppendToolResult(tx, conversationId, call, unavailable, runtime.Now())
+				result, err := AppendToolResult(tx, conversationId, call, unavailable, runtime.Now(), nil)
 				if err != nil {
 					return nil, err
 				}
@@ -969,6 +1050,8 @@ func startToolRound(ctx context.Context, runtime generationRuntime, request gene
 				slots = append(slots, ToolSlot{CallId: call.ID, Name: call.Name, Status: ToolSlotPending})
 				continue
 			}
+			// pig divergence (D177): the tool tasks of a parallel round run concurrently, so the order in which their calls
+			// start within the round is unspecified; Pi's event loop runs each execute's synchronous prefix in call order.
 			taskId, err := createToolTask(tx, runtime.TaskId(), entry.Id, call.ID)
 			if err != nil {
 				return nil, err
@@ -993,6 +1076,8 @@ func finishToolRound(ctx context.Context, runtime generationRuntime, assistant d
 	conversationId := runtime.ConversationId()
 	controls := make(map[durable.TaskId]*durable.ToolControl, len(tools))
 	var ordered []*durable.ToolControl
+	// pig divergence (D181): this read and the commits after it race the commits of a job started in the round and not awaited
+	// (see TaskScheduler.start); their order against each other is unspecified, where Pi's microtask hops fix it.
 	outcomes, err := runtime.Outcomes(ctx, tools)
 	if err != nil {
 		return err
@@ -1109,6 +1194,7 @@ func finishToolRound(ctx context.Context, runtime generationRuntime, assistant d
 				}
 			} else {
 				live.Delete("tools")
+				live.Delete("nestedTools")
 				if owner, ok := runTaskOf(live); ok && owner == taskId && len(placed.Users) > 0 {
 					inputs := live.Object("run").Array("inputs")
 					values := make([]any, len(placed.Users))
@@ -1182,9 +1268,7 @@ func streamOptionsOf(stream durable.ConversationStreamOptions, signal context.Co
 			options.Headers[name] = &value
 		}
 	}
-	if thinking != "" && thinking != ai.ThinkingOff {
-		options.Thinking = thinking
-	}
+	options.Thinking = thinking.ReasoningOption()
 	return options
 }
 
@@ -1198,6 +1282,22 @@ func decodeOutcomeResult[R any](outcome durable.TaskOutcome[durable.JsonValue]) 
 		return nil, err
 	}
 	return &decoded, nil
+}
+
+// compactionFailure is the error text for a generation whose blocking compaction ended without completing
+// (generation.ts compactionFailure).
+func compactionFailure(outcome durable.TaskOutcome[durable.JsonValue]) string {
+	switch outcome.Status {
+	case durable.OutcomeFailed, durable.OutcomeFaulted:
+		if outcome.Error != nil { // the outcome contract requires Error for these statuses
+			return "Compaction failed: " + outcome.Error.Message
+		}
+	case durable.OutcomeOrphaned:
+		if outcome.Reason != nil { // the outcome contract requires Reason for orphaned
+			return "Compaction failed: " + *outcome.Reason
+		}
+	}
+	return "Compaction was aborted"
 }
 
 func nonNil[T any](items []T) []T {

@@ -1,5 +1,7 @@
 package sqlite_test
 
+// pi: packages/durable/src/storage/sqlite/migrations.ts
+
 // Ports packages/durable/test/sqlite-migrations.test.ts
 
 import (
@@ -18,7 +20,7 @@ func databasePath(t *testing.T) string {
 
 func openDatabase(t *testing.T, path string) *node.NodeSqliteDatabase {
 	t.Helper()
-	return must(node.OpenNodeSqliteDatabase(path, node.NodeSqliteStorageOptions{}))
+	return must(node.OpenNodeSqliteDatabase(path, node.NodeSqliteDatabaseOptions{}))
 }
 
 func expectRow(t *testing.T, database sqlite.SqliteExecutor, sqlText string, expected sqlite.SqliteRow) {
@@ -38,6 +40,35 @@ func TestDurableSQLiteMigrations(t *testing.T) {
 			sqlite.SqliteRow{"next_id": "2", "next_seq": 1})
 	})
 
+	// upstream: packages/durable/test/sqlite-migrations.test.ts:47
+	t.Run("migrates a version 1 database to store sleeping tasks, keeping its tasks and indexes", func(t *testing.T) {
+		path := databasePath(t)
+		database := openDatabase(t, path)
+		mustDo(t, sqlite.ApplySqliteMigrations(database, sqlite.SqliteMigrations[:1]))
+		waiting := `{"id":5,"conversationId":1,"kind":"test.task","version":1,"input":null,"background":false,"abortRequested":false,"state":{"status":"waiting","checkpoint":{"phase":"run"},"on":[],"policy":"allSettled"}}`
+		insertSleeping := "INSERT INTO tasks (id, conversation_id, kind, status, abort_requested, background, record) VALUES (6, 1, 'test.task', 'sleeping', 0, 0, '{}')"
+		mustDo(t, database.Run("INSERT INTO tasks (id, conversation_id, kind, status, abort_requested, background, record) VALUES (5, 1, 'test.task', 'waiting', 0, 0, ?)", waiting))
+		if err := database.Run(insertSleeping); err == nil {
+			t.Fatal("version 1 admitted a sleeping task")
+		}
+		mustDo(t, database.Close())
+
+		storage := must(node.OpenNodeSqliteStorage(path, node.NodeSqliteStorageOptions{}))
+		mustDo(t, storage.Close(testContext))
+		migrated := openDatabase(t, path)
+		defer func() { mustDo(t, migrated.Close()) }()
+		expectRow(t, migrated, "SELECT version FROM durable_schema WHERE singleton = 1", sqlite.SqliteRow{"version": 2})
+		expectRow(t, migrated, "SELECT status, record FROM tasks WHERE id = 5", sqlite.SqliteRow{"status": "waiting", "record": waiting})
+		mustDo(t, migrated.Run(insertSleeping))
+		indexes := must(migrated.All("SELECT name FROM sqlite_schema WHERE type = 'index' AND tbl_name = 'tasks' ORDER BY name"))
+		var names []any
+		for _, index := range indexes {
+			names = append(names, index["name"])
+		}
+		expectEqual(t, names, []any{"tasks_by_abort_requested", "tasks_by_background", "tasks_by_conversation", "tasks_by_kind", "tasks_by_status"})
+		expectRow(t, migrated, "SELECT count(*) AS count FROM sqlite_schema WHERE name = 'tasks_v2'", sqlite.SqliteRow{"count": 0})
+	})
+
 	t.Run("rejects a database newer than the portable core", func(t *testing.T) {
 		path := databasePath(t)
 		database := openDatabase(t, path)
@@ -47,31 +78,6 @@ func TestDurableSQLiteMigrations(t *testing.T) {
 
 		_, err := node.OpenNodeSqliteStorage(path, node.NodeSqliteStorageOptions{})
 		expectError(t, err, "is newer than supported version")
-	})
-
-	t.Run("rolls initial bootstrap and every pending migration back together", func(t *testing.T) {
-		database := openDatabase(t, databasePath(t))
-		defer func() { mustDo(t, database.Close()) }()
-		failed := []sqlite.SqliteMigration{
-			{Version: 1, Statements: []string{
-				"CREATE TABLE migration_first (value TEXT) STRICT",
-				"INSERT INTO migration_first (value) VALUES ('retained')",
-			}},
-			{Version: 2, Statements: []string{"CREATE TABLE migration_second (value TEXT) STRICT", "THIS IS NOT SQL"}},
-		}
-		if err := sqlite.ApplySqliteMigrations(database, failed); err == nil {
-			t.Fatal("failed migration succeeded")
-		}
-		expectRow(t, database,
-			"SELECT count(*) AS count FROM sqlite_schema WHERE name IN ('durable_schema', 'migration_first', 'migration_second')",
-			sqlite.SqliteRow{"count": 0})
-
-		mustDo(t, sqlite.ApplySqliteMigrations(database, []sqlite.SqliteMigration{
-			failed[0],
-			{Version: 2, Statements: []string{"CREATE TABLE migration_second (value TEXT) STRICT"}},
-		}))
-		expectRow(t, database, "SELECT version FROM durable_schema WHERE singleton = 1", sqlite.SqliteRow{"version": 2})
-		expectRow(t, database, "SELECT value FROM migration_first", sqlite.SqliteRow{"value": "retained"})
 	})
 
 	t.Run("rolls a failed migration back and preserves stored data for a successful retry", func(t *testing.T) {

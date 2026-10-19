@@ -47,10 +47,16 @@ roots = ["temp"]
 pattern = '[0-9]Z_[0-9a-f-]+\.jsonl$'
 reason = "Only generated session filenames vary; require Pi's millisecond filename syntax and bind the embedded UUID to its session."
 [[assert.json_aliases]]
-paths = ["/**/cwd", "/**/sessionFile"]
+paths = ["/**/cwd"]
+kind = "id"
+group = "cwd"
+pattern = '^/.+/rpc-wire-[a-z0-9_]{8}$'
+reason = "rpc-wire-drift.py runs each side in its own tempfile.mkdtemp(prefix='rpc-wire-') directory, which has the same length on both sides; only its 8 random characters differ. Pi and PiG estimate tokens from the system prompt's cwd characters, so an equal-length cwd is what makes estimatedTokensAfter comparable (a cwd under {{TEMP}} differed by the -pig-/-pi- infix and the random digits: 786 against 787 in 3-5 of 150 pairs, 2026-10-18). Preserve the cwd's shape and every reference to it."
+[[assert.json_aliases]]
+paths = ["/**/sessionFile"]
 kind = "path"
 roots = ["temp"]
-reason = "The fixture explicitly locates cwd, sessions and the missing target under the run-owned temporary root; retain every path suffix."
+reason = "The fixture explicitly locates sessions and the missing target under the run-owned temporary root; retain every path suffix."
 [[assert.json_aliases]]
 paths = ["/**/baseUrl"]
 kind = "id"
@@ -61,3 +67,7 @@ reason = "The loopback provider receives an allocated port; preserve scheme, hos
 paths = ["/**/timestamp"]
 kind = "timestamp"
 reason = "Independent clocks vary; retain field presence, numeric/string type and timestamp syntax instead of replacing arbitrary values with zero."
+[[assert.json_aliases]]
+paths = ["/**/durationMs"]
+kind = "duration"
+reason = "Pi 1.1.0 times each response and tool run with a monotonic clock (event-stream.ts, agent-loop.ts), so the whole-millisecond value differs between runs; retain the field's presence, its position and its number spelling."

@@ -62,7 +62,7 @@ func (s *Session) promptSectionUpdate(messages []agent.AgentMessage) (*ai.System
 	var systems []ai.Message
 	for _, message := range messages {
 		if message.System != nil {
-			systems = append(systems, *message.System)
+			systems = append(systems, systemMessageWithoutTools(*message.System))
 		}
 	}
 	current := ai.GetCurrentSystemMessage(systems)
@@ -83,6 +83,12 @@ func (s *Session) promptSectionUpdate(messages []agent.AgentMessage) (*ai.System
 		return nil, nil
 	}
 	return &ai.SystemMessage{Content: ai.SystemText(""), Sections: patch, Timestamp: time.Now().UnixMilli()}, nil
+}
+
+// systemMessageWithoutTools is message without its tool changes. The replay that promptSectionUpdate runs reads only the sections and whether a system message exists, both of which the tool changes leave as they are, and replaying them copies every tool schema each turn.
+func systemMessageWithoutTools(message ai.SystemMessage) ai.SystemMessage {
+	message.ToolsAdded, message.ToolsRemoved = nil, nil
+	return message
 }
 
 // effectiveSystemSections reads the run's live loadout without changing the base prompt. A structured prompt is built from the run's before_agent_start options, as agent-session.ts:1669-1683 builds it for every mode, also when the caller's structured prompt is the rendering of the base options; any other caller-owned structured prompt takes only the tools and rules sections from them. The caller holds toolRegistryMu.
@@ -138,6 +144,14 @@ func (s *Session) hiddenDeclarations() map[string]struct{} {
 // HiddenDeclarations returns the tools whose declarations the loadout hides from every request. A prompt built outside the Session lists no hidden tool.
 func (s *Session) HiddenDeclarations() map[string]struct{} {
 	return maps.Clone(s.hiddenDeclarations())
+}
+
+// HiddenDeclarationNames lists the tools whose declarations the loadout hides, in the order the hooks hid them: upstream's `hiddenTools: [...this._hiddenDeclarations]` (agent-session.ts _rebuildSystemPrompt).
+func (s *Session) HiddenDeclarationNames() []string {
+	if order := s.loadout.hiddenOrder.Load(); order != nil {
+		return slices.Clone(*order)
+	}
+	return []string{}
 }
 
 // SystemPrompt returns the effective run prompt while running and the base prompt between runs, independently of the retained active loadout.
@@ -204,13 +218,7 @@ func (s *Session) initSystemPrompt(opts SessionOptions) {
 	s.rebuildSystemPrompt(s.ActiveToolNames())
 }
 
-// projectedContext returns the canonical Session projection as the agent's
-// loop context, keeping the current instruction baseline.
-func (s *Session) projectedContext() []agent.AgentMessage {
-	return s.contextFromProjection(s.inner.BuildSessionProjection())
-}
-
-// contextFromProjection is projectedContext over a projection the caller already built.
+// contextFromProjection is the canonical Session projection as the agent's loop context, keeping the current instruction baseline.
 func (s *Session) contextFromProjection(projection codingagent.SessionProjection) []agent.AgentMessage {
 	return withInstructionBaseline(s.agent.Messages(), projection.Messages)
 }
@@ -218,17 +226,41 @@ func (s *Session) contextFromProjection(projection codingagent.SessionProjection
 // prepareRequest re-projects the Session before every provider request, so
 // context edits and compactions written during a run reach the next request
 // (agent-session.ts _installAgentRequestProjection).
-func (s *Session) prepareRequest(ctx context.Context, _ agent.PrepareRequestContext) (*agent.AgentRequestUpdate, error) {
+func (s *Session) prepareRequest(ctx context.Context, request agent.PrepareRequestContext) (*agent.AgentRequestUpdate, error) {
 	failed := s.failedResponse.Swap(nil)
-	thinking := s.agent.ThinkingLevel()
-	model := s.agent.Model()
-	projection := s.inner.BuildSessionProjection()
-	projected := s.contextFromProjection(projection)
+	// prepare projects the Session and passes the projection through the hook the supplied Agent had before the Session installed its own.
+	prepare := func() (previous *agent.AgentRequestUpdate, requestContext *agent.AgentContext, projection codingagent.SessionProjection, err error) {
+		projection = s.inner.BuildSessionProjectionView()
+		requestContext = s.executableContext(s.contextFromProjection(projection))
+		if s.previousPrepareRequest == nil {
+			return nil, requestContext, projection, nil
+		}
+		request.Context = *requestContext
+		request.Model, request.ThinkingLevel = s.agent.Model(), s.agent.ThinkingLevel()
+		if previous, err = s.previousPrepareRequest(ctx, request); err != nil {
+			return nil, nil, projection, err
+		}
+		if previous != nil && previous.Context != nil {
+			requestContext = previous.Context
+		}
+		return previous, requestContext, projection, nil
+	}
+	previous, requestContext, projection, err := prepare()
+	if err != nil {
+		return nil, err
+	}
+	model, thinking := s.agent.Model(), s.agent.ThinkingLevel()
+	if previous != nil && previous.Model != nil {
+		model = previous.Model
+	}
+	if previous != nil && previous.ThinkingLevel != nil {
+		thinking = *previous.ThinkingLevel
+	}
 	if !IsVirtualModel(model) {
-		return &agent.AgentRequestUpdate{Context: projected, Model: model, ThinkingLevel: &thinking}, nil
+		return &agent.AgentRequestUpdate{Context: requestContext, Model: model, ThinkingLevel: &thinking}, nil
 	}
 	// A routing failure rejects, which ends the run with an error response.
-	route, err := s.routeRequest(ctx, model, thinking, projected, failed)
+	route, err := s.routeRequest(ctx, model, thinking, requestContext.Messages, failed)
 	if err != nil {
 		return nil, err
 	}
@@ -241,9 +273,18 @@ func (s *Session) prepareRequest(ctx context.Context, _ agent.PrepareRequestCont
 		if _, err := s.runAutoCompaction(ctx, "threshold", false); err != nil {
 			return nil, err
 		}
-		projected = s.projectedContext()
+		if _, requestContext, _, err = prepare(); err != nil {
+			return nil, err
+		}
 	}
-	return &agent.AgentRequestUpdate{Context: projected, Model: route.Model, ThinkingLevel: &route.ThinkingLevel}, nil
+	return &agent.AgentRequestUpdate{Context: requestContext, Model: route.Model, ThinkingLevel: &route.ThinkingLevel}, nil
+}
+
+// executableContext is the projected transcript with the agent's current tools: messages declare the provider-visible loadout and context.tools keeps the executable implementations.
+//
+// upstream: agent-session.ts _installAgentRequestProjection (`tools: this.agent.state.tools.slice()`)
+func (s *Session) executableContext(messages []agent.AgentMessage) *agent.AgentContext {
+	return &agent.AgentContext{Messages: messages, Tools: s.agent.Tools()}
 }
 
 // exceedsCompactionThreshold reports whether projection, the current session projection, exceeds the compaction threshold of model.
@@ -266,8 +307,9 @@ func (s *Session) exceedsCompactionThreshold(model *ai.Model, projection codinga
 // projection (agent-session.ts _installAgentNextTurnRefresh and
 // _compactBeforeNextAssistantResponse). It runs on the agent goroutine inside
 // Send, which holds s.mu.
-func (s *Session) prepareNextTurn(ctx context.Context, _ agent.PrepareNextTurnContext) (*agent.AgentLoopTurnUpdate, error) {
-	projection := s.inner.BuildSessionProjection()
+func (s *Session) prepareNextTurn(ctx context.Context, turn agent.PrepareNextTurnContext) (*agent.AgentLoopTurnUpdate, error) {
+	// The projection is the session's own messages, as Pi's buildSessionContext returns the entries' objects: the loop reads them and the request that follows projects the session again, so a deep copy of every message before each request only grows with the history.
+	projection := s.inner.BuildSessionProjectionView()
 	// A virtual selection is checked in prepareRequest, against the model the request is routed to.
 	if model := s.Model(); model != nil && !IsVirtualModel(model) {
 		exceeds, err := s.exceedsCompactionThreshold(model, projection)
@@ -278,12 +320,30 @@ func (s *Session) prepareNextTurn(ctx context.Context, _ agent.PrepareNextTurnCo
 			if _, err := s.runAutoCompaction(ctx, "threshold", false); err != nil {
 				return nil, err
 			}
-			projection = s.inner.BuildSessionProjection()
+			projection = s.inner.BuildSessionProjectionView()
+		}
+	}
+	projected := s.contextFromProjection(projection)
+	// The hook the supplied Agent had before the Session installed its own sees the refreshed context and may replace it and add messages (agent-session.ts _installAgentNextTurnRefresh).
+	var previous *agent.AgentLoopTurnUpdate
+	if s.previousPrepareNextTurn != nil {
+		// The projection is the session's own, read and never written; the hook may write the array it receives.
+		//perf:ok only when the supplied Agent has its own hook; Pi hands that hook the fresh array buildSessionProjection builds each call
+		turn.Context = *s.executableContext(slices.Clone(projected))
+		var err error
+		if previous, err = s.previousPrepareNextTurn(ctx, turn); err != nil {
+			return nil, err
+		}
+		if previous != nil && previous.Context != nil {
+			projected = previous.Context.Messages
 		}
 	}
 	thinking := s.agent.ThinkingLevel()
-	projected := s.contextFromProjection(projection)
-	update := &agent.AgentLoopTurnUpdate{Context: projected, Model: s.agent.Model(), ThinkingLevel: &thinking}
+	update := &agent.AgentLoopTurnUpdate{Context: s.executableContext(projected), Model: s.agent.Model(), ThinkingLevel: &thinking}
+	if previous != nil {
+		// Clipped, so the update message below goes to a new array and the hook's slice is not written, as Pi spreads it into a new one.
+		update.Messages = slices.Clip(previous.Messages)
+	}
 	// agent-session.ts:697-709 refreshes the run's options before each later turn and keeps them.
 	if run := s.runPrompt.Load(); run != nil {
 		next := *run
@@ -295,7 +355,7 @@ func (s *Session) prepareNextTurn(ctx context.Context, _ agent.PrepareNextTurnCo
 		return nil, err
 	}
 	if system != nil {
-		update.Messages = []agent.AgentMessage{{System: system}}
+		update.Messages = append(update.Messages, agent.AgentMessage{System: system})
 	}
 	return update, nil
 }

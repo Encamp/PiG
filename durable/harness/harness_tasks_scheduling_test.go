@@ -3,6 +3,8 @@
 
 package harness
 
+// pi: packages/durable/src/harness/scheduler.ts
+
 import (
 	"context"
 	"errors"
@@ -23,9 +25,8 @@ type tkNotes struct {
 
 func tkSessionNotes(kind string) durable.DocToken[tkNotes] {
 	return durable.DefineDoc(durable.DocDefinition[tkNotes]{
-		CommonDocDefinition: durable.CommonDocDefinition[tkNotes]{Kind: kind, Version: 1},
+		CommonDocDefinition: durable.CommonDocDefinition[tkNotes]{Kind: kind, Version: 1, Initial: func() tkNotes { return tkNotes{} }},
 		DocumentSemantics:   durable.DocumentSemantics{Scope: durable.ScopeSession},
-		Initial:             func() tkNotes { return tkNotes{} },
 	})
 }
 
@@ -94,6 +95,20 @@ func tkTaskWrites(storage *controlledStorage, id durable.TaskId) []durable.TaskS
 	return statuses
 }
 
+// tkTaskWritesAt is the task records of the commit at index, negative from the end (storage.commits.at(-n) of harness-tasks.test.ts).
+func tkTaskWritesAt(storage *controlledStorage, index int) []durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue] {
+	if index < 0 {
+		index += storage.commitCount()
+	}
+	var records []durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue]
+	for _, write := range storage.commitAt(index) {
+		if task, ok := write.(durable.TaskWrite); ok {
+			records = append(records, task.Value)
+		}
+	}
+	return records
+}
+
 func tkLastTaskWrites(storage *controlledStorage) []durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue] {
 	var records []durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue]
 	for _, write := range storage.commitAt(storage.commitCount() - 1) {
@@ -104,7 +119,10 @@ func tkLastTaskWrites(storage *controlledStorage) []durable.TaskRecord[durable.J
 	return records
 }
 
+// Pi TaskRuntime.agent: packages/durable/src/types.ts:181.
+// Pi TaskRuntime.sleep: packages/durable/src/types.ts:229.
 func TestTaskRuntime(t *testing.T) {
+	// harness-tasks.test.ts:522 it("rejects runtime operations after the invocation ends and stops its watches")
 	t.Run("rejects runtime operations after the invocation ends and stops its watches", func(t *testing.T) {
 		notes := tkSessionNotes("test.task-notes")
 		absentNotes := tkSessionNotes("test.task-absent")
@@ -129,16 +147,16 @@ func TestTaskRuntime(t *testing.T) {
 				if value == nil {
 					delivered.add("retired")
 				} else {
-					delivered.add(value["text"].(string))
+					delivered.add(value.Value("text").(string))
 				}
 				return nil
 			})
 			watchHandle.put(watch)
 			return tkComplete(ctx, runtime)
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{watcher})
+		opened := tkOpenRoot(t, []durable.AnyTask{watcher.Erased()})
 		tkSetNotes(t, opened.harness, notes, "hello")
-		id := tkStart(t, opened.root, watcher)
+		id := tkStart(t, opened.root, watcher.Erased())
 		opened.harness.Resume()
 		tkWaitOutcome(t, opened.harness, id)
 		if missing, _ := absent.get(); missing != nil {
@@ -164,7 +182,7 @@ func TestTaskRuntime(t *testing.T) {
 		tkContainsError(t, memoErr, "invocation has ended")
 		_, candidateErr := runtime.MemoCandidate(testContext, "x", float64(1))
 		tkContainsError(t, candidateErr, "invocation has ended")
-		tkContainsError(t, runtime.Sleep(testContext, 0), "invocation has ended")
+		tkContainsError(t, runtime.SleepUntil(testContext, 0, stepState{Phase: "run"}), "invocation has ended")
 		_, watchErr := runtime.WatchDocErased(testContext, notes)
 		tkContainsError(t, watchErr, "invocation has ended")
 		// The handler's own context is cancelled by now; the ended invocation still wins.
@@ -176,11 +194,11 @@ func TestTaskRuntime(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:579 it("reads committed documents and context through the runtime, and forwards the clock and reports")
 	t.Run("reads committed documents and context through the runtime, and forwards the clock and reports", func(t *testing.T) {
 		notes := durable.DefineDoc(durable.DocDefinition[tkNotes]{
-			CommonDocDefinition: durable.CommonDocDefinition[tkNotes]{Kind: "test.runtime-notes", Version: 1},
+			CommonDocDefinition: durable.CommonDocDefinition[tkNotes]{Kind: "test.runtime-notes", Version: 1, Initial: func() tkNotes { return tkNotes{} }},
 			DocumentSemantics:   durable.DocumentSemantics{Scope: durable.ScopeConversation, History: durable.HistoryRewindable, Fork: durable.ForkAsOf},
-			Initial:             func() tkNotes { return tkNotes{} },
 		})
 		captured := &syncValue[stepRuntime]{}
 		seen := &syncList[any]{}
@@ -201,12 +219,12 @@ func TestTaskRuntime(t *testing.T) {
 				return err
 			}
 			seen.add(asOf.Text)
-			atFirst, err := runtime.Context(ctx, runtime.ConversationId(), &first)
+			atFirst, err := runtime.Context(ctx, runtime.ConversationId(), &durable.ContextOptions{At: &first})
 			if err != nil {
 				return err
 			}
 			seen.add(len(atFirst.Entries))
-			atSecond, err := runtime.Context(ctx, runtime.ConversationId(), &second)
+			atSecond, err := runtime.Context(ctx, runtime.ConversationId(), &durable.ContextOptions{At: &second})
 			if err != nil {
 				return err
 			}
@@ -215,7 +233,7 @@ func TestTaskRuntime(t *testing.T) {
 			runtime.Report(errors.New("reported"))
 			return tkComplete(ctx, runtime)
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{reader}, tkOptions{now: func() float64 { return 1234 }})
+		opened := tkOpenRoot(t, []durable.AnyTask{reader.Erased()}, tkOptions{now: func() float64 { return 1234 }})
 		for _, text := range []string{"one", "two"} {
 			_, err := opened.root.Commit(testContext, func(tx durable.Tx) (any, error) {
 				draft, err := durable.TxDoc[tkNotes](tx, notes, opened.root.Id())
@@ -232,7 +250,7 @@ func TestTaskRuntime(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		id := tkStart(t, opened.root, reader)
+		id := tkStart(t, opened.root, reader.Erased())
 		opened.harness.Resume()
 		tkWaitOutcome(t, opened.harness, id)
 		if want := []any{"two", "one", 1, 2, float64(1234)}; !reflect.DeepEqual(seen.all(), want) {
@@ -247,11 +265,15 @@ func TestTaskRuntime(t *testing.T) {
 		runtime, _ := captured.get()
 		_, snapshotErr := runtime.SnapshotErased(testContext, notes, opened.root.Id())
 		tkContainsError(t, snapshotErr, "invocation has ended")
+		var documents durable.DocumentReader = runtime
+		_, snapshotAsOfErr := documents.SnapshotAsOfErased(testContext, notes, 1, opened.root.Id())
+		tkContainsError(t, snapshotAsOfErr, "invocation has ended")
 		_, contextErr := runtime.Context(testContext, opened.root.Id(), nil)
 		tkContainsError(t, contextErr, "invocation has ended")
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:622 it("orders runtime commits against the step: one queued before it lands, one after it rejects")
 	t.Run("orders runtime commits against the step: one queued before it lands, one after it rejects", func(t *testing.T) {
 		store := newControlledStorage()
 		before := make(chan error, 1)
@@ -283,9 +305,9 @@ func TestTaskRuntime(t *testing.T) {
 			})
 			return nil
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{detached}, tkOptions{storage: store})
+		opened := tkOpenRoot(t, []durable.AnyTask{detached.Erased()}, tkOptions{storage: store})
 		harnessRef.Store(&opened.harness)
-		id := tkStart(t, opened.root, detached)
+		id := tkStart(t, opened.root, detached.Erased())
 		opened.harness.Resume()
 		eventually(t, func() bool { return heldGate.isSet() })
 		eventually(t, afterQueued.Load)
@@ -303,6 +325,7 @@ func TestTaskRuntime(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:654 it("stops a watch whose acquisition finishes after the invocation ended")
 	t.Run("stops a watch whose acquisition finishes after the invocation ended", func(t *testing.T) {
 		notes := tkSessionNotes("test.late-watch")
 		store := newControlledStorage()
@@ -322,10 +345,10 @@ func TestTaskRuntime(t *testing.T) {
 			})
 			return nil
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{late}, tkOptions{storage: store})
+		opened := tkOpenRoot(t, []durable.AnyTask{late.Erased()}, tkOptions{storage: store})
 		harnessRef.Store(&opened.harness)
 		tkSetNotes(t, opened.harness, notes, "x")
-		id := tkStart(t, opened.root, late)
+		id := tkStart(t, opened.root, late.Erased())
 		opened.harness.Resume()
 		eventually(t, heldGate.isSet)
 		held, _ := heldGate.get()
@@ -338,70 +361,6 @@ func TestTaskRuntime(t *testing.T) {
 		tkContainsError(t, tkWaitErr(t, watching), "invocation has ended")
 		if outcome := tkWaitOutcome(t, opened.harness, id); outcome.Status != durable.OutcomeFaulted {
 			t.Fatalf("outcome %s, want faulted", describeOutcome(outcome))
-		}
-		mustClose(t, opened.harness)
-	})
-
-	t.Run("sleeps until the Harness clock reaches the deadline, rechecking after each timer", func(t *testing.T) {
-		var clock atomic.Int64
-		clock.Store(1000)
-		woke := deferred()
-		sleeper := tkOneStep("test.sleeper", func(ctx context.Context, _ stepRecord, runtime stepRuntime) error {
-			if err := runtime.Sleep(ctx, 900); err != nil {
-				return err
-			}
-			if err := runtime.Sleep(ctx, 1005); err != nil {
-				return err
-			}
-			woke.resolve()
-			return tkComplete(ctx, runtime)
-		})
-		opened := tkOpenRoot(t, []durable.AnyTask{sleeper}, tkOptions{now: func() float64 { return float64(clock.Load()) }})
-		id := tkStart(t, opened.root, sleeper)
-		opened.harness.Resume()
-		// The clock stands still, so real timers keep firing without waking the task.
-		time.Sleep(30 * time.Millisecond)
-		if settled(woke.done) {
-			t.Fatal("the task woke before the clock reached its deadline")
-		}
-		clock.Store(1005)
-		tkWaitOutcome(t, opened.harness, id)
-		mustClose(t, opened.harness)
-	})
-
-	t.Run("rejects a sleep when the invocation is signalled or the sleep's own context is cancelled", func(t *testing.T) {
-		results := &syncList[string]{}
-		sleeping := deferred()
-		signalled := tkOneStep("test.sleep-signalled", func(ctx context.Context, _ stepRecord, runtime stepRuntime) error {
-			sleeping.resolve()
-			err := runtime.Sleep(ctx, float64(time.Now().UnixMilli()+60_000))
-			// Upstream's signal reason is an AbortError; the scheduler's signal is context.Canceled.
-			results.add(fmt.Sprintf("signalled:%v", errors.Is(err, context.Canceled)))
-			return err
-		})
-		cancelled := tkOneStep("test.sleep-cancelled", func(ctx context.Context, _ stepRecord, runtime stepRuntime) error {
-			own, cancel := context.WithCancelCause(ctx)
-			result := make(chan error, 1)
-			go func() { result <- runtime.Sleep(own, float64(time.Now().UnixMilli()+60_000)) }()
-			flush()
-			cancel(errors.New("stop sleeping"))
-			results.add("cancelled:" + (<-result).Error())
-			return tkComplete(ctx, runtime)
-		})
-		opened := tkOpenRoot(t, []durable.AnyTask{signalled, cancelled})
-		signalledId := tkStart(t, opened.root, signalled)
-		cancelledId := tkStart(t, opened.root, cancelled)
-		opened.harness.Resume()
-		tkWaitOutcome(t, opened.harness, cancelledId)
-		if err := sleeping.wait(testContext); err != nil {
-			t.Fatal(err)
-		}
-		if result, err := opened.harness.AbortTask(testContext, signalledId); err != nil || result != "marked" {
-			t.Fatalf("AbortTask %q %v", result, err)
-		}
-		expectOutcome(t, tkWaitOutcome(t, opened.harness, signalledId), outcomeAborted("test"))
-		if want := []string{"cancelled:stop sleeping", "signalled:true"}; !reflect.DeepEqual(results.all(), want) {
-			t.Fatalf("results %v, want %v", results.all(), want)
 		}
 		mustClose(t, opened.harness)
 	})
@@ -425,78 +384,92 @@ func indexOf(text, fragment string) int {
 	return -1
 }
 
+// TestTaskScheduling Conversation.waitForIdle resolves when the ordinary ownership scope has no live non-background task (packages/durable/src/harness/types.ts:546-550).
+// mutation-checked: Conversation.WaitForIdle returning without waiting fails it.
 func TestTaskScheduling(t *testing.T) {
-	t.Run("retries reservation on the next wakeup after a rejected reservation commit", func(t *testing.T) {
+	// harness-tasks.test.ts:745 it("fails the Harness on a failed reservation commit; reopening runs the task")
+	t.Run("fails the Harness on a failed reservation commit; reopening runs the task", func(t *testing.T) {
 		var runs atomic.Int32
 		once := tkOneStep("test.once", func(ctx context.Context, _ stepRecord, runtime stepRuntime) error {
 			runs.Add(1)
 			return tkComplete(ctx, runtime)
 		})
 		store := newControlledStorage()
-		opened := tkOpenRoot(t, []durable.AnyTask{once}, tkOptions{storage: store})
-		id := tkStart(t, opened.root, once)
-		store.failNextCommit(durable.NewStorageRejected("busy", nil))
+		opened := tkOpenRoot(t, []durable.AnyTask{once.Erased()}, tkOptions{storage: store})
+		id := tkStart(t, opened.root, once.Erased())
+		waiting := goCall(func() error {
+			_, err := opened.harness.WaitForTask(testContext, id)
+			return err
+		})
+		failure := errors.New("disk gone")
+		store.failNextCommit(failure)
 		opened.harness.Resume()
-		eventually(t, func() bool { return len(opened.reports.all()) == 1 })
-		record, err := opened.harness.GetTask(testContext, id)
-		if err != nil || record.State.Status != durable.TaskPending {
-			t.Fatalf("task %+v %v, want pending", record, err)
+		<-opened.harness.Closed()
+		if end := opened.harness.End(); end.Reason != durable.SessionEndFailed || !errors.Is(end.Error, failure) {
+			t.Fatalf("end %+v, want failed with the storage error", end)
 		}
-		// Any wakeup, here a registry change, reserves again.
-		addTool(t, opened.registry, supportTool("wake"))
-		tkWaitOutcome(t, opened.harness, id)
+		if reports := opened.reports.all(); len(reports) != 1 || !errors.Is(reports[0], failure) {
+			t.Fatalf("reports %v, want the storage error once", reports)
+		}
+		// The pending wait and every later call get SessionFailed with the storage error.
+		expectSessionFailed(t, waiting.wait(t), failure)
+		_, err := opened.harness.GetTask(testContext, id)
+		expectSessionFailed(t, err, failure)
+		_, err = opened.root.Submit(testContext, ownInput("x"))
+		expectSessionFailed(t, err, failure)
+		if runs.Load() != 0 {
+			t.Fatalf("%d runs, want 0", runs.Load())
+		}
+		mustClose(t, opened.harness)
+
+		store.Reopen()
+		reopened := tkOpenRoot(t, []durable.AnyTask{once.Erased()}, tkOptions{storage: store})
+		reopened.harness.Resume()
+		expectOutcome(t, tkWaitOutcome(t, reopened.harness, id), outcomeCompleted(nil))
 		if runs.Load() != 1 {
-			t.Fatalf("%d runs, want 1", runs.Load())
+			t.Fatalf("%d runs after reopening, want 1", runs.Load())
 		}
-		mustClose(t, opened.harness)
+		mustClose(t, reopened.harness)
 	})
 
-	t.Run("keeps a wakeup that arrives while a rejected reservation commit is in storage", func(t *testing.T) {
-		first := tkOneStep("test.wake-first", func(ctx context.Context, _ stepRecord, runtime stepRuntime) error { return tkComplete(ctx, runtime) })
-		late := tkOneStep("test.wake-late", func(ctx context.Context, _ stepRecord, runtime stepRuntime) error { return tkComplete(ctx, runtime) })
-		store := newControlledStorage()
-		opened := tkOpenRoot(t, []durable.AnyTask{first}, tkOptions{storage: store})
-		firstId := tkStart(t, opened.root, first)
-		lateId := tkStart(t, opened.root, late)
-		held := store.holdCommits()
-		store.failNextCommit(durable.NewStorageRejected("busy", nil))
-		opened.harness.Resume()
-		if err := held.entered.wait(testContext); err != nil {
-			t.Fatal(err)
-		}
-		// Registering the missing definition wakes the scheduler while the doomed reservation is in storage.
-		addTask(t, opened.registry, late)
-		held.release()
-		tkWaitOutcome(t, opened.harness, firstId)
-		tkWaitOutcome(t, opened.harness, lateId)
-		mustClose(t, opened.harness)
-	})
-
-	t.Run("reruns a task whose fault write was rejected", func(t *testing.T) {
+	// harness-tasks.test.ts:777 it("fails the Harness instead of running a task again when its fault write fails")
+	t.Run("fails the Harness instead of running a task again when its fault write fails", func(t *testing.T) {
 		var runs atomic.Int32
 		store := newControlledStorage()
-		throws := tkOneStep("test.rejected-fault", func(context.Context, stepRecord, stepRuntime) error {
+		failure := errors.New("disk gone")
+		throws := tkOneStep("test.failed-fault", func(context.Context, stepRecord, stepRuntime) error {
 			// The next commit is the step's fault write.
 			if runs.Add(1) == 1 {
-				store.failNextCommit(durable.NewStorageRejected("busy", nil))
+				store.failNextCommit(failure)
 			}
 			return errors.New("boom")
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{throws}, tkOptions{storage: store})
-		id := tkStart(t, opened.root, throws)
+		opened := tkOpenRoot(t, []durable.AnyTask{throws.Erased()}, tkOptions{storage: store})
+		id := tkStart(t, opened.root, throws.Erased())
 		opened.harness.Resume()
-		expectOutcome(t, tkWaitOutcome(t, opened.harness, id), outcomeFaulted("boom"))
-		if runs.Load() != 2 {
-			t.Fatalf("%d runs, want 2", runs.Load())
+		<-opened.harness.Closed()
+		if end := opened.harness.End(); end.Reason != durable.SessionEndFailed || !errors.Is(end.Error, failure) {
+			t.Fatalf("end %+v, want failed with the storage error", end)
 		}
-		reports := opened.reports.all()
-		var rejected *durable.StorageRejected
-		if len(reports) != 1 || !errors.As(reports[0], &rejected) || rejected.Message != "busy" {
-			t.Fatalf("reports %v, want one StorageRejected: busy", reports)
+		if runs.Load() != 1 {
+			t.Fatalf("%d runs, want 1", runs.Load())
+		}
+		if reports := opened.reports.all(); len(reports) != 1 || !errors.Is(reports[0], failure) {
+			t.Fatalf("reports %v, want the storage error once", reports)
 		}
 		mustClose(t, opened.harness)
+		// Reopening recovers the task as after a crash: still running, so its phase runs again.
+		store.Reopen()
+		reopened := tkOpenRoot(t, []durable.AnyTask{throws.Erased()}, tkOptions{storage: store})
+		reopened.harness.Resume()
+		expectOutcome(t, tkWaitOutcome(t, reopened.harness, id), outcomeFaulted("boom"))
+		if runs.Load() != 2 {
+			t.Fatalf("%d runs after reopening, want 2", runs.Load())
+		}
+		mustClose(t, reopened.harness)
 	})
 
+	// harness-tasks.test.ts:806 it("waits for Harness and conversation idleness, counting blocked work and ignoring background tasks")
 	t.Run("waits for Harness and conversation idleness, counting blocked work and ignoring background tasks", func(t *testing.T) {
 		var gatesMu sync.Mutex
 		gates := map[durable.TaskId]chan struct{}{}
@@ -517,7 +490,7 @@ func TestTaskScheduling(t *testing.T) {
 			defer gatesMu.Unlock()
 			close(gates[id])
 		}
-		opened := tkOpenRoot(t, []durable.AnyTask{gated})
+		opened := tkOpenRoot(t, []durable.AnyTask{gated.Erased()})
 		if err := opened.harness.WaitForIdle(testContext); err != nil {
 			t.Fatal(err)
 		}
@@ -525,9 +498,9 @@ func TestTaskScheduling(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		foreground := tkStart(t, opened.root, gated)
-		background := tkStart(t, opened.root, gated, true)
-		elsewhere := tkStart(t, other, gated)
+		foreground := tkStart(t, opened.root, gated.Erased())
+		background := tkStart(t, opened.root, gated.Erased(), true)
+		elsewhere := tkStart(t, other, gated.Erased())
 		// Work that has not started yet is live; cancelling a wait only rejects that wait.
 		stopWaiting, cancelWait := context.WithCancelCause(testContext)
 		cancelledWait := make(chan error, 1)
@@ -572,9 +545,10 @@ func TestTaskScheduling(t *testing.T) {
 		tkContainsError(t, opened.root.WaitForIdle(testContext), "closed")
 	})
 
+	// harness-tasks.test.ts:856 it("rejects unknown tasks and reports terminal tasks")
 	t.Run("rejects unknown tasks and reports terminal tasks", func(t *testing.T) {
 		done := tkOneStep("test.quick", func(ctx context.Context, _ stepRecord, runtime stepRuntime) error { return tkComplete(ctx, runtime) })
-		opened := tkOpenRoot(t, []durable.AnyTask{done})
+		opened := tkOpenRoot(t, []durable.AnyTask{done.Erased()})
 		unknown := durable.TaskId(999_999)
 		if record, err := opened.harness.GetTask(testContext, unknown); err != nil || record != nil {
 			t.Fatalf("GetTask of an unknown task %+v %v", record, err)
@@ -583,7 +557,7 @@ func TestTaskScheduling(t *testing.T) {
 		tkContainsError(t, waitErr, "does not exist")
 		_, abortErr := opened.harness.AbortTask(testContext, unknown)
 		tkContainsError(t, abortErr, "does not exist")
-		id := tkStart(t, opened.root, done)
+		id := tkStart(t, opened.root, done.Erased())
 		opened.harness.Resume()
 		tkWaitOutcome(t, opened.harness, id)
 		if receipt, err := opened.harness.WaitForTask(testContext, id); err != nil || receipt.State.Status != durable.TaskTerminal {
@@ -596,12 +570,13 @@ func TestTaskScheduling(t *testing.T) {
 		tkExpectPanic(t, "closed", opened.harness.Resume)
 	})
 
+	// harness-tasks.test.ts:874 it("rejects task waits cancelled or closed while queued on the line, and pending waits on close")
 	t.Run("rejects task waits cancelled or closed while queued on the line, and pending waits on close", func(t *testing.T) {
 		gate := deferred()
 		blocking := tkGated("test.wait-close", gate)
 		store := newControlledStorage()
-		opened := tkOpenRoot(t, []durable.AnyTask{blocking}, tkOptions{storage: store})
-		id := tkStart(t, opened.root, blocking)
+		opened := tkOpenRoot(t, []durable.AnyTask{blocking.Erased()}, tkOptions{storage: store})
+		id := tkStart(t, opened.root, blocking.Erased())
 
 		// Hold the line with a commit, then queue waits behind it.
 		held := store.holdCommits()
@@ -660,6 +635,7 @@ func TestTaskScheduling(t *testing.T) {
 }
 
 func TestTaskAbort(t *testing.T) {
+	// harness-tasks.test.ts:917 it("rejects the run's commits and memo writes after the mark, and settles through a fresh abort invocation")
 	t.Run("rejects the run's commits and memo writes after the mark, and settles through a fresh abort invocation", func(t *testing.T) {
 		reached := deferred()
 		errs := &syncList[string]{}
@@ -700,8 +676,8 @@ func TestTaskAbort(t *testing.T) {
 				return abortedWith[stepState, durable.JsonValue]("mark"), nil
 			})
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{marked})
-		id := tkStart(t, opened.root, marked)
+		opened := tkOpenRoot(t, []durable.AnyTask{marked.Erased()})
+		id := tkStart(t, opened.root, marked.Erased())
 		opened.harness.Resume()
 		if err := reached.wait(testContext); err != nil {
 			t.Fatal(err)
@@ -724,6 +700,7 @@ func TestTaskAbort(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:961 it("starts no further phase after a mark that lands during a phase with progress")
 	t.Run("starts no further phase after a mark that lands during a phase with progress", func(t *testing.T) {
 		reached, proceed := deferred(), deferred()
 		phases := &syncList[string]{}
@@ -760,8 +737,8 @@ func TestTaskAbort(t *testing.T) {
 				})
 			},
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{two})
-		id := tkStart(t, opened.root, two)
+		opened := tkOpenRoot(t, []durable.AnyTask{two.Erased()})
+		id := tkStart(t, opened.root, two.Erased())
 		opened.harness.Resume()
 		if err := reached.wait(testContext); err != nil {
 			t.Fatal(err)
@@ -778,6 +755,7 @@ func TestTaskAbort(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:998 it("signals and joins the run before returning, then runs the abort handler")
 	t.Run("signals and joins the run before returning, then runs the abort handler", func(t *testing.T) {
 		reached := deferred()
 		var runEnded atomic.Bool
@@ -797,8 +775,8 @@ func TestTaskAbort(t *testing.T) {
 				return abortedWith[stepState, durable.JsonValue]("test"), nil
 			})
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{signalled})
-		id := tkStart(t, opened.root, signalled)
+		opened := tkOpenRoot(t, []durable.AnyTask{signalled.Erased()})
+		id := tkStart(t, opened.root, signalled.Erased())
 		opened.harness.Resume()
 		if err := reached.wait(testContext); err != nil {
 			t.Fatal(err)
@@ -817,6 +795,7 @@ func TestTaskAbort(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:1020 it("aborts waiting work before its wait ends and faults abort handlers that throw or settle nothing")
 	t.Run("aborts waiting work before its wait ends and faults abort handlers that throw or settle nothing", func(t *testing.T) {
 		gate := deferred()
 		first := tkGated("test.dependency", gate)
@@ -828,11 +807,11 @@ func TestTaskAbort(t *testing.T) {
 		}
 		lazy := tkOneStep("test.lazy-abort", wait, func(context.Context, stepRuntime) error { return nil })
 		throwing := tkOneStep("test.throwing-abort", wait, func(context.Context, stepRuntime) error { return errors.New("abort failed") })
-		opened := tkOpenRoot(t, []durable.AnyTask{first, lazy, throwing})
-		firstTask := tkStart(t, opened.root, first)
+		opened := tkOpenRoot(t, []durable.AnyTask{first.Erased(), lazy.Erased(), throwing.Erased()})
+		firstTask := tkStart(t, opened.root, first.Erased())
 		firstId.Store(int64(firstTask))
-		lazyId := tkStart(t, opened.root, lazy)
-		throwingId := tkStart(t, opened.root, throwing)
+		lazyId := tkStart(t, opened.root, lazy.Erased())
+		throwingId := tkStart(t, opened.root, throwing.Erased())
 		opened.harness.Resume()
 		waiting := func(id durable.TaskId) bool {
 			record, err := opened.harness.GetTask(testContext, id)
@@ -855,6 +834,7 @@ func TestTaskAbort(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:1055 it("does not signal a running abort handler when aborted again, and a cancelled caller leaves the mark durable")
 	t.Run("does not signal a running abort handler when aborted again, and a cancelled caller leaves the mark durable", func(t *testing.T) {
 		started, reached, proceed, runRelease := deferred(), deferred(), deferred(), deferred()
 		abortSignalled := &syncValue[bool]{}
@@ -874,8 +854,8 @@ func TestTaskAbort(t *testing.T) {
 				return abortedWith[stepState, durable.JsonValue]("once"), nil
 			})
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{run})
-		id := tkStart(t, opened.root, run)
+		opened := tkOpenRoot(t, []durable.AnyTask{run.Erased()})
+		id := tkStart(t, opened.root, run.Erased())
 		opened.harness.Resume()
 		// AbortTask joins only a run invocation already on the line (scheduler.ts abort), so the caller can be seen
 		// joining only once the run phase has started; a fixed flush does not guarantee it under load.
@@ -919,6 +899,7 @@ func TestTaskAbort(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:1095 it("keeps a terminal outcome committed by an abort handler that throws afterwards")
 	t.Run("keeps a terminal outcome committed by an abort handler that throws afterwards", func(t *testing.T) {
 		run := tkOneStep("test.abort-then-throw", func(_ context.Context, _ stepRecord, runtime stepRuntime) error {
 			return abortedBy(runtime.Signal())
@@ -930,8 +911,8 @@ func TestTaskAbort(t *testing.T) {
 			}
 			return errors.New("after terminal")
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{run})
-		id := tkStart(t, opened.root, run)
+		opened := tkOpenRoot(t, []durable.AnyTask{run.Erased()})
+		id := tkStart(t, opened.root, run.Erased())
 		opened.harness.Resume()
 		flush()
 		if _, err := opened.harness.AbortTask(testContext, id); err != nil {
@@ -941,6 +922,7 @@ func TestTaskAbort(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:1115 it("never starts phase one when the abort lands while the reservation settles")
 	t.Run("never starts phase one when the abort lands while the reservation settles", func(t *testing.T) {
 		var ran atomic.Bool
 		reserved := tkOneStep("test.reserved", func(_ context.Context, _ stepRecord, runtime stepRuntime) error {
@@ -948,8 +930,8 @@ func TestTaskAbort(t *testing.T) {
 			return abortedBy(runtime.Signal())
 		})
 		store := newControlledStorage()
-		opened := tkOpenRoot(t, []durable.AnyTask{reserved}, tkOptions{storage: store})
-		id := tkStart(t, opened.root, reserved)
+		opened := tkOpenRoot(t, []durable.AnyTask{reserved.Erased()}, tkOptions{storage: store})
+		id := tkStart(t, opened.root, reserved.Erased())
 		held := store.holdCommits()
 		opened.harness.Resume()
 		if err := held.entered.wait(testContext); err != nil {
@@ -978,6 +960,7 @@ func TestTaskAbort(t *testing.T) {
 		mustClose(t, opened.harness)
 	})
 
+	// harness-tasks.test.ts:1136 it("lets an abort mark win over a fault that races it")
 	t.Run("lets an abort mark win over a fault that races it", func(t *testing.T) {
 		store := newControlledStorage()
 		marking := make(chan tkAbortResult, 1)
@@ -996,9 +979,9 @@ func TestTaskAbort(t *testing.T) {
 			// The mark is in storage but not committed when the handler throws, so the fault commit queues behind it.
 			return errors.New("would fault")
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{racing}, tkOptions{storage: store})
+		opened := tkOpenRoot(t, []durable.AnyTask{racing.Erased()}, tkOptions{storage: store})
 		harnessRef.Store(&opened.harness)
-		id := tkStart(t, opened.root, racing)
+		id := tkStart(t, opened.root, racing.Erased())
 		opened.harness.Resume()
 		eventually(t, heldGate.isSet)
 		held, _ := heldGate.get()
@@ -1016,6 +999,7 @@ func TestTaskAbort(t *testing.T) {
 }
 
 func TestTaskClose(t *testing.T) {
+	// harness-tasks.test.ts:1163 it("stops without outcomes and starts no fresh phase or abort invocation while closing")
 	t.Run("stops without outcomes and starts no fresh phase or abort invocation while closing", func(t *testing.T) {
 		reached, proceed := deferred(), deferred()
 		phases := &syncList[string]{}
@@ -1052,8 +1036,8 @@ func TestTaskClose(t *testing.T) {
 			},
 		})
 		store := newControlledStorage()
-		opened := tkOpenRoot(t, []durable.AnyTask{two}, tkOptions{storage: store})
-		id := tkStart(t, opened.root, two)
+		opened := tkOpenRoot(t, []durable.AnyTask{two.Erased()}, tkOptions{storage: store})
+		id := tkStart(t, opened.root, two.Erased())
 		opened.harness.Resume()
 		if err := reached.wait(testContext); err != nil {
 			t.Fatal(err)
@@ -1072,8 +1056,13 @@ func TestTaskClose(t *testing.T) {
 		if result := <-aborting; result.err != nil || result.result != "marked" {
 			t.Fatalf("AbortTask %+v", result)
 		}
-		if store.commitCount() != commits {
-			t.Fatalf("%d commits after close began, want %d", store.commitCount(), commits)
+		// harness-tasks.test.ts:1148: no outcome; close writes only the stopped task back as pending, so a reopen counts no restart.
+		if store.commitCount() != commits+1 {
+			t.Fatalf("%d commits after close began, want %d", store.commitCount(), commits+1)
+		}
+		if writes := tkTaskWritesAt(store, -1); len(writes) != 1 || writes[0].Id != id || !writes[0].AbortRequested || writes[0].State.Status != durable.TaskPending ||
+			writes[0].State.Checkpoint == nil || mustJSON(t, *writes[0].State.Checkpoint) != `{"phase":"two"}` {
+			t.Fatalf("last commit task writes %+v, want the abort-marked task pending at phase two", writes)
 		}
 		if !reflect.DeepEqual(phases.all(), []string{"one"}) {
 			t.Fatalf("phases %v, want [one]", phases.all())
@@ -1082,13 +1071,14 @@ func TestTaskClose(t *testing.T) {
 			t.Fatal("the abort handler ran")
 		}
 		checkpoint := record.State.Checkpoint
-		if !record.AbortRequested || record.State.Status != durable.TaskRunning || checkpoint == nil || !reflect.DeepEqual(*checkpoint, map[string]any{"phase": "two"}) {
+		if !record.AbortRequested || record.State.Status != durable.TaskRunning || checkpoint == nil || mustJSON(t, *checkpoint) != `{"phase":"two"}` {
 			t.Fatalf("task %+v, want abort-marked and running at phase two", record)
 		}
 		_, commitErr := opened.harness.Commit(testContext, func(durable.Tx) (any, error) { return nil, nil })
 		tkContainsError(t, commitErr, "closed")
 	})
 
+	// harness-tasks.test.ts:1210 it("seals admission before signalling handlers and stops watches before joining them")
 	t.Run("seals admission before signalling handlers and stops watches before joining them", func(t *testing.T) {
 		notes := tkSessionNotes("test.close-notes")
 		reached := deferred()
@@ -1112,10 +1102,10 @@ func TestTaskClose(t *testing.T) {
 			watchEnd.put(watch.End())
 			return nil
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{stubborn})
+		opened := tkOpenRoot(t, []durable.AnyTask{stubborn.Erased()})
 		harnessRef.Store(&opened.harness)
 		tkSetNotes(t, opened.harness, notes, "x")
-		tkStart(t, opened.root, stubborn)
+		tkStart(t, opened.root, stubborn.Erased())
 		opened.harness.Resume()
 		if err := reached.wait(testContext); err != nil {
 			t.Fatal(err)
@@ -1127,6 +1117,7 @@ func TestTaskClose(t *testing.T) {
 		}
 	})
 
+	// harness-tasks.test.ts:1243 it("writes no fault when close seals while the step after a failed phase is queued")
 	t.Run("writes no fault when close seals while the step after a failed phase is queued", func(t *testing.T) {
 		store := newControlledStorage()
 		heldGate := &syncValue[gate]{}
@@ -1141,9 +1132,9 @@ func TestTaskClose(t *testing.T) {
 			}
 			return errors.New("would fault")
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{throws}, tkOptions{storage: store})
+		opened := tkOpenRoot(t, []durable.AnyTask{throws.Erased()}, tkOptions{storage: store})
 		harnessRef.Store(&opened.harness)
-		id := tkStart(t, opened.root, throws)
+		id := tkStart(t, opened.root, throws.Erased())
 		opened.harness.Resume()
 		eventually(t, heldGate.isSet)
 		held, _ := heldGate.get()
@@ -1156,11 +1147,13 @@ func TestTaskClose(t *testing.T) {
 		if err := tkWaitErr(t, closing); err != nil {
 			t.Fatal(err)
 		}
-		if got := tkTaskWrites(store, id); !reflect.DeepEqual(got, []durable.TaskStatus{durable.TaskPending, durable.TaskRunning}) {
-			t.Fatalf("task writes %v, want [pending running]", got)
+		// harness-tasks.test.ts:1222: created, reserved, and written back as pending by close: no fault.
+		if got := tkTaskWrites(store, id); !reflect.DeepEqual(got, []durable.TaskStatus{durable.TaskPending, durable.TaskRunning, durable.TaskPending}) {
+			t.Fatalf("task writes %v, want [pending running pending]", got)
 		}
 	})
 
+	// harness-tasks.test.ts:1273 it("starts no abort handler whose reservation settles while closing")
 	t.Run("starts no abort handler whose reservation settles while closing", func(t *testing.T) {
 		var ran atomic.Bool
 		marked := tkOneStep("test.close-abort-reservation", func(context.Context, stepRecord, stepRuntime) error { return nil }, func(context.Context, stepRuntime) error {
@@ -1168,8 +1161,8 @@ func TestTaskClose(t *testing.T) {
 			return nil
 		})
 		store := newControlledStorage()
-		opened := tkOpenRoot(t, []durable.AnyTask{marked}, tkOptions{storage: store})
-		id := tkStart(t, opened.root, marked)
+		opened := tkOpenRoot(t, []durable.AnyTask{marked.Erased()}, tkOptions{storage: store})
+		id := tkStart(t, opened.root, marked.Erased())
 		if result, err := opened.harness.AbortTask(testContext, id); err != nil || result != "marked" {
 			t.Fatalf("AbortTask %q %v", result, err)
 		}
@@ -1186,12 +1179,18 @@ func TestTaskClose(t *testing.T) {
 		if ran.Load() {
 			t.Fatal("the abort handler ran")
 		}
+		// harness-tasks.test.ts:1250: the reservation landed; close wrote the task back as pending.
+		reserved := tkTaskWritesAt(store, -2)
+		if len(reserved) != 1 || reserved[0].Id != id || !reserved[0].AbortRequested || reserved[0].State.Status != durable.TaskRunning {
+			t.Fatalf("reservation commit task writes %+v, want one abort-marked running record of %d", reserved, id)
+		}
 		writes := tkLastTaskWrites(store)
-		if len(writes) != 1 || writes[0].Id != id || !writes[0].AbortRequested || writes[0].State.Status != durable.TaskRunning {
-			t.Fatalf("last commit task writes %+v, want one abort-marked running record of %d", writes, id)
+		if len(writes) != 1 || writes[0].Id != id || !writes[0].AbortRequested || writes[0].State.Status != durable.TaskPending {
+			t.Fatalf("last commit task writes %+v, want the abort-marked record of %d pending", writes, id)
 		}
 	})
 
+	// harness-tasks.test.ts:1297 it("rejects a runtime commit that was queued on the line when close sealed it")
 	t.Run("rejects a runtime commit that was queued on the line when close sealed it", func(t *testing.T) {
 		store := newControlledStorage()
 		queued := make(chan error, 1)
@@ -1216,9 +1215,9 @@ func TestTaskClose(t *testing.T) {
 			// Ignores the close signal, so the invocation is still alive when the queued commit reaches the line.
 			return proceed.wait(testContext)
 		})
-		opened := tkOpenRoot(t, []durable.AnyTask{queuedTask}, tkOptions{storage: store})
+		opened := tkOpenRoot(t, []durable.AnyTask{queuedTask.Erased()}, tkOptions{storage: store})
 		harnessRef.Store(&opened.harness)
-		id := tkStart(t, opened.root, queuedTask)
+		id := tkStart(t, opened.root, queuedTask.Erased())
 		opened.harness.Resume()
 		eventually(t, heldGate.isSet)
 		held, _ := heldGate.get()
@@ -1237,11 +1236,13 @@ func TestTaskClose(t *testing.T) {
 		if err := tkWaitErr(t, closing); err != nil {
 			t.Fatal(err)
 		}
-		if got := tkTaskWrites(store, id); len(got) != 2 {
-			t.Fatalf("task writes %v, want two", got)
+		// harness-tasks.test.ts:1288: created, reserved, and written back as pending by close; the queued outcome never landed.
+		if got := tkTaskWrites(store, id); !reflect.DeepEqual(got, []durable.TaskStatus{durable.TaskPending, durable.TaskRunning, durable.TaskPending}) {
+			t.Fatalf("task writes %v, want [pending running pending]", got)
 		}
 	})
 
+	// harness-tasks.test.ts:1330 it("starts no next phase when close seals during a step that decided to continue")
 	t.Run("starts no next phase when close seals during a step that decided to continue", func(t *testing.T) {
 		phases := &syncList[string]{}
 		registry := CreateRegistry()
@@ -1287,14 +1288,14 @@ func TestTaskClose(t *testing.T) {
 			},
 			Abort: tkNoopAbort[durable.JsonValue, twoState, durable.JsonValue, any],
 		})
-		addTask(t, registry, two)
+		addTask(t, registry, two.Erased())
 		harness, err := OpenHarness(testContext, newControlledStorage(), HarnessOptions{Models: ai.CreateModels(), Registry: reader})
 		if err != nil {
 			t.Fatal(err)
 		}
 		harnessRef.Store(&harness)
 		root := mustRoot(t, harness, nil)
-		tkStart(t, root, two)
+		tkStart(t, root, two.Erased())
 		harness.Resume()
 		if err := tkWaitErr(t, closing); err != nil {
 			t.Fatal(err)
@@ -1304,6 +1305,7 @@ func TestTaskClose(t *testing.T) {
 		}
 	})
 
+	// harness-tasks.test.ts:1374 it("joins a reservation that settles while closing without starting its handler")
 	t.Run("joins a reservation that settles while closing without starting its handler", func(t *testing.T) {
 		var ran atomic.Bool
 		never := tkOneStep("test.close-reservation", func(context.Context, stepRecord, stepRuntime) error {
@@ -1311,8 +1313,8 @@ func TestTaskClose(t *testing.T) {
 			return nil
 		})
 		store := newControlledStorage()
-		opened := tkOpenRoot(t, []durable.AnyTask{never}, tkOptions{storage: store})
-		id := tkStart(t, opened.root, never)
+		opened := tkOpenRoot(t, []durable.AnyTask{never.Erased()}, tkOptions{storage: store})
+		id := tkStart(t, opened.root, never.Erased())
 		held := store.holdCommits()
 		opened.harness.Resume()
 		if err := held.entered.wait(testContext); err != nil {
@@ -1326,9 +1328,14 @@ func TestTaskClose(t *testing.T) {
 		if ran.Load() {
 			t.Fatal("the handler ran")
 		}
+		// harness-tasks.test.ts:1355: the reservation landed; close wrote the task back as pending.
+		reserved := tkTaskWritesAt(store, -2)
+		if len(reserved) != 1 || reserved[0].Id != id || reserved[0].State.Status != durable.TaskRunning {
+			t.Fatalf("reservation commit task writes %+v, want one running record of %d", reserved, id)
+		}
 		writes := tkLastTaskWrites(store)
-		if len(writes) != 1 || writes[0].Id != id || writes[0].State.Status != durable.TaskRunning {
-			t.Fatalf("last commit task writes %+v, want one running record of %d", writes, id)
+		if len(writes) != 1 || writes[0].Id != id || writes[0].State.Status != durable.TaskPending {
+			t.Fatalf("last commit task writes %+v, want one pending record of %d", writes, id)
 		}
 	})
 }
@@ -1346,4 +1353,72 @@ func (reader *snapshotHook) Snapshot() durable.RegistrySnapshot {
 
 func (reader *snapshotHook) Subscribe(listener func()) func() {
 	return reader.registry.Subscribe(listener)
+}
+
+// scheduler.ts join() signals every invocation after every close listener has run, so the waits, watches, and streams a
+// task holds end with the Session's reason, not as cancelled by its signal (Pi eba84973). The seal listener, which runs
+// first, only sets the closing flag.
+func TestTaskCloseSignalsHandlersOnlyAfterEveryCloseListenerRan(t *testing.T) {
+	reached := deferred()
+	var signal atomic.Pointer[context.Context]
+	running := tkOneStep("test.seal-order", func(_ context.Context, _ stepRecord, runtime stepRuntime) error {
+		current := runtime.Signal()
+		signal.Store(&current)
+		reached.resolve()
+		<-current.Done()
+		return nil
+	})
+	opened := tkOpenRoot(t, []durable.AnyTask{running.Erased()})
+	tkStart(t, opened.root, running.Erased())
+	opened.harness.Resume()
+	if err := reached.wait(testContext); err != nil {
+		t.Fatal(err)
+	}
+	handlerSignal := *signal.Load()
+	live := make(chan bool, 1)
+	opened.harness.SubscribeClose(func() { live <- handlerSignal.Err() == nil })
+	if err := opened.harness.Close(testContext); err != nil {
+		t.Fatal(err)
+	}
+	if !<-live {
+		t.Error("an invocation's signal was cancelled before the last close listener ran")
+	}
+	if handlerSignal.Err() == nil {
+		t.Error("the invocation's signal was not cancelled by the close")
+	}
+}
+
+// #10546: harness-tasks.test.ts:844 it("pages the newest tasks first without scanning older ones")
+func TestTaskScanPagesTheNewestFirst(t *testing.T) {
+	idle := tkOneStep("test.idle", func(context.Context, stepRecord, stepRuntime) error { return nil })
+	opened := tkOpenRoot(t, []durable.AnyTask{idle.Erased()})
+	ids := make([]durable.TaskId, 5)
+	for index := range ids {
+		ids[index] = tkStart(t, opened.root, idle.Erased())
+	}
+	scan := func(query durable.TaskQuery, cursor durable.Cursor) durable.Page[durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue], durable.Cursor] {
+		t.Helper()
+		page, err := opened.harness.Commit(testContext, func(tx durable.Tx) (any, error) { return tx.ScanTasks(query, 2, cursor) })
+		if err != nil {
+			t.Fatal(err)
+		}
+		return page.(durable.Page[durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue], durable.Cursor])
+	}
+	taskIds := func(page durable.Page[durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue], durable.Cursor]) []durable.TaskId {
+		var found []durable.TaskId
+		for _, record := range page.Items {
+			found = append(found, record.Id)
+		}
+		return found
+	}
+	first := scan(durable.TaskQuery{Order: new(durable.ScanDescending)}, nil)
+	if got, want := taskIds(first), []durable.TaskId{ids[4], ids[3]}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("first page %v, want %v", got, want)
+	}
+	// The cursor carries the order: the next page needs no query order.
+	second := scan(durable.TaskQuery{}, *first.Next)
+	if got, want := taskIds(second), []durable.TaskId{ids[2], ids[1]}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("second page %v, want %v", got, want)
+	}
+	mustClose(t, opened.harness)
 }

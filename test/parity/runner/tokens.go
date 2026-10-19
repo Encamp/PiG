@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/MichaelKinsy/PiG/internal/testenv"
 )
 
 // Hermetic per-run substitution tokens.
@@ -62,6 +63,14 @@ type tokenContext struct {
 // registers it for automatic cleanup. Callers receive a distinct
 // context per (binary, run), guaranteeing no cross-side or cross-run
 // state visibility.
+//
+// The root is the canonical path, like the cwd copies (cleanSnapshotRoot).
+// macOS spells its temporary directory through a symlink (/var/folders is
+// /private/var/folders), and a binary that resolves a path under {{TEMP}}
+// (Python's Path.resolve, bash's pwd, Node's process.cwd) reports the
+// canonical spelling. The "temp" identity root and every {{TEMP}} expansion
+// must be that spelling, or a path alias cannot match the paths the binaries
+// print.
 func newTokenContext(t *testing.T, label string) *tokenContext {
 	t.Helper()
 	dir, err := os.MkdirTemp("", fmt.Sprintf("parity-%s-*", label))
@@ -73,7 +82,11 @@ func newTokenContext(t *testing.T, label string) *tokenContext {
 			t.Error(err)
 		}
 	})
-	return &tokenContext{tempRoot: dir}
+	canonical, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		t.Fatalf("parity: resolve tempdir %s for %s: %v", dir, label, err)
+	}
+	return &tokenContext{tempRoot: canonical}
 }
 
 // expand performs token substitution on a single string. Returns the
@@ -132,15 +145,13 @@ func containsLiteralTmpPath(parts []string) (string, bool) {
 // holds no-op shims (open, xdg-open, start) used by hermetic OAuth
 // scenarios to suppress real browser launches.
 //
-// Resolution uses runtime.Caller so it works whether tests are run from
-// the package dir or the repo root, in CI or locally.
+// go test runs the runner in its package directory, so the path holds under -trimpath and whatever directory invoked go test.
 func fakeBinDir() string {
-	_, thisFile, _, ok := runtime.Caller(0)
-	if !ok {
+	dir, err := testenv.PackageDirPath()
+	if err != nil {
 		return "test/parity/testdata/fake-bin"
 	}
-	// thisFile = .../parity/runner/tokens.go
-	return filepath.Join(filepath.Dir(filepath.Dir(thisFile)), "testdata", "fake-bin")
+	return filepath.Join(filepath.Dir(dir), "testdata", "fake-bin")
 }
 
 // shellQuote returns s safely quoted for inclusion in an inline shell
