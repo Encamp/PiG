@@ -639,10 +639,10 @@ rationale = ""
 
 [[files]]
 path = "packages/chord/src/sqlite/replication/node.ts"
-disposition = "pending"
-contracts = []
-evidence = []
-rationale = ""
+disposition = "translated"
+contracts = ["awaited", "microtask-ordering"]
+evidence = ["test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteReportsEveryOperationIncludingFailedOnesAndStatementsOutsideTransactions", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteRunsTheCloseHookAfterEarlierOperationsWhileTheWALHoldsEveryCommit", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteClosesTheConnectionEvenWhenTheCloseHookFails", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteOpensInWALModeAndNeverCheckpointsOnItsOwn"]
+rationale = "Async uses in replication/node.ts. (1) Every operation (exec, run, get, all, transaction, exclusive) returns the promise of the underlying Node connection; observe (:114-123) delegates synchronously, so the operation enters the connection's queue before the call returns, and afterOperation fires when the operation settles, success or failure, because it may have committed. In Go each method blocks until the operation settles, begin admits calls in the order they reach it (the order they enter the connection's queue), and AfterOperation runs after the operation returns, also on error. (2) close (:90-111) is awaited and memoized: it first waits for every operation admitted before it, then runs beforeClose alone through the connection's exclusive queue (:99), then closes the connection, and every call gets the one outcome; a beforeClose failure and a close failure are reported together as an AggregateError. In Go Close sets closing, waits on the in-flight count so earlier operations finish before BeforeClose, runs BeforeClose inside Exclusive, closes the connection even when the hook fails, and sync.Once makes every Close return the first outcome. Operations and exclusive after Close started reject with the closed error (:86, :115); Go returns the same error from begin. (3) openReplicatedNodeSqliteDatabase (:125-) awaits openNodeSqliteDatabase with automatic checkpoints off; Go's OpenReplicatedNodeSqliteDatabase blocks and returns the connection or the error. A zero value, which Go can construct and Pi's type-only export cannot, answers every call with an error instead of panicking. No task is detached, and nothing is cancellable."
 
 [[files]]
 path = "packages/chord/src/state.ts"
