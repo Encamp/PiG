@@ -82,8 +82,12 @@ func aiTelemetrySetup(t *testing.T, result *AssistantMessage) *Models {
 	models.SetProvider(CreateProvider(CreateProviderOptions{
 		ID: model.ProviderMeta.ProviderID, Models: []AnyModel{model}, Auth: configuredTestAuth(),
 		API: &ProviderStreams{
-			Stream:       func(context.Context, *Model, TranscriptContext, StreamOptions) (*AssistantMessageEventStream, error) { return respond() },
-			StreamSimple: func(context.Context, *Model, TranscriptContext, StreamOptions) (*AssistantMessageEventStream, error) { return respond() },
+			Stream: func(context.Context, *Model, TranscriptContext, StreamOptions) (*AssistantMessageEventStream, error) {
+				return respond()
+			},
+			StreamSimple: func(context.Context, *Model, TranscriptContext, StreamOptions) (*AssistantMessageEventStream, error) {
+				return respond()
+			},
 			FetchDeferred: func(context.Context, *Model, DeferredHandle, DeferredFetchOptions) (*AssistantMessageEventStream, error) {
 				return respond()
 			},
@@ -501,7 +505,7 @@ func TestAITelemetryRecordsUsageForPollOnlyWhenFinalUpstream(t *testing.T) {
 // countingMetrics is vi.spyOn(telemetry, "histogram"/"counter"): it records instrument creation and delegates.
 type countingMetrics struct {
 	telemetry.TelemetryMetrics
-	mu                  sync.Mutex
+	mu                   sync.Mutex
 	histograms, counters []string
 }
 
