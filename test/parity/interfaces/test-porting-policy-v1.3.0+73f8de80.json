@@ -5674,7 +5674,7 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f). SCRUTINIZED:approved by the integration lead (assignment 2026-10-19, relayed by Main; owner confirmation pending) \u2014 Durable telemetry: only the async-listener case is designed out: Go commit listeners (SubscribeCommits) return no value, so a Promise-returning listener has no Go form.",
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f). SCRUTINIZED:approved by the owner (2026-10-20) \u2014 Durable telemetry: only the async-listener case (:899) is designed out: Go commit listeners (SubscribeCommits) return no value, so a Promise-returning listener has no Go form.",
       "designedOutCases": [
         "Durable telemetry \u203a preserves async listener error containment and report counting"
       ]
