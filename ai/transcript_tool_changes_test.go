@@ -1051,3 +1051,117 @@ func TestTranscriptToolChangesKimiPrefixAcrossLoadsAfterARemoval(t *testing.T) {
 		t.Errorf("tool-bearing messages = %v", loaded)
 	}
 }
+
+// ─── Request tools resolve over the transcript as given (openai-responses.ts buildParams) ─
+
+// captureToolChangesForResponsesProviders sends one request through each Responses provider that shares the converter and returns
+// the request bodies by provider name.
+func captureToolChangesForResponsesProviders(t *testing.T, compat *OpenAIResponsesCompat, transcript TranscriptContext) map[string]toolChangeRequest {
+	t.Helper()
+	capture := func(name string, install func(*http.Client), stream func() (*AssistantMessageEventStream, error)) toolChangeRequest {
+		var started *AssistantMessageEventStream
+		requests := captureToolChangeRequests(t, install, func() (*AssistantMessageEventStream, error) {
+			result, err := stream()
+			started = result
+			return result, err
+		}, toolChangeReply{200, responsesToolChangeDone})
+		if len(requests) != 1 {
+			message := ""
+			if started != nil {
+				message = started.Result().ErrorMessage
+			}
+			t.Fatalf("%s requests = %d (stream error %q)", name, len(requests), message)
+		}
+		return requests[0]
+	}
+	out := map[string]toolChangeRequest{}
+	openai := NewOpenAIResponsesProvider(OpenAIResponsesConfig{APIKey: "test-key", Model: "custom-model", ProviderID: "openai", IsReasoning: true, Compat: compat}).(*openAIResponsesProvider)
+	out["openai-responses"] = capture("openai-responses", func(client *http.Client) { openai.client = client }, func() (*AssistantMessageEventStream, error) {
+		return openai.Stream(context.Background(), transcript, StreamOptions{})
+	})
+	azure := NewAzureOpenAIResponsesProvider(AzureOpenAIResponsesConfig{APIKey: "test-key", Model: "custom-deployment", IsReasoning: true, Compat: compat}).(*openAIResponsesProvider)
+	out["azure-openai-responses"] = capture("azure-openai-responses", func(client *http.Client) { azure.client = client }, func() (*AssistantMessageEventStream, error) {
+		return azure.Stream(context.Background(), transcript, StreamOptions{AzureBaseURL: "https://example.test/openai/v1", AzureResourceName: "acme"})
+	})
+	codex := NewOpenAICodexResponsesProvider(OpenAICodexResponsesConfig{APIKey: codexTestToken(t, "acc_test"), Model: "custom-model", ProviderID: "openai-codex", Compat: compat, ModelMetadata: &Model{ID: "custom-model", DisplayName: "custom-model", ProviderMeta: ProviderMetadata{API: APIOpenAICodexResponses, ProviderID: "openai-codex", Reasoning: true}, Input: []string{"text"}, Capabilities: ModelCapabilities{ContextWindow: 400000, MaxOutputTokens: 128000, MaxThinking: ThinkingLevelHigh}}}).(*openAIResponsesProvider)
+	// The Codex transport sends its body in its own wire form, which the Codex tests decode with codexUpstreamBody.
+	var codexBody map[string]json.RawMessage
+	codex.client = &http.Client{Transport: codexRoundTripper(func(r *http.Request) (*http.Response, error) {
+		codexBody = codexUpstreamBody(t, r)
+		return codexUpstreamHTTP(codexUpstreamSSE("completed", nil)), nil
+	})}
+	stream, err := codex.Stream(context.Background(), transcript, StreamOptions{APIKey: codexTestToken(t, "acc_test"), Transport: TransportSSE})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = stream.Result()
+	decoded := map[string]any{}
+	for key, raw := range codexBody {
+		var value any
+		if err := json.Unmarshal(raw, &value); err != nil {
+			t.Fatal(err)
+		}
+		decoded[key] = value
+	}
+	out["openai-codex-responses"] = toolChangeRequest{body: decoded}
+	return out
+}
+
+// Pi's buildParams and convertResponsesMessages resolve the tools over the transcript after resolveTranscript and before
+// transformMessages, so these two histories send what Pi sends on every Responses provider.
+func TestTranscriptToolChangesResponsesRequestToolsResolveBeforeTransformMessages(t *testing.T) {
+	aborted := AssistantMessage{API: APIAnthropicMessages, Provider: "anthropic", Model: "custom", Content: []AssistantContentBlock{TextContent{Text: ""}}, StopReason: StopReasonAborted, Timestamp: 1}
+	for _, tc := range []struct {
+		name       string
+		compat     *OpenAIResponsesCompat
+		transcript TranscriptContext
+		tools      []string
+		// loaded is the tools each tool_search_output item declares.
+		loaded [][]string
+	}{
+		{
+			// The assistant is dropped by transformMessages, but the transcript after resolveTranscript (what Pi's buildParams and
+			// converter resolve over) has no initial system message: no top-level tools, and the leading system message declares its
+			// tools in place.
+			name:   "an aborted assistant before the first system message with tool search",
+			compat: &OpenAIResponsesCompat{SupportsMidConvoSystemMessages: new(true), SupportsToolSearch: new(true)},
+			transcript: NormalizeContext(Context{Messages: []Message{
+				aborted,
+				SystemMessage{Content: SystemText("base prompt"), ToolsAdded: []ToolSchema{replayTool("a")}, Timestamp: 2},
+				UserMessage{Content: UserText("go"), Timestamp: 3},
+			}}),
+			tools:  nil,
+			loaded: [][]string{{"a"}},
+		},
+		{
+			// Without mid-conversation system messages the transcript collapses into one leading system message holding every current
+			// tool, which the request's tool list carries; nothing is declared in place.
+			name:   "tool search without mid-conversation system messages",
+			compat: &OpenAIResponsesCompat{SupportsToolSearch: new(true)},
+			transcript: NormalizeContext(Context{Messages: []Message{
+				SystemMessage{Content: SystemText("base prompt"), ToolsAdded: []ToolSchema{replayTool("a")}},
+				UserMessage{Content: UserText("go"), Timestamp: 1},
+				SystemMessage{Content: SystemText("update"), ToolsAdded: []ToolSchema{replayTool("b")}, Timestamp: 2},
+			}}),
+			tools:  []string{"a", "b"},
+			loaded: nil,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for provider, request := range captureToolChangesForResponsesProviders(t, tc.compat, tc.transcript) {
+				if got := jsonStrings(jsonItems(request.body["tools"]), "name"); !slices.Equal(got, tc.tools) {
+					t.Errorf("%s tools = %v, want %v", provider, got, tc.tools)
+				}
+				var loaded [][]string
+				for _, item := range jsonItems(request.body["input"]) {
+					if item["type"] == "tool_search_output" {
+						loaded = append(loaded, jsonStrings(jsonItems(item["tools"]), "name"))
+					}
+				}
+				if !reflect.DeepEqual(loaded, tc.loaded) {
+					t.Errorf("%s tool_search_output tools = %v, want %v", provider, loaded, tc.loaded)
+				}
+			}
+		})
+	}
+}

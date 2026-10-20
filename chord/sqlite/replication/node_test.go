@@ -306,3 +306,18 @@ func TestReplicatedNodeSqliteCanOnlyBeCreatedByOpeningAFile(t *testing.T) {
 		t.Errorf("exported package functions = %v, want %v", functions, want)
 	}
 }
+
+// A zero value has no connection the engine controls: every call fails with an error instead of panicking or reaching a connection.
+func TestReplicatedNodeSqliteZeroValueRefusesEveryCall(t *testing.T) {
+	const want = "Replicated SQLite database was not opened with OpenReplicatedNodeSqliteDatabase"
+	var database ReplicatedNodeSqliteDatabase
+	expectError(t, database.Exec("SELECT 1"), want)
+	expectError(t, database.Run("SELECT 1"), want)
+	_, err := database.Get("SELECT 1")
+	expectError(t, err, want)
+	_, err = database.All("SELECT 1")
+	expectError(t, err, want)
+	expectError(t, database.Transaction(func(chordsqlite.SqliteExecutor) error { return nil }), want)
+	expectError(t, database.Exclusive(func(chordsqlite.SqliteExecutor) error { return nil }), want)
+	expectError(t, database.Close(), want)
+}

@@ -80,6 +80,14 @@ var publishedAgentPins = agentPins{
 // is a launcher whose bytes equal the release's; its chunks differ. A pin bump to a commit adds its entry
 // (TestCommittedPinHasAgentPins).
 var sourceAgentPins = map[string]agentPins{
+	"fdce48eb404ec014adaf2ac10a3a53bc6b1740c2": {
+		files: map[string]string{
+			"pi-agent/package.json":      "49bcc92772c7bb1fbb6597e3a3d5671b586f34627bd76c964b25b291af9a3d5e",
+			"pi-agent/package-lock.json": "8576e51f320c1506e2a665934fa9d4dc5f21db920f6688b8efae7cfd5c1cdf41",
+			piAgentCLI:                   "e79626f2dd6f94aa45d30f3fa63cd84319a6eefcd150b353cfaf274366926774",
+		},
+		tree: "0",
+	},
 	"73f8de80bc87021375f8b525292ac07492253002": {
 		files: map[string]string{
 			"pi-agent/package.json":      "49bcc92772c7bb1fbb6597e3a3d5671b586f34627bd76c964b25b291af9a3d5e",

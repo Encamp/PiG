@@ -1404,11 +1404,10 @@ func (p *openAIResponsesProvider) Stream(ctx context.Context, transcript Transcr
 		SupportsToolSearch:             compat.SupportsToolSearch,
 	})
 	messages, transcriptTools := prepareResponsesTranscript(target, transcript, p.messageConverter(compat, nil).allowedToolCallProviders, compat.SupportsMidConvoSystemMessages, toolSupport)
-	// Pi's buildParams resolves the request tools from context.messages as given (openai-responses.ts buildParams), while
-	// convertResponsesMessages resolves the anchored system messages from the transcript after resolveTranscript: a transcript
-	// whose first message is an aborted assistant has no initial system message in the first, though transformMessages drops that
-	// assistant, and a transport without mid-conversation system messages still sees its later system messages there.
-	tools := ResolveTranscriptTools(transcript.borrowed(), toolSupport).RequestTools
+	// Pi's stream functions pass buildParams the transcript after resolveTranscript and before transformMessages, so the request
+	// tools and the anchored system messages resolve over the same messages: a transcript whose first message is an aborted
+	// assistant has no initial system message there, though transformMessages drops that assistant.
+	tools := transcriptTools.RequestTools
 	grammarProps, err := createGrammarToolInputProperties(GetDeclaredTools(messages), compat.SupportsOpenAIGrammarTools)
 	if err != nil {
 		return nil, err

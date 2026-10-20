@@ -37,6 +37,10 @@ type ReplicatedNodeSqliteDatabaseOptions struct {
 
 var errClosed = errors.New("Replicated SQLite database is closed")
 
+// errNotOpened answers every call on a zero value: only OpenReplicatedNodeSqliteDatabase builds a database whose connection
+// the replication engine controls.
+var errNotOpened = errors.New("Replicated SQLite database was not opened with OpenReplicatedNodeSqliteDatabase")
+
 // ReplicatedNodeSqliteDatabase is a Node SQLite connection whose write-ahead log (WAL) the replication engine reads from
 // outside SQLite.
 //
@@ -81,6 +85,9 @@ type ReplicatedNodeSqliteDatabase struct {
 // begin admits an operation, or reports that Close already started. Calls are admitted in the order they reach begin, the
 // order in which they enter the connection's queue.
 func (database *ReplicatedNodeSqliteDatabase) begin() error {
+	if database.database == nil {
+		return errNotOpened
+	}
 	database.mu.Lock()
 	defer database.mu.Unlock()
 	if database.closing {
@@ -150,6 +157,9 @@ func (database *ReplicatedNodeSqliteDatabase) Exclusive(operation func(executor 
 // Close waits for every operation called before it, runs BeforeClose alone on the connection, then closes the connection,
 // which checkpoints and deletes the WAL. Every call returns the outcome of the one close.
 func (database *ReplicatedNodeSqliteDatabase) Close() error {
+	if database.database == nil {
+		return errNotOpened
+	}
 	database.mu.Lock()
 	database.closing = true
 	database.mu.Unlock()

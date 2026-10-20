@@ -924,7 +924,7 @@
       ],
       "rationale": "Selected Provider catalog, credentials, request conversion, streaming, replay, or error handling. SCRUTINIZED:approved by the lead ruling LEAD-RULINGS 13:05Z 2026-10-09 (compat-schema: only the type-level cases are designed out): the case asserts TypeScript Static<> property types with expectTypeOf, which has no runtime behavior; the Go compat structs are typed and the compiler checks their property types.",
       "designedOutCases": [
-        "compatibility schemas \u203a preserves property types in the provider superset"
+        "compatibility schemas › preserves property types in the provider superset"
       ]
     },
     {
@@ -1183,7 +1183,7 @@
         "hot-path"
       ],
       "designedOutCases": [
-        "Models with image models \u203a rejects chat models at the image entry point at runtime"
+        "Models with image models › rejects chat models at the image entry point at runtime"
       ],
       "rationale": "Selected Provider catalog, credentials, request conversion, streaming, replay, or error handling. SCRUTINIZED:approved by owner Michael Kinsy on 2026-10-01 (lead session, 'Yes go with recommendations'): the case 'rejects chat models at the image entry point at runtime' is designed out because it is unreachable in Go: GenerateImages takes *ImageModel, so a chat model cannot reach the image entry point."
     },
@@ -2351,7 +2351,7 @@
       ],
       "rationale": "Production-path review at Pi 1.2.0: chord replicatedState, which Pi Durable's harness attaches for its task graph and conversation view (harness/task-graph.ts, harness/view.ts) and updates on every durable turn; area follows the reviewed sessions rows of chord/delta and state.test.ts. SCRUTINIZED:approved by the tern lead ruling 2026-10-13 (tests-120-b): :46 is designed out (a Go change callback returns an error and cannot return a PromiseLike).",
       "designedOutCases": [
-        "transactional replicated state \u203a rejects PromiseLike callbacks and aborts their draft"
+        "transactional replicated state › rejects PromiseLike callbacks and aborts their draft"
       ]
     },
     {
@@ -2394,6 +2394,15 @@
         "hot-path"
       ],
       "rationale": "Production-path review at Pi 1.3.0+c268154c: chord/sqlite is the SQLite driver and migration runner that Pi Durable's SQLite storage opens and migrates through on every durable session (moved from packages/durable/src/storage/sqlite)."
+    },
+    {
+      "path": "packages/chord/test/sqlite/replication-node.test.ts",
+      "upstreamTestHash": "sha256:714afeb8610e892f9a5b19af0ead054e510ac24952cfecd7522ed6dbb3e032b3",
+      "area": "sessions",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Production-path review at Pi 1.3.0+fdce48eb: the replicated connection wrapper opens a database file with automatic checkpoints off and runs the close hook before the WAL is checkpointed and deleted; it is the connection Pi Durable's SQLite replication reads the WAL through. PiG ports it without a production caller, as Pi has none yet."
     },
     {
       "path": "packages/chord/test/state-diff.test.ts",
@@ -2529,9 +2538,9 @@
       ],
       "rationale": "Codemode sandbox execution reached on coding turns: the built-in codemode tool runs every script through codemode.NewSandbox (coding/extension/builtin/codemode/execute.go); the inline and remote backends serve the durable and Cloudflare hosts. SCRUTINIZED:approved by owner Michael Kinsy on 2026-10-01 (lead session, 'Yes go with recommendations'): the cases 'accepts a worker path string' and 'reports a missing worker file as a sandbox error' are designed out because the Go engine runs QuickJS on wazero in process and has no worker file. Carried to 1.2.0: both cases are unchanged in the 1.2.0 'worker host' describe and the Go engine still has no worker file. The 1.2.0 case 'ignores Node --watch notifications from the worker' is designed out on the same mechanic: the in-process wazero QuickJS engine has no worker message channel, so no Node --watch notification can arrive (nodejs/node#65044 is the Node behavior the case guards against). SCRUTINIZED:approved by the lead ruling of 2026-10-11T18:42Z (Q5, commit 4c6bb3897f), confirmed for 1.2.0 by the lead on 2026-10-12.",
       "designedOutCases": [
-        "worker host \u203a accepts a worker path string",
-        "worker host \u203a ignores Node --watch notifications from the worker",
-        "worker host \u203a reports a missing worker file as a sandbox error"
+        "worker host › accepts a worker path string",
+        "worker host › ignores Node --watch notifications from the worker",
+        "worker host › reports a missing worker file as a sandbox error"
       ]
     },
     {
@@ -3044,6 +3053,15 @@
       "rationale": "CLI startup, selected execution mode, settings, or command routing."
     },
     {
+      "path": "packages/coding-agent/test/export-html-cjk.test.ts",
+      "upstreamTestHash": "sha256:7fb48d764cc16383b4a69dbd30ad7338c523c3a9835952273181920f060c0e23",
+      "area": "cli",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Production-path review at Pi 1.3.0+fdce48eb: the exported HTML page renders Markdown emphasis next to CJK punctuation through the vendored marked-cjk-friendly extension, on every HTML export."
+    },
+    {
       "path": "packages/coding-agent/test/export-html-skill-block.test.ts",
       "upstreamTestHash": "sha256:1050bd9e8e0ba42bf8d3a35ad596fc0364d4621dd576ff26a93e6c6987a37f3f",
       "area": "cli",
@@ -3141,10 +3159,10 @@
         "hot-path"
       ],
       "designedOutCases": [
-        "shouldRunFirstTimeSetup \u203a returns true when experimental, default agent dir, and no settings.json",
-        "shouldRunFirstTimeSetup \u203a returns false when experimental features are disabled",
-        "shouldRunFirstTimeSetup \u203a returns false when a custom agent dir is set",
-        "shouldRunFirstTimeSetup \u203a returns false when settings.json already exists"
+        "shouldRunFirstTimeSetup › returns true when experimental, default agent dir, and no settings.json",
+        "shouldRunFirstTimeSetup › returns false when experimental features are disabled",
+        "shouldRunFirstTimeSetup › returns false when a custom agent dir is set",
+        "shouldRunFirstTimeSetup › returns false when settings.json already exists"
       ],
       "rationale": "CLI startup, selected execution mode, settings, or command routing. Four official-distribution cases are designed out, SCRUTINIZED:approved by owner Michael Kinsy on 2026-09-29: Pi shows first-time setup only for its official distribution identity (src/cli/startup-ui.ts:122-140; caller src/main.ts:661), which PiG never has. The mapping row test-mapping-v0.99.1.json#packages/coding-agent/test/first-time-setup.test.ts must list exactly these ids."
     },
@@ -5674,9 +5692,9 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f). SCRUTINIZED:approved by the owner (2026-10-20) \u2014 Durable telemetry: only the async-listener case (:899) is designed out: Go commit listeners (SubscribeCommits) return no value, so a Promise-returning listener has no Go form.",
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f). SCRUTINIZED:approved by the owner (2026-10-20) — Durable telemetry: only the async-listener case (:899) is designed out: Go commit listeners (SubscribeCommits) return no value, so a Promise-returning listener has no Go form.",
       "designedOutCases": [
-        "Durable telemetry \u203a preserves async listener error containment and report counting"
+        "Durable telemetry › preserves async listener error containment and report counting"
       ]
     },
     {
@@ -5769,7 +5787,7 @@
       ],
       "rationale": "Production-path review at Pi 1.2.0: Durable session document cache retention, on every durable turn's state; hot-path with the sibling packages/durable/test/ rows. SCRUTINIZED:approved by the tern lead ruling 2026-10-13 (tests-120-b): :451 is designed out (it tests Node's unreferenced-timer mechanism, runtime mechanics).",
       "designedOutCases": [
-        "document cache retention \u203a keeps no timer where timers cannot be unreferenced, and evicts on commits"
+        "document cache retention › keeps no timer where timers cannot be unreferenced, and evicts on commits"
       ]
     },
     {
@@ -6066,7 +6084,7 @@
       ],
       "rationale": "New in 0.99.1 (D-B, docs/plan/upgrade-0.99.1.md): mcp behavior that coding turns reach through the built-in extension; tagged hot-path until the production-path review. SCRUTINIZED:approved by owner Michael Kinsy on 2026-10-01 (lead session, 'Yes go with recommendations'): the receiver assertion of 'calls fetch without a receiver' is designed out because Go has no receiver binding; the observable remainder is ported.",
       "designedOutCases": [
-        "StreamableHttpTransport \u203a calls fetch without a receiver"
+        "StreamableHttpTransport › calls fetch without a receiver"
       ]
     },
     {
