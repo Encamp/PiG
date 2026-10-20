@@ -210,7 +210,7 @@ func observeModelRequest(requestedModel *Model, options *StreamOptions, poll boo
 	}
 	o := &modelRequestObservation{
 		started:    jsclock.PerformanceNow(),
-		attributes: telemetry.SpanAttributes{"provider": modelProviderID(requestedModel), "model": requestedModel.ID},
+		attributes: telemetry.SpanAttributes{telemetry.Attr("provider", modelProviderID(requestedModel)), telemetry.Attr("model", requestedModel.ID)},
 		poll:       poll,
 		span:       telemetry.NoopTelemetryContext,
 		finished:   make(chan struct{}),
@@ -224,9 +224,9 @@ func observeModelRequest(requestedModel *Model, options *StreamOptions, poll boo
 	if o.instr == nil {
 		o.instr = createAIInstruments(adapter)
 	}
-	startAttributes := telemetry.SpanAttributes{"provider": o.attributes["provider"], "model": o.attributes["model"], "api": string(requestedModel.ProviderMeta.API)}
+	startAttributes := o.attributes.Merge(telemetry.SpanAttributes{telemetry.Attr("api", string(requestedModel.ProviderMeta.API))})
 	if options.Thinking != "" {
-		startAttributes["reasoning"] = string(options.Thinking)
+		startAttributes = startAttributes.Set("reasoning", string(options.Thinking))
 	}
 	name := "pi.ai.request"
 	if poll {
@@ -262,36 +262,33 @@ func (o *modelRequestObservation) onEvent(event AssistantMessageEvent) {
 		}
 		o.toolChars[event.ContentIndex] += jsstring.Length(event.Delta)
 	case TextEndEvent:
-		o.span.AddEvent("pi.ai.block", telemetry.SpanAttributes{"type": "text", "index": event.ContentIndex, "chars": jsstring.Length(event.Content)})
+		o.span.AddEvent("pi.ai.block", telemetry.SpanAttributes{telemetry.Attr("type", "text"), telemetry.Attr("index", event.ContentIndex), telemetry.Attr("chars", jsstring.Length(event.Content))})
 	case ThinkingEndEvent:
-		o.span.AddEvent("pi.ai.block", telemetry.SpanAttributes{"type": "thinking", "index": event.ContentIndex, "chars": jsstring.Length(event.Content)})
+		o.span.AddEvent("pi.ai.block", telemetry.SpanAttributes{telemetry.Attr("type", "thinking"), telemetry.Attr("index", event.ContentIndex), telemetry.Attr("chars", jsstring.Length(event.Content))})
 	case ToolCallEndEvent:
 		chars := o.toolChars[event.ContentIndex]
 		delete(o.toolChars, event.ContentIndex)
-		o.span.AddEvent("pi.ai.block", telemetry.SpanAttributes{"type": "tool_call", "index": event.ContentIndex, "chars": chars, "tool": event.ToolCall.Name})
+		o.span.AddEvent("pi.ai.block", telemetry.SpanAttributes{telemetry.Attr("type", "tool_call"), telemetry.Attr("index", event.ContentIndex), telemetry.Attr("chars", chars), telemetry.Attr("tool", event.ToolCall.Name)})
 	}
 }
 
-func (o *modelRequestObservation) metricAttributes(extra string, value string) telemetry.SpanAttributes {
-	attributes := telemetry.SpanAttributes{"provider": o.attributes["provider"], "model": o.attributes["model"]}
-	if extra != "" {
-		attributes[extra] = value
-	}
-	return attributes
+// metricAttributes is `{ ...attributes, [name]: value }`: the provider and model, then the extra attribute.
+func (o *modelRequestObservation) metricAttributes(name string, value string) telemetry.SpanAttributes {
+	return append(o.attributes[:2:2], telemetry.Attr(name, value))
 }
 
 func (o *modelRequestObservation) onResult(message *AssistantMessage) {
 	if message != nil {
 		attributes := telemetry.SpanAttributes{
-			"stop":              string(message.StopReason),
-			"usage.input":       message.Usage.Input,
-			"usage.output":      message.Usage.Output,
-			"usage.cache_read":  message.Usage.CacheRead,
-			"usage.cache_write": message.Usage.CacheWrite,
-			"cost.total":        message.Usage.Cost.Total,
+			telemetry.Attr("stop", string(message.StopReason)),
+			telemetry.Attr("usage.input", message.Usage.Input),
+			telemetry.Attr("usage.output", message.Usage.Output),
+			telemetry.Attr("usage.cache_read", message.Usage.CacheRead),
+			telemetry.Attr("usage.cache_write", message.Usage.CacheWrite),
+			telemetry.Attr("cost.total", message.Usage.Cost.Total),
 		}
 		if message.ResponseID != "" {
-			attributes["response.id"] = message.ResponseID
+			attributes = append(attributes, telemetry.Attr("response.id", message.ResponseID))
 		}
 		o.span.SetAttributes(attributes)
 		if message.StopReason == StopReasonError {
