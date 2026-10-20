@@ -179,9 +179,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/lazy.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/telemetry_upstream_test.go#TestLazyStreamObservationOrdersEventResolvedResultUpstream", "test:ai/telemetry_upstream_test.go#TestLazyStreamObservationReportsTerminalResultOnceUpstream", "test:ai/telemetry_upstream_test.go#TestLazyStreamObservationReportsSetupFailureOnceUpstream"]
+rationale = "Pi 2ec55d80 gives lazyStream an observer with onEvent and onResult. ai.LazyStreamObserver{OnEvent, OnResult} is the optional trailing argument of LazyStream and LazyStreamSync (ai/provider_streams.go): events are observed after the outer stream's push, the result once after it ends, and a setup failure observes the error event and then the result; tick positions are unchanged (TestAnthropicMicrotaskTrace stays tick-identical). Dropping onEvent from the forwarding push fails TestLazyStreamObservationOrdersEventResolvedResultUpstream (5 s timeout)."
 
 [[files]]
 path = "packages/ai/src/api/llama-cpp-classify.lazy.ts"
@@ -312,9 +312,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/simple-options.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/telemetry_options_upstream_test.go#TestTelemetryOptionsInheritedByEveryRequestOptionSurfaceUpstream"]
+rationale = "Pi 2ec55d80 changes one line of buildBaseOptions to carry options.telemetry (it was telemetryContext). ai.BuildBaseOptions copies the StreamOptions value, so the renamed Telemetry field passes through with no code change in ai/simple_options.go; the first case of telemetry-options.test.ts asserts it for BuildBaseOptions."
 
 [[files]]
 path = "packages/ai/src/api/system-one-shared.ts"
@@ -571,9 +571,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/models.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/telemetry_upstream_test.go#TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream", "test:ai/telemetry_options_upstream_test.go#TestTelemetryOptionsSurviveProviderAndModelsDispatchUpstream"]
+rationale = "Pi 2ec55d80 makes Models.stream, streamSimple and streamDeferred install the telemetry observer (pi.ai.poll for deferred). ai/models_runtime_stream.go does the same through observeModelRequest; the span callback runs on a goroutine launched through Models.operations.Go, so Models.Close drains it. The observed stream, streamSimple and deferred paths are asserted by TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream."
 
 [[files]]
 path = "packages/ai/src/oauth.ts"
@@ -1257,16 +1257,16 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/telemetry.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi 2ec55d80 adds the pi.ai.request/pi.ai.poll telemetry schema and the lazy-stream span observer. The telemetry commits 2ec55d80 and d9025a5f are deferred to a later milestone: PiG emits no pi.ai spans and keeps ai.StreamOptions.TelemetryContext as the span parent option. The vendored Node runtime (runtime-node shims) carries Pi's own telemetry.js so extensions that import pi-ai load; the Go host does not port it."
+disposition = "ported"
+evidence = ["test:ai/telemetry_upstream_test.go#TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryReportsErrorAndAbortedStatusUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryBoundsPollErrorMessagesUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryIncludesSetupFailuresAndOmitsNonScalarReasoningUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryCountsInterleavedToolDeltasIndependentlyUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetrySupportsTracingOnlySpanUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryDefaultsToNoopUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryRecordsLowCardinalityMetricsWithMonotonicDurationsUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryRecordsUsageForPollOnlyWhenFinalUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryCreatesInstrumentsOncePerMetricsObjectUpstream"]
+rationale = "Pi 2ec55d80 adds the pi.ai.request and pi.ai.poll span schema and observeModelRequest. ai/telemetry.go ports both (AITelemetrySchema, the span, events first_chunk and one block per completed block, end attributes, provider_error status with the message cut to 500 UTF-16 units, the four metrics read from the parent's Metrics()), with attributes in Pi's key order everywhere. A nil or no-op parent installs no observer, so the no-telemetry path allocates nothing extra (BenchmarkModelsStreamNoTelemetry: 132 allocs/op, the same as before the port). Gaps recorded in the code: the instrument cache holds a strong reference per metrics adapter where Pi uses a WeakMap, and response.id is omitted when empty because Go cannot tell Pi's empty string from undefined. Mutants: removing the observer from Models.Stream fails TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream."
 
 [[files]]
 path = "packages/ai/src/types.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/telemetry_options_upstream_test.go#TestTelemetryOptionsInheritedByEveryRequestOptionSurfaceUpstream", "test:ai/telemetry_options_upstream_test.go#TestTelemetryOptionsSurviveImageDispatchUpstream", "test:ai/telemetry_options_upstream_test.go#TestTelemetryOptionsSurviveClassifierDispatch"]
+rationale = "Pi 2ec55d80 renames ProviderRequestOptions.telemetryContext to telemetry (a TelemetrySpan). Go renames StreamOptions.TelemetryContext, ClassifierOptions.TelemetryContext and ImagesOptions.TelemetryContext to Telemetry (ai/types.go, ai/classifier.go, ai/images.go) as a clean cutover; nil is Pi's omitted option and means the no-op span."
 
 [[files]]
 path = "packages/ai/src/utils/abort-signals.ts"
@@ -1467,9 +1467,9 @@ rationale = "aa9cf15b (a hold whose input the token places on another host is in
 [[files]]
 path = "packages/chord/src/context/index.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi 2ec55d80 narrows Context.telemetry to a span (TelemetrySpan) and makes it always present. Deferred with the telemetry commits (2ec55d80, d9025a5f) to a later milestone: chord/context keeps the TelemetryContext carrier it ported at 1402973a."
+disposition = "ported"
+evidence = ["test:chord/context/chordctx_upstream_test.go#TestContextDerivesTelemetryIndependentlyFromValuesAndCancellation", "test:chord/context/chordctx_upstream_test.go#TestContextIsolatesConcurrentTraceInBranchesAndPreservesCallbackResultsAndErrors"]
+rationale = "Pi 2ec55d80 narrows Context.telemetry from TelemetryContext to TelemetrySpan, always present. chord/context Telemetry(ctx) returns a telemetry.TelemetrySpan and WithTelemetry(parent, span) takes one; a foreign context.Context carries no span and reads as the no-op span, so no Go caller breaks (Go's Context is the stdlib's open interface and cannot narrow a field)."
 
 [[files]]
 path = "packages/chord/src/contract.ts"
@@ -1684,16 +1684,16 @@ rationale = "state.ts replaces 1.1.0 services/state.ts. Its 1.2.0 port is chord/
 [[files]]
 path = "packages/chord/src/telemetry-sqlite/index.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi d9025a5f adds the SQLite telemetry sink in Chord. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); PiG has no telemetry store or SQLite sink yet."
+disposition = "ported"
+evidence = ["test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestSqliteTelemetryConformance", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestDoesNotExecuteSQLWhileRecordingAndStoresOnlySettledSpans", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestAggregatesCanonicalSeriesByIntervalAndWritesPartialIntervalsOnlyOnClose", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestStrictlyBoundsQueuedSpansIncludingTheInFlightBatch", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestSerializesConcurrentFlushAndCloseWithoutLosingMeasurements", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestStopsPermanentlyAfterAWriteFailureAndReportsTheIdenticalError", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestRollsBackSpansAndMetricAggregatesTogetherOnSQLFailure"]
+rationale = "Pi d9025a5f adds the SQLite telemetry sink. chord/telemetrysqlite/index.go ports it over the existing chord/sqlite facade (SqliteDatabase, ApplySqliteMigrations), so it runs on the node (modernc) adapter and the Durable Object adapter: bounded span queue counting the in-flight batch, canonical metric series aggregated by interval, one-second batched flush on one owned goroutine, retention trim, serialized Flush and Close with Close's result returned to later calls, rollback of spans and aggregates together, permanent stop after a write failure with the identical error. All 13 case sites of telemetry-sqlite.test.ts are ported. Additive seam: the unexported ticks option of SqliteTelemetryOptions drives the timer in tests because Go has no global fake timers."
 
 [[files]]
 path = "packages/chord/src/telemetry-sqlite/store.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi d9025a5f adds the Chord SQLite telemetry store queries. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); PiG has no telemetry store yet."
+disposition = "ported"
+evidence = ["test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestSqliteTelemetryStoreConformance", "test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestDurableObjectSqliteTelemetryStoreConformance", "test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestUsesTwoSpanQueriesForAPageNotOnePerTrace", "test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestReadsCommittedRowsWithoutImplicitlyFlushingIncludingAfterClose", "test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestKeepsSurvivingDescendantsDiscoverableAfterAStoredParentIsRemoved"]
+rationale = "Pi d9025a5f adds the Chord SQLite telemetry store queries. chord/telemetrysqlite/store.go ports FindTraces, GetTrace and FindMetrics, which block and return (value, error) and read committed rows without flushing. The shared telemetry store conformance suite passes on both adapters; the metric-name query case failed first on an aliasing bug in findMetrics (a unit pointer aimed at a later-overwritten variable) and passes after the fix."
 
 [[files]]
 path = "packages/chord/src/types.ts"
@@ -3637,9 +3637,9 @@ rationale = "New in Pi 1.2.0: a re-export barrel for codemode.ts and describe.ts
 [[files]]
 path = "packages/durable/src/codemode/models.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi 2ec55d80 changes two lines of the code mode model types for telemetry. Deferred with the telemetry commits (2ec55d80, d9025a5f) to a later milestone; durable/codemode/models.go keeps its 1402973a shape."
+disposition = "ported"
+evidence = ["test:durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool"]
+rationale = "Pi 2ec55d80 changes two lines of the code mode model types so the classify and generateImages calls carry the telemetry span. durable/codemode/models.go passes the phase span as the Telemetry option; the codemode replay case asserts the replay event of a journal result."
 
 [[files]]
 path = "packages/durable/src/codemode/output.ts"
@@ -3714,9 +3714,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/compaction.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryParentsBackgroundCompactionToThePreparePhaseThatCreatesIt", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryRecordsInternalCompactionAdmissionsAsPhaseEventsWithoutASubmitSpan"]
+rationale = "Pi 2ec55d80 passes the phase span as the Telemetry option of compaction's model calls and parents background compaction to the prepare phase that creates it. durable/harness/compaction.go does the same."
 
 [[files]]
 path = "packages/durable/src/harness/context.ts"
@@ -3742,16 +3742,16 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/generation.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_test.go#TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans"]
+rationale = "Pi 2ec55d80 passes the phase span as the Telemetry option of generation's model calls and of the deferred fetch and cancel. durable/harness/generation.go does the same."
 
 [[files]]
 path = "packages/durable/src/harness/harness.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryAttachesSynchronousCommitListenerReportsToTheActiveSubmissionSpan", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryCountsAnOutsideSpanSessionFailureWithoutStartingASpan"]
+rationale = "Pi 2ec55d80 reads HarnessOptions.telemetry once, creates the emitter and attaches commit-listener reports to the active submission span. durable/harness/harness.go does the same. Pi's async-listener case is designed out of the test mapping because Go commit listeners return no value."
 
 [[files]]
 path = "packages/durable/src/harness/inbox.ts"
@@ -3798,16 +3798,16 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/scheduler.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryStartsEachQueuedInputsRunInItsAdmissionTraceAndLinksInputRootsToTheirCaller", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksTheOtherQueuedInputsToTheFirstInvocationOfTheirSharedRun", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksASteerAdmissionToTheCurrentRunWithoutMovingItsWorkIntoTheSteersTrace", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryRecordsCheckpointsOnlyWhenTheRunningPhaseChanges", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryMarksOnlyTheFirstInvocationAfterReopenResumedRetainingItsStoredParent"]
+rationale = "Pi 2ec55d80 wraps each phase in a pi.durable.phase span (parents from the stored task trace, links for shared runs and steers, outcome aborted, waiting or sleeping at a wait, restart or close, a resumed mark on the first invocation after reopen) and adds the checkpoint event after the runtime commit. durable/harness/scheduler.go ports it: the phase span covers the handler plus its decision commit and settles before the next phase starts. Mutants: dropping the phase links fails the shared-run link case and dropping the steer link fails the steer case; Go runs each invocation on its own goroutine (D181), so the tests match phases to tasks by task.id."
 
 [[files]]
 path = "packages/durable/src/harness/submissions.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryReturnsAdmissionResultsWithoutRereadingRecordsOrProbingRootLinkTargets", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryKeepsAPublicWriteAdmissionOpenThroughCommitAsAChildOfItsCaller", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksAnInputSubmittedInsideATurnToTheCallingPhaseWithoutParentingIt"]
+rationale = "Pi 2ec55d80 opens a pi.durable.submit span around each admission commit, stores the trace carrier on submission records and builds runs from the transaction's staged submissions. durable/harness/submissions.go ports it: a commit error returns on the same call with a bare error status, the run creation reads each submission from the staged records and from storage only when it is not staged."
 
 [[files]]
 path = "packages/durable/src/harness/task-graph.ts"
@@ -3819,23 +3819,23 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/telemetry.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi 2ec55d80 adds the pi.durable.submit/pi.durable.phase span emitter and metrics. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); HarnessOptions.Telemetry stays accepted and unused."
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_test.go#TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans", "test:durable/harness/harness_telemetry_test.go#TestDurableTelemetryRecordsAttributesInPisKeyOrder", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryRecordsAFixedCategoryAndABoundedDiagnostic", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryMirrorsRuntimeReportsAsFixedFieldPhaseEventsAndTypeOnlyCounters"]
+rationale = "Pi 2ec55d80 adds the pi.durable.submit and pi.durable.phase span emitter, DURABLE_TELEMETRY_SCHEMA, the phase-duration, active-task and report metrics and the fixed failure categories task_faulted, task_failed and task_orphaned (message cut to 500 UTF-16 units). durable/harness/telemetry.go ports them as harness.DurableTelemetrySchema and the emitter, attributes in Pi's key order. Mutants: dropping the entry events from session.publish fails four cases; the fixed-category and report-mirroring cases pin the bounded diagnostics and the type-only counters."
 
 [[files]]
 path = "packages/durable/src/harness/tool.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_test.go#TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans", "test:durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool"]
+rationale = "Pi 2ec55d80 passes the phase span through tool and nested tool calls and adds the replay event for a journal result. durable/harness/tool.go and tool_nested.go do the same; the replay event is added after its commit returns."
 
 [[files]]
 path = "packages/durable/src/harness/types.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi 2ec55d80 changes the harness option and record types for telemetry (trace and links on submission and task records). Deferred with the telemetry commits (2ec55d80, d9025a5f) to a later milestone; the persisted record shapes are unchanged in PiG."
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryInheritsOmittedOrUndefinedTaskTracesAndStoresNoCarrierForAnExplicitRoot", "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities"]
+rationale = "Pi 2ec55d80 gives TaskOptions an optional trace and links and widens the harness option types for telemetry. Go adds TaskOptions.Trace (*TaskTrace{Root bool; Carrier}) and TaskOptions.Links in durable/harness/types.go; session.Hooks.Report, SessionImpl.Fail and ReportAs take a context that carries the telemetry span, and harness.AdmitSubmission takes the admission span and returns an Admission. Those signature changes are listed in changelog.d/tel-durable-2ec55d80.md."
 
 [[files]]
 path = "packages/durable/src/harness/usage.ts"
@@ -3910,9 +3910,9 @@ rationale = "Declares Photon's WebAssembly import for TypeScript. The Go process
 [[files]]
 path = "packages/durable/src/index.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_test.go#TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans"]
+rationale = "Pi 2ec55d80 re-exports DURABLE_TELEMETRY_SCHEMA from the barrel. The barrel is not a Go file; harness.DurableTelemetrySchema is the exported Go form."
 
 [[files]]
 path = "packages/durable/src/search.ts"
@@ -3938,16 +3938,16 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/session/session.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryEmitsEntryAndSettlementEventsOnlyAfterSuccessfulStorageCommits", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPhaseContext", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryCountsAnOutsideSpanSessionFailureWithoutStartingASpan"]
+rationale = "Pi 2ec55d80 hands the transaction the active span, publishes entry events after a successful commit and runs the report hook inside the span's scope. durable/session/session.go ports it: Hooks.Report and SessionImpl.Fail take a context that carries the telemetry span, and the report is synchronous (host callback, then the counter, then the span event). Dropping the entry events from session.publish fails four cases."
 
 [[files]]
 path = "packages/durable/src/session/transaction.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryEmitsEntryAndSettlementEventsOnlyAfterSuccessfulStorageCommits", "test:durable/session/transaction_context_release_internal_test.go"]
+rationale = "Pi 2ec55d80 keeps the span on the transaction and resets the transaction context to the background context after a commit so the span reference is released. durable/session/transaction.go carries the span; the release is tested by durable/session/transaction_context_release_internal_test.go."
 
 [[files]]
 path = "packages/durable/src/storage/jsonl/index.ts"
@@ -4197,9 +4197,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/types.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/record_carriers_wire_test.go#TestRecordCarriersAreOptionalPlainJsonMembers", "test:durable/storage/record_carriers_test.go#TestStorageKeepsTaskAndSubmissionTelemetryCarriers"]
+rationale = "Pi 2ec55d80 adds an optional trace to submission records and optional trace and links to task records. durable/types.go adds them as optional plain JSON members, written only when the adapter supports propagation (links only for runs started from several queued inputs; an empty array is kept as []). No storage migration: SQLite, JSONL and memory store records as JSON blobs, and old records decode without the members. The round trip and detachment are tested on all three backends (durabletest.CheckRecordCarriers)."
 
 [[files]]
 path = "packages/env/src/connection.ts"
@@ -4421,44 +4421,44 @@ rationale = ""
 [[files]]
 path = "packages/telemetry/src/index.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi 2ec55d80 and d9025a5f add the DURABLE/AI telemetry schema constants, StoredSpan/StoredTrace/TelemetryStore and span-typed NOOP. Deferred to a later milestone with the telemetry commits; telemetry/ keeps its 1402973a carrier and metric core."
+disposition = "ported"
+evidence = ["test:telemetry/telemetry_upstream_test.go#TestTelemetryUpstream", "test:telemetry/store_upstream_test.go#TestInMemoryTelemetryStoreConformance"]
+rationale = "Pi 2ec55d80 and d9025a5f split the telemetry barrel and add the store, trace and metric row types, TraceQuery, MetricQuery and TelemetryStore, and give TelemetryContext optional Metrics() and Propagation() accessors. telemetry/context.go and telemetry/store.go port them (nil means absent; the store calls block and return (value, error)); the exported API adds telemetry.TelemetryStore, StoredSpan, StoredTrace, StoredMetric, TraceQuery, MetricQuery and RenderTrace."
 
 [[files]]
 path = "packages/telemetry/src/memory.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi d9025a5f reworks the in-memory telemetry into a store with trace queries. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); telemetry/memory.go keeps its 1402973a shape."
+disposition = "ported"
+evidence = ["test:telemetry/store_upstream_test.go#TestInMemoryTelemetryStoreConformance", "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots", "test:telemetry/attributes_test.go#TestInMemoryRecorderKeepsAttributeInsertionOrder", "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream"]
+rationale = "Pi d9025a5f turns the recorder into a TelemetryStore: it filters by first-span name, any error, one-span attribute equality and start window with cursor paging, offers GetTrace and FindMetrics, adds a pi-memory-trace carrier key (Extract needs all three keys with opaque identifiers), returns an inert span that keeps the recorder's capabilities when a span starts after its parent settled, and no longer validates or suppresses malformed input. telemetry/memory.go ports it. Go maps have no insertion order, so SpanAttributes keeps ordered attributes and every row is written in Pi's key order (TestInMemoryRecorderKeepsAttributeInsertionOrder)."
 
 [[files]]
 path = "packages/telemetry/src/metrics.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi d9025a5f changes the typed metrics helpers for the store. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); telemetry/metrics.go keeps its 1402973a shape."
+disposition = "ported"
+evidence = ["test:telemetry/metrics_upstream_test.go#TestMetricsUpstream"]
+rationale = "Pi d9025a5f drops the invalid-metric-input handling of the typed metrics helpers (the no-op instruments are shared and frozen). telemetry/metrics.go keeps the typed helpers; the shared no-op instruments are stateless Go values."
 
 [[files]]
 path = "packages/telemetry/src/noop.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi 2ec55d80 makes the no-op telemetry context a span. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); telemetry keeps the 1402973a no-op context."
+disposition = "ported"
+evidence = ["test:telemetry/telemetry_upstream_test.go#TestTelemetryUpstream", "test:telemetry/metrics_upstream_test.go#TestMetricsUpstream"]
+rationale = "Pi 2ec55d80 makes the no-op telemetry context a span that carries the no-op metrics and propagation. telemetry.NoopTelemetryContext and NoopTelemetryPropagation are span-typed and carry them (telemetry/context.go)."
 
 [[files]]
 path = "packages/telemetry/src/render.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi d9025a5f adds the trace renderer (@earendil-works/pi-telemetry/render). Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); PiG has no telemetry store or trace renderer yet."
+disposition = "ported"
+evidence = ["test:telemetry/render_upstream_test.go#TestRenderTrace", "test:telemetry/render_upstream_test.go#TestRenderTraceWritesJSONStringifyValues"]
+rationale = "Pi d9025a5f adds renderTrace. telemetry/render.go ports it: an iterative walk, last value wins when two stores merge the same span id, roots and children ordered by start time, cross-trace links printed and not followed. Go has no attribute insertion order, so attributes are written in name order; that is the one deviation, and the first TestRenderTrace case's expected line is in name order."
 
 [[files]]
 path = "packages/telemetry/src/testing/conformance.ts"
 change = "added"
-disposition = "deferred"
-evidence = []
-rationale = "Pi d9025a5f moves the store cases into the shared conformance suite. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f); telemetry/telemetrytest keeps its 1402973a cases."
+disposition = "ported"
+evidence = ["test:telemetry/conformance_upstream_test.go#TestConformanceUpstream", "test:telemetry/conformance_case_catalogue_test.go#TestConformanceCasesKeepPiGroupsNamesAndOrder", "test:telemetry/conformance_capability_cases_test.go#TestConformanceCapabilityCasesCheckTheirRules"]
+rationale = "Pi 2ec55d80 and d9025a5f add the capabilities conformance group and remove the malformed-input and passivity cases, with case renames. telemetry/telemetrytest/conformance.go follows (new capabilities case; the unreadable helpers and the passivity case are removed; renamed cases follow upstream), and store-conformance.ts is ported as telemetrytest.CreateTelemetryStoreConformance and StoreFixture."
 
 [[files]]
 path = "packages/telemetry/src/testing/index.ts"

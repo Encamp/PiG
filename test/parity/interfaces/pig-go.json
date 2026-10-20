@@ -6904,6 +6904,17 @@
       "shapeHash": "sha256:8f43ad2278170c94f0e7d97537e9a352ee308dd139b9e4665c9535aa3f3de73b"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#AITelemetrySchema",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "AITelemetrySchema",
+      "kind": "variable",
+      "exported": true,
+      "shape": {
+        "type": "*github.com/MichaelKinsy/PiG/telemetry.TelemetrySchemaDefinition"
+      },
+      "shapeHash": "sha256:7fa68ec53194154d69710d26aa51a36f60b4158bcdc2b46f288677654cfa0a69"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#API",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "API",
@@ -15732,9 +15743,20 @@
       "kind": "function",
       "exported": true,
       "shape": {
-        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error)) *AssistantMessageEventStream"
+        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), observer ...LazyStreamObserver) *AssistantMessageEventStream"
       },
-      "shapeHash": "sha256:203846717c9973b6ec2bd752a92cfaea0605a60f630517723e8116738eb6c0ea"
+      "shapeHash": "sha256:a89e96c392b4053411ee4db47633571790a6fd0e853878a495ac882fee806831"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#LazyStreamObserver",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "LazyStreamObserver",
+      "kind": "type",
+      "exported": true,
+      "shape": {
+        "type": "LazyStreamObserver"
+      },
+      "shapeHash": "sha256:5b54ea924f2bb7792bca80267466a562888b4846b6e3fc57d04cefdeaa757ec5"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#LazyStreamSync",
@@ -15743,9 +15765,9 @@
       "kind": "function",
       "exported": true,
       "shape": {
-        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error)) *AssistantMessageEventStream"
+        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), observer ...LazyStreamObserver) *AssistantMessageEventStream"
       },
-      "shapeHash": "sha256:203846717c9973b6ec2bd752a92cfaea0605a60f630517723e8116738eb6c0ea"
+      "shapeHash": "sha256:a89e96c392b4053411ee4db47633571790a6fd0e853878a495ac882fee806831"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#ListModels",
@@ -16997,9 +17019,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(ctx context.Context, model *Model, setup func() (*AssistantMessageEventStream, error)) *AssistantMessageEventStream"
+        "type": "func(ctx context.Context, model *Model, setup func() (*AssistantMessageEventStream, error), observer *LazyStreamObserver) *AssistantMessageEventStream"
       },
-      "shapeHash": "sha256:a2030f0107d564de5311c606fef8867407931e237ad9ff4ff80cd11ed75bd6ed"
+      "shapeHash": "sha256:08a43e81114e0f02f5f8ed5504a6807f93007a6978d7756366954ca58d28cb62"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#Models.publishProviderModels",
@@ -25261,6 +25283,116 @@
         "type": "func(executor *continuationExecutor, n int, step func())"
       },
       "shapeHash": "sha256:84845dfd3c7e2753ef4a5aae20e997fb6089c36de4df1d4850d5a22c6fbd24b5"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiAttribute",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiAttribute",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(valueType github.com/MichaelKinsy/PiG/telemetry.TelemetryAttributeType, description string, required bool) github.com/MichaelKinsy/PiG/telemetry.TelemetryStartAttributeDefinition"
+      },
+      "shapeHash": "sha256:986d476777df39231213040ac1d58be10a3296d2549a9814563e9c1c1b6b50bd"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiEndAttribute",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiEndAttribute",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(description string) github.com/MichaelKinsy/PiG/telemetry.TelemetryAttributeDefinition"
+      },
+      "shapeHash": "sha256:f4e61bd0ec3396999f165a2a6cc001ce290a7f46eccc0966538387e7702b3850"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiInstrumentSet",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiInstrumentSet",
+      "kind": "type",
+      "exported": false,
+      "shape": {
+        "type": "aiInstrumentSet"
+      },
+      "shapeHash": "sha256:24145b04b5561514840229ccec38b340a0868ffaa77365d003dbe4053b6a4778"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiInstruments",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiInstruments",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "struct{sync.Mutex; weak map[weak.Pointer[byte]]*aiInstrumentSet; value map[github.com/MichaelKinsy/PiG/telemetry.TelemetryMetrics]*aiInstrumentSet}"
+      },
+      "shapeHash": "sha256:fdd0bb1b8f47d6b18b46a01662f9a35cd442951b3542f5accadc083ad608f230"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiInstrumentsFor",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiInstrumentsFor",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(adapter github.com/MichaelKinsy/PiG/telemetry.TelemetryMetrics) *aiInstrumentSet"
+      },
+      "shapeHash": "sha256:b15e5e4f239c2377dffe31035069539d64d7e3b2c8cfc3c64c0ae3ea56a131f4"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiMetricStop",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiMetricStop",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func() github.com/MichaelKinsy/PiG/telemetry.TelemetryMetricAttributeDefinition"
+      },
+      "shapeHash": "sha256:8cdb867695f06a21784cd35c6c9a29147161d9d340d712bce2d537dc4933902f"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiModel",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiModel",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "github.com/MichaelKinsy/PiG/telemetry.TelemetryStartAttributeDefinition"
+      },
+      "shapeHash": "sha256:cc45f6d684f3bc0e14c72afb138c1ff5cd8a95464acca8cabcc862a671faf476"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiProvider",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiProvider",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "github.com/MichaelKinsy/PiG/telemetry.TelemetryStartAttributeDefinition"
+      },
+      "shapeHash": "sha256:cc45f6d684f3bc0e14c72afb138c1ff5cd8a95464acca8cabcc862a671faf476"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiRequestSpan",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiRequestSpan",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(description string) github.com/MichaelKinsy/PiG/telemetry.TelemetrySpanDefinition"
+      },
+      "shapeHash": "sha256:2c6e76f2753a3e90ab5c1284ca24993024edd9b909dc647d00f4b4e329156529"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiStop",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiStop",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "github.com/MichaelKinsy/PiG/telemetry.TelemetryAttributeDefinition"
+      },
+      "shapeHash": "sha256:aca9a44485175964e7c5bfb3cc6c2e81672e852029867d87659ba9591c30e321"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#allHex",
@@ -37044,6 +37176,17 @@
       "shapeHash": "sha256:bbb3b0f04c7fffbed115be89f7d696c895d0b1cb9f3eba8b42754c23f3a82987"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#createAIInstruments",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "createAIInstruments",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(adapter github.com/MichaelKinsy/PiG/telemetry.TelemetryMetrics) *aiInstrumentSet"
+      },
+      "shapeHash": "sha256:b15e5e4f239c2377dffe31035069539d64d7e3b2c8cfc3c64c0ae3ea56a131f4"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#createGrammarToolInputProperties",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "createGrammarToolInputProperties",
@@ -40064,9 +40207,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(ctx context.Context, turn *continuationTurn, executor *continuationExecutor, outer *AssistantMessageEventStream, model *Model, inner *AssistantMessageEventStream, err error)"
+        "type": "func(ctx context.Context, turn *continuationTurn, executor *continuationExecutor, outer *AssistantMessageEventStream, model *Model, inner *AssistantMessageEventStream, err error, observation *lazyObservation)"
       },
-      "shapeHash": "sha256:61eb6a8ef9bbb3596b992e1a0792df48b1c449e8b40be9d0308623717234bb54"
+      "shapeHash": "sha256:31124747e4ee1833d46a9d0586f69b02ee7eb836ee0ffd7d2197322103750b3b"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#forwardedEndFields",
@@ -44205,6 +44348,17 @@
       "shapeHash": "sha256:12bd64af2ebf22bb652b26613118406a6537ab68a058bdd64b9e3c4d9de00aa8"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#jsonValidRecord",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "jsonValidRecord",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(data []byte) bool"
+      },
+      "shapeHash": "sha256:8450d6f70ee32323c3129101833ee4462d4a0537b7bd4f619b679a7a2d4801df"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#jsonValueString",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "jsonValueString",
@@ -44995,6 +45149,39 @@
         "type": "func(credential Credential) (ModelAuth, error)"
       },
       "shapeHash": "sha256:cc2f426fd0910ff08c4f98e79bebcf9ab716a4dd7172410382680744beee8877"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#lazyObservation",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "lazyObservation",
+      "kind": "type",
+      "exported": false,
+      "shape": {
+        "type": "lazyObservation"
+      },
+      "shapeHash": "sha256:e53933fe08d28ecca51b0ddcd43d80478962e859cb182b858abd060346ddb299"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#lazyObservation.onEvent",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "lazyObservation.onEvent",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(event AssistantMessageEvent)"
+      },
+      "shapeHash": "sha256:b66d45c66bb4e049d1ce120101f3ecf70e1d6894da68fc83ae343c0f3964ffea"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#lazyObservation.onResult",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "lazyObservation.onResult",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(result *AssistantMessage)"
+      },
+      "shapeHash": "sha256:dabab129e1d9fea35ae55c2ccfb35c623dfd63aba8364c589186fe1b211b1469"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#lazySetupError",
@@ -47857,6 +48044,50 @@
       "shapeHash": "sha256:53aca092001d5a6dd1b065b1319c084c02b339471f636cff6d9145ada2e206ca"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#modelRequestObservation",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "modelRequestObservation",
+      "kind": "type",
+      "exported": false,
+      "shape": {
+        "type": "modelRequestObservation"
+      },
+      "shapeHash": "sha256:01f1e8125228184ea14deaebff0df5e8aab10300855f57d7cca136990d5173f8"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#modelRequestObservation.metricAttributes",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "modelRequestObservation.metricAttributes",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(name string, value string) github.com/MichaelKinsy/PiG/telemetry.SpanAttributes"
+      },
+      "shapeHash": "sha256:662fd5dd6613d733233d836487b32af769e32d14b5dd373c6da764f57570a7a6"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#modelRequestObservation.onEvent",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "modelRequestObservation.onEvent",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(event AssistantMessageEvent)"
+      },
+      "shapeHash": "sha256:b66d45c66bb4e049d1ce120101f3ecf70e1d6894da68fc83ae343c0f3964ffea"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#modelRequestObservation.onResult",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "modelRequestObservation.onResult",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(message *AssistantMessage)"
+      },
+      "shapeHash": "sha256:22f0bbc2679b80710a3d114fac3bfc459ff8b8a86af29fe63e257ac3adae1f53"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#modelUsesAdaptiveThinking",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "modelUsesAdaptiveThinking",
@@ -48438,6 +48669,17 @@
         "type": "func() kimiOAuthProvider"
       },
       "shapeHash": "sha256:78dace5c0771346cf55ec3aefc3b67b5977fab42d12a30813516cbf4b4e6a05f"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#newLazyObservation",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "newLazyObservation",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(observer []LazyStreamObserver) *lazyObservation"
+      },
+      "shapeHash": "sha256:b20618985ad759e7b2909ca875a868fb14e3bf0813f629b38ef7c3dd83504a41"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#newMetaOAuthProvider",
@@ -50572,6 +50814,17 @@
         "type": "func(providerID string, provider OAuthProviderInterface) func(Credential) (ModelAuth, error)"
       },
       "shapeHash": "sha256:ab07a32b005488db14b365f88cd08e47bf84a179c202ea64f920d5f87b622ddb"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#observeModelRequest",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "observeModelRequest",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(requestedModel *Model, options *StreamOptions, poll bool, launch func(func())) *LazyStreamObserver"
+      },
+      "shapeHash": "sha256:daef09464449451753a492060f594bea6bb1b6b46d9cbe3069bec2469126a993"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#observeProviderResponse",
@@ -55678,6 +55931,50 @@
       "shapeHash": "sha256:237daebd73a7c2064ac996110994265f25fd7f4fd6c57e39f2d38e60bba1137d"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#recordScanHook",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "recordScanHook",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "func(pass recordScanPass, bytes int)"
+      },
+      "shapeHash": "sha256:41cd1cf02ae6572d3f1e542d94f5c3632e64bf83f1acf244b7868f25c96830bb"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#recordScanObserver",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "recordScanObserver",
+      "kind": "constant",
+      "exported": false,
+      "shape": {
+        "type": "recordScanPass"
+      },
+      "shapeHash": "sha256:c95011f985a86b124d42a69e81b66540735c0d07cdabbec4febc879cdc09a425"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#recordScanPass",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "recordScanPass",
+      "kind": "type",
+      "exported": false,
+      "shape": {
+        "type": "recordScanPass"
+      },
+      "shapeHash": "sha256:c95011f985a86b124d42a69e81b66540735c0d07cdabbec4febc879cdc09a425"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#recordScanValid",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "recordScanValid",
+      "kind": "constant",
+      "exported": false,
+      "shape": {
+        "type": "recordScanPass"
+      },
+      "shapeHash": "sha256:c95011f985a86b124d42a69e81b66540735c0d07cdabbec4febc879cdc09a425"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#redactAnthropicTokenBody",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "redactAnthropicTokenBody",
@@ -58940,9 +59237,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), launch func(func())) *AssistantMessageEventStream"
+        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), launch func(func()), observation *lazyObservation) *AssistantMessageEventStream"
       },
-      "shapeHash": "sha256:dee37b1366eed9339e7bca7f88e38b74d3ee94c6467e03c4b635b8fb33b2528b"
+      "shapeHash": "sha256:75373db30d52737850f0a9fa63ef7e1f4a4dd8988c75de553fc22f54d3d81e33"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#startLazyStreamSync",
@@ -58951,9 +59248,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), launch func(func())) *AssistantMessageEventStream"
+        "type": "func(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), launch func(func()), observation *lazyObservation) *AssistantMessageEventStream"
       },
-      "shapeHash": "sha256:dee37b1366eed9339e7bca7f88e38b74d3ee94c6467e03c4b635b8fb33b2528b"
+      "shapeHash": "sha256:75373db30d52737850f0a9fa63ef7e1f4a4dd8988c75de553fc22f54d3d81e33"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#staticBearerTokenProvider",

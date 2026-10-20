@@ -1704,13 +1704,37 @@
     },
     {
       "path": "packages/ai/test/telemetry-options.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:4dda5ab2f96378f9574257802e1198fd54f4b8ada9ed5a899dc41d829d519de9"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:4dda5ab2f96378f9574257802e1198fd54f4b8ada9ed5a899dc41d829d519de9",
+      "evidence": [
+        "ai/telemetry_options_upstream_test.go#TestTelemetryOptionsInheritedByEveryRequestOptionSurfaceUpstream",
+        "ai/telemetry_options_upstream_test.go#TestTelemetryOptionsSurviveProviderAndModelsDispatchUpstream",
+        "ai/telemetry_options_upstream_test.go#TestTelemetryOptionsSurviveImageDispatchUpstream",
+        "ai/telemetry_options_upstream_test.go#TestTelemetryOptionsSurviveClassifierDispatch"
+      ],
+      "rationale": "All 3 cases (Pi 2ec55d80 renames ProviderRequestOptions.telemetryContext to telemetry and makes it a TelemetrySpan; the cases keep their bodies). Go renames StreamOptions, ClassifierOptions and ImagesOptions TelemetryContext to Telemetry (a telemetry.TelemetrySpan; nil is Pi's omitted option and means the no-op span). The first case now also asserts that BuildBaseOptions copies it, as Pi's buildBaseOptions does; the second observes the provider and Models stream, streamSimple, fetchDeferred and cancelDeferred dispatches; the third the direct and Models image dispatches. TestTelemetryOptionsSurviveClassifierDispatch additionally covers the Go classifier options."
     },
     {
       "path": "packages/ai/test/telemetry.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:fa6456c3ab3251741cc6bb824e1d98916adeed3b62d17924119ac543642a7b36"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:fa6456c3ab3251741cc6bb824e1d98916adeed3b62d17924119ac543642a7b36",
+      "evidence": [
+        "ai/telemetry_upstream_test.go#TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryReportsErrorAndAbortedStatusUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryBoundsPollErrorMessagesUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryIncludesSetupFailuresAndOmitsNonScalarReasoningUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryCountsInterleavedToolDeltasIndependentlyUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetrySupportsTracingOnlySpanUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryDefaultsToNoopUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryRecordsLowCardinalityMetricsWithMonotonicDurationsUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryRecordsUsageForPollOnlyWhenFinalUpstream",
+        "ai/telemetry_upstream_test.go#TestAITelemetryCreatesInstrumentsOncePerMetricsObjectUpstream",
+        "ai/telemetry_upstream_test.go#TestLazyStreamObservationOrdersEventResolvedResultUpstream",
+        "ai/telemetry_upstream_test.go#TestLazyStreamObservationReportsTerminalResultOnceUpstream",
+        "ai/telemetry_upstream_test.go#TestLazyStreamObservationReportsSetupFailureOnceUpstream",
+        "ai/telemetry_instruments_test.go#"
+      ],
+      "rationale": "All 14 case sites ported with Pi's inputs and attribute order (spans, events and metric attributes are compared in Pi's key order, not as sets): the ten AI telemetry cases (the each-cases run as subtests over stream, streamSimple and streamDeferred, over error and aborted, over missing and present poll messages, and over final and non-final polls) and the four lazyStream observation cases. Go mapping: the two lazyStream cases about an iterable without a result method become a source that ends on a terminal event and a result-only source, and the 'one source iterator' assertion has no Go form because the source is one FIFO stream, so it is omitted; the throwing-arguments getter has no Go form, so the interleaved-tool-delta case uses a ToolCall without arguments; the non-scalar native reasoning case passes GoogleThinking with Thinking empty. The span callback of Pi's `void start(...)` runs on a goroutine owned by Models.operations, so the tests close the Models to drain it. Red-green: dropping the observer from Models.Stream fails the first case, and dropping onEvent from the forwarding push fails the ordering case."
     },
     {
       "path": "packages/ai/test/text.test.ts",
@@ -1992,8 +2016,18 @@
     },
     {
       "path": "packages/chord/test/context.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:497e037cad48fc62a3ba4454a84730ee5308c8db2ef3693aa0fc6378133e1ea2"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:497e037cad48fc62a3ba4454a84730ee5308c8db2ef3693aa0fc6378133e1ea2",
+      "evidence": [
+        "chord/context/chordctx_upstream_test.go#TestContextDerivesTelemetryIndependentlyFromValuesAndCancellation",
+        "chord/context/chordctx_upstream_test.go#TestContextIsolatesConcurrentTraceInBranchesAndPreservesCallbackResultsAndErrors",
+        "chord/context/chordctx_upstream_test.go#TestContextProvidesDistinctEmptyRootContexts",
+        "chord/context/chordctx_upstream_test.go#TestContextLayersTypedValuesWithoutModifyingParents",
+        "chord/context/chordctx_upstream_test.go#TestContextInheritsParentCancellationAndIsolatesChildCancellation",
+        "chord/context/chordctx_upstream_test.go#TestContextMasksCallerCancellationForMandatoryCleanup",
+        "chord/context/chordctx_upstream_test.go#TestContextStopsWaitingWhenTheInvocationIsCancelled"
+      ],
+      "rationale": "All 7 cases, one Go test each. Pi 2ec55d80 narrows Context.telemetry from TelemetryContext to TelemetrySpan, always present, and rewrites the two telemetry cases to run inside spans. Go mapping: Telemetry(ctx) returns a telemetry.TelemetrySpan (a context that carries none reads as the no-op span) and WithTelemetry takes the parent context first and a TelemetrySpan; TraceIn's callback receives the context and the span, because Go cannot narrow a context's type, so the assertions read Telemetry(child)."
     },
     {
       "path": "packages/chord/test/contract.test.ts",
@@ -2568,13 +2602,37 @@
     },
     {
       "path": "packages/chord/test/telemetry-sqlite-store.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:91c5e5be81b55213c74b25ff973bdb44620ef1de67aff9c96dcd11fdde942f18"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:91c5e5be81b55213c74b25ff973bdb44620ef1de67aff9c96dcd11fdde942f18",
+      "evidence": [
+        "chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestUsesTwoSpanQueriesForAPageNotOnePerTrace",
+        "chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestReadsCommittedRowsWithoutImplicitlyFlushingIncludingAfterClose",
+        "chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestKeepsSurvivingDescendantsDiscoverableAfterAStoredParentIsRemoved",
+        "chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestSqliteTelemetryStoreConformance",
+        "chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestDurableObjectSqliteTelemetryStoreConformance"
+      ],
+      "rationale": "All 3 cases plus the store conformance suite the file runs over the node SQLite adapter and over a Durable Object storage adapter (TestSqliteTelemetryStoreConformance and TestDurableObjectSqliteTelemetryStoreConformance run telemetrytest.CreateTelemetryStoreConformance over chord/sqlite/node, which is modernc, and over durable_object_storage_test.go, the port of the test's durableObjectStorage helper). Red-green: an aliasing bug in findMetrics (the unit pointer aimed at a variable that was later overwritten) failed the conformance case 'queries metric names, kinds, units, boundaries and attributes' before it was fixed."
     },
     {
       "path": "packages/chord/test/telemetry-sqlite.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:7c71fc0a0f7d51500cbbf858cc1e499295b6469abe47146dbb5e4cc1de08b474"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:7c71fc0a0f7d51500cbbf858cc1e499295b6469abe47146dbb5e4cc1de08b474",
+      "evidence": [
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestSqliteTelemetryConformance",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestDoesNotExecuteSQLWhileRecordingAndStoresOnlySettledSpans",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestAggregatesCanonicalSeriesByIntervalAndWritesPartialIntervalsOnlyOnClose",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestSeparatesKindNameUnitAndCallerAttributes",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestStrictlyBoundsQueuedSpansIncludingTheInFlightBatch",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestCountsInFlightMetricIntervalsAgainstCapacityUntilCommit",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestFlushesOncePerSecondAndRetainsOnlyRowsInsideTheRetentionWindow",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestSerializesConcurrentFlushAndCloseWithoutLosingMeasurements",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestCloseDoesNotWaitForActiveCallbacksAndLeavesTheDatabaseOpen",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestStopsPermanentlyAfterAWriteFailureAndReportsTheIdenticalError",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestRemembersABackgroundWriteFailureAndStopsItsTimer",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestRollsBackSpansAndMetricAggregatesTogetherOnSQLFailure",
+        "chord/telemetrysqlite/telemetry_sqlite_test.go#TestReusesMigrationsPreservesIdentitiesAcrossReopenAndMergesAggregates"
+      ],
+      "rationale": "All 13 case sites ported: the dynamic span and propagation conformance cases run through TestSqliteTelemetryConformance, the other 12 are one Go test each. Go mapping: the tests read time from internal/jsclock (the stand-in for vi.spyOn(Date, 'now')) and drive the one-second timer through the unexported ticks option of SqliteTelemetryOptions, because Go has no global fake timers; upstream's 'undefined background write failure' has no Go form (a nil error is success), so the case uses a real error and asserts the same behavior, that the failure is remembered and the timer takes no further tick. Red-green: zeroing the in-flight metric accounting fails the in-flight capacity case."
     },
     {
       "path": "packages/chord/test/tutorial.test.ts",
@@ -7091,13 +7149,47 @@
     },
     {
       "path": "packages/durable/test/harness-telemetry-options.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:63a9df866bc34626ad83b304d86897f484408b94b20996112453aa6d6fa4286e"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:63a9df866bc34626ad83b304d86897f484408b94b20996112453aa6d6fa4286e",
+      "evidence": [
+        "durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities"
+      ],
+      "rationale": "The one case. Upstream is a compile-time check of HarnessOptions.telemetry; Pi 2ec55d80 changes the adapter's capability members to the span-typed shape. The Go test assigns one adapter to HarnessOptions.Telemetry and finds the optional Metrics() and Propagation() capabilities (nil means absent)."
     },
     {
       "path": "packages/durable/test/harness-telemetry.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:bdadee7352c44e72a29916768b89954bdc271313a76114e7dcf6055f10a87c6a"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:bdadee7352c44e72a29916768b89954bdc271313a76114e7dcf6055f10a87c6a",
+      "evidence": [
+        "durable/harness/harness_telemetry_test.go#TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans",
+        "durable/harness/harness_telemetry_test.go#TestDurableTelemetryRecordsAttributesInPisKeyOrder",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryReturnsAdmissionResultsWithoutRereadingRecordsOrProbingRootLinkTargets",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryInheritsOmittedOrUndefinedTaskTracesAndStoresNoCarrierForAnExplicitRoot",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryRecordsCheckpointsOnlyWhenTheRunningPhaseChanges",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryStartsEachQueuedInputsRunInItsAdmissionTraceAndLinksInputRootsToTheirCaller",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksTheOtherQueuedInputsToTheFirstInvocationOfTheirSharedRun",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksASteerAdmissionToTheCurrentRunWithoutMovingItsWorkIntoTheSteersTrace",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryKeepsAPublicWriteAdmissionOpenThroughCommitAsAChildOfItsCaller",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksAnInputSubmittedInsideATurnToTheCallingPhaseWithoutParentingIt",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryParentsBackgroundCompactionToThePreparePhaseThatCreatesIt",
+        "durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryMarksOnlyTheFirstInvocationAfterReopenResumedRetainingItsStoredParent",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryEmitsEntryAndSettlementEventsOnlyAfterSuccessfulStorageCommits",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryRecordsInternalCompactionAdmissionsAsPhaseEventsWithoutASubmitSpan",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryRecordsAFixedCategoryAndABoundedDiagnostic",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryKeepsBothInterruptedRunsAndExplicitAbortHandlersAtStatusOk",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryMirrorsRuntimeReportsAsFixedFieldPhaseEventsAndTypeOnlyCounters",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPhaseContext",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryCountsAnOutsideSpanSessionFailureWithoutStartingASpan",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryCountsReportsRaisedWithANoopSpanWithoutCreatingARoot",
+        "durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryAttachesSynchronousCommitListenerReportsToTheActiveSubmissionSpan",
+        "durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool",
+        "durable/storage/record_carriers_test.go#TestStorageKeepsTaskAndSubmissionTelemetryCarriers",
+        "durable/record_carriers_wire_test.go#TestRecordCarriersAreOptionalPlainJsonMembers"
+      ],
+      "rationale": "21 of the 22 case sites are ported; the replay case lives in durable/codemode because that package imports the harness. Designed out (listed in designedOutCases): 'preserves async listener error containment and report counting' passes commit listeners that return Promises and asserts that a rejection is contained and counted; Go commit listeners (SubscribeCommits) return no value, so a Promise-returning listener has no Go form, and panic containment is covered by the synchronous-listener case 'attaches synchronous commit-listener reports to the active submission span'. Go mapping: each Go invocation runs on its own goroutine (D181), so the admission file matches each phase to its task by task.id and asserts the same per-task parents instead of comparing parents in span-start order; the fixed-category case runs its three categories as subtests. The new persisted members (an optional trace on submission records, optional trace and links on task records) are covered by TestStorageKeepsTaskAndSubmissionTelemetryCarriers on the memory, SQLite and JSONL backends and by TestRecordCarriersAreOptionalPlainJsonMembers. Red-green: dropping the entry events from session.publish fails four cases, disabling task trace inheritance fails the inherit case, dropping the phase links or the steer link fails their cases, and dropping the replay event fails the codemode case.",
+      "designedOutCases": [
+        "Durable telemetry › preserves async listener error containment and report counting"
+      ]
     },
     {
       "path": "packages/durable/test/harness-tools-recovery.test.ts",
@@ -7660,28 +7752,56 @@
     },
     {
       "path": "packages/telemetry/test/metrics.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:aaca86bc027c3f7250cefd316db899d11e7ed8a91af785062311e836866c52a7"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:aaca86bc027c3f7250cefd316db899d11e7ed8a91af785062311e836866c52a7",
+      "evidence": [
+        "telemetry/metrics_upstream_test.go#TestMetricsUpstream",
+        "telemetry/metrics_upstream_test.go#TestCreateTypedMetricsReadsSchemaMetadataForDeclaredNamesOnly",
+        "telemetry/memory_metrics_pi_oracle_test.go#TestInMemoryMetricsMatchPiOnRandomPrograms"
+      ],
+      "rationale": "All 4 cases, one Go subtest each in TestMetricsUpstream with Pi's names and the same inputs and expected measurements. Pi d9025a5f removes the invalid-metric-input case and keeps its exemplar-for-a-no-op-context check as part of 'shares frozen no-op instruments'; Go keeps the exemplar check as its own subtest. Designed out: expectTypeOf/@ts-expect-error assertions (TypeScript inference) and Object.isFrozen on the shared no-op instruments (the Go no-op instruments are stateless values). TestInMemoryMetricsMatchPiOnRandomPrograms additionally compares the Go recorder with Pi's memory.ts over random programs."
     },
     {
       "path": "packages/telemetry/test/propagation.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:11e2238c7242d8b25fad8bff1ce4d9e02c98dedd4812f202752ae00f110050e2"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:11e2238c7242d8b25fad8bff1ce4d9e02c98dedd4812f202752ae00f110050e2",
+      "evidence": [
+        "telemetry/propagation_upstream_test.go#TestPropagationUpstream",
+        "telemetry/propagation_upstream_test.go#TestExtractAcceptsCompleteMemoryCarriers",
+        "telemetry/propagation_pi_oracle_test.go#TestInMemoryCarriersInteroperateWithPi",
+        "telemetry/propagation_worker_test.go#TestMain"
+      ],
+      "rationale": "All 6 cases, one Go subtest each in TestPropagationUpstream. The 'another Node process' case spawns the test binary as the worker (propagation_worker_test.go TestMain is propagation-worker.ts), so recorder state is not shared, as upstream. Pi d9025a5f adds a pi-memory-trace carrier key, and Extract needs all three keys with opaque identifiers; TestExtractAcceptsCompleteMemoryCarriers and 'treats recognized carrier identifiers as opaque strings' pin it. Upstream's non-string carrier values have no Go form, so the fallback check removes one key per carrier and expects 3 fallback traces where upstream expects 6. TestInMemoryCarriersInteroperateWithPi runs Pi's InMemory carriers against the Go adapter and back."
     },
     {
       "path": "packages/telemetry/test/render.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:477cf07299dc5984283ae6d3afe3c2d4262c05066bbf5dbcc7613c9885b3c3c7"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:477cf07299dc5984283ae6d3afe3c2d4262c05066bbf5dbcc7613c9885b3c3c7",
+      "evidence": [
+        "telemetry/render_upstream_test.go#TestRenderTrace",
+        "telemetry/render_upstream_test.go#TestRenderTraceWritesJSONStringifyValues"
+      ],
+      "rationale": "All 8 cases, one Go subtest each in TestRenderTrace with Pi's inputs and expected text. Go maps have no insertion order, so telemetry.RenderTrace writes attributes in name order and the first case's expected line is in name order; every other expectation is upstream's. TestRenderTraceWritesJSONStringifyValues pins the JSON.stringify form of attribute values. The deep-tree case renders a 2000-deep chain."
     },
     {
       "path": "packages/telemetry/test/store.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:fa5faaee1bca35f4e8a7a11b29291d7146826c19de048ffed869bc9664db7e37"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:fa5faaee1bca35f4e8a7a11b29291d7146826c19de048ffed869bc9664db7e37",
+      "evidence": [
+        "telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots",
+        "telemetry/store_upstream_test.go#TestInMemoryTelemetryStoreConformance",
+        "telemetry/store_upstream_test.go#TestInMemoryMetricRowsKeepAttributeInsertionOrder"
+      ],
+      "rationale": "All 3 cases, one Go subtest each in TestInMemoryStoreSnapshots, plus the shared store conformance suite (store-conformance.ts, telemetrytest.CreateTelemetryStoreConformance) that store.test.ts runs over the in-memory recorder: the recorder implements telemetry.TelemetryStore. Store conformance uses float64 numbers and compares through the JSON form so a SQLite store that returns decoded values passes."
     },
     {
       "path": "packages/telemetry/test/telemetry.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:e1f30df4b84859fb1b5ef1ec78040c78c749f0d9bdcc5b3523c8430d43512648"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:e1f30df4b84859fb1b5ef1ec78040c78c749f0d9bdcc5b3523c8430d43512648",
+      "evidence": [
+        "telemetry/telemetry_upstream_test.go#TestTelemetryUpstream"
+      ],
+      "rationale": "All 5 cases. Pi 2ec55d80 adds 'ignores typed recording payloads' and d9025a5f removes the unreadable-schema assertion; the Go test follows both. Designed out: the expectTypeOf and @ts-expect-error assertions, which check TypeScript inference of exact attributes, closed value sets, narrowed span names and duplicate span names (upstream performs no runtime schema validation, so Go has no runtime form), and Object.isFrozen (the Go noop span is a stateless value). Go mapping: schema data is TelemetrySchemaDefinition and its JSON is pinned exactly; DefineTelemetrySchema is pointer identity (toBe); CreateTypedSpanStarter takes variadic schemas it never reads; a typed or noop starter returns the callback's error by identity, and a panic propagates with the same value."
     },
     {
       "path": "packages/tui/test/autocomplete-skill-slash.test.ts",

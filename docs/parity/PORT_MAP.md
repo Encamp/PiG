@@ -284,7 +284,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/ai/src/utils/models-error.ts` | `ai/auth_resolve.go (ModelsErrorCode, ModelsError, NewModelsError)` | ✅ |
 | `packages/ai/src/utils/oauth-page.ts` | `ai/oauth_page.go (upstream 0.99.1 moved the file unchanged from auth/oauth/oauth-page.ts)` | ✅ |
 | `packages/ai/src/providers/openrouter-api.ts` | `ai/openrouter_api.go (OpenRouterModel, OpenRouterCost and the rest of the row's exported members), cmd/gen-models/` | ✅ |
-| `packages/ai/src/telemetry.ts` | `(Pi 2ec55d80 pi.ai spans; deferred to a later milestone, with d9025a5f; the vendored Node runtime carries Pi's own telemetry.js)` | ⏸ |
+| `packages/ai/src/telemetry.ts` | `ai/telemetry.go` | 🟡 |
 
 ## `packages/coding-agent/src/`
 
@@ -681,8 +681,8 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/chord/src/state.ts` | `chord/state.go` | ✅ |
 | `packages/chord/src/websocket.ts` | `chord/host/websocket.go (link protocol 4)` | ✅ |
 | `packages/chord/src/wire.ts` | `chord/host/wire.go (link protocol 4)` | ✅ |
-| `packages/chord/src/telemetry-sqlite/index.ts` | `(Pi d9025a5f SQLite telemetry sink; deferred to a later milestone)` | ⏸ |
-| `packages/chord/src/telemetry-sqlite/store.ts` | `(Pi d9025a5f SQLite telemetry store; deferred to a later milestone)` | ⏸ |
+| `packages/chord/src/telemetry-sqlite/index.ts` | `chord/telemetrysqlite/index.go` | 🟡 |
+| `packages/chord/src/telemetry-sqlite/store.ts` | `chord/telemetrysqlite/store.go` | 🟡 |
 
 ## `packages/protocol/src/`
 
@@ -786,7 +786,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/durable/src/search.ts` | `durable/internal/search/search.go` (tests in durable/internal/search/search_test.go) | ✅ |
 | `packages/durable/src/tool-search/index.ts` | `(barrel re-exports; Go has no barrel exports)` | n/a |
 | `packages/durable/src/tool-search/tool-search.ts` | `durable/toolsearch/` | ✅ |
-| `packages/durable/src/harness/telemetry.ts` | `(Pi 2ec55d80 pi.durable spans; deferred to a later milestone)` | ⏸ |
+| `packages/durable/src/harness/telemetry.ts` | `durable/harness/telemetry.go` | 🟡 |
 
 ## `packages/env/src/`
 
@@ -837,11 +837,11 @@ The daemon is a Go program with Pi's command line and wire protocol (D96); the R
 
 | Upstream | PiG | Status |
 |---|---|---|
-| `packages/telemetry/src/index.ts` | `telemetry/context.go + telemetry/schema.go` | 🟡 |
+| `packages/telemetry/src/index.ts` | `telemetry/context.go + telemetry/schema.go + telemetry/store.go` | 🟡 |
 | `packages/telemetry/src/memory.ts` | `telemetry/memory.go` | 🟡 |
 | `packages/telemetry/src/metrics.ts` | `telemetry/metrics.go` | 🟡 |
 | `packages/telemetry/src/noop.ts` | `telemetry/context.go` | 🟡 |
 | `packages/telemetry/src/testing/conformance.ts` | `telemetry/telemetrytest/conformance.go` | 🟡 |
 | `packages/telemetry/src/testing/index.ts` | `(re-export barrel: the exports are the Go package surface)` | n/a |
 | `packages/telemetry/src/testing/types.ts` | `telemetry/telemetrytest/types.go` | ✅ |
-| `packages/telemetry/src/render.ts` | `(Pi d9025a5f trace renderer; deferred to a later milestone)` | ⏸ |
+| `packages/telemetry/src/render.ts` | `telemetry/render.go` | 🟡 |

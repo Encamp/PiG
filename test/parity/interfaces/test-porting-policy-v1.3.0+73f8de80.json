@@ -1921,7 +1921,7 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry (deferred with Pi 2ec55d80 and d9025a5f); pending until the telemetry milestone lands."
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f)."
     },
     {
       "path": "packages/ai/test/text.test.ts",
@@ -2454,7 +2454,7 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry (deferred with Pi 2ec55d80 and d9025a5f); pending until the telemetry milestone lands."
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f)."
     },
     {
       "path": "packages/chord/test/telemetry-sqlite.test.ts",
@@ -2463,7 +2463,7 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry (deferred with Pi 2ec55d80 and d9025a5f); pending until the telemetry milestone lands."
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f)."
     },
     {
       "path": "packages/chord/test/tutorial.test.ts",
@@ -5674,7 +5674,10 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry (deferred with Pi 2ec55d80 and d9025a5f); pending until the telemetry milestone lands."
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f). SCRUTINIZED:approved by the integration lead (assignment 2026-10-19, relayed by Main; owner confirmation pending) \u2014 Durable telemetry: only the async-listener case is designed out: Go commit listeners (SubscribeCommits) return no value, so a Promise-returning listener has no Go form.",
+      "designedOutCases": [
+        "Durable telemetry \u203a preserves async listener error containment and report counting"
+      ]
     },
     {
       "path": "packages/durable/test/harness-tools-recovery.test.ts",
@@ -6100,7 +6103,7 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry (deferred with Pi 2ec55d80 and d9025a5f); pending until the telemetry milestone lands."
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f)."
     },
     {
       "path": "packages/telemetry/test/store.test.ts",
@@ -6109,7 +6112,7 @@
       "tags": [
         "hot-path"
       ],
-      "rationale": "Telemetry (deferred with Pi 2ec55d80 and d9025a5f); pending until the telemetry milestone lands."
+      "rationale": "Telemetry recording, propagation, storage, or rendering (Pi 2ec55d80 and d9025a5f)."
     },
     {
       "path": "packages/telemetry/test/telemetry.test.ts",
