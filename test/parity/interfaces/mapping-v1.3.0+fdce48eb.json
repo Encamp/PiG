@@ -7034,7 +7034,7 @@
       "id": "pkg:ai/.#ApiStreamOptions",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:564c0539bcb0ffa0901985f2da7b43cdc5db20ba5a723a8545d19f581980b0d9",
-      "rationale": "types.ts:272-277 ApiStreamOptions\u003cTApi\u003e is a conditional type: a known API resolves to ApiOptionsMap[TApi] and any other API string to StreamOptions \u0026 Record\u003cstring, unknown\u003e. It selects an option type at compile time and has no runtime value. Go carries every API's options in the one ai.StreamOptions (renames-reviewed.json places each per-API Options type, ApiOptionsMap and ApiStreamOptions on it) and the API is selected at run time by the Model's Api value, so there is no type to compute. Designed out as a TypeScript conditional-type mechanic, by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:272-277 ApiStreamOptions<TApi> is a conditional type: a known API resolves to ApiOptionsMap[TApi] and any other API string to StreamOptions & Record<string, unknown>. It selects an option type at compile time and has no runtime value. Go carries every API's options in the one ai.StreamOptions (renames-reviewed.json places each per-API Options type, ApiOptionsMap and ApiStreamOptions on it) and the API is selected at run time by the Model's Api value, so there is no type to compute. Designed out as a TypeScript conditional-type mechanic, by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/types.go#StreamOptions"
       ]
@@ -16802,11 +16802,11 @@
       ],
       "layers": {
         "behavior": "complete",
-        "production": "complete",
+        "production": "public-api-tested",
         "shape": "complete"
       },
       "production": [
-        "call:ai/transcript.go#HasNonAdditiveToolChanges"
+        "public-api:ai/transcript.go#HasNonAdditiveToolChanges"
       ],
       "evidence": [
         "test:ai/transcript_replay_oracle_test.go#TestTranscriptReplayMatchesPi",
@@ -16824,11 +16824,11 @@
       ],
       "layers": {
         "behavior": "complete",
-        "production": "complete",
+        "production": "public-api-tested",
         "shape": "complete"
       },
       "production": [
-        "call:ai/transcript.go#HasNonAdditiveToolChanges"
+        "public-api:ai/transcript.go#HasNonAdditiveToolChanges"
       ],
       "evidence": [
         "test:ai/transcript_replay_oracle_test.go#TestTranscriptReplayMatchesPi",
@@ -18264,7 +18264,7 @@
       "id": "pkg:ai/.#JsonRepresentation",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:eb037ccd1e012caeee0dd7194fd9feeefcad47c83b83798e881fdc124aef3a85",
-      "rationale": "TL: JsonRepresentation\u003cT\u003e is a TypeScript type-level computation over its type parameters (IsAny\u003cT\u003e extends true ? JsonValue : unknown extends T ? JsonValue : [T] extends [JsonValue] ? T : T extends readonly unk...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here ai/types.go#JsonValue. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: JsonRepresentation<T> is a TypeScript type-level computation over its type parameters (IsAny<T> extends true ? JsonValue : unknown extends T ? JsonValue : [T] extends [JsonValue] ? T : T extends readonly unk...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here ai/types.go#JsonValue. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "ai/types.go#JsonValue"
       ]
@@ -22047,7 +22047,7 @@
       "id": "pkg:ai/.#ModelTypeMap",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:05a53b5fcfba8d6a271e9882c1a9fb65858398339151b8bda60af3d458d1f247",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -22057,7 +22057,7 @@
       "id": "pkg:ai/.#ModelTypeMap::property:chat",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:e7b1a5780c5f3ccef459a48a1ce3020b3574eb15125146447b499af5b693cc93",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -22067,7 +22067,7 @@
       "id": "pkg:ai/.#ModelTypeMap::property:classifier",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:758aaed21dabc3293b8f040bd0f2294b8a5bd5bd6438ebb69a7c87f2691764c1",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -22077,7 +22077,7 @@
       "id": "pkg:ai/.#ModelTypeMap::property:image",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:945912d8f4f916f15c3ffe182034b26fd715b7f3995aa092c44eb1b317f92a5a",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -30243,13 +30243,47 @@
     },
     {
       "id": "pkg:ai/.#resolveTranscriptTools",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:8f44c3c2e23ec7ad4bcf6fbda3358e60add9afd55a31f629cf4e68a32266353e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:8f44c3c2e23ec7ad4bcf6fbda3358e60add9afd55a31f629cf4e68a32266353e",
+      "rationale": "Derived by the interface gap detector: resolveTranscriptTools is Go ai/transcript.go#ResolveTranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/.#resolveTranscriptTools::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:63ab4785410c716ca7b19774fd06b8d7e574cb74a2fa3d175aad7123d133e5af"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:63ab4785410c716ca7b19774fd06b8d7e574cb74a2fa3d175aad7123d133e5af",
+      "rationale": "Derived by the interface gap detector: resolveTranscriptTools::call:0 is Go ai/transcript.go#ResolveTranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/.#retryAssistantCall",
@@ -31203,7 +31237,7 @@
       "id": "pkg:ai/.#Static",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:fe80730ccd93457a2bbaf43adc942e70ee8dc92777813f5d43323a2618c2ec06",
-      "rationale": "index.ts:1-2 re-exports `Static`, `TSchema` and `Type` from the third-party `typebox` package; Pi does not define them. Static\u003cT\u003e infers a TypeScript type from a schema value at compile time, which has no Go meaning (Go has no type-level computation). Go decodes a tool's arguments into the caller's own struct or map. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "index.ts:1-2 re-exports `Static`, `TSchema` and `Type` from the third-party `typebox` package; Pi does not define them. Static<T> infers a TypeScript type from a schema value at compile time, which has no Go meaning (Go has no type-level computation). Go decodes a tool's arguments into the caller's own struct or map. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/types.go#ToolSchema.Parameters"
       ]
@@ -32920,13 +32954,47 @@
     },
     {
       "id": "pkg:ai/.#TranscriptTools",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:0ab3f8f476a5bf67103f8476ca7307b6d0584e2d6e928a644c769f21da2b920e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:0ab3f8f476a5bf67103f8476ca7307b6d0584e2d6e928a644c769f21da2b920e",
+      "rationale": "Derived by the interface gap detector: TranscriptTools is Go ai/transcript.go#TranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.Stream"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/.#TranscriptTools::property:foldedSystemMessages",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:32c035cd9e8828119b6738023d4ff94d5548e5ba99b089a4a554d6b9e8e5d55c"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:32c035cd9e8828119b6738023d4ff94d5548e5ba99b089a4a554d6b9e8e5d55c",
+      "rationale": "Derived by the interface gap detector: TranscriptTools::property:foldedSystemMessages is Go ai/transcript.go#TranscriptTools.FoldedSystemMessages (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptTools.FoldedSystemMessages"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.convertTranscript"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/.#TranscriptTools::property:requestTools",
@@ -32946,13 +33014,31 @@
       ],
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
-        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript"
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
       ]
     },
     {
       "id": "pkg:ai/.#TranscriptToolSupport",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:b8fe20c732413156a5a25bdacbba6628a3ef02a0174b60d91fb2cec587e59734"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:b8fe20c732413156a5a25bdacbba6628a3ef02a0174b60d91fb2cec587e59734",
+      "rationale": "Derived by the interface gap detector: TranscriptToolSupport is Go ai/transcript.go#TranscriptToolSupport (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptToolSupport"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.convertTranscript"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/.#Transport",
@@ -36631,7 +36717,7 @@
       "id": "pkg:ai/api/classifier-shared#ClassifierHttpError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "ai/classifier_http.go#ClassifierHTTPError"
       ]
@@ -43545,13 +43631,43 @@
     },
     {
       "id": "pkg:ai/api/openai-responses-shared#getResponsesToolSupport",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:b024d3699bbe3b5ba908f49264e9044519f9b3e709f0e266983c70daad4eab97"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:b024d3699bbe3b5ba908f49264e9044519f9b3e709f0e266983c70daad4eab97",
+      "rationale": "Derived by the interface gap detector: getResponsesToolSupport is Go ai/openai_responses.go#GetResponsesToolSupport (name rule N1), every shape rule holds, and it is exercised by a function reachable from cmd/pig. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/openai_responses.go#GetResponsesToolSupport"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai_responses.go#GetResponsesToolSupport"
+      ],
+      "evidence": [
+        "reach:ai/openai_responses.go#GetResponsesToolSupport"
+      ]
     },
     {
       "id": "pkg:ai/api/openai-responses-shared#getResponsesToolSupport::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:018a5dea1e84eedaa8cbff81c6e0750932dc155ff3a527be1d4a64d096b28cca"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:018a5dea1e84eedaa8cbff81c6e0750932dc155ff3a527be1d4a64d096b28cca",
+      "rationale": "Derived by the interface gap detector: getResponsesToolSupport::call:0 is Go ai/openai_responses.go#GetResponsesToolSupport (name rule N1), every shape rule holds, and it is exercised by a function reachable from cmd/pig. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/openai_responses.go#GetResponsesToolSupport"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai_responses.go#GetResponsesToolSupport"
+      ],
+      "evidence": [
+        "reach:ai/openai_responses.go#GetResponsesToolSupport"
+      ]
     },
     {
       "id": "pkg:ai/api/openai-responses-shared#OpenAIResponsesStreamOptions",
@@ -45148,7 +45264,7 @@
       "id": "pkg:ai/api/pi-messages#PiMessagesResponseError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "ai/pi_messages.go#PiMessagesResponseError"
       ]
@@ -48265,7 +48381,7 @@
       "id": "pkg:ai/compat#ApiStreamOptions",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:564c0539bcb0ffa0901985f2da7b43cdc5db20ba5a723a8545d19f581980b0d9",
-      "rationale": "types.ts:272-277 ApiStreamOptions\u003cTApi\u003e is a conditional type: a known API resolves to ApiOptionsMap[TApi] and any other API string to StreamOptions \u0026 Record\u003cstring, unknown\u003e. It selects an option type at compile time and has no runtime value. Go carries every API's options in the one ai.StreamOptions (renames-reviewed.json places each per-API Options type, ApiOptionsMap and ApiStreamOptions on it) and the API is selected at run time by the Model's Api value, so there is no type to compute. Designed out as a TypeScript conditional-type mechanic, by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:272-277 ApiStreamOptions<TApi> is a conditional type: a known API resolves to ApiOptionsMap[TApi] and any other API string to StreamOptions & Record<string, unknown>. It selects an option type at compile time and has no runtime value. Go carries every API's options in the one ai.StreamOptions (renames-reviewed.json places each per-API Options type, ApiOptionsMap and ApiStreamOptions on it) and the API is selected at run time by the Model's Api value, so there is no type to compute. Designed out as a TypeScript conditional-type mechanic, by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/types.go#StreamOptions"
       ]
@@ -58956,11 +59072,11 @@
       ],
       "layers": {
         "behavior": "complete",
-        "production": "complete",
+        "production": "public-api-tested",
         "shape": "complete"
       },
       "production": [
-        "call:ai/transcript.go#HasNonAdditiveToolChanges"
+        "public-api:ai/transcript.go#HasNonAdditiveToolChanges"
       ],
       "evidence": [
         "test:ai/transcript_replay_oracle_test.go#TestTranscriptReplayMatchesPi",
@@ -58978,11 +59094,11 @@
       ],
       "layers": {
         "behavior": "complete",
-        "production": "complete",
+        "production": "public-api-tested",
         "shape": "complete"
       },
       "production": [
-        "call:ai/transcript.go#HasNonAdditiveToolChanges"
+        "public-api:ai/transcript.go#HasNonAdditiveToolChanges"
       ],
       "evidence": [
         "test:ai/transcript_replay_oracle_test.go#TestTranscriptReplayMatchesPi",
@@ -60555,7 +60671,7 @@
       "id": "pkg:ai/compat#JsonRepresentation",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:eb037ccd1e012caeee0dd7194fd9feeefcad47c83b83798e881fdc124aef3a85",
-      "rationale": "TL: JsonRepresentation\u003cT\u003e is a TypeScript type-level computation over its type parameters (IsAny\u003cT\u003e extends true ? JsonValue : unknown extends T ? JsonValue : [T] extends [JsonValue] ? T : T extends readonly unk...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here ai/types.go#JsonValue. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: JsonRepresentation<T> is a TypeScript type-level computation over its type parameters (IsAny<T> extends true ? JsonValue : unknown extends T ? JsonValue : [T] extends [JsonValue] ? T : T extends readonly unk...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here ai/types.go#JsonValue. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "ai/types.go#JsonValue"
       ]
@@ -64399,7 +64515,7 @@
       "id": "pkg:ai/compat#ModelTypeMap",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:05a53b5fcfba8d6a271e9882c1a9fb65858398339151b8bda60af3d458d1f247",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -64409,7 +64525,7 @@
       "id": "pkg:ai/compat#ModelTypeMap::property:chat",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:e7b1a5780c5f3ccef459a48a1ce3020b3574eb15125146447b499af5b693cc93",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -64419,7 +64535,7 @@
       "id": "pkg:ai/compat#ModelTypeMap::property:classifier",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:758aaed21dabc3293b8f040bd0f2294b8a5bd5bd6438ebb69a7c87f2691764c1",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -64429,7 +64545,7 @@
       "id": "pkg:ai/compat#ModelTypeMap::property:image",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:945912d8f4f916f15c3ffe182034b26fd715b7f3995aa092c44eb1b317f92a5a",
-      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -\u003e model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType\u003cTType\u003e (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "types.ts:1161-1172 ModelTypeMap is a type-level lookup (model type tag -> model shape) whose consumers are the key-derived alias ModelType, AnyModel = ModelTypeMap[ModelType] and the generic guard isModelType<TType> (utils/model-operations.ts:22). Go has no type-level map: ai.ModelType is a string type with one constant per tag and ai.AnyModel is the interface the three model shapes implement (ai/model_types.go). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/model_types.go#ModelType",
         "ai/model_types.go#AnyModel"
@@ -73044,13 +73160,47 @@
     },
     {
       "id": "pkg:ai/compat#resolveTranscriptTools",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:8f44c3c2e23ec7ad4bcf6fbda3358e60add9afd55a31f629cf4e68a32266353e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:8f44c3c2e23ec7ad4bcf6fbda3358e60add9afd55a31f629cf4e68a32266353e",
+      "rationale": "Derived by the interface gap detector: resolveTranscriptTools is Go ai/transcript.go#ResolveTranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/compat#resolveTranscriptTools::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:63ab4785410c716ca7b19774fd06b8d7e574cb74a2fa3d175aad7123d133e5af"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:63ab4785410c716ca7b19774fd06b8d7e574cb74a2fa3d175aad7123d133e5af",
+      "rationale": "Derived by the interface gap detector: resolveTranscriptTools::call:0 is Go ai/transcript.go#ResolveTranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/compat#retryAssistantCall",
@@ -74022,7 +74172,7 @@
       "id": "pkg:ai/compat#Static",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:fe80730ccd93457a2bbaf43adc942e70ee8dc92777813f5d43323a2618c2ec06",
-      "rationale": "index.ts:1-2 re-exports `Static`, `TSchema` and `Type` from the third-party `typebox` package; Pi does not define them. Static\u003cT\u003e infers a TypeScript type from a schema value at compile time, which has no Go meaning (Go has no type-level computation). Go decodes a tool's arguments into the caller's own struct or map. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "index.ts:1-2 re-exports `Static`, `TSchema` and `Type` from the third-party `typebox` package; Pi does not define them. Static<T> infers a TypeScript type from a schema value at compile time, which has no Go meaning (Go has no type-level computation). Go decodes a tool's arguments into the caller's own struct or map. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "ai/types.go#ToolSchema.Parameters"
       ]
@@ -76529,13 +76679,47 @@
     },
     {
       "id": "pkg:ai/compat#TranscriptTools",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:0ab3f8f476a5bf67103f8476ca7307b6d0584e2d6e928a644c769f21da2b920e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:0ab3f8f476a5bf67103f8476ca7307b6d0584e2d6e928a644c769f21da2b920e",
+      "rationale": "Derived by the interface gap detector: TranscriptTools is Go ai/transcript.go#TranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.Stream"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/compat#TranscriptTools::property:foldedSystemMessages",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:32c035cd9e8828119b6738023d4ff94d5548e5ba99b089a4a554d6b9e8e5d55c"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:32c035cd9e8828119b6738023d4ff94d5548e5ba99b089a4a554d6b9e8e5d55c",
+      "rationale": "Derived by the interface gap detector: TranscriptTools::property:foldedSystemMessages is Go ai/transcript.go#TranscriptTools.FoldedSystemMessages (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptTools.FoldedSystemMessages"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.convertTranscript"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/compat#TranscriptTools::property:requestTools",
@@ -76555,13 +76739,31 @@
       ],
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
-        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript"
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
       ]
     },
     {
       "id": "pkg:ai/compat#TranscriptToolSupport",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:b8fe20c732413156a5a25bdacbba6628a3ef02a0174b60d91fb2cec587e59734"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:b8fe20c732413156a5a25bdacbba6628a3ef02a0174b60d91fb2cec587e59734",
+      "rationale": "Derived by the interface gap detector: TranscriptToolSupport is Go ai/transcript.go#TranscriptToolSupport (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptToolSupport"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.convertTranscript"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/compat#Transport",
@@ -96079,11 +96281,11 @@
       ],
       "layers": {
         "behavior": "complete",
-        "production": "complete",
+        "production": "public-api-tested",
         "shape": "complete"
       },
       "production": [
-        "call:ai/transcript.go#HasNonAdditiveToolChanges"
+        "public-api:ai/transcript.go#HasNonAdditiveToolChanges"
       ],
       "evidence": [
         "test:ai/transcript_replay_oracle_test.go#TestTranscriptReplayMatchesPi",
@@ -96101,11 +96303,11 @@
       ],
       "layers": {
         "behavior": "complete",
-        "production": "complete",
+        "production": "public-api-tested",
         "shape": "complete"
       },
       "production": [
-        "call:ai/transcript.go#HasNonAdditiveToolChanges"
+        "public-api:ai/transcript.go#HasNonAdditiveToolChanges"
       ],
       "evidence": [
         "test:ai/transcript_replay_oracle_test.go#TestTranscriptReplayMatchesPi",
@@ -96241,13 +96443,47 @@
     },
     {
       "id": "pkg:ai/utils/transcript#resolveTranscriptTools",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:8f44c3c2e23ec7ad4bcf6fbda3358e60add9afd55a31f629cf4e68a32266353e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:8f44c3c2e23ec7ad4bcf6fbda3358e60add9afd55a31f629cf4e68a32266353e",
+      "rationale": "Derived by the interface gap detector: resolveTranscriptTools is Go ai/transcript.go#ResolveTranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/utils/transcript#resolveTranscriptTools::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:63ab4785410c716ca7b19774fd06b8d7e574cb74a2fa3d175aad7123d133e5af"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:63ab4785410c716ca7b19774fd06b8d7e574cb74a2fa3d175aad7123d133e5af",
+      "rationale": "Derived by the interface gap detector: resolveTranscriptTools::call:0 is Go ai/transcript.go#ResolveTranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/transcript.go#ResolveTranscriptTools"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/utils/transcript#ToolStateChanges",
@@ -96403,13 +96639,47 @@
     },
     {
       "id": "pkg:ai/utils/transcript#TranscriptTools",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:0ab3f8f476a5bf67103f8476ca7307b6d0584e2d6e928a644c769f21da2b920e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:0ab3f8f476a5bf67103f8476ca7307b6d0584e2d6e928a644c769f21da2b920e",
+      "rationale": "Derived by the interface gap detector: TranscriptTools is Go ai/transcript.go#TranscriptTools (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptTools"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.Stream"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/utils/transcript#TranscriptTools::property:foldedSystemMessages",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:32c035cd9e8828119b6738023d4ff94d5548e5ba99b089a4a554d6b9e8e5d55c"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:32c035cd9e8828119b6738023d4ff94d5548e5ba99b089a4a554d6b9e8e5d55c",
+      "rationale": "Derived by the interface gap detector: TranscriptTools::property:foldedSystemMessages is Go ai/transcript.go#TranscriptTools.FoldedSystemMessages (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptTools.FoldedSystemMessages"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.convertTranscript"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/utils/transcript#TranscriptTools::property:requestTools",
@@ -96429,13 +96699,31 @@
       ],
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
-        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript"
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
       ]
     },
     {
       "id": "pkg:ai/utils/transcript#TranscriptToolSupport",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:b8fe20c732413156a5a25bdacbba6628a3ef02a0174b60d91fb2cec587e59734"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:b8fe20c732413156a5a25bdacbba6628a3ef02a0174b60d91fb2cec587e59734",
+      "rationale": "Derived by the interface gap detector: TranscriptToolSupport is Go ai/transcript.go#TranscriptToolSupport (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/transcript.go#TranscriptToolSupport"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/openai.go#openAIProvider.convertTranscript"
+      ],
+      "evidence": [
+        "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
+        "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
+        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+      ]
     },
     {
       "id": "pkg:ai/utils/transcript#withoutInitialSystemMessage",
@@ -98122,7 +98410,7 @@
       "id": "pkg:chord/.#Context::property:value",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:b9c3b0428be59e41f45639face00bd7cfe9efbe27e29093662c4ee9a35291203",
-      "rationale": "Pi chord/src/context/index.ts:14 Context.value\u003cT\u003e(key: ContextKey\u003cT\u003e): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
       "pigTargets": [
         "chord/context/chordctx.go#Value"
       ]
@@ -98131,7 +98419,7 @@
       "id": "pkg:chord/.#Context::property:value::call:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:132522b5a2656386cc83aa437163326cb9d7295c64d5b28268590c573257d44d",
-      "rationale": "Pi chord/src/context/index.ts:14 Context.value\u003cT\u003e(key: ContextKey\u003cT\u003e): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
       "pigTargets": [
         "chord/context/chordctx.go#Value"
       ]
@@ -98581,13 +98869,13 @@
       "id": "pkg:chord/.#Draft",
       "upstreamShapeHash": "sha256:7676130f8d9b3dbdcfefd2c6cdaff439f6e38867ca5ae4e7759ee5bc8368b731",
       "disposition": "designed-out",
-      "rationale": "chord delta/draft.ts:2 `Draft\u003cT, Depth\u003e` is a depth-limited mapped type that strips readonly from a value's type so a draft can be edited. Go values are mutable and have no readonly modifier, so there is no Go type to define. Designed out as a TypeScript type-level mechanic."
+      "rationale": "chord delta/draft.ts:2 `Draft<T, Depth>` is a depth-limited mapped type that strips readonly from a value's type so a draft can be edited. Go values are mutable and have no readonly modifier, so there is no Go type to define. Designed out as a TypeScript type-level mechanic."
     },
     {
       "id": "pkg:chord/.#EventOf",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:f2515d7cd429304d56fee587b72cfec5623db374f0b64686c1794d0c9047b5f0",
-      "rationale": "TL: EventOf\u003cS\u003e is a TypeScript type-level computation over its type parameters (S extends Subscribable\u003cinfer E\u003e ? E : S extends Resource\u003cinfer T\u003e ? EventOf\u003cT\u003e : never); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/declare.go#Subscribable. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: EventOf<S> is a TypeScript type-level computation over its type parameters (S extends Subscribable<infer E> ? E : S extends Resource<infer T> ? EventOf<T> : never); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/declare.go#Subscribable. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "chord/host/declare.go#Subscribable"
       ]
@@ -100519,7 +100807,7 @@
       "id": "pkg:chord/.#ImplementationOf",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:cc09b6644298628e5de028ab56e8a474101ca00811a9315b7081920926824cb7",
-      "rationale": "TL: ImplementationOf\u003cC, P\u003e is a TypeScript type-level computation over its type parameters (C extends RemoteContract\u003cinfer D\u003e ? { [K in keyof D[\"variants\"]]: VariantImplementation\u003cK, D[\"variants\"][K], P\u003e }[keyof ...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/contract.go#Contract. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: ImplementationOf<C, P> is a TypeScript type-level computation over its type parameters (C extends RemoteContract<infer D> ? { [K in keyof D[\"variants\"]]: VariantImplementation<K, D[\"variants\"][K], P> }[keyof ...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/contract.go#Contract. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "chord/host/contract.go#Contract"
       ]
@@ -100570,7 +100858,7 @@
       "id": "pkg:chord/.#InputOf",
       "upstreamShapeHash": "sha256:bd28e171f34fba2948f39c2c0ef6b85349cf71bc70fe4b42b2f221dd3168e53c",
       "disposition": "designed-out",
-      "rationale": "Pi contract.ts:265 InputOf\u003cC\u003e is a conditional type computing Static\u003cdef.input\u003e. A Go get takes input any, which Normalize checks against Contract.Input (chord/host/schema.go). Designed out as TypeScript type mechanics.",
+      "rationale": "Pi contract.ts:265 InputOf<C> is a conditional type computing Static<def.input>. A Go get takes input any, which Normalize checks against Contract.Input (chord/host/schema.go). Designed out as TypeScript type mechanics.",
       "pigTargets": [
         "chord/host/contract.go#Contract"
       ]
@@ -100953,7 +101241,7 @@
       "id": "pkg:chord/.#JsonRepresentation",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:1e6005ea2cce7c8611a0080bc2f432323cdf70804d3a1009e9931748aac46c6f",
-      "rationale": "chord/src/types.ts:26-35 JsonRepresentation\u003cT\u003e is a recursive conditional/mapped type that computes the JSON-serialised type of T at compile time; it has no runtime value. Go values cross JSON through encoding/json with a concrete Go type, so there is no type to compute. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "chord/src/types.ts:26-35 JsonRepresentation<T> is a recursive conditional/mapped type that computes the JSON-serialised type of T at compile time; it has no runtime value. Go values cross JSON through encoding/json with a concrete Go type, so there is no type to compute. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "chord/json.go#CopyJSON"
       ]
@@ -102244,7 +102532,7 @@
       "id": "pkg:chord/.#Ref",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:9dd8a496eb86b8d4fba9265c037b1244047ec653f8c9cc4ece24e267f5a4b000",
-      "rationale": "TL: Ref\u003cC\u003e is a TypeScript type-level computation over its type parameters (C extends RemoteContract\u003cinfer D\u003e ? { [K in keyof D[\"variants\"]]: VariantRef\u003cC, K, D[\"variants\"][K]\u003e }[keyof D[\"variants...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/contract.go#Contract. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: Ref<C> is a TypeScript type-level computation over its type parameters (C extends RemoteContract<infer D> ? { [K in keyof D[\"variants\"]]: VariantRef<C, K, D[\"variants\"][K]> }[keyof D[\"variants...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/contract.go#Contract. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "chord/host/contract.go#Contract"
       ]
@@ -104584,7 +104872,7 @@
       "id": "pkg:chord/.#ServeOptionsFor",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:796aea56caec7bf6f3f82a8f2105826e778da0af442e5304fc425648053f86ac",
-      "rationale": "TL: ServeOptionsFor\u003cC\u003e is a TypeScript type-level computation over its type parameters (C extends LocalContract ? Record\u003cnever, never\u003e extends InputOf\u003cC\u003e ? ServeOptions : ReferencedServeOptions : ReferencedSe...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/contract.go#Contract. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: ServeOptionsFor<C> is a TypeScript type-level computation over its type parameters (C extends LocalContract ? Record<never, never> extends InputOf<C> ? ServeOptions : ReferencedServeOptions : ReferencedSe...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/contract.go#Contract. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "chord/host/contract.go#Contract"
       ]
@@ -104899,7 +105187,7 @@
       "id": "pkg:chord/.#ValueOf",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0da75435dd7c728e4cf20e0456d59fbc58db1c6ea3c0c6d952ad5dbbaf33f64c",
-      "rationale": "TL: ValueOf\u003cS\u003e is a TypeScript type-level computation over its type parameters (S extends Subscribable\u003cunknown\u003e ? S : S extends Resource\u003cinfer T\u003e ? T : S); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/declare.go#Subscribable. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: ValueOf<S> is a TypeScript type-level computation over its type parameters (S extends Subscribable<unknown> ? S : S extends Resource<infer T> ? T : S); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here chord/host/declare.go#Subscribable. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "chord/host/declare.go#Subscribable"
       ]
@@ -105577,7 +105865,7 @@
       "id": "pkg:chord/context#Context::property:value",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:b9c3b0428be59e41f45639face00bd7cfe9efbe27e29093662c4ee9a35291203",
-      "rationale": "Pi chord/src/context/index.ts:14 Context.value\u003cT\u003e(key: ContextKey\u003cT\u003e): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
       "pigTargets": [
         "chord/context/chordctx.go#Value"
       ]
@@ -105586,7 +105874,7 @@
       "id": "pkg:chord/context#Context::property:value::call:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:132522b5a2656386cc83aa437163326cb9d7295c64d5b28268590c573257d44d",
-      "rationale": "Pi chord/src/context/index.ts:14 Context.value\u003cT\u003e(key: ContextKey\u003cT\u003e): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
       "pigTargets": [
         "chord/context/chordctx.go#Value"
       ]
@@ -106526,7 +106814,7 @@
       "id": "pkg:chord/delta#Draft",
       "upstreamShapeHash": "sha256:7676130f8d9b3dbdcfefd2c6cdaff439f6e38867ca5ae4e7759ee5bc8368b731",
       "disposition": "designed-out",
-      "rationale": "chord delta/draft.ts:2 `Draft\u003cT, Depth\u003e` is a depth-limited mapped type that strips readonly from a value's type so a draft can be edited. Go values are mutable and have no readonly modifier, so there is no Go type to define. Designed out as a TypeScript type-level mechanic."
+      "rationale": "chord delta/draft.ts:2 `Draft<T, Depth>` is a depth-limited mapped type that strips readonly from a value's type so a draft can be edited. Go values are mutable and have no readonly modifier, so there is no Go type to define. Designed out as a TypeScript type-level mechanic."
     },
     {
       "id": "pkg:chord/delta#encoder",
@@ -106900,7 +107188,7 @@
       "id": "pkg:chord/delta#PathError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "chord/delta/delta.go#PathError"
       ]
@@ -106984,7 +107272,7 @@
       "id": "pkg:chord/delta#PathRef",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:79c60d65af3d28d137c25115b9a991cd373da3ec6cd05eae8b7c0584df3b34a9",
-      "rationale": "chord/src/delta/index.ts:19 PathRef\u003cP\u003e = P | number is a generic alias that only computes a type from its parameter: a path written inline, or the id the encoder assigned on its second use. Go carries the same two forms in the path slot of a WireOp ([]any, delta.go:61) and the Encoder and Decoder read and write both (codec.go:20-100: an id is defined by a [\"#\", id, path] op and referenced by its number), so no Go type of its own stands for the union (LEAD-RULINGS-1520 principle: language mechanics with no Go meaning are designed out with a citation, naming the Go type that carries the shape).",
+      "rationale": "chord/src/delta/index.ts:19 PathRef<P> = P | number is a generic alias that only computes a type from its parameter: a path written inline, or the id the encoder assigned on its second use. Go carries the same two forms in the path slot of a WireOp ([]any, delta.go:61) and the Encoder and Decoder read and write both (codec.go:20-100: an id is defined by a [\"#\", id, path] op and referenced by its number), so no Go type of its own stands for the union (LEAD-RULINGS-1520 principle: language mechanics with no Go meaning are designed out with a citation, naming the Go type that carries the shape).",
       "pigTargets": [
         "chord/delta/delta.go#WireOp"
       ]
@@ -107469,7 +107757,7 @@
       "id": "pkg:chord/delta#UnsafePathError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "chord/delta/delta.go#UnsafePathError"
       ]
@@ -109915,8 +110203,26 @@
     },
     {
       "id": "pkg:chord/sqlite/node#NodeSqliteDatabase",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:31c51f7b64b1600fed78f663e43f31dd6cfcdcd1dd205ffebaffc794c91d9aba"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:31c51f7b64b1600fed78f663e43f31dd6cfcdcd1dd205ffebaffc794c91d9aba",
+      "rationale": "Derived by the interface gap detector: NodeSqliteDatabase is Go chord/sqlite/node/node.go#NodeSqliteDatabase (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/sqlite/node/node.go#NodeSqliteDatabase"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:chord/sqlite/node/node.go#NewNodeSqliteDatabase"
+      ],
+      "evidence": [
+        "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
+        "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
+        "test:chord/sqlite/migrations_test.go#TestSqliteMigrations"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:chord/sqlite/node#NodeSqliteDatabase::construct:0",
@@ -109956,8 +110262,8 @@
       ],
       "evidence": [
         "test:chord/sqlite/migrations_test.go#TestSqliteMigrations",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -109979,8 +110285,8 @@
       ],
       "evidence": [
         "test:chord/sqlite/migrations_test.go#TestSqliteMigrations",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -110032,13 +110338,49 @@
     },
     {
       "id": "pkg:chord/sqlite/node#NodeSqliteDatabase::property:exclusive",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:3b81e0fdcd54e5cb480357cbfeb04d18545cb04340415bef31a285364107674f"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:3b81e0fdcd54e5cb480357cbfeb04d18545cb04340415bef31a285364107674f",
+      "rationale": "Derived by the interface gap detector: NodeSqliteDatabase::property:exclusive is Go chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "evidence": [
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:chord/sqlite/node#NodeSqliteDatabase::property:exclusive::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:98aacc8b749ed428f666519b3e09e66afe48eaa876d338e90439d27a493121da"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:98aacc8b749ed428f666519b3e09e66afe48eaa876d338e90439d27a493121da",
+      "rationale": "Derived by the interface gap detector: NodeSqliteDatabase::property:exclusive::call:0 is Go chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "evidence": [
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:chord/sqlite/node#NodeSqliteDatabase::property:exec",
@@ -110105,7 +110447,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -110128,7 +110470,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -110150,8 +110492,8 @@
       ],
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -110173,8 +110515,8 @@
       ],
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -110197,7 +110539,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:chord/sqlite/node/database_contract_test.go#TestSqliteDatabaseContractReportsBothErrorsWhenRollbackFails",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -110220,7 +110562,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:chord/sqlite/node/database_contract_test.go#TestSqliteDatabaseContractReportsBothErrorsWhenRollbackFails",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -112247,7 +112589,7 @@
       "id": "pkg:codemode/.#CodemodeRemoteExchange::call:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:71488902d3716105329f63f2e51da8a74da7e069be664d221a0f5d40a054c828",
-      "rationale": "Pi remote.ts:62-67 CodemodeRemoteExchange = (messages) =\u003e Promise\u003cCodemodeRemoteReply | null\u003e is one function of the messages that returns a TypeScript Promise of the reply. Go RemoteExchange(ctx, messages, reply) adds the context that carries AbortSignal and request lifetime and a reply callback that exchange calls exactly once: the Go mapping of a Promise the caller does not await before going on (remote_types.go doc: the messages are delivered in call order before exchange returns, the reply settles later, an error is a rejected Promise, nil is upstream's null). A one-parameter blocking Go function cannot deliver in call order and also return the reply later. Designed out as a language mechanic with this citation (lead ruling 2026-10-07 15:20 MDT); locked by TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAnImmediateToolAnswerReachesTheRemote, TestASynchronousToolAnswerReachesTheRemote and TestARemoteExecutedByHandReportsTheScriptThroughTheExchange.",
+      "rationale": "Pi remote.ts:62-67 CodemodeRemoteExchange = (messages) => Promise<CodemodeRemoteReply | null> is one function of the messages that returns a TypeScript Promise of the reply. Go RemoteExchange(ctx, messages, reply) adds the context that carries AbortSignal and request lifetime and a reply callback that exchange calls exactly once: the Go mapping of a Promise the caller does not await before going on (remote_types.go doc: the messages are delivered in call order before exchange returns, the reply settles later, an error is a rejected Promise, nil is upstream's null). A one-parameter blocking Go function cannot deliver in call order and also return the reply later. Designed out as a language mechanic with this citation (lead ruling 2026-10-07 15:20 MDT); locked by TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAnImmediateToolAnswerReachesTheRemote, TestASynchronousToolAnswerReachesTheRemote and TestARemoteExecutedByHandReportsTheScriptThroughTheExchange.",
       "pigTargets": [
         "codemode/remote_types.go#RemoteExchange"
       ]
@@ -113082,7 +113424,7 @@
       "id": "pkg:codemode/.#CodemodeSandboxBase::construct:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:c29568d01af265a927823540693515ea02c2d9c31f46bc7d21fe099089d8300a",
-      "rationale": "Pi execution.ts:363-390 CodemodeSandboxBase is the shared tool table, defaults and execution lifecycle; its public constructor(options, launch: VmLauncher) (execution.ts:372) takes the VM placement, and Pi's doc says subclasses only choose where the VM runs by passing a VmLauncher (execution.ts:355-356). The type name VmLauncher is not re-exported by index.ts, portable.ts or cloudflare.ts, but TypeScript is structural and portable.ts:20 and :35 export VmStartData, HostToWorkerMessage, WorkerToHostMessage and CodemodeError, so a Pi caller can construct the base or subclass it with a launcher of its own: (data, events) =\u003e VmChannel (execution.ts:58-76). Go has no class to extend; the placement seam a Go caller passes is a Remote for NewRemoteSandbox: Remote.Execute receives the same VmStartData (RemoteRequest.Data), reports WorkerToHostMessage values and failures through RemoteExchange (a failure reaches the host unchanged, as events.failure does; remote.go remoteChannel.exchange), receives each HostToWorkerMessage result as the exchange reply (VmChannel.post), and is stopped by a stop reply and the cancellation of its context (VmChannel.stop); the tool table, defaults, deadline and result handling are the base's, shared through the unexported newSandbox (sandbox.go). Differences a placement written that way sees: an error returned by Remote.Execute is reported as 'Remote sandbox failed: \u003cmessage\u003e' where a rejected Pi launcher is the bare message, and Remote() failing is 'Failed to reach the remote sandbox: \u003cmessage\u003e'; a placement that reports its failure through the exchange gets Pi's message. Locked by TestMalformedAndFailureMessagesEndTheExecution, TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAbortAnswersThePendingExchangeWithStop and TestRemoteSandboxHasTheToolTableOfTheBase, whose remotes are written by hand.",
+      "rationale": "Pi execution.ts:363-390 CodemodeSandboxBase is the shared tool table, defaults and execution lifecycle; its public constructor(options, launch: VmLauncher) (execution.ts:372) takes the VM placement, and Pi's doc says subclasses only choose where the VM runs by passing a VmLauncher (execution.ts:355-356). The type name VmLauncher is not re-exported by index.ts, portable.ts or cloudflare.ts, but TypeScript is structural and portable.ts:20 and :35 export VmStartData, HostToWorkerMessage, WorkerToHostMessage and CodemodeError, so a Pi caller can construct the base or subclass it with a launcher of its own: (data, events) => VmChannel (execution.ts:58-76). Go has no class to extend; the placement seam a Go caller passes is a Remote for NewRemoteSandbox: Remote.Execute receives the same VmStartData (RemoteRequest.Data), reports WorkerToHostMessage values and failures through RemoteExchange (a failure reaches the host unchanged, as events.failure does; remote.go remoteChannel.exchange), receives each HostToWorkerMessage result as the exchange reply (VmChannel.post), and is stopped by a stop reply and the cancellation of its context (VmChannel.stop); the tool table, defaults, deadline and result handling are the base's, shared through the unexported newSandbox (sandbox.go). Differences a placement written that way sees: an error returned by Remote.Execute is reported as 'Remote sandbox failed: <message>' where a rejected Pi launcher is the bare message, and Remote() failing is 'Failed to reach the remote sandbox: <message>'; a placement that reports its failure through the exchange gets Pi's message. Locked by TestMalformedAndFailureMessagesEndTheExecution, TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAbortAnswersThePendingExchangeWithStop and TestRemoteSandboxHasTheToolTableOfTheBase, whose remotes are written by hand.",
       "pigTargets": [
         "codemode/sandbox.go#NewSandbox",
         "codemode/remote.go#NewRemoteSandbox",
@@ -113778,7 +114120,7 @@
       "id": "pkg:codemode/.#CodemodeSourceError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "codemode/source.go#SourceError"
       ]
@@ -116596,7 +116938,7 @@
       "id": "pkg:codemode/cloudflare#CodemodeRemoteExchange::call:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:71488902d3716105329f63f2e51da8a74da7e069be664d221a0f5d40a054c828",
-      "rationale": "Pi remote.ts:62-67 CodemodeRemoteExchange = (messages) =\u003e Promise\u003cCodemodeRemoteReply | null\u003e is one function of the messages that returns a TypeScript Promise of the reply. Go RemoteExchange(ctx, messages, reply) adds the context that carries AbortSignal and request lifetime and a reply callback that exchange calls exactly once: the Go mapping of a Promise the caller does not await before going on (remote_types.go doc: the messages are delivered in call order before exchange returns, the reply settles later, an error is a rejected Promise, nil is upstream's null). A one-parameter blocking Go function cannot deliver in call order and also return the reply later. Designed out as a language mechanic with this citation (lead ruling 2026-10-07 15:20 MDT); locked by TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAnImmediateToolAnswerReachesTheRemote, TestASynchronousToolAnswerReachesTheRemote and TestARemoteExecutedByHandReportsTheScriptThroughTheExchange.",
+      "rationale": "Pi remote.ts:62-67 CodemodeRemoteExchange = (messages) => Promise<CodemodeRemoteReply | null> is one function of the messages that returns a TypeScript Promise of the reply. Go RemoteExchange(ctx, messages, reply) adds the context that carries AbortSignal and request lifetime and a reply callback that exchange calls exactly once: the Go mapping of a Promise the caller does not await before going on (remote_types.go doc: the messages are delivered in call order before exchange returns, the reply settles later, an error is a rejected Promise, nil is upstream's null). A one-parameter blocking Go function cannot deliver in call order and also return the reply later. Designed out as a language mechanic with this citation (lead ruling 2026-10-07 15:20 MDT); locked by TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAnImmediateToolAnswerReachesTheRemote, TestASynchronousToolAnswerReachesTheRemote and TestARemoteExecutedByHandReportsTheScriptThroughTheExchange.",
       "pigTargets": [
         "codemode/remote_types.go#RemoteExchange"
       ]
@@ -117132,7 +117474,7 @@
       "id": "pkg:codemode/cloudflare#CodemodeSandboxBase::construct:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:c29568d01af265a927823540693515ea02c2d9c31f46bc7d21fe099089d8300a",
-      "rationale": "Pi execution.ts:363-390 CodemodeSandboxBase is the shared tool table, defaults and execution lifecycle; its public constructor(options, launch: VmLauncher) (execution.ts:372) takes the VM placement, and Pi's doc says subclasses only choose where the VM runs by passing a VmLauncher (execution.ts:355-356). The type name VmLauncher is not re-exported by index.ts, portable.ts or cloudflare.ts, but TypeScript is structural and portable.ts:20 and :35 export VmStartData, HostToWorkerMessage, WorkerToHostMessage and CodemodeError, so a Pi caller can construct the base or subclass it with a launcher of its own: (data, events) =\u003e VmChannel (execution.ts:58-76). Go has no class to extend; the placement seam a Go caller passes is a Remote for NewRemoteSandbox: Remote.Execute receives the same VmStartData (RemoteRequest.Data), reports WorkerToHostMessage values and failures through RemoteExchange (a failure reaches the host unchanged, as events.failure does; remote.go remoteChannel.exchange), receives each HostToWorkerMessage result as the exchange reply (VmChannel.post), and is stopped by a stop reply and the cancellation of its context (VmChannel.stop); the tool table, defaults, deadline and result handling are the base's, shared through the unexported newSandbox (sandbox.go). Differences a placement written that way sees: an error returned by Remote.Execute is reported as 'Remote sandbox failed: \u003cmessage\u003e' where a rejected Pi launcher is the bare message, and Remote() failing is 'Failed to reach the remote sandbox: \u003cmessage\u003e'; a placement that reports its failure through the exchange gets Pi's message. Locked by TestMalformedAndFailureMessagesEndTheExecution, TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAbortAnswersThePendingExchangeWithStop and TestRemoteSandboxHasTheToolTableOfTheBase, whose remotes are written by hand.",
+      "rationale": "Pi execution.ts:363-390 CodemodeSandboxBase is the shared tool table, defaults and execution lifecycle; its public constructor(options, launch: VmLauncher) (execution.ts:372) takes the VM placement, and Pi's doc says subclasses only choose where the VM runs by passing a VmLauncher (execution.ts:355-356). The type name VmLauncher is not re-exported by index.ts, portable.ts or cloudflare.ts, but TypeScript is structural and portable.ts:20 and :35 export VmStartData, HostToWorkerMessage, WorkerToHostMessage and CodemodeError, so a Pi caller can construct the base or subclass it with a launcher of its own: (data, events) => VmChannel (execution.ts:58-76). Go has no class to extend; the placement seam a Go caller passes is a Remote for NewRemoteSandbox: Remote.Execute receives the same VmStartData (RemoteRequest.Data), reports WorkerToHostMessage values and failures through RemoteExchange (a failure reaches the host unchanged, as events.failure does; remote.go remoteChannel.exchange), receives each HostToWorkerMessage result as the exchange reply (VmChannel.post), and is stopped by a stop reply and the cancellation of its context (VmChannel.stop); the tool table, defaults, deadline and result handling are the base's, shared through the unexported newSandbox (sandbox.go). Differences a placement written that way sees: an error returned by Remote.Execute is reported as 'Remote sandbox failed: <message>' where a rejected Pi launcher is the bare message, and Remote() failing is 'Failed to reach the remote sandbox: <message>'; a placement that reports its failure through the exchange gets Pi's message. Locked by TestMalformedAndFailureMessagesEndTheExecution, TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAbortAnswersThePendingExchangeWithStop and TestRemoteSandboxHasTheToolTableOfTheBase, whose remotes are written by hand.",
       "pigTargets": [
         "codemode/sandbox.go#NewSandbox",
         "codemode/remote.go#NewRemoteSandbox",
@@ -120534,7 +120876,7 @@
       "id": "pkg:codemode/portable#CodemodeRemoteExchange::call:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:71488902d3716105329f63f2e51da8a74da7e069be664d221a0f5d40a054c828",
-      "rationale": "Pi remote.ts:62-67 CodemodeRemoteExchange = (messages) =\u003e Promise\u003cCodemodeRemoteReply | null\u003e is one function of the messages that returns a TypeScript Promise of the reply. Go RemoteExchange(ctx, messages, reply) adds the context that carries AbortSignal and request lifetime and a reply callback that exchange calls exactly once: the Go mapping of a Promise the caller does not await before going on (remote_types.go doc: the messages are delivered in call order before exchange returns, the reply settles later, an error is a rejected Promise, nil is upstream's null). A one-parameter blocking Go function cannot deliver in call order and also return the reply later. Designed out as a language mechanic with this citation (lead ruling 2026-10-07 15:20 MDT); locked by TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAnImmediateToolAnswerReachesTheRemote, TestASynchronousToolAnswerReachesTheRemote and TestARemoteExecutedByHandReportsTheScriptThroughTheExchange.",
+      "rationale": "Pi remote.ts:62-67 CodemodeRemoteExchange = (messages) => Promise<CodemodeRemoteReply | null> is one function of the messages that returns a TypeScript Promise of the reply. Go RemoteExchange(ctx, messages, reply) adds the context that carries AbortSignal and request lifetime and a reply callback that exchange calls exactly once: the Go mapping of a Promise the caller does not await before going on (remote_types.go doc: the messages are delivered in call order before exchange returns, the reply settles later, an error is a rejected Promise, nil is upstream's null). A one-parameter blocking Go function cannot deliver in call order and also return the reply later. Designed out as a language mechanic with this citation (lead ruling 2026-10-07 15:20 MDT); locked by TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAnImmediateToolAnswerReachesTheRemote, TestASynchronousToolAnswerReachesTheRemote and TestARemoteExecutedByHandReportsTheScriptThroughTheExchange.",
       "pigTargets": [
         "codemode/remote_types.go#RemoteExchange"
       ]
@@ -121070,7 +121412,7 @@
       "id": "pkg:codemode/portable#CodemodeSandboxBase::construct:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:c29568d01af265a927823540693515ea02c2d9c31f46bc7d21fe099089d8300a",
-      "rationale": "Pi execution.ts:363-390 CodemodeSandboxBase is the shared tool table, defaults and execution lifecycle; its public constructor(options, launch: VmLauncher) (execution.ts:372) takes the VM placement, and Pi's doc says subclasses only choose where the VM runs by passing a VmLauncher (execution.ts:355-356). The type name VmLauncher is not re-exported by index.ts, portable.ts or cloudflare.ts, but TypeScript is structural and portable.ts:20 and :35 export VmStartData, HostToWorkerMessage, WorkerToHostMessage and CodemodeError, so a Pi caller can construct the base or subclass it with a launcher of its own: (data, events) =\u003e VmChannel (execution.ts:58-76). Go has no class to extend; the placement seam a Go caller passes is a Remote for NewRemoteSandbox: Remote.Execute receives the same VmStartData (RemoteRequest.Data), reports WorkerToHostMessage values and failures through RemoteExchange (a failure reaches the host unchanged, as events.failure does; remote.go remoteChannel.exchange), receives each HostToWorkerMessage result as the exchange reply (VmChannel.post), and is stopped by a stop reply and the cancellation of its context (VmChannel.stop); the tool table, defaults, deadline and result handling are the base's, shared through the unexported newSandbox (sandbox.go). Differences a placement written that way sees: an error returned by Remote.Execute is reported as 'Remote sandbox failed: \u003cmessage\u003e' where a rejected Pi launcher is the bare message, and Remote() failing is 'Failed to reach the remote sandbox: \u003cmessage\u003e'; a placement that reports its failure through the exchange gets Pi's message. Locked by TestMalformedAndFailureMessagesEndTheExecution, TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAbortAnswersThePendingExchangeWithStop and TestRemoteSandboxHasTheToolTableOfTheBase, whose remotes are written by hand.",
+      "rationale": "Pi execution.ts:363-390 CodemodeSandboxBase is the shared tool table, defaults and execution lifecycle; its public constructor(options, launch: VmLauncher) (execution.ts:372) takes the VM placement, and Pi's doc says subclasses only choose where the VM runs by passing a VmLauncher (execution.ts:355-356). The type name VmLauncher is not re-exported by index.ts, portable.ts or cloudflare.ts, but TypeScript is structural and portable.ts:20 and :35 export VmStartData, HostToWorkerMessage, WorkerToHostMessage and CodemodeError, so a Pi caller can construct the base or subclass it with a launcher of its own: (data, events) => VmChannel (execution.ts:58-76). Go has no class to extend; the placement seam a Go caller passes is a Remote for NewRemoteSandbox: Remote.Execute receives the same VmStartData (RemoteRequest.Data), reports WorkerToHostMessage values and failures through RemoteExchange (a failure reaches the host unchanged, as events.failure does; remote.go remoteChannel.exchange), receives each HostToWorkerMessage result as the exchange reply (VmChannel.post), and is stopped by a stop reply and the cancellation of its context (VmChannel.stop); the tool table, defaults, deadline and result handling are the base's, shared through the unexported newSandbox (sandbox.go). Differences a placement written that way sees: an error returned by Remote.Execute is reported as 'Remote sandbox failed: <message>' where a rejected Pi launcher is the bare message, and Remote() failing is 'Failed to reach the remote sandbox: <message>'; a placement that reports its failure through the exchange gets Pi's message. Locked by TestMalformedAndFailureMessagesEndTheExecution, TestAnExchangeIsAnsweredWithTheResultOfItsCall, TestAbortAnswersThePendingExchangeWithStop and TestRemoteSandboxHasTheToolTableOfTheBase, whose remotes are written by hand.",
       "pigTargets": [
         "codemode/sandbox.go#NewSandbox",
         "codemode/remote.go#NewRemoteSandbox",
@@ -123256,7 +123598,7 @@
       "id": "pkg:codemode/source#CodemodeSourceError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "codemode/source.go#SourceError"
       ]
@@ -203044,7 +203386,7 @@
       "id": "pkg:durable/.#ConversationBusy::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "durable/errors.go#ConversationBusy"
       ]
@@ -205983,7 +206325,7 @@
       "id": "pkg:durable/.#HookResult",
       "upstreamShapeHash": "sha256:5b9106550aaa65f00368c5c2778ecf8c34a04e9c7bc87cb5ea3d5eafba9bae3e",
       "disposition": "designed-out",
-      "rationale": "durable harness/types.ts:612 `HookResult\u003cT\u003e = T | undefined | Promise\u003cT | undefined\u003e` lets a hook return a value, nothing, or a Promise of either. Go has no Promise and no undefined: a hook is a plain blocking function whose return is the value (nil for none) plus an error, the AGENTS async rule for an awaited Promise. The expandHookResult rule reads each hook through that shape. Designed out as a TypeScript/Promise mechanic."
+      "rationale": "durable harness/types.ts:612 `HookResult<T> = T | undefined | Promise<T | undefined>` lets a hook return a value, nothing, or a Promise of either. Go has no Promise and no undefined: a hook is a plain blocking function whose return is the value (nil for none) plus an error, the AGENTS async rule for an awaited Promise. The expandHookResult rule reads each hook through that shape. Designed out as a TypeScript/Promise mechanic."
     },
     {
       "id": "pkg:durable/.#HookRunner",
@@ -206058,7 +206400,7 @@
       "id": "pkg:durable/.#HooksOf",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:f9ee1b4e3658ccdbe9f659ae12f28e538af3717889a2aff6d2d444ee69cc2c8d",
-      "rationale": "TL: HooksOf\u003cK\u003e is a TypeScript type-level computation over its type parameters (K extends Task\u003cinfer _I, infer _S, infer _R, infer H\u003e ? H : never); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here durable/types.go#Task. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: HooksOf<K> is a TypeScript type-level computation over its type parameters (K extends Task<infer _I, infer _S, infer _R, infer H> ? H : never); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here durable/types.go#Task. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "durable/types.go#Task"
       ]
@@ -207593,7 +207935,7 @@
       "id": "pkg:durable/.#ReadAfterWrite::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "durable/errors.go#ReadAfterWrite"
       ]
@@ -210390,7 +210732,7 @@
       "id": "pkg:durable/.#StorageRequestError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "durable/errors.go#StorageRequestError"
       ]
@@ -225662,8 +226004,26 @@
     },
     {
       "id": "pkg:durable/storage/sqlite/node#NodeSqliteDatabase",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:d773c419d811d529018a4b155a33e8ab2309a5285b2a52f61fa2c4cb19a654b2"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:d773c419d811d529018a4b155a33e8ab2309a5285b2a52f61fa2c4cb19a654b2",
+      "rationale": "Derived by the interface gap detector: NodeSqliteDatabase is Go durable/storage/sqlite/node/node.go#NodeSqliteDatabase (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/storage/sqlite/node/node.go#NodeSqliteDatabase"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/storage/sqlite/node/node.go#NewNodeSqliteDatabase"
+      ],
+      "evidence": [
+        "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
+        "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
+        "test:chord/sqlite/migrations_test.go#TestSqliteMigrations"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:durable/storage/sqlite/node#NodeSqliteDatabase::construct:0",
@@ -225704,8 +226064,8 @@
       ],
       "evidence": [
         "test:chord/sqlite/migrations_test.go#TestSqliteMigrations",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -225727,8 +226087,8 @@
       ],
       "evidence": [
         "test:chord/sqlite/migrations_test.go#TestSqliteMigrations",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -225780,13 +226140,49 @@
     },
     {
       "id": "pkg:durable/storage/sqlite/node#NodeSqliteDatabase::property:exclusive",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:3b81e0fdcd54e5cb480357cbfeb04d18545cb04340415bef31a285364107674f"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:3b81e0fdcd54e5cb480357cbfeb04d18545cb04340415bef31a285364107674f",
+      "rationale": "Derived by the interface gap detector: NodeSqliteDatabase::property:exclusive is Go chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "evidence": [
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:durable/storage/sqlite/node#NodeSqliteDatabase::property:exclusive::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:98aacc8b749ed428f666519b3e09e66afe48eaa876d338e90439d27a493121da"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:98aacc8b749ed428f666519b3e09e66afe48eaa876d338e90439d27a493121da",
+      "rationale": "Derived by the interface gap detector: NodeSqliteDatabase::property:exclusive::call:0 is Go chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:chord/sqlite/node/node.go#NodeSqliteDatabase.Exclusive"
+      ],
+      "evidence": [
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:durable/storage/sqlite/node#NodeSqliteDatabase::property:exec",
@@ -225853,7 +226249,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -225876,7 +226272,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRunsAloneOutsideATransactionAfterEarlierCalls"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -225898,8 +226294,8 @@
       ],
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -225921,8 +226317,8 @@
       ],
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteValueMembersBindAndReadBack",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
-        "test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails",
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackWhenTheOperationPanics"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -225945,7 +226341,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:chord/sqlite/node/database_contract_test.go#TestSqliteDatabaseContractReportsBothErrorsWhenRollbackFails",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -225968,7 +226364,7 @@
       "evidence": [
         "test:durable/storage/sqlite/sqlite_executor_upstream_test.go#TestSqliteExecutorExecRunGetAllOnDatabaseAndTransaction",
         "test:chord/sqlite/node/database_contract_test.go#TestSqliteDatabaseContractReportsBothErrorsWhenRollbackFails",
-        "test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver"
+        "test:chord/sqlite/node/exclusive_test.go#TestNodeSqliteExclusiveRollsBackATransactionItLeftOpenAndFails"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -227996,7 +228392,7 @@
       "id": "pkg:durable/testing#ExpectLike",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:b9fb584eceeddd4c4777bba1e01090c74bdc9c0afb7e92cf3ac6cc44161883b8",
-      "rationale": "durable/src/testing/assertions.ts:3 ExpectLike = (actual, message?) =\u003e unknown is the assertion hook the TypeScript conformance runner injects (StorageConformanceRunner.expect) so the suite depends on no test framework. Go's conformance suite takes *testing.T and builds its assertions from it (representations.json maps StorageConformanceRunner to testing.T): durabletest.CreateTestingAssertions. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "durable/src/testing/assertions.ts:3 ExpectLike = (actual, message?) => unknown is the assertion hook the TypeScript conformance runner injects (StorageConformanceRunner.expect) so the suite depends on no test framework. Go's conformance suite takes *testing.T and builds its assertions from it (representations.json maps StorageConformanceRunner to testing.T): durabletest.CreateTestingAssertions. Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "durable/durabletest/durabletest.go#CreateTestingAssertions"
       ]
@@ -232316,7 +232712,7 @@
       "id": "pkg:env/.#RemoteError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "env/connection.go#RemoteError"
       ]
@@ -235174,7 +235570,7 @@
       "id": "pkg:env/.#SshError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "env/ssh.go#SshError"
       ]
@@ -237862,7 +238258,7 @@
       "id": "pkg:mcp/.#McpAbortError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpAbortError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpAbortError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpAbortError.Cause"
       ]
@@ -239179,7 +239575,7 @@
       "id": "pkg:mcp/.#McpConnectionClosedError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpConnectionClosedError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpConnectionClosedError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpConnectionClosedError.Cause"
       ]
@@ -239281,7 +239677,7 @@
       "id": "pkg:mcp/.#McpError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpError.Cause"
       ]
@@ -239883,7 +240279,7 @@
       "id": "pkg:mcp/.#McpTimeoutError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpTimeoutError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpTimeoutError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpTimeoutError.Cause"
       ]
@@ -243999,7 +244395,7 @@
       "id": "pkg:mcp/oauth#McpOAuthAuthorizationRequiredError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#McpOAuthAuthorizationRequiredError"
       ]
@@ -246960,7 +247356,7 @@
       "id": "pkg:mcp/oauth#OAuthError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthError"
       ]
@@ -247359,7 +247755,7 @@
       "id": "pkg:mcp/oauth#OAuthInsecureEndpointError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthInsecureEndpointError"
       ]
@@ -247482,7 +247878,7 @@
       "id": "pkg:mcp/oauth#OAuthIssuerMismatchError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthIssuerMismatchError"
       ]
@@ -247735,7 +248131,7 @@
       "id": "pkg:mcp/oauth#OAuthRegistrationError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/oauth/errors.go#OAuthRegistrationError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/oauth/errors.go#OAuthRegistrationError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+fdce48eb) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+fdce48eb source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthRegistrationError.Cause"
       ]
@@ -248959,7 +249355,7 @@
       "id": "pkg:telemetry/.#createTypedMetrics::call:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:a142f6d5a602d82db60be814d752307e73b9ccc93394d02020831d1845cd83ea",
-      "rationale": "Pi's `schemas` parameter is typed `Schemas \u0026 ([DuplicateMetricNames\u003cSchemas\u003e] extends [never] ? unknown : { readonly \"duplicate telemetry metric names\": ... })` (telemetry/src/metrics.ts:124-130) over a non-empty tuple. The duplicate-name member is a compile-time brand that makes the call fail to type-check; it is never a run-time value. Go's CreateTypedMetrics(metrics, schema, schemas...) takes the first schema as a required parameter, the Go form of the non-empty tuple, and the rest variadically; a type-level uniqueness check has no Go meaning, and at run time later schemas override earlier ones as upstream's Map.set does. TestCreateTypedMetricsReadsSchemaMetadataForDeclaredNamesOnly and TestMetricsUpstream (telemetry/metrics_upstream_test.go) exercise the call. Designed out as a TypeScript type-level mechanic (LEAD-RULINGS-1520 principle).",
+      "rationale": "Pi's `schemas` parameter is typed `Schemas & ([DuplicateMetricNames<Schemas>] extends [never] ? unknown : { readonly \"duplicate telemetry metric names\": ... })` (telemetry/src/metrics.ts:124-130) over a non-empty tuple. The duplicate-name member is a compile-time brand that makes the call fail to type-check; it is never a run-time value. Go's CreateTypedMetrics(metrics, schema, schemas...) takes the first schema as a required parameter, the Go form of the non-empty tuple, and the rest variadically; a type-level uniqueness check has no Go meaning, and at run time later schemas override earlier ones as upstream's Map.set does. TestCreateTypedMetricsReadsSchemaMetadataForDeclaredNamesOnly and TestMetricsUpstream (telemetry/metrics_upstream_test.go) exercise the call. Designed out as a TypeScript type-level mechanic (LEAD-RULINGS-1520 principle).",
       "pigTargets": [
         "telemetry/metrics.go#CreateTypedMetrics"
       ]
@@ -248989,7 +249385,7 @@
       "id": "pkg:telemetry/.#createTypedSpanStarter::call:0",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:837acb479f8dc06f25acca7458f229cb230f11727198c2cc9dbc8008b507e3ee",
-      "rationale": "Pi's `_schemas` parameter is typed `Schemas \u0026 UniqueTelemetrySchemas\u003cSchemas\u003e` (telemetry/src/index.ts:349-352). UniqueTelemetrySchemas is a compile-time brand: when two schemas of the tuple declare the same span name it adds the member `readonly \"duplicate telemetry span names\"`, so the call fails to type-check (index.ts:279-298). The member is never a run-time value, and the function ignores its schemas at run time (bindTypedSpanStarter(telemetryContext), index.ts:352-355; 'no runtime schema validation is performed'). Go's CreateTypedSpanStarter takes the same schema definitions and likewise ignores them (telemetry/schema.go:139-143). A type-level uniqueness check has no Go meaning, and a run-time check would add behaviour Pi does not have: designed out as a TypeScript compile-time construct, the language-mechanics case AGENTS.md lists.",
+      "rationale": "Pi's `_schemas` parameter is typed `Schemas & UniqueTelemetrySchemas<Schemas>` (telemetry/src/index.ts:349-352). UniqueTelemetrySchemas is a compile-time brand: when two schemas of the tuple declare the same span name it adds the member `readonly \"duplicate telemetry span names\"`, so the call fails to type-check (index.ts:279-298). The member is never a run-time value, and the function ignores its schemas at run time (bindTypedSpanStarter(telemetryContext), index.ts:352-355; 'no runtime schema validation is performed'). Go's CreateTypedSpanStarter takes the same schema definitions and likewise ignores them (telemetry/schema.go:139-143). A type-level uniqueness check has no Go meaning, and a run-time check would add behaviour Pi does not have: designed out as a TypeScript compile-time construct, the language-mechanics case AGENTS.md lists.",
       "pigTargets": [
         "telemetry/schema.go#CreateTypedSpanStarter"
       ]
@@ -249042,7 +249438,7 @@
       "id": "pkg:telemetry/.#ExactTelemetryAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:6d746d76f01954901b7716b83e63fc826b3621c220578d2793dba9f117e001e2",
-      "rationale": "telemetry/src/index.ts:140-141 ExactTelemetryAttributes\u003cExpected, Actual\u003e = Actual \u0026 Record\u003cExclude\u003ckeyof Actual, keyof Expected\u003e, never\u003e is an excess-property check: it makes the TypeScript compiler reject attribute keys the schema does not declare. It has no runtime value and upstream performs no runtime schema validation; telemetry/schema.go records that these helpers have no Go form. Go keeps the schema data and the runtime starter that takes the attributes (CreateTypedSpanStarter). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
+      "rationale": "telemetry/src/index.ts:140-141 ExactTelemetryAttributes<Expected, Actual> = Actual & Record<Exclude<keyof Actual, keyof Expected>, never> is an excess-property check: it makes the TypeScript compiler reject attribute keys the schema does not declare. It has no runtime value and upstream performs no runtime schema validation; telemetry/schema.go records that these helpers have no Go form. Go keeps the schema data and the runtime starter that takes the attributes (CreateTypedSpanStarter). Designed out by the lead's ruling of 2026-10-07 15:20 MDT (language mechanics with no Go meaning are designed out with a citation).",
       "pigTargets": [
         "telemetry/schema.go#CreateTypedSpanStarter"
       ]
@@ -249138,7 +249534,7 @@
       "id": "pkg:telemetry/.#InferEventAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:74dd2008d3d4939be40022a577b9ecf8a69d670fe657473cd047372e58e8914f",
-      "rationale": "TL: InferEventAttributes\u003cDefinitions\u003e is a TypeScript type-level computation over its type parameters (InferRequiredAndOptionalAttributes\u003cDefinitions\u003e); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryEventAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: InferEventAttributes<Definitions> is a TypeScript type-level computation over its type parameters (InferRequiredAndOptionalAttributes<Definitions>); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryEventAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetryEventAttributeDefinition"
       ]
@@ -249147,7 +249543,7 @@
       "id": "pkg:telemetry/.#InferOptionalAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:7134e265a5a1494a4b560fb5b6a15a9f44e5863bc92ce4d52989b458bf4e087f",
-      "rationale": "TL: InferOptionalAttributes\u003cDefinitions\u003e is a TypeScript type-level computation over its type parameters (keyof Definitions extends never ? Record\u003cstring, never\u003e : { [Name in keyof Definitions]?: AttributeDefinitionValue\u003cDefin...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: InferOptionalAttributes<Definitions> is a TypeScript type-level computation over its type parameters (keyof Definitions extends never ? Record<string, never> : { [Name in keyof Definitions]?: AttributeDefinitionValue<Defin...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetryAttributeDefinition"
       ]
@@ -249156,7 +249552,7 @@
       "id": "pkg:telemetry/.#InferRequiredAndOptionalAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:9c0a99a21e44ad81205e85c18ec576b6967fadf9b2b269ae4e63c140ac6191dd",
-      "rationale": "TL: InferRequiredAndOptionalAttributes\u003cDefinitions\u003e is a TypeScript type-level computation over its type parameters (keyof Definitions extends never ? Record\u003cstring, never\u003e : { [Name in RequiredAttributeNames\u003cDefinitions\u003e]: AttributeDefi...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryStartAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: InferRequiredAndOptionalAttributes<Definitions> is a TypeScript type-level computation over its type parameters (keyof Definitions extends never ? Record<string, never> : { [Name in RequiredAttributeNames<Definitions>]: AttributeDefi...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryStartAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetryStartAttributeDefinition"
       ]
@@ -249165,7 +249561,7 @@
       "id": "pkg:telemetry/.#InferStartAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:c68f14c1bcb2358d97d803037f9239ec86571df38a0eb5ce8d35523b87206912",
-      "rationale": "TL: InferStartAttributes\u003cDefinitions\u003e is a TypeScript type-level computation over its type parameters (InferRequiredAndOptionalAttributes\u003cDefinitions\u003e); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryStartAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: InferStartAttributes<Definitions> is a TypeScript type-level computation over its type parameters (InferRequiredAndOptionalAttributes<Definitions>); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetryStartAttributeDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetryStartAttributeDefinition"
       ]
@@ -252111,7 +252507,7 @@
       "id": "pkg:telemetry/.#TelemetrySchemaSpanEndAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:e5613f7c219e39c0aaed5c1acc4ffd038b11f45321ace79b0f42f5cb446f0036",
-      "rationale": "TL: TelemetrySchemaSpanEndAttributes\u003cSchema, Name\u003e is a TypeScript type-level computation over its type parameters (SchemaSpan\u003cSchema, Name\u003e[\"endAttributes\"] extends infer Definitions extends Record\u003c string, TelemetryAttributeDefinition...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: TelemetrySchemaSpanEndAttributes<Schema, Name> is a TypeScript type-level computation over its type parameters (SchemaSpan<Schema, Name>[\"endAttributes\"] extends infer Definitions extends Record< string, TelemetryAttributeDefinition...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetrySchemaDefinition"
       ]
@@ -252120,7 +252516,7 @@
       "id": "pkg:telemetry/.#TelemetrySchemaSpanEventAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:f32017d8e47bdee14ff6a0d214d33a586ca9c59f93566fc64401c9aeac72821f",
-      "rationale": "TL: TelemetrySchemaSpanEventAttributes\u003cSchema, Name, EventName\u003e is a TypeScript type-level computation over its type parameters (SchemaSpanEvent\u003cSchema, Name, EventName\u003e extends { attributes: infer Definitions extends Record\u003cstring, TelemetryEventAt...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: TelemetrySchemaSpanEventAttributes<Schema, Name, EventName> is a TypeScript type-level computation over its type parameters (SchemaSpanEvent<Schema, Name, EventName> extends { attributes: infer Definitions extends Record<string, TelemetryEventAt...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetrySchemaDefinition"
       ]
@@ -252129,7 +252525,7 @@
       "id": "pkg:telemetry/.#TelemetrySchemaSpanEventName",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:b49bd127ef1af89efed8de4e4f87e8b7dff770dfdbb8a486cb0a786ab3c15940",
-      "rationale": "TL: TelemetrySchemaSpanEventName\u003cSchema, Name\u003e is a TypeScript type-level computation over its type parameters (keyof SchemaSpanEvents\u003cSchema, Name\u003e \u0026 string); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: TelemetrySchemaSpanEventName<Schema, Name> is a TypeScript type-level computation over its type parameters (keyof SchemaSpanEvents<Schema, Name> & string); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetrySchemaDefinition"
       ]
@@ -252138,7 +252534,7 @@
       "id": "pkg:telemetry/.#TelemetrySchemaSpanName",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:5095f47cbad08763c2a8c6d3c9f070cf05ca74b0755c06ee64de4679020f7a7b",
-      "rationale": "TL: TelemetrySchemaSpanName\u003cSchema\u003e is a TypeScript type-level computation over its type parameters (keyof Schema[\"spans\"] \u0026 string); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: TelemetrySchemaSpanName<Schema> is a TypeScript type-level computation over its type parameters (keyof Schema[\"spans\"] & string); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetrySchemaDefinition"
       ]
@@ -252147,7 +252543,7 @@
       "id": "pkg:telemetry/.#TelemetrySchemaSpanStartAttributes",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:9ef0480c1db21bf88c85d330abb16a96c2a1c892c342bc5085d1e786bd90e84b",
-      "rationale": "TL: TelemetrySchemaSpanStartAttributes\u003cSchema, Name\u003e is a TypeScript type-level computation over its type parameters (SchemaSpan\u003cSchema, Name\u003e[\"startAttributes\"] extends infer Definitions extends Record\u003c string, TelemetryStartAttributeDef...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: TelemetrySchemaSpanStartAttributes<Schema, Name> is a TypeScript type-level computation over its type parameters (SchemaSpan<Schema, Name>[\"startAttributes\"] extends infer Definitions extends Record< string, TelemetryStartAttributeDef...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetrySchemaDefinition"
       ]
@@ -252156,7 +252552,7 @@
       "id": "pkg:telemetry/.#TelemetrySchemaSpanUnion",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:5ced96a96a0d385abff68819f221dda80f0a024a7be64416d7116de834211a9a",
-      "rationale": "TL: TelemetrySchemaSpanUnion\u003cSchema\u003e is a TypeScript type-level computation over its type parameters ({ [Name in TelemetrySchemaSpanName\u003cSchema\u003e]: { name: Name; startAttributes: TelemetrySchemaSpanStartAttributes\u003cSchema, N...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
+      "rationale": "TL: TelemetrySchemaSpanUnion<Schema> is a TypeScript type-level computation over its type parameters ({ [Name in TelemetrySchemaSpanName<Schema>]: { name: Name; startAttributes: TelemetrySchemaSpanStartAttributes<Schema, N...); it has no value, member or call, so nothing of it exists at run time and Go generics cannot express it. PiG's concrete Go types carry the shapes it computes where they are used, here telemetry/schema.go#TelemetrySchemaDefinition. Designed out as a TypeScript-only artifact with no Go runtime meaning (reason class c of the design-out audit; the lead ruling LEAD-RULINGS-1520 of 2026-10-07 names the class).",
       "pigTargets": [
         "telemetry/schema.go#TelemetrySchemaDefinition"
       ]

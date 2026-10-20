@@ -37,10 +37,10 @@ rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/azure-openai-responses.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/azure_openai_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/bedrock-converse-stream.lazy.ts"
@@ -128,10 +128,10 @@ rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/openai-codex-responses.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/openai_codex_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/openai-completions.ts"
@@ -638,6 +638,13 @@ evidence = []
 rationale = ""
 
 [[files]]
+path = "packages/chord/src/sqlite/replication/node.ts"
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
+
+[[files]]
 path = "packages/chord/src/state.ts"
 disposition = "translated"
 contracts = ["awaited", "microtask-ordering"]
@@ -891,10 +898,10 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`coding/
 
 [[files]]
 path = "packages/coding-agent/src/core/export-html/index.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`internal/codingagent/export/export.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
+rationale = ""
 
 [[files]]
 path = "packages/coding-agent/src/core/extensions/loader.ts"
@@ -1388,10 +1395,10 @@ rationale = "Session-replacing commands and export_html await off the input loop
 
 [[files]]
 path = "packages/coding-agent/src/package-manager-cli.ts"
-disposition = "deferred"
-contracts = ["awaited"]
-evidence = ["test:coding/cli/package_cli_parity_test.go", "test:coding/cli/package_git_parity_test.go", "scenario:test/parity/scenarios/cli-utils/11-package-uninstall-alias.toml", "scenario:test/parity/scenarios/cli-utils/12-package-update-error.toml"]
-rationale = "Package aliases route before Session/model startup. Removal, installation and update complete before success output; thrown errors appear after inherited child diagnostics. Native self-update ownership remains D39; the complete upstream managed-update and configuration async family remains unreviewed, so this file is not async-closed."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/coding-agent/src/utils/abort.ts"
@@ -1655,9 +1662,9 @@ rationale = "Added to the accounting when every monorepo package was listed: the
 [[files]]
 path = "packages/durable/src/harness/scheduler.ts"
 disposition = "pending"
-contracts = []
-evidence = []
-rationale = ""
+contracts = ["awaited"]
+evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryRecordsCheckpointsOnlyWhenTheRunningPhaseChanges", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryKeepsAPublicWriteAdmissionOpenThroughCommitAsAChildOfItsCaller", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryKeepsBothInterruptedRunsAndExplicitAbortHandlersAtStatusOk"]
+rationale = "Pi 2ec55d80 telemetry contracts, translated: the pi.durable.phase span is awaited and covers the handler plus its decision commit, and it settles before the next phase starts; a wait, restart or close ends it with outcome aborted, waiting or sleeping; a handler panic becomes a fault as before; the checkpoint event is added after the runtime commit returns. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
 
 [[files]]
 path = "packages/durable/src/harness/submissions.ts"
@@ -1676,9 +1683,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/tool.ts"
 disposition = "pending"
-contracts = []
-evidence = []
-rationale = ""
+contracts = ["awaited"]
+evidence = ["test:durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool"]
+rationale = "Pi 2ec55d80 telemetry contract, translated: a nested call's replay event is added after its commit returns, and the phase span is passed through the nested call. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
 
 [[files]]
 path = "packages/durable/src/harness/types.ts"
@@ -1746,9 +1753,9 @@ rationale = "A watch drains its frames serially: one delivery at a time, in comm
 [[files]]
 path = "packages/durable/src/session/session.ts"
 disposition = "pending"
-contracts = []
-evidence = []
-rationale = ""
+contracts = ["awaited"]
+evidence = ["test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryMirrorsRuntimeReportsAsFixedFieldPhaseEventsAndTypeOnlyCounters", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPhaseContext"]
+rationale = "Pi 2ec55d80 telemetry contract, translated: the report is synchronous (the host callback runs first, then the counter, then the span event) and runs with the context that carries the active span; entry events are published after the commit returns. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
 
 [[files]]
 path = "packages/durable/src/session/transaction.ts"
