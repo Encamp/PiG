@@ -1,5 +1,7 @@
 package replication
 
+// pi: packages/chord/src/sqlite/replication/node.ts
+
 // Ports packages/chord/test/sqlite/replication-node.test.ts (Pi 48c8f322).
 
 import (
