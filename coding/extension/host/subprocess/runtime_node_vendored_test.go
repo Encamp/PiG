@@ -67,6 +67,8 @@ var vendoredImportRewrites = map[string][2]string{
 		`import { Type } from "../../../typebox.mjs";`},
 	"pi-ai/utils/typebox-helpers.js": {`import { Type } from "typebox";`,
 		`import { Type } from "../../../typebox.mjs";`},
+	"pi-ai/telemetry.js": {`import { createTypedMetrics, createTypedSpanStarter, defineTelemetrySchema, NOOP_TELEMETRY_CONTEXT, NOOP_TELEMETRY_METRICS, } from "@earendil-works/pi-telemetry";`,
+		`import { createTypedMetrics, createTypedSpanStarter, defineTelemetrySchema, NOOP_TELEMETRY_CONTEXT, NOOP_TELEMETRY_METRICS, } from "../pi-telemetry/index.js";`},
 	"pi-ai/index.js": {`export { Type } from "typebox";`,
 		`export { Type } from "../../typebox.mjs";`},
 	"pi-coding-agent/utils/shell.js": {`import { getBinDir } from "../config.js";`,
@@ -118,6 +120,7 @@ var pinnedPackageDist = map[string][]string{
 	"pi-agent-core":   {"node_modules", "@earendil-works", "pi-agent-core", "dist"},
 	"pi-codemode":     {"node_modules", "@earendil-works", "pi-codemode", "dist"},
 	"pi-mcp":          {"node_modules", "@earendil-works", "pi-mcp", "dist"},
+	"pi-telemetry":    {"node_modules", "@earendil-works", "pi-telemetry", "dist"},
 }
 
 // closureVendoredPackages are copied as the module graph reachable from
