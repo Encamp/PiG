@@ -547,3 +547,24 @@ func integralNumbers(attributes telemetry.SpanAttributes) telemetry.SpanAttribut
 	}
 	return normalized
 }
+
+// Upstream trim rule (index.ts drain): a commit removes only the spans of the batch it wrote
+// (`this.spans.splice(0, spans.length)`), so spans that settle during the in-flight write stay queued for the next flush.
+func TestSpansSettledDuringAnInFlightWriteSurviveTheTrimAndAreWrittenByTheNextFlush(t *testing.T) {
+	f := newFixture(t, SqliteTelemetryOptions{})
+	f.span("batch")
+	gate := newBlocker(t)
+	f.db.setHook(gate.hook)
+	flushing := start(f.telemetry.Flush)
+	gate.waitEntered(t)
+	f.span("during-write")
+	gate.open()
+	check(t, flushing.wait(t))
+	if got := f.names("SELECT name FROM telemetry_spans ORDER BY rowid"); strings.Join(got, ",") != "batch" {
+		t.Fatalf("spans after the first commit = %v, want [batch]", got)
+	}
+	f.flush()
+	if got := f.names("SELECT name FROM telemetry_spans ORDER BY rowid"); strings.Join(got, ",") != "batch,during-write" {
+		t.Fatalf("spans after the next flush = %v, want [batch during-write]", got)
+	}
+}
