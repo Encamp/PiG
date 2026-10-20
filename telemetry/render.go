@@ -3,15 +3,15 @@ package telemetry
 // Ports packages/telemetry/src/render.ts.
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
+	"math"
+	"reflect"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/MichaelKinsy/PiG/internal/jsnumber"
-	"github.com/MichaelKinsy/PiG/internal/jsonstringify"
 )
 
 // formatAttributes is upstream's formatAttributes: Object.entries in insertion order.
@@ -23,19 +23,78 @@ func formatAttributes(attributes SpanAttributes) string {
 	return text.String()
 }
 
-// jsonStringify is JSON.stringify of one attribute value.
+// jsonStringify is JSON.stringify of one attribute value: a string, boolean or number, or an array of them.
 func jsonStringify(value AttributeValue) string {
-	var raw bytes.Buffer
-	encoder := json.NewEncoder(&raw)
-	encoder.SetEscapeHTML(false)
-	if err := encoder.Encode(value); err != nil {
-		return fmt.Sprint(value)
+	var text strings.Builder
+	writeJSON(&text, reflect.ValueOf(value))
+	return text.String()
+}
+
+func writeJSON(text *strings.Builder, value reflect.Value) {
+	switch value.Kind() {
+	case reflect.String:
+		writeJSONString(text, value.String())
+	case reflect.Bool:
+		text.WriteString(strconv.FormatBool(value.Bool()))
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		text.WriteString(jsnumber.String(float64(value.Int())))
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		text.WriteString(jsnumber.String(float64(value.Uint())))
+	case reflect.Float32, reflect.Float64:
+		if number := value.Float(); math.IsNaN(number) || math.IsInf(number, 0) {
+			text.WriteString("null")
+		} else {
+			text.WriteString(jsnumber.String(number))
+		}
+	case reflect.Slice, reflect.Array:
+		text.WriteByte('[')
+		for index := range value.Len() {
+			if index > 0 {
+				text.WriteByte(',')
+			}
+			writeJSON(text, value.Index(index))
+		}
+		text.WriteByte(']')
+	case reflect.Interface, reflect.Pointer:
+		if value.IsNil() {
+			text.WriteString("null")
+			return
+		}
+		writeJSON(text, value.Elem())
+	default:
+		text.WriteString("null")
 	}
-	canonical, err := jsonstringify.Canonicalize(raw.Bytes())
-	if err != nil {
-		return strings.TrimSpace(raw.String())
+}
+
+// writeJSONString is JSON.stringify of a string: quotes, backslashes and control characters are escaped, and every
+// other character, U+2028 and U+2029 included, is written as is.
+func writeJSONString(text *strings.Builder, value string) {
+	text.WriteByte('"')
+	for _, character := range value {
+		switch character {
+		case '"':
+			text.WriteString(`\"`)
+		case '\\':
+			text.WriteString(`\\`)
+		case '\b':
+			text.WriteString(`\b`)
+		case '\f':
+			text.WriteString(`\f`)
+		case '\n':
+			text.WriteString(`\n`)
+		case '\r':
+			text.WriteString(`\r`)
+		case '\t':
+			text.WriteString(`\t`)
+		default:
+			if character < 0x20 {
+				fmt.Fprintf(text, `\u%04x`, character)
+			} else {
+				text.WriteRune(character)
+			}
+		}
 	}
-	return string(canonical)
+	text.WriteByte('"')
 }
 
 // RenderTrace renders stored spans as a chronological forest, treating absent parents as roots. Spans sharing an ID are

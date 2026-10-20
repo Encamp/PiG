@@ -177,3 +177,17 @@ func TestRenderTrace(t *testing.T) {
 		}
 	})
 }
+
+// RenderTrace writes values as JSON.stringify does: JavaScript number text, null for a non-finite number, and only quotes,
+// backslashes and control characters escaped in strings.
+func TestRenderTraceWritesJSONStringifyValues(t *testing.T) {
+	got := telemetry.RenderTrace([]telemetry.StoredSpan{renderSpan("root", func(span *telemetry.StoredSpan) {
+		span.Attributes = telemetry.SpanAttributes{
+			telemetry.Attr("big", 1e21), telemetry.Attr("fraction", 0.1), telemetry.Attr("int", 7), telemetry.Attr("sizes", []float64{1.5, 2}),
+			telemetry.Attr("text", "tab\there \u0001 \u2028 é<>&"),
+		}
+	})})
+	if want := "root big=1e+21 fraction=0.1 int=7 sizes=[1.5,2] text=\"tab\\there \\u0001 \u2028 é<>&\" (10ms)"; got != want {
+		t.Fatalf("RenderTrace = %q, want %q", got, want)
+	}
+}
