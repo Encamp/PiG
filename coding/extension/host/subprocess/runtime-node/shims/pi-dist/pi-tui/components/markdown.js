@@ -1,4 +1,5 @@
 import { Marked, Tokenizer } from "../../../marked/lib/marked.esm.js";
+import markedCjkFriendly from "../../../marked-cjk-friendly/dist/index.js";
 import { renderLatex } from "../latex.js";
 import { getCapabilities, hyperlink, isImageLine } from "../terminal-image.js";
 import { applyBackgroundToLine, flattenLines, visibleWidth, wrapTextWithAnsi } from "../utils.js";
@@ -146,7 +147,10 @@ const markdownParser = new Marked();
 markdownParser.setOptions({
     tokenizer: new StrictStrikethroughTokenizer(),
 });
-markdownParser.use({ extensions: [...LATEX_MARKDOWN_EXTENSIONS] });
+markdownParser.use({
+    tokenizer: { emStrong: markedCjkFriendly().tokenizer?.emStrong },
+    extensions: [...LATEX_MARKDOWN_EXTENSIONS],
+});
 export class Markdown {
     text;
     paddingX; // Left/right padding

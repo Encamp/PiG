@@ -131,7 +131,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/core/export-html/index.js",
-      "sha256": "0d5984ea8d607e48df6256014f5410a8446eff7dbf0baed8bfe621103490e98e"
+      "sha256": "9b7a893c46341d2557ba79dd88307797054577c8789665281d1dfb4134d347a3"
     },
     {
       "path": "pi-dist/pi-coding-agent/core/export-html/tool-renderer.js",
@@ -807,7 +807,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/package-manager-cli.js",
-      "sha256": "9cc01d1fc2986c5d42e85b0955950f0b3bfdf46d189e521a5eb8f93a48575d94"
+      "sha256": "3eb0f2f5ad2ebfe40bdbd81a59081d2558dad933406028d0ae4fff11c16a5130"
     },
     {
       "path": "pi-dist/pi-coding-agent/utils/abort.js",

@@ -123,7 +123,7 @@ import {
   wrapRegisteredTools,
   writeBugReportArchive,
   writeRawStdout
-} from "./chunk-G4XTQGPV.js";
+} from "./chunk-PWDJIBHY.js";
 import {
   convertToPng,
   createBashToolDefinition,
@@ -20432,7 +20432,7 @@ function getActiveManagedInstallRoot() {
     return void 0;
   const markerPath = join14(managedRoot, MANAGED_INSTALL_MARKER);
   try {
-    const marker = JSON.parse(readFileSync10(markerPath, "utf8"));
+    const marker = JSON.parse(stripBom(readFileSync10(markerPath, "utf8")));
     if (marker.kind !== "pi-managed-install" || marker.schemaVersion !== 1 || marker.layout !== "releases-v1") {
       throw new Error();
     }

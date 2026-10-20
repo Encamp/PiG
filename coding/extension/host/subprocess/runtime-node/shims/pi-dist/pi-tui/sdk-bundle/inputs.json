@@ -47,7 +47,7 @@
     },
     {
       "path": "pi-dist/pi-tui/components/markdown.js",
-      "sha256": "39c2b3f62876226b7d5e8e721c696a5f6cdcd07d17d02a841efcb8233f82abeb"
+      "sha256": "ba0d980a26642502b966f489057243b13e8f2a19ec95f18292304b797bc76887"
     },
     {
       "path": "pi-dist/pi-tui/components/mouse-region.js",

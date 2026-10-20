@@ -19,6 +19,7 @@ yaml="$agent/node_modules/yaml"
 eaw="$agent/node_modules/get-east-asian-width"
 pjson="$agent/node_modules/partial-json"
 marked="$agent/node_modules/marked"
+markedCjk="$agent/node_modules/marked-cjk-friendly"
 hljs="$agent/node_modules/highlight.js"
 jiti="$agent/node_modules/jiti"
 core="$agent/node_modules/@earendil-works/pi-agent-core"
@@ -40,8 +41,8 @@ copy() {
   done
 }
 
-rm -rf "$dist" "$shims/yaml" "$shims/get-east-asian-width" "$shims/partial-json" "$shims/marked" "$shims/highlight.js" "$shims/jiti" "$shims/ignore" "$shims/diff"
-mkdir -p "$dist" "$shims/yaml" "$shims/get-east-asian-width" "$shims/partial-json/dist" "$shims/marked/lib" "$shims/highlight.js" "$shims/jiti" "$shims/ignore" "$shims/diff"
+rm -rf "$dist" "$shims/yaml" "$shims/get-east-asian-width" "$shims/partial-json" "$shims/marked" "$shims/marked-cjk-friendly" "$shims/highlight.js" "$shims/jiti" "$shims/ignore" "$shims/diff"
+mkdir -p "$dist" "$shims/yaml" "$shims/get-east-asian-width" "$shims/partial-json/dist" "$shims/marked/lib" "$shims/marked-cjk-friendly/dist" "$shims/highlight.js" "$shims/jiti" "$shims/ignore" "$shims/diff"
 printf '{\n  "type": "module"\n}\n' >"$dist/package.json"
 
 # pi-tui: every runtime module, including locally constructed screens and scroll views. Native helpers keep the package's platform/architecture layout at one of getNativeModuleCandidates' unchanged lookup locations.
@@ -53,7 +54,8 @@ sed 's#^export { Marked } from "marked";$#export { Marked } from "../../marked/l
   "$tui/dist/index.js" >"$dist/pi-tui/index.js"
 sed 's#^import { eastAsianWidth } from "get-east-asian-width";$#import { eastAsianWidth } from "../../get-east-asian-width/index.js";#' \
   "$tui/dist/utils.js" >"$dist/pi-tui/utils.js"
-sed 's#^import { Marked, Tokenizer } from "marked";$#import { Marked, Tokenizer } from "../../../marked/lib/marked.esm.js";#' \
+sed -e 's#^import { Marked, Tokenizer } from "marked";$#import { Marked, Tokenizer } from "../../../marked/lib/marked.esm.js";#' \
+  -e 's#^import markedCjkFriendly from "marked-cjk-friendly";$#import markedCjkFriendly from "../../../marked-cjk-friendly/dist/index.js";#' \
   "$tui/dist/components/markdown.js" >"$dist/pi-tui/components/markdown.js"
 
 # pi-telemetry: the runtime modules pi-ai's telemetry.ts imports (the testing entry is test support).
@@ -166,6 +168,8 @@ cp "$pjson/dist/index.js" "$pjson/dist/options.js" "$shims/partial-json/dist/"
 cp "$pjson/package.json" "$pjson/LICENSE" "$shims/partial-json/"
 cp "$marked/lib/marked.esm.js" "$shims/marked/lib/"
 cp "$marked/package.json" "$marked/LICENSE" "$shims/marked/"
+cp "$markedCjk/dist/index.js" "$shims/marked-cjk-friendly/dist/"
+cp "$markedCjk/package.json" "$markedCjk/LICENSE" "$shims/marked-cjk-friendly/"
 cp -R "$hljs/lib" "$shims/highlight.js/lib"
 cp "$hljs/package.json" "$hljs/LICENSE" "$shims/highlight.js/"
 cp -R "$jiti/lib" "$jiti/dist" "$shims/jiti/"
@@ -190,6 +194,7 @@ rewrote() {
 rewrote "$dist/pi-tui/index.js" "$tui/dist/index.js" marked ../../marked/lib/marked.esm.js
 rewrote "$dist/pi-tui/utils.js" "$tui/dist/utils.js" get-east-asian-width ../../get-east-asian-width/index.js
 rewrote "$dist/pi-tui/components/markdown.js" "$tui/dist/components/markdown.js" marked ../../../marked/lib/marked.esm.js
+rewrote "$dist/pi-tui/components/markdown.js" "$tui/dist/components/markdown.js" marked-cjk-friendly ../../../marked-cjk-friendly/dist/index.js
 rewrote "$dist/pi-ai/utils/json-parse.js" "$ai/dist/utils/json-parse.js" partial-json ../../../partial-json/dist/index.js
 rewrote "$dist/pi-ai/utils/validation.js" "$ai/dist/utils/validation.js" typebox/compile ../../../typebox-compile.mjs
 rewrote "$dist/pi-ai/utils/validation.js" "$ai/dist/utils/validation.js" typebox/value ../../../typebox-value.mjs
@@ -220,4 +225,4 @@ node "$root/automation/gen/bundle-pi-sdk.mjs" "$shims"
 node "$root/automation/gen/vendor-node-manifest.mjs" "$shims" "$agent"
 
 version() { node -p "require('$1/package.json').version"; }
-echo "vendored Pi $(version "$agent") dist modules, yaml $(version "$yaml"), get-east-asian-width $(version "$eaw"), partial-json $(version "$pjson"), marked $(version "$marked"), highlight.js $(version "$hljs"), jiti $(version "$jiti"), ignore $(version "$ignore") and diff $(version "$jsdiff") into $shims"
+echo "vendored Pi $(version "$agent") dist modules, yaml $(version "$yaml"), get-east-asian-width $(version "$eaw"), partial-json $(version "$pjson"), marked $(version "$marked"), marked-cjk-friendly $(version "$markedCjk"), highlight.js $(version "$hljs"), jiti $(version "$jiti"), ignore $(version "$ignore") and diff $(version "$jsdiff") into $shims"

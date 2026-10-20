@@ -4214,6 +4214,7 @@ var Input = class {
 
 // pi-dist/pi-tui/components/markdown.js
 import { Marked, Tokenizer } from "../../../marked/lib/marked.esm.js";
+import markedCjkFriendly from "../../../marked-cjk-friendly/dist/index.js";
 
 // pi-dist/pi-tui/latex.js
 import { visibleWidth as visibleWidth7 } from "../utils.js";
@@ -5684,7 +5685,10 @@ var markdownParser = new Marked();
 markdownParser.setOptions({
   tokenizer: new StrictStrikethroughTokenizer()
 });
-markdownParser.use({ extensions: [...LATEX_MARKDOWN_EXTENSIONS] });
+markdownParser.use({
+  tokenizer: { emStrong: markedCjkFriendly().tokenizer?.emStrong },
+  extensions: [...LATEX_MARKDOWN_EXTENSIONS]
+});
 var Markdown = class {
   static {
     __name(this, "Markdown");

@@ -267,6 +267,9 @@ func TestVendoredPiDistMatchesThePinnedPackage(t *testing.T) {
 		if rw, ok := vendoredImportRewrites[rel]; ok {
 			rewrites = append(rewrites, rw)
 		}
+		if rel == "pi-tui/components/markdown.js" {
+			rewrites = append(rewrites, [2]string{`import markedCjkFriendly from "marked-cjk-friendly";`, `import markedCjkFriendly from "../../../marked-cjk-friendly/dist/index.js";`})
+		}
 		if rel == "pi-ai/utils/validation.js" {
 			rewrites = append(rewrites, vendoredValidationRewrites...)
 		}
@@ -369,6 +372,7 @@ func TestVendoredPiDistMatchesThePinnedPackage(t *testing.T) {
 	}
 	ignore := filepath.Join(nodeModules, "ignore")
 	marked := filepath.Join(nodeModules, "marked")
+	markedCjk := filepath.Join(nodeModules, "marked-cjk-friendly")
 	eaw := filepath.Join(nodeModules, "get-east-asian-width")
 	partial := filepath.Join(nodeModules, "partial-json")
 	for dir, files := range map[string]map[string]string{
@@ -388,6 +392,10 @@ func TestVendoredPiDistMatchesThePinnedPackage(t *testing.T) {
 		"marked": {
 			"lib/marked.esm.js": filepath.Join(marked, "lib", "marked.esm.js"),
 			"LICENSE":           filepath.Join(marked, "LICENSE"), "package.json": filepath.Join(marked, "package.json"),
+		},
+		"marked-cjk-friendly": {
+			"dist/index.js": filepath.Join(markedCjk, "dist", "index.js"),
+			"LICENSE":       filepath.Join(markedCjk, "LICENSE"), "package.json": filepath.Join(markedCjk, "package.json"),
 		},
 		"partial-json": {
 			"dist/index.js": filepath.Join(partial, "dist", "index.js"), "dist/options.js": filepath.Join(partial, "dist", "options.js"),
