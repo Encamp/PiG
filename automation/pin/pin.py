@@ -136,7 +136,7 @@ def ci_commit(pin: Pin, text: str) -> str:
 
 
 # (path, transform(pin, text), command to refresh a lock when the file changed or None)
-INTEROP = ['@earendil-works/chord', '@earendil-works/pi-ai', '@earendil-works/pi-durable']
+INTEROP = ['@earendil-works/chord', '@earendil-works/pi-ai', '@earendil-works/pi-durable', '@earendil-works/pi-telemetry']
 ORACLE_PACKAGES = ['@earendil-works/pi-agent-core', '@earendil-works/pi-ai', '@earendil-works/pi-coding-agent', '@earendil-works/pi-tui']
 RULES: list[tuple[str, object, str | None]] = [
     ("README.md", lambda p, t: readme(p, t), None),

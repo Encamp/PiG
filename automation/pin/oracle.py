@@ -295,7 +295,7 @@ def pack(source: Path, destination: Path, root: str | None = None) -> dict[str, 
 AGENT = "@earendil-works/pi-coding-agent"
 DURABLE = "@earendil-works/pi-durable"
 # The packages durable/interop imports directly (its package.json dependencies): they sit at the top of the durable oracle tree.
-INTEROP = ["@earendil-works/chord", "@earendil-works/pi-ai", DURABLE]
+INTEROP = ["@earendil-works/chord", "@earendil-works/pi-ai", DURABLE, "@earendil-works/pi-telemetry"]
 LOCK_KEY = "node_modules/" + AGENT
 PACK_PREFIX = "pig-pack:"
 
