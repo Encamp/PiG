@@ -116,7 +116,7 @@ func WithCancel(parent context.Context) (ctx context.Context, cancel func(cause 
 var telemetryKey = NewKey[telemetry.TelemetrySpan]("chord.telemetry")
 
 // Telemetry is Pi's `Context.telemetry`: the explicit telemetry parent of ctx, always a span (the no-op span is one), so a caller never narrows it. It is never nil: a context that carries none, context.Background() and the to-do context included, returns telemetry.NoopTelemetryContext, as Pi's BaseContext defaults to NOOP_TELEMETRY_CONTEXT.
-// Pi's Context is a closed interface that custom implementations must extend with a `telemetry` member (a Breaking Change upstream). A Go context is stdlib's open interface, so a context from outside this package carries no telemetry and reads as the no-op parent; no Go caller breaks.
+// Pi's Context is a closed interface that custom implementations must extend with a `telemetry: TelemetrySpan` member (a Breaking Change upstream, whose type narrowed from TelemetryContext when Context.telemetry became always a span, so withTelemetry accepts spans and not adapters). A Go context is stdlib's open interface, so a context from outside this package carries no telemetry and reads as the no-op parent; no Go caller breaks.
 func Telemetry(ctx context.Context) telemetry.TelemetrySpan {
 	if value, ok := Value(ctx, telemetryKey); ok {
 		return value

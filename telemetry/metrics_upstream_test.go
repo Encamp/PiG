@@ -61,11 +61,11 @@ func TestMetricsUpstream(t *testing.T) {
 		adapter := telemetry.NewInMemoryTelemetryContext()
 		traffic, latency := trafficSchema(), latencySchema()
 		metrics := telemetry.CreateTypedMetrics(adapter, traffic, latency)
-		metrics.Counter("network.bytes").Add(128, telemetry.SpanAttributes{"direction": "out"})
+		metrics.Counter("network.bytes").Add(128, telemetry.SpanAttributes{telemetry.Attr("direction", "out")})
 		metrics.UpDownCounter("network.active").Add(1, nil)
 		metrics.UpDownCounter("network.active").Add(-1, nil)
 		if err := adapter.StartSpan(telemetry.SpanOptions{Name: "request"}, func(span telemetry.TelemetrySpan) error {
-			metrics.Histogram("call.duration").Record(12, telemetry.SpanAttributes{"method": "read"}, span)
+			metrics.Histogram("call.duration").Record(12, telemetry.SpanAttributes{telemetry.Attr("method", "read")}, span)
 			metrics.Histogram("call.duration").Record(13, nil, nil)
 			metrics.Histogram("call.duration").Record(14, nil, span)
 			return nil
@@ -79,7 +79,7 @@ func TestMetricsUpstream(t *testing.T) {
 		counter := measurements[0]
 		if counter.Kind != telemetry.TelemetryMetricKindCounter || counter.Name != "network.bytes" || counter.Value != 128 ||
 			counter.Description == nil || *counter.Description != "Encoded bytes" || counter.Unit == nil || *counter.Unit != "By" ||
-			!reflect.DeepEqual(counter.Attributes, telemetry.SpanAttributes{"direction": "out"}) {
+			!reflect.DeepEqual(counter.Attributes, telemetry.SpanAttributes{telemetry.Attr("direction", "out")}) {
 			t.Fatalf("counter measurement = %+v", counter)
 		}
 		span := adapter.GetSpans()[0]
@@ -116,9 +116,9 @@ func TestMetricsUpstream(t *testing.T) {
 			}},
 		})
 		adapter := telemetry.NewInMemoryTelemetryContext()
-		telemetry.CreateTypedMetrics(adapter, schema).Histogram("required").Record(1, telemetry.SpanAttributes{"cache": true}, nil)
+		telemetry.CreateTypedMetrics(adapter, schema).Histogram("required").Record(1, telemetry.SpanAttributes{telemetry.Attr("cache", true)}, nil)
 		measurements := adapter.GetMetrics()
-		if len(measurements) != 1 || measurements[0].Name != "required" || measurements[0].Value != 1 || !reflect.DeepEqual(measurements[0].Attributes, telemetry.SpanAttributes{"cache": true}) ||
+		if len(measurements) != 1 || measurements[0].Name != "required" || measurements[0].Value != 1 || !reflect.DeepEqual(measurements[0].Attributes, telemetry.SpanAttributes{telemetry.Attr("cache", true)}) ||
 			measurements[0].Description == nil || *measurements[0].Description != "Required tag" || measurements[0].Unit != nil || measurements[0].Boundaries != nil {
 			t.Fatalf("measurements = %+v", measurements)
 		}
@@ -129,7 +129,7 @@ func TestMetricsUpstream(t *testing.T) {
 		adapter := telemetry.NewInMemoryTelemetryContext()
 		histogram := adapter.Histogram("duration", telemetry.HistogramOptions{Boundaries: []float64{1, 2}})
 		if err := adapter.StartSpan(telemetry.SpanOptions{Name: "request"}, func(span telemetry.TelemetrySpan) error {
-			histogram.Record(1, telemetry.SpanAttributes{"tags": []string{"original"}}, span)
+			histogram.Record(1, telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})}, span)
 			return nil
 		}); err != nil {
 			t.Fatal(err)
@@ -141,11 +141,11 @@ func TestMetricsUpstream(t *testing.T) {
 		// A Go slice aliases its backing array, so each element is mutated in place as well as the slice replaced.
 		measurement.Boundaries[0] = 99
 		measurement.Boundaries = append(measurement.Boundaries, 3)
-		measurement.Attributes["tags"].([]string)[0] = "mutated"
-		measurement.Attributes["tags"] = []string{"mutated"}
+		measurement.Attributes.Value("tags").([]string)[0] = "mutated"
+		measurement.Attributes.Set("tags", []string{"mutated"})
 		measurement.Context["pi-memory-span"] = "999"
 		again := adapter.GetMetrics()[0]
-		if !reflect.DeepEqual(again.Boundaries, []float64{1, 2}) || !reflect.DeepEqual(again.Attributes, telemetry.SpanAttributes{"tags": []string{"original"}}) || !reflect.DeepEqual(again.Context, adapter.GetSpans()[0].Context) {
+		if !reflect.DeepEqual(again.Boundaries, []float64{1, 2}) || !reflect.DeepEqual(again.Attributes, telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})}) || !reflect.DeepEqual(again.Context, adapter.GetSpans()[0].Context) {
 			t.Fatalf("measurement = %+v, want boundaries [1 2], tags [original] and the request span as exemplar", again)
 		}
 	})
@@ -162,7 +162,7 @@ func TestMetricsUpstream(t *testing.T) {
 	t.Run("metrics › shares frozen no-op instruments", func(t *testing.T) {
 		// upstream: packages/telemetry/test/metrics.test.ts:182
 		options := telemetry.HistogramOptions{InstrumentOptions: telemetry.InstrumentOptions{Unit: new("By")}}
-		attributes := telemetry.SpanAttributes{"direction": "out"}
+		attributes := telemetry.SpanAttributes{telemetry.Attr("direction", "out")}
 		counter := telemetry.NoopTelemetryMetrics.Counter("bytes", options.InstrumentOptions)
 		active := telemetry.NoopTelemetryMetrics.UpDownCounter("active", options.InstrumentOptions)
 		histogram := telemetry.NoopTelemetryMetrics.Histogram("duration", options)

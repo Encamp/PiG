@@ -103,9 +103,9 @@ func TestTelemetryUpstream(t *testing.T) {
 		telemetryContext := NewInMemoryTelemetryContext()
 		startSpan := CreateTypedSpanStarter(telemetryContext, operationSchema, requestSchema)
 
-		result, err := StartTypedSpan(startSpan, "operation", SpanAttributes{"kind": "read"}, func(_ TelemetrySpan, startChildSpan TypedSpanStarter) (int, error) {
-			return StartTypedSpan(startChildSpan, "request", SpanAttributes{"provider": "example"}, func(requestSpan TelemetrySpan, _ TypedSpanStarter) (int, error) {
-				requestSpan.SetAttributes(SpanAttributes{"response": "cached"})
+		result, err := StartTypedSpan(startSpan, "operation", SpanAttributes{Attr("kind", "read")}, func(_ TelemetrySpan, startChildSpan TypedSpanStarter) (int, error) {
+			return StartTypedSpan(startChildSpan, "request", SpanAttributes{Attr("provider", "example")}, func(requestSpan TelemetrySpan, _ TypedSpanStarter) (int, error) {
+				requestSpan.SetAttributes(SpanAttributes{Attr("response", "cached")})
 				return 42, nil
 			})
 		})
@@ -128,17 +128,17 @@ func TestTelemetryUpstream(t *testing.T) {
 		if requestSpan == nil || requestSpan.ParentID == nil || *requestSpan.ParentID != operationSpan.ID {
 			t.Fatalf("request span = %+v, want parent %d", requestSpan, operationSpan.ID)
 		}
-		if got := requestSpan.Attributes["response"]; got != "cached" {
+		if got := requestSpan.Attributes.Value("response"); got != "cached" {
 			t.Fatalf("request response attribute = %v", got)
 		}
 		syncError := errors.New("sync")
-		if value, err := StartTypedSpan(startSpan, "operation", SpanAttributes{"kind": "write"}, func(TelemetrySpan, TypedSpanStarter) (int, error) {
+		if value, err := StartTypedSpan(startSpan, "operation", SpanAttributes{Attr("kind", "write")}, func(TelemetrySpan, TypedSpanStarter) (int, error) {
 			return 7, syncError
 		}); err != syncError || value != 0 {
 			t.Fatalf("sync rejection = %d, %v; want the thrown value and no result", value, err)
 		}
 		asyncError := errors.New("async")
-		if err := startSpan("request", SpanAttributes{"provider": "example"}, func(TelemetrySpan, TypedSpanStarter) error {
+		if err := startSpan("request", SpanAttributes{Attr("provider", "example")}, func(TelemetrySpan, TypedSpanStarter) error {
 			return awaited(asyncError)
 		}); err != asyncError {
 			t.Fatalf("async rejection = %v, want the thrown value", err)
@@ -192,9 +192,9 @@ func TestTelemetryUpstream(t *testing.T) {
 
 	t.Run("NOOP_TELEMETRY_CONTEXT › ignores typed recording payloads", func(t *testing.T) {
 		// upstream: packages/telemetry/test/telemetry.test.ts:172
-		result, err := StartSpan(NoopTelemetryContext, SpanOptions{Name: "operation", Attributes: SpanAttributes{"kind": "test"}}, func(span TelemetrySpan) (int, error) {
-			span.AddEvent("event", SpanAttributes{"count": 1})
-			span.SetAttributes(SpanAttributes{"complete": true})
+		result, err := StartSpan(NoopTelemetryContext, SpanOptions{Name: "operation", Attributes: SpanAttributes{Attr("kind", "test")}}, func(span TelemetrySpan) (int, error) {
+			span.AddEvent("event", SpanAttributes{Attr("count", 1)})
+			span.SetAttributes(SpanAttributes{Attr("complete", true)})
 			span.SetStatus(SpanStatus{Status: SpanStatusCodeError, Error: &SpanStatusError{Name: "Expected", Message: "test"}})
 			span.AddLink(SpanLink{Context: span})
 			return 42, nil
@@ -249,8 +249,8 @@ func TestTelemetrySchemaKeepsEmptyMembers(t *testing.T) {
 func TestTypedSpanStarterRecordsStartAttributesAndNestsByCallbackSpan(t *testing.T) {
 	recorder := NewInMemoryTelemetryContext()
 	startSpan := CreateTypedSpanStarter(recorder, &TelemetrySchemaDefinition{})
-	err := startSpan("root", SpanAttributes{"kind": "read", "count": 3}, func(_ TelemetrySpan, child TypedSpanStarter) error {
-		return child("middle", SpanAttributes{"flag": true}, func(_ TelemetrySpan, grandchild TypedSpanStarter) error {
+	err := startSpan("root", SpanAttributes{Attr("kind", "read"), Attr("count", 3)}, func(_ TelemetrySpan, child TypedSpanStarter) error {
+		return child("middle", SpanAttributes{Attr("flag", true)}, func(_ TelemetrySpan, grandchild TypedSpanStarter) error {
 			return grandchild("leaf", nil, func(TelemetrySpan, TypedSpanStarter) error { return nil })
 		})
 	})
@@ -261,10 +261,10 @@ func TestTypedSpanStarterRecordsStartAttributesAndNestsByCallbackSpan(t *testing
 	if len(spans) != 3 {
 		t.Fatalf("spans = %+v, want root, middle and leaf", spans)
 	}
-	if got := spans[0].Attributes; !reflect.DeepEqual(got, SpanAttributes{"kind": "read", "count": 3}) {
+	if got := spans[0].Attributes; !reflect.DeepEqual(got, SpanAttributes{Attr("kind", "read"), Attr("count", 3)}) {
 		t.Fatalf("root attributes = %#v", got)
 	}
-	if got := spans[1].Attributes; !reflect.DeepEqual(got, SpanAttributes{"flag": true}) {
+	if got := spans[1].Attributes; !reflect.DeepEqual(got, SpanAttributes{Attr("flag", true)}) {
 		t.Fatalf("middle attributes = %#v", got)
 	}
 	if spans[1].ParentID == nil || *spans[1].ParentID != spans[0].ID || spans[2].ParentID == nil || *spans[2].ParentID != spans[1].ID {

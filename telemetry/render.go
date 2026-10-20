@@ -14,17 +14,11 @@ import (
 	"github.com/MichaelKinsy/PiG/internal/jsonstringify"
 )
 
-// formatAttributes is upstream's formatAttributes. Upstream writes Object.entries in insertion order; a Go map has none,
-// so the entries are written in name order.
+// formatAttributes is upstream's formatAttributes: Object.entries in insertion order.
 func formatAttributes(attributes SpanAttributes) string {
-	names := make([]string, 0, len(attributes))
-	for name := range attributes {
-		names = append(names, name)
-	}
-	sort.Strings(names)
 	var text strings.Builder
-	for _, name := range names {
-		text.WriteString(" " + name + "=" + jsonStringify(attributes[name]))
+	for _, attribute := range attributes {
+		text.WriteString(" " + attribute.Name + "=" + jsonStringify(attribute.Value))
 	}
 	return text.String()
 }
@@ -45,7 +39,7 @@ func jsonStringify(value AttributeValue) string {
 }
 
 // RenderTrace renders stored spans as a chronological forest, treating absent parents as roots. Spans sharing an ID are
-// one span, the first occurrence winning as upstream's Map keeps the last value in the first position; the input is
+// one span, the last value in the first position, as upstream's Map keeps it; the input is
 // not modified.
 func RenderTrace(spans []StoredSpan) string {
 	byID := map[string]StoredSpan{}
