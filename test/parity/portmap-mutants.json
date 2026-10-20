@@ -1,4 +1,21 @@
 {
+ "packages/chord/src/sqlite/replication/node.ts": [
+  {
+   "file": "chord/sqlite/replication/node.go",
+   "old": "\terr := operation()\n\tdatabase.hooks.AfterOperation()\n",
+   "new": "\terr := operation()\n"
+  },
+  {
+   "file": "chord/sqlite/replication/node.go",
+   "old": "\t\tWalAutoCheckpointPages: &noCheckpoint,\n",
+   "new": ""
+  },
+  {
+   "file": "chord/sqlite/replication/node.go",
+   "old": "\thookErr := database.database.Exclusive(database.hooks.BeforeClose)\n",
+   "new": "\tvar hookErr error\n"
+  }
+ ],
  "packages/codemode/src/cloudflare.ts": [
   {
    "file": "codemode/cloudflare/cloudflare.go",
