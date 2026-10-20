@@ -45,7 +45,7 @@ func jsonStringify(value AttributeValue) string {
 }
 
 // RenderTrace renders stored spans as a chronological forest, treating absent parents as roots. Spans sharing an ID are
-// one span, the first occurrence winning as upstream's Map keeps the last value in the first position; the input is
+// one span, the last value in the first position, as upstream's Map keeps it; the input is
 // not modified.
 func RenderTrace(spans []StoredSpan) string {
 	byID := map[string]StoredSpan{}

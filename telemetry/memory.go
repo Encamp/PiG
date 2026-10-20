@@ -534,11 +534,35 @@ func (recorder *InMemoryTelemetryContext) GetTrace(traceID string) (*StoredTrace
 	return &StoredTrace{TraceID: traceID, Spans: spans}, nil
 }
 
+// attributeEqual is upstream's `===` on a string, number or boolean: numbers are equal by value whatever their Go type.
+func attributeEqual(left, right AttributeValue) bool {
+	leftNumber, leftIsNumber := numberOf(left)
+	rightNumber, rightIsNumber := numberOf(right)
+	if leftIsNumber || rightIsNumber {
+		return leftIsNumber && rightIsNumber && leftNumber == rightNumber
+	}
+	return left == right
+}
+
+func numberOf(value AttributeValue) (float64, bool) {
+	reflected := reflect.ValueOf(value)
+	switch reflected.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return float64(reflected.Int()), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return float64(reflected.Uint()), true
+	case reflect.Float32, reflect.Float64:
+		return reflected.Float(), true
+	default:
+		return 0, false
+	}
+}
+
 // attributesMatch is upstream's `Object.entries(query).every(([key, value]) => attributes[key] === value)`.
 func attributesMatch(query map[string]AttributeValue, attributes SpanAttributes) bool {
 	for key, want := range query {
 		got, ok := attributes[key]
-		if !ok || got != want {
+		if !ok || !attributeEqual(got, want) {
 			return false
 		}
 	}

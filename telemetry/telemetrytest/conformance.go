@@ -16,7 +16,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"slices"
 
 	"github.com/MichaelKinsy/PiG/telemetry"
 )
@@ -126,10 +125,6 @@ func roundTrip(carrier telemetry.TelemetryCarrier) (telemetry.TelemetryCarrier, 
 	var decoded telemetry.TelemetryCarrier
 	//portlint:allow jsonclone the round trip is the case: it is the transport that serializes the carrier between processes
 	return decoded, json.Unmarshal(encoded, &decoded) //perf:ok conformance test support: the JSON round trip is the transport under test, not a clone
-}
-
-func measurementsNamed(measurements []telemetry.RecordedTelemetryMeasurement, name string) []telemetry.RecordedTelemetryMeasurement {
-	return slices.DeleteFunc(slices.Clone(measurements), func(measurement telemetry.RecordedTelemetryMeasurement) bool { return measurement.Name != name })
 }
 
 func stringPointerEqual(actual *string, expected string, what string) error {
