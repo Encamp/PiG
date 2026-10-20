@@ -1,4 +1,4 @@
-### Breaking Changes
+### Upgrading
 
 - `ai` renames the provider request option `TelemetryContext` to `Telemetry` (Pi `telemetryContext` → `telemetry`, Pi 2ec55d80) on `StreamOptions`, `ClassifierOptions` and `ImagesOptions`, with no alias. Its type is `telemetry.TelemetrySpan`: pass a parent span, not an adapter; nil is the omitted option and uses the no-op span.
 - `ai.LazyStream` and `ai.LazyStreamSync` take an optional trailing `LazyStreamObserver` (Pi's `lazyStream(model, setup, observer?)`).
