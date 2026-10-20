@@ -260,6 +260,8 @@ type TaskScheduler struct {
 	telemetry      telemetry.TelemetryContext
 	activeMetric   telemetry.TelemetryUpDownCounter
 	durationMetric telemetry.TelemetryHistogram
+	// metricsOn is false when the root has no metrics capability: the instruments are no-ops, so no attribute bag is built for them.
+	metricsOn bool
 	// resumed holds the tasks loaded by Open and not yet invoked: their first invocation is a resumption. Guarded by mu.
 	resumed map[durable.TaskId]struct{}
 	// counted holds the live tasks counted by activeMetric, with the task name they were counted under. Guarded by mu.
@@ -376,10 +378,12 @@ type failedMigration struct {
 // NewTaskScheduler returns a scheduler; Open loads it.
 func NewTaskScheduler(options TaskSchedulerOptions) *TaskScheduler {
 	root := rootTelemetry(options.Telemetry)
-	metrics := telemetry.CreateTypedMetrics(metricsOf(root), DurableTelemetrySchema)
+	rootMetrics := metricsOf(root)
+	metrics := telemetry.CreateTypedMetrics(rootMetrics, DurableTelemetrySchema)
 	return &TaskScheduler{
 		options:             options,
 		telemetry:           root,
+		metricsOn:           rootMetrics != telemetry.NoopTelemetryMetrics,
 		activeMetric:        metrics.UpDownCounter("pi.durable.tasks.active"),
 		durationMetric:      metrics.Histogram("pi.durable.phase.duration"),
 		resumed:             map[durable.TaskId]struct{}{},
@@ -1651,8 +1655,10 @@ func (s *TaskScheduler) seal() {
 // finishSealLocked completes the seal; it is called with s.mu held and releases it.
 func (s *TaskScheduler) finishSealLocked() {
 	// Closing the Harness releases its active counts.
-	for _, kind := range s.counted {
-		s.activeMetric.Add(-1, telemetry.SpanAttributes{telemetry.Attr("task", kind)})
+	if s.metricsOn {
+		for _, kind := range s.counted {
+			s.activeMetric.Add(-1, telemetry.SpanAttributes{telemetry.Attr("task", kind)})
+		}
 	}
 	clear(s.counted)
 	clear(s.resumed)
@@ -2154,22 +2160,12 @@ func (s *TaskScheduler) phase(invocation *invocation, task anyTaskRecord, run fu
 	delete(s.resumed, task.Id)
 	links := invocation.links
 	s.mu.Unlock()
-	// Pi's literal order: task.id, task.name, phase, kind, resumed, then attempt when present.
-	attributes := telemetry.SpanAttributes{
-		telemetry.Attr("task.id", float64(task.Id)),
-		telemetry.Attr("task.name", task.Kind),
-		telemetry.Attr("phase", phaseOf),
-		telemetry.Attr("kind", kind),
-		telemetry.Attr("resumed", resumed),
-	}
-	if attempt, ok := jsonMember(checkpoint, "attempt").(float64); ok {
-		attributes = attributes.Set("attempt", attempt)
-	}
 	type stepped struct {
 		record anyTaskRecord
 		ok     bool
 	}
-	result, _ := telemetry.StartTypedSpan(telemetry.CreateTypedSpanStarter(parent, DurableTelemetrySchema), "pi.durable.phase", attributes, func(span telemetry.TelemetrySpan, _ telemetry.TypedSpanStarter) (stepped, error) {
+	body := run
+	runSpan := func(span telemetry.TelemetrySpan) stepped {
 		if propagation := span.Propagation(); propagation != nil {
 			for _, carrier := range links {
 				span.AddLink(telemetry.SpanLink{Context: propagation.Extract(carrier)})
@@ -2182,14 +2178,36 @@ func (s *TaskScheduler) phase(invocation *invocation, task anyTaskRecord, run fu
 			invocation.setSpan(nil)
 			s.finishPhase(invocation, span, task, phaseOf, jsclock.PerformanceNow()-started)
 		}()
-		out.record, out.ok = run(chordctx.WithTelemetry(invocation.ctx, span))
-		return out, nil
+		out.record, out.ok = body(chordctx.WithTelemetry(invocation.ctx, span))
+		return out
+	}
+	// The no-op parent starts the no-op span and drops the attributes, so none are built for it.
+	if parent == telemetry.NoopTelemetryContext {
+		out := runSpan(telemetry.NoopTelemetryContext)
+		return out.record, out.ok
+	}
+	// Pi's literal order: task.id, task.name, phase, kind, resumed, then attempt when present.
+	attributes := telemetry.SpanAttributes{
+		telemetry.Attr("task.id", float64(task.Id)),
+		telemetry.Attr("task.name", task.Kind),
+		telemetry.Attr("phase", phaseOf),
+		telemetry.Attr("kind", kind),
+		telemetry.Attr("resumed", resumed),
+	}
+	if attempt, ok := jsonMember(checkpoint, "attempt").(float64); ok {
+		attributes = attributes.Set("attempt", attempt)
+	}
+	result, _ := telemetry.StartTypedSpan(telemetry.CreateTypedSpanStarter(parent, DurableTelemetrySchema), "pi.durable.phase", attributes, func(span telemetry.TelemetrySpan, _ telemetry.TypedSpanStarter) (stepped, error) {
+		return runSpan(span), nil
 	})
 	return result.record, result.ok
 }
 
 // finishPhase sets the outcome attributes, the fixed-category error status, and the duration metric of a finished phase.
 func (s *TaskScheduler) finishPhase(invocation *invocation, span telemetry.TelemetrySpan, task anyTaskRecord, phaseOf string, durationMs float64) {
+	if span == telemetry.NoopTelemetryContext && !s.metricsOn {
+		return
+	}
 	s.mu.Lock()
 	var state anyTaskState
 	if invocation.record != nil {
@@ -2225,6 +2243,12 @@ func (s *TaskScheduler) finishPhase(invocation *invocation, span telemetry.Telem
 		outcome = "next=" + next
 	}
 	s.mu.Unlock()
+	if span == telemetry.NoopTelemetryContext {
+		if s.metricsOn {
+			s.durationMetric.Record(durationMs, telemetry.SpanAttributes{telemetry.Attr("task", task.Kind), telemetry.Attr("phase", phaseOf), telemetry.Attr("outcome", outcome)}, span)
+		}
+		return
+	}
 	span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("outcome", outcome)})
 	if terminal != nil && (terminal.Status == durable.OutcomeFaulted || terminal.Status == durable.OutcomeFailed || terminal.Status == durable.OutcomeOrphaned) {
 		message := ""
@@ -2238,7 +2262,9 @@ func (s *TaskScheduler) finishPhase(invocation *invocation, span telemetry.Telem
 	} else if outcome == "aborted" {
 		span.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeOK})
 	}
-	s.durationMetric.Record(durationMs, telemetry.SpanAttributes{telemetry.Attr("task", task.Kind), telemetry.Attr("phase", phaseOf), telemetry.Attr("outcome", outcome)}, span)
+	if s.metricsOn {
+		s.durationMetric.Record(durationMs, telemetry.SpanAttributes{telemetry.Attr("task", task.Kind), telemetry.Attr("phase", phaseOf), telemetry.Attr("outcome", outcome)}, span)
+	}
 }
 
 // runHandler runs task code and turns a panic into a fault, as an uncaught throw faults a task upstream; the fault's
@@ -2833,7 +2859,9 @@ func (runtime *taskRuntime) Commit(ctx context.Context, change func(tx durable.T
 		return struct{}{}, nil
 	})
 	if err == nil && committed {
-		runtime.invocation.currentSpan().AddEvent("pi.durable.checkpoint", telemetry.SpanAttributes{telemetry.Attr("phase", checkpoint)})
+		if span := runtime.invocation.currentSpan(); span != telemetry.NoopTelemetryContext {
+			span.AddEvent("pi.durable.checkpoint", telemetry.SpanAttributes{telemetry.Attr("phase", checkpoint)})
+		}
 	}
 	return err
 }

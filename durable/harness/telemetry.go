@@ -30,9 +30,15 @@ func metricsOf(adapter telemetry.TelemetryContext) telemetry.TelemetryMetrics {
 // (harness.ts safeReport). Without a span the NOOP span drops the event; no root report span is created. Only the fixed
 // fields are recorded, never the error.
 func telemetryReport(onReport func(err error, info durable.ReportInfo), adapter telemetry.TelemetryContext) func(ctx context.Context, err error, info durable.ReportInfo) {
-	reports := telemetry.CreateTypedMetrics(metricsOf(adapter), DurableTelemetrySchema).Counter("pi.durable.reports")
+	reportMetrics := metricsOf(adapter)
+	reports := telemetry.CreateTypedMetrics(reportMetrics, DurableTelemetrySchema).Counter("pi.durable.reports")
+	metricsOn := reportMetrics != telemetry.NoopTelemetryMetrics
 	return func(ctx context.Context, err error, info durable.ReportInfo) {
 		onReport(err, info)
+		span := chordctx.Telemetry(ctx)
+		if !metricsOn && span == telemetry.NoopTelemetryContext {
+			return
+		}
 		attributes := telemetry.SpanAttributes{telemetry.Attr("type", string(info.Type))}
 		taskId := func() {
 			if info.Task != nil {
@@ -57,8 +63,10 @@ func telemetryReport(onReport func(err error, info durable.ReportInfo), adapter 
 		case durable.ReportHostError:
 			taskId()
 		}
-		reports.Add(1, telemetry.SpanAttributes{telemetry.Attr("type", string(info.Type))})
-		chordctx.Telemetry(ctx).AddEvent("pi.durable.report", attributes)
+		if metricsOn {
+			reports.Add(1, telemetry.SpanAttributes{telemetry.Attr("type", string(info.Type))})
+		}
+		span.AddEvent("pi.durable.report", attributes)
 	}
 }
 

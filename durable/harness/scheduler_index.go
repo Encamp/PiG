@@ -427,12 +427,16 @@ func (s *TaskScheduler) trackLocked(previous *anyTaskRecord, record anyTaskRecor
 	}
 	if record.State.Status == durable.TaskTerminal {
 		if kind, counted := s.counted[id]; counted {
-			s.activeMetric.Add(-1, telemetry.SpanAttributes{telemetry.Attr("task", kind)})
+			if s.metricsOn {
+				s.activeMetric.Add(-1, telemetry.SpanAttributes{telemetry.Attr("task", kind)})
+			}
 			delete(s.counted, id)
 		}
 		delete(s.resumed, id)
 	} else if _, counted := s.counted[id]; !counted && previous == nil && !s.sealing.Load() {
-		s.activeMetric.Add(1, telemetry.SpanAttributes{telemetry.Attr("task", record.Kind)})
+		if s.metricsOn {
+			s.activeMetric.Add(1, telemetry.SpanAttributes{telemetry.Attr("task", record.Kind)})
+		}
 		s.counted[id] = record.Kind
 	}
 	if previous != nil && previous.State.Status == durable.TaskWaiting {

@@ -78,11 +78,9 @@ func (submissions *Submissions) Submit(ctx context.Context, conversationId durab
 	if draft.Type != durable.SubmissionTypeInput {
 		parent = chordctx.Telemetry(ctx)
 	}
-	return telemetry.StartTypedSpan(telemetry.CreateTypedSpanStarter(parent, DurableTelemetrySchema), "pi.durable.submit", telemetry.SpanAttributes{
-		telemetry.Attr("submission.type", string(draft.Type)),
-		telemetry.Attr("conversation.id", float64(conversationId)),
-	}, func(span telemetry.TelemetrySpan, _ telemetry.TypedSpanStarter) (durable.Submission, error) {
-		if draft.Type == durable.SubmissionTypeInput {
+	submit := func(span telemetry.TelemetrySpan) (durable.Submission, error) {
+		traced := span != telemetry.NoopTelemetryContext
+		if traced && draft.Type == durable.SubmissionTypeInput {
 			span.AddLink(telemetry.SpanLink{Context: chordctx.Telemetry(ctx)})
 		}
 		admission, err := commitOnLine(chordctx.WithTelemetry(ctx, span), submissions.line, session.TransactionScope{}, func(tx *session.Transaction) (Admission, error) {
@@ -93,8 +91,20 @@ func (submissions *Submissions) Submit(ctx context.Context, conversationId durab
 			span.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError})
 			return nil, err
 		}
-		span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("submission.id", float64(admission.Id)), telemetry.Attr("result", admission.Status)})
+		if traced {
+			span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("submission.id", float64(admission.Id)), telemetry.Attr("result", admission.Status)})
+		}
 		return &submissionHandle{id: admission.Id, submissions: submissions}, nil
+	}
+	// The no-op parent starts the no-op span and drops the attributes, so none are built for it.
+	if parent == telemetry.NoopTelemetryContext {
+		return submit(telemetry.NoopTelemetryContext)
+	}
+	return telemetry.StartTypedSpan(telemetry.CreateTypedSpanStarter(parent, DurableTelemetrySchema), "pi.durable.submit", telemetry.SpanAttributes{
+		telemetry.Attr("submission.type", string(draft.Type)),
+		telemetry.Attr("conversation.id", float64(conversationId)),
+	}, func(span telemetry.TelemetrySpan, _ telemetry.TypedSpanStarter) (durable.Submission, error) {
+		return submit(span)
 	})
 }
 
