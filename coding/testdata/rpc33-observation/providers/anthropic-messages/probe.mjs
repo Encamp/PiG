@@ -196,8 +196,10 @@ const clientSockets = new Set();
 subscribe('net.client.socket', ({ socket }) => { clientSockets.add(socket); socket.once('close', () => clientSockets.delete(socket)); });
 async function clientHasRead(res) {
   // The client end of this response's connection: its local port is the server end's remote port.
-  const client = () => [...clientSockets].find(socket => socket.localPort === res.socket.remotePort && socket.remotePort === res.socket.localPort);
-  while ((client()?.bytesRead ?? 0) < res.socket.bytesWritten) await new Promise(resolve => setImmediate(resolve));
+  const server = res.socket;
+  const client = () => [...clientSockets].find(socket => socket.localPort === server.remotePort && socket.remotePort === server.localPort);
+  // A connection that closed (the consumer aborted, or the case ended) has nothing left to read: stop, or the loop spins forever.
+  while (!server.destroyed && (client()?.bytesRead ?? 0) < server.bytesWritten) await new Promise(resolve => setImmediate(resolve));
 }
 
 function serverFor(delivery, body) {
