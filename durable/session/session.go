@@ -146,7 +146,7 @@ func NewSessionImpl(storage durable.Storage, hooks Hooks, now func() float64, do
 	}
 	session := &SessionImpl{hooks: hooks, scheduler: newPending(), documents: map[string]*LoadedDocument{}, cache: newDocumentCache(), now: now, retentionSource: documentRetentionMs, failed: make(chan struct{}), closed: make(chan struct{})}
 	session.timers = durable.HostTimers(hooks.SetTimer, func(err error) {
-		session.report(context.Background(), err, durable.ReportInfo{Type: durable.ReportHostError, Callback: durable.HostCallbackSetTimer})
+		session.report(unscoped, err, durable.ReportInfo{Type: durable.ReportHostError, Callback: durable.HostCallbackSetTimer})
 	})
 	session.storage = newGuardedStorage(storage, session)
 	session.host = &transactionHost{
@@ -289,13 +289,19 @@ func (session *SessionImpl) End() durable.SessionEnd {
 	return session.end
 }
 
+// unscoped is the context of a report raised where upstream's `report(error, info)` has no context argument: it carries no
+// telemetry span, so the report is counted and no event is recorded.
+//
+//portlint:allow ctxbackground a report with no caller context records no span event; nothing is started from it
+var unscoped = context.Background()
+
 // listenerInfo is the default source of a report: a listener, which never fails what ran it (session.ts LISTENER).
 var listenerInfo = durable.ReportInfo{Type: durable.ReportListenerError}
 
 // Report is session.ts report with its default info: it hands a non-fatal failure, such as the error of a state or
 // watch listener, to the host; a plain Session drops it.
 func (session *SessionImpl) Report(err error) {
-	session.report(context.Background(), err, listenerInfo)
+	session.report(unscoped, err, listenerInfo)
 }
 
 // ReportAs is session.ts report with info: it hands a non-fatal failure to the host; a plain Session drops it.
@@ -305,7 +311,7 @@ func (session *SessionImpl) ReportAs(ctx context.Context, err error, info durabl
 
 // reportListener hands the error of a listener to the host.
 func (session *SessionImpl) reportListener(err error) {
-	session.report(context.Background(), err, listenerInfo)
+	session.report(unscoped, err, listenerInfo)
 }
 
 // reportListenerIn hands the error of a commit listener to the host under the telemetry of the commit's context.
@@ -325,7 +331,7 @@ func (session *SessionImpl) report(ctx context.Context, err error, info durable.
 // scheduler's own commits.
 func (session *SessionImpl) Fail(ctx context.Context, err error) { session.failIn(ctx, err) }
 
-func (session *SessionImpl) fail(err error) { session.failIn(context.Background(), err) }
+func (session *SessionImpl) fail(err error) { session.failIn(unscoped, err) }
 
 // failIn fails the Session and reports it under the telemetry of ctx, which is where upstream's `fail(error, context)` records it.
 func (session *SessionImpl) failIn(ctx context.Context, err error) {
@@ -340,6 +346,7 @@ func (session *SessionImpl) failIn(ctx context.Context, err error) {
 	// Seal first, so a report handler that calls back finds the Session failed. Closing runs the close listeners
 	// synchronously; a failing backend close is the caller's to see, and here nobody waits.
 	//portlint:allow ctxbackground session.ts's guarded-storage failure starts close with no caller to cancel it; nobody waits on this close
+	//portlint:allow ctxmapping the close is not the caller's work: ctx only names the span the failure is reported under, and may hold the failing commit's line ticket
 	session.beginClose(context.WithoutCancel(context.Background()))
 	session.report(ctx, err, durable.ReportInfo{Type: durable.ReportSessionFailed})
 }
@@ -738,7 +745,7 @@ func (session *SessionImpl) beginClose(ctx context.Context) <-chan struct{} {
 			}
 			session.mu.Unlock()
 			if reported {
-				session.report(context.Background(), err, durable.ReportInfo{Type: durable.ReportSessionFailed})
+				session.report(unscoped, err, durable.ReportInfo{Type: durable.ReportSessionFailed})
 			}
 			close(session.closed)
 		}()
