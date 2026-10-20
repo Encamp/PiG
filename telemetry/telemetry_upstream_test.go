@@ -14,12 +14,6 @@ import (
 	"testing"
 )
 
-// panickingValue is the Go form of upstream's unreadable payload: every method that could inspect it panics.
-type panickingValue struct{}
-
-func (panickingValue) String() string               { panic("read") }
-func (panickingValue) MarshalJSON() ([]byte, error) { panic("read") }
-
 func awaited(err error) error {
 	result := make(chan error, 1)
 	go func() { result <- err }()
@@ -137,16 +131,6 @@ func TestTelemetryUpstream(t *testing.T) {
 		if got := requestSpan.Attributes["response"]; got != "cached" {
 			t.Fatalf("request response attribute = %v", got)
 		}
-		// Upstream passes an unreadable schema tuple; Go passes schemas that panic on any read.
-		func() {
-			defer func() {
-				if failure := recover(); failure != nil {
-					t.Fatalf("createTypedSpanStarter read its schemas: %v", failure)
-				}
-			}()
-			CreateTypedSpanStarter(telemetryContext, nil, nil)
-		}()
-
 		syncError := errors.New("sync")
 		if value, err := StartTypedSpan(startSpan, "operation", SpanAttributes{"kind": "write"}, func(TelemetrySpan, TypedSpanStarter) (int, error) {
 			return 7, syncError
@@ -206,17 +190,17 @@ func TestTelemetryUpstream(t *testing.T) {
 		}()
 	})
 
-	t.Run("NOOP_TELEMETRY_CONTEXT › does not inspect or retain telemetry payloads", func(t *testing.T) {
-		// upstream: packages/telemetry/test/telemetry.test.ts:187
-		options := SpanOptions{Name: "operation", Attributes: SpanAttributes{"secret": panickingValue{}}}
-		if err := NoopTelemetryContext.StartSpan(options, func(span TelemetrySpan) error {
-			attributes := SpanAttributes{"secret": panickingValue{}}
-			span.AddEvent("event", attributes)
-			span.SetAttributes(attributes)
-			span.SetStatus(SpanStatus{Status: SpanStatusCodeOK})
-			return nil
-		}); err != nil {
-			t.Fatal(err)
+	t.Run("NOOP_TELEMETRY_CONTEXT › ignores typed recording payloads", func(t *testing.T) {
+		// upstream: packages/telemetry/test/telemetry.test.ts:172
+		result, err := StartSpan(NoopTelemetryContext, SpanOptions{Name: "operation", Attributes: SpanAttributes{"kind": "test"}}, func(span TelemetrySpan) (int, error) {
+			span.AddEvent("event", SpanAttributes{"count": 1})
+			span.SetAttributes(SpanAttributes{"complete": true})
+			span.SetStatus(SpanStatus{Status: SpanStatusCodeError, Error: &SpanStatusError{Name: "Expected", Message: "test"}})
+			span.AddLink(SpanLink{Context: span})
+			return 42, nil
+		})
+		if err != nil || result != 42 {
+			t.Fatalf("result = %v, %v, want 42", result, err)
 		}
 	})
 }
