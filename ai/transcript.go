@@ -553,40 +553,85 @@ func HasToolRedefinitions[M RoleMessage](messages TranscriptMessages[M]) bool {
 }
 
 func HasNonAdditiveToolChanges[M RoleMessage](messages TranscriptMessages[M]) bool {
-	declared := map[string]struct{}{}
+	return findLastNonAdditiveToolChange(systemMessagesOf(messages)) >= 0
+}
+
+// systemMessagesOf is messages.filter(isSystemMessage): the transcript's system messages in order.
+func systemMessagesOf[M RoleMessage](messages TranscriptMessages[M]) []SystemMessage {
+	var systemMessages []SystemMessage
 	for _, item := range messages {
-		message, ok := systemMessageOf(item)
-		if !ok {
-			continue
+		if message, ok := systemMessageOf(item); ok {
+			systemMessages = append(systemMessages, message)
 		}
+	}
+	return systemMessages
+}
+
+// findLastNonAdditiveToolChange is the index of the last system message with a removal or same-name redeclaration, or -1.
+// A name declared before counts as a redeclaration even after its removal: Kimi K3 ignores a removed tool that a later tool
+// message declares again.
+func findLastNonAdditiveToolChange(systemMessages []SystemMessage) int {
+	declared := map[string]struct{}{}
+	last := -1
+	for index, message := range systemMessages {
 		if len(message.ToolsRemoved) > 0 {
-			return true
+			last = index
 		}
 		for _, tool := range message.ToolsAdded {
 			if _, exists := declared[tool.Name]; exists {
-				return true
+				last = index
 			}
 			declared[tool.Name] = struct{}{}
 		}
 	}
-	return false
+	return last
 }
+
+// TranscriptToolSupport is how a transport can express tool changes after the first request.
+//
+//   - TranscriptToolSupportNone: only the top-level tool list exists; it always holds the current tools.
+//   - TranscriptToolSupportAdditions: tools can be added at a later message, but not removed or redefined.
+//   - TranscriptToolSupportChanges: every tool, including the initial ones, is declared in place, and a later declaration
+//     under the same name replaces the earlier one. Removals are not expressible on the wire, so the transport announces
+//     them as text and the removed tools stay declared.
+type TranscriptToolSupport string
+
+const (
+	TranscriptToolSupportNone      TranscriptToolSupport = "none"
+	TranscriptToolSupportAdditions TranscriptToolSupport = "additions"
+	TranscriptToolSupportChanges   TranscriptToolSupport = "changes"
+)
 
 type TranscriptTools struct {
-	RequestTools     []ToolSchema
-	AnchorsAdditions bool
+	// RequestTools are the tools sent in the top-level request field.
+	RequestTools []ToolSchema
+	// FoldedSystemMessages is the number of leading system messages whose tool changes RequestTools already holds. Every later
+	// system message carries its own tool changes in place.
+	FoldedSystemMessages int
 }
 
-func ResolveTranscriptTools[M RoleMessage](messages TranscriptMessages[M], supportsToolAdditions bool) TranscriptTools {
-	anchors := supportsToolAdditions && !HasNonAdditiveToolChanges(messages)
-	if anchors {
-		initial := GetInitialSystemMessage(messages)
-		if initial == nil {
-			return TranscriptTools{AnchorsAdditions: true}
-		}
-		return TranscriptTools{RequestTools: cloneTools(initial.ToolsAdded), AnchorsAdditions: true}
+// ResolveTranscriptTools splits tool declarations between the top-level request field and in-place changes.
+//
+// With TranscriptToolSupportChanges, the top-level list stays empty and every system message, including the leading one,
+// declares its tools in place: an in-place declaration can replace an earlier in-place one, but not a top-level one. With
+// TranscriptToolSupportAdditions, a removal or redefinition cannot be expressed in place, so the top-level list becomes the
+// tool state after the last such change; later additions stay anchored, and the cached prefix is invalidated once per
+// removal instead of on every later addition. With TranscriptToolSupportNone, the top-level list is the current tool set.
+func ResolveTranscriptTools[M RoleMessage](messages TranscriptMessages[M], support TranscriptToolSupport) TranscriptTools {
+	systemMessages := systemMessagesOf(messages)
+	switch support {
+	case TranscriptToolSupportNone:
+		return TranscriptTools{RequestTools: GetCurrentTools(systemMessages), FoldedSystemMessages: len(systemMessages)}
+	case TranscriptToolSupportChanges:
+		return TranscriptTools{}
 	}
-	return TranscriptTools{RequestTools: GetCurrentTools(messages)}
+	folded := max(findLastNonAdditiveToolChange(systemMessages)+1, 0)
+	if len(messages) > 0 {
+		if _, ok := systemMessageOf(messages[0]); ok {
+			folded = max(folded, 1)
+		}
+	}
+	return TranscriptTools{RequestTools: GetCurrentTools(systemMessages[:folded]), FoldedSystemMessages: folded}
 }
 
 func systemContentText(content SystemContent) string {

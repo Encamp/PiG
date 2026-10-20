@@ -970,7 +970,7 @@ func (p *openAIResponsesProvider) consumeCodexWebSocket(ctx context.Context, acq
 	result := builder.stream.Result()
 	keep := result != nil && result.StopReason != StopReasonError && result.StopReason != StopReasonAborted
 	if keep && useCachedContext && acquired.entry != nil && result.ResponseID != "" {
-		responseItems, err := p.convertAnchoredMessages([]Message{*result}, grammarProps, false)
+		responseItems, err := p.convertMessages([]Message{*result}, grammarProps)
 		baseline := make([]json.RawMessage, len(request.input), len(request.input)+len(responseItems))
 		copy(baseline, request.input)
 		// Each response item as the next request's body writes it: JSON.stringify text, compared byte for byte.
