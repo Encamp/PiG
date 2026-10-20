@@ -592,10 +592,10 @@ func newHarness(ctx context.Context, storage durable.Storage, options HarnessOpt
 	harness.line = sessionLine{harness.SessionImpl}
 	harness.tasks = NewTaskScheduler(TaskSchedulerOptions{
 		Telemetry: options.Telemetry,
-		Session:  harness.SessionImpl,
-		Storage:  storage,
-		Registry: options.Registry,
-		Models:   options.CurrentModels,
+		Session:   harness.SessionImpl,
+		Storage:   storage,
+		Registry:  options.Registry,
+		Models:    options.CurrentModels,
 		Agent: func(callCtx context.Context, id durable.ConversationId, snapshot durable.RegistrySnapshot) (durable.Agent, error) {
 			return harness.resolveAgent(callCtx, id, snapshot)
 		},

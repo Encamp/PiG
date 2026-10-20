@@ -17,12 +17,16 @@ import (
 	"sync"
 	"sync/atomic"
 
+	chordctx "github.com/MichaelKinsy/PiG/chord/context"
 	"github.com/MichaelKinsy/PiG/chord/delta"
 	"github.com/MichaelKinsy/PiG/durable"
 	"github.com/MichaelKinsy/PiG/durable/core/jv"
 	"github.com/MichaelKinsy/PiG/durable/env"
 	"github.com/MichaelKinsy/PiG/durable/internal/detach"
 	"github.com/MichaelKinsy/PiG/durable/session"
+	"github.com/MichaelKinsy/PiG/internal/jsclock"
+	"github.com/MichaelKinsy/PiG/internal/jsstring"
+	"github.com/MichaelKinsy/PiG/telemetry"
 )
 
 type anyTaskRecord = durable.TaskRecord[durable.JsonValue, durable.JsonValue, durable.JsonValue]
@@ -205,9 +209,9 @@ type scope struct {
 type TaskSchedulerOptions struct {
 	// Telemetry is HarnessOptions.telemetry: the root of phase spans and the source of the metrics; nil is the no-op context.
 	Telemetry telemetry.TelemetryContext
-	Session  *session.SessionImpl
-	Storage  durable.Storage
-	Registry RegistryReader
+	Session   *session.SessionImpl
+	Storage   durable.Storage
+	Registry  RegistryReader
 	// Models returns the host's current model access (HarnessOptions.models); read at each access.
 	Models func() durable.Models
 	// Agent resolves a conversation's agent against a snapshot; the runtime calls it at most once per phase.
@@ -608,7 +612,9 @@ func (s *TaskScheduler) notifyBlockedLocked() {
 	}
 	s.background.Go(func() {
 		for _, listener := range listeners {
-			session.Contained(listener, func(err error) { s.options.Report(context.Background(), err, durable.ReportInfo{Type: durable.ReportListenerError}) })
+			session.Contained(listener, func(err error) {
+				s.options.Report(context.Background(), err, durable.ReportInfo{Type: durable.ReportListenerError})
+			})
 		}
 	})
 }
@@ -1300,7 +1306,7 @@ func (s *TaskScheduler) reconcile(ticket *session.LineTicket) {
 		// Any pass may have staged marks, so a failed one is retried with the next commit.
 		// No extension code runs in this commit: a failure is a storage failure, a host callback, or a bug. None is fixed by
 		// running the pass again, so it fails the Session, which reports it.
-		s.failSession(err)
+		s.failSession(context.Background(), err)
 	}
 	s.mu.Lock()
 	if work {
@@ -1319,12 +1325,12 @@ func (s *TaskScheduler) reconcileWorkLocked() bool {
 
 // failSession fails the Session, which reports it, for a failure in one of the scheduler's own commits; ignored once
 // closing.
-func (s *TaskScheduler) failSession(err error) {
+func (s *TaskScheduler) failSession(ctx context.Context, err error) {
 	s.mu.Lock()
 	closing := s.sealing.Load()
 	s.mu.Unlock()
 	if !closing {
-		s.options.Session.Fail(err)
+		s.options.Session.Fail(ctx, err)
 	}
 }
 
@@ -1715,7 +1721,7 @@ func (s *TaskScheduler) drain(ticket *session.LineTicket) {
 		ticket = nil
 		if err != nil {
 			// As in reconcile: the reservation commit runs no extension code.
-			s.failSession(err)
+			s.failSession(context.Background(), err)
 			s.mu.Lock()
 			s.draining = false
 			dirty := s.dirty
@@ -2085,39 +2091,152 @@ func (s *TaskScheduler) start(reserved reservation) {
 	}()
 }
 
-// run runs phase handlers, each preceded by a step that decides on the line whether the invocation continues.
+// run runs phase handlers, each preceded by a step that decides on the line whether the invocation continues. A phase
+// owns its decision commit, not the next handler, a durable wait, or recovery.
 func (s *TaskScheduler) run(reserved reservation) error {
 	invocation := reserved.invocation
 	phase := &phaseState{snapshot: reserved.snapshot, task: reserved.task}
 	runtime := s.runtime(invocation, phase)
-	var previous *phaseResult
-	for {
-		current, ok := s.step(invocation, func(tx *session.Transaction, current anyTaskRecord) decision {
-			return s.decideLocked(tx, current, previous, phase, invocation)
+	current, ok := s.step(invocation, func(tx *session.Transaction, current anyTaskRecord) decision {
+		return s.decideLocked(tx, current, nil, phase, invocation)
+	})
+	for ok && !s.isSealed() {
+		task := current
+		current, ok = s.phase(invocation, task, func(ctx context.Context) (anyTaskRecord, bool) {
+			var checkpoint durable.JsonValue
+			if task.State.Checkpoint != nil {
+				checkpoint = *task.State.Checkpoint
+			}
+			// Each phase handler resolves its agent afresh, at first use.
+			phase.mu.Lock()
+			phase.agent = nil
+			definition := phase.task
+			phase.mu.Unlock()
+			name := phaseName(checkpoint)
+			handler := definition.AnyDefinition().Phases[name]
+			var failure error
+			if handler == nil {
+				failure = fmt.Errorf("Task %s has no phase %s", task.Kind, name)
+			} else {
+				failure = runHandler(func() error { return handler(ctx, task, runtime) })
+			}
+			previous := &phaseResult{checkpoint: checkpoint, failure: failure, failed: failure != nil}
+			return s.step(invocation, func(tx *session.Transaction, next anyTaskRecord) decision {
+				return s.decideLocked(tx, next, previous, phase, invocation)
+			})
 		})
-		// Close may seal between the decision and dispatch.
-		if !ok || s.isSealed() {
-			return nil
-		}
-		var checkpoint durable.JsonValue
-		if current.State.Checkpoint != nil {
-			checkpoint = *current.State.Checkpoint
-		}
-		// Each phase handler resolves its agent afresh, at first use.
-		phase.mu.Lock()
-		phase.agent = nil
-		task := phase.task
-		phase.mu.Unlock()
-		name := phaseName(checkpoint)
-		handler := task.AnyDefinition().Phases[name]
-		var failure error
-		if handler == nil {
-			failure = fmt.Errorf("Task %s has no phase %s", current.Kind, name)
-		} else {
-			failure = runHandler(func() error { return handler(invocation.ctx, current, runtime) })
-		}
-		previous = &phaseResult{checkpoint: checkpoint, failure: failure, failed: failure != nil}
 	}
+	return nil
+}
+
+// phase runs one run or abort phase under a pi.durable.phase span (scheduler.ts #phase). The span's parent is the
+// extracted stored carrier of the task, else the adapter root; its first invocation links to the task's creation-time
+// links. Handlers and the decision commit receive its context. Its outcome, status, and duration are set when the phase
+// returns.
+func (s *TaskScheduler) phase(invocation *invocation, task anyTaskRecord, run func(ctx context.Context) (anyTaskRecord, bool)) (anyTaskRecord, bool) {
+	parent := s.telemetry
+	if task.Trace != nil {
+		if propagation := s.telemetry.Propagation(); propagation != nil {
+			parent = propagation.Extract(task.Trace)
+		}
+	}
+	var checkpoint durable.JsonValue
+	if task.State.Checkpoint != nil {
+		checkpoint = *task.State.Checkpoint
+	}
+	phaseOf := phaseName(checkpoint)
+	attributes := telemetry.SpanAttributes{
+		"task.id":   float64(task.Id),
+		"task.name": task.Kind,
+		"phase":     phaseOf,
+		"kind":      "run",
+	}
+	if invocation.mode == modeAbort {
+		attributes["kind"] = "abort"
+	}
+	if attempt, ok := jsonMember(checkpoint, "attempt").(float64); ok {
+		attributes["attempt"] = attempt
+	}
+	s.mu.Lock()
+	_, resumed := s.resumed[task.Id]
+	delete(s.resumed, task.Id)
+	links := invocation.links
+	s.mu.Unlock()
+	attributes["resumed"] = resumed
+	type stepped struct {
+		record anyTaskRecord
+		ok     bool
+	}
+	result, _ := telemetry.StartTypedSpan(telemetry.CreateTypedSpanStarter(parent, DurableTelemetrySchema), "pi.durable.phase", attributes, func(span telemetry.TelemetrySpan, _ telemetry.TypedSpanStarter) (stepped, error) {
+		if propagation := span.Propagation(); propagation != nil {
+			for _, carrier := range links {
+				span.AddLink(telemetry.SpanLink{Context: propagation.Extract(carrier)})
+			}
+		}
+		invocation.setSpan(span)
+		started := jsclock.PerformanceNow()
+		var out stepped
+		defer func() {
+			invocation.setSpan(nil)
+			s.finishPhase(invocation, span, task, phaseOf, jsclock.PerformanceNow()-started)
+		}()
+		out.record, out.ok = run(chordctx.WithTelemetry(invocation.ctx, span))
+		return out, nil
+	})
+	return result.record, result.ok
+}
+
+// finishPhase sets the outcome attributes, the fixed-category error status, and the duration metric of a finished phase.
+func (s *TaskScheduler) finishPhase(invocation *invocation, span telemetry.TelemetrySpan, task anyTaskRecord, phaseOf string, durationMs float64) {
+	s.mu.Lock()
+	var state anyTaskState
+	if invocation.record != nil {
+		state = invocation.record.State
+	}
+	var terminal *anyOutcome
+	switch {
+	case invocation.fault != nil:
+		terminal = invocation.fault
+	case state.Status == durable.TaskTerminal || state.Status == durable.TaskCompleting:
+		terminal = state.Outcome
+	}
+	var outcome string
+	switch {
+	case terminal != nil:
+		switch terminal.Status {
+		case durable.OutcomeCompleted:
+			outcome = "done"
+		case durable.OutcomeAborted:
+			outcome = "aborted"
+		default:
+			outcome = "faulted"
+		}
+	case state.Status == durable.TaskWaiting || state.Status == durable.TaskSleeping:
+		outcome = string(state.Status)
+	case invocation.ended.Load() || s.sealing.Load():
+		outcome = "aborted"
+	default:
+		next := ""
+		if state.Checkpoint != nil {
+			next = phaseName(*state.Checkpoint)
+		}
+		outcome = "next=" + next
+	}
+	s.mu.Unlock()
+	span.SetAttributes(telemetry.SpanAttributes{"outcome": outcome})
+	if terminal != nil && (terminal.Status == durable.OutcomeFaulted || terminal.Status == durable.OutcomeFailed || terminal.Status == durable.OutcomeOrphaned) {
+		message := ""
+		switch {
+		case terminal.Status == durable.OutcomeOrphaned && terminal.Reason != nil:
+			message = *terminal.Reason
+		case terminal.Error != nil:
+			message = terminal.Error.Message
+		}
+		span.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError, Error: &telemetry.SpanStatusError{Name: "task_" + string(terminal.Status), Message: jsstring.Slice(message, 0, 500)}})
+	} else if outcome == "aborted" {
+		span.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeOK})
+	}
+	s.durationMetric.Record(durationMs, telemetry.SpanAttributes{"task": task.Kind, "phase": phaseOf, "outcome": outcome}, span)
 }
 
 // runHandler runs task code and turns a panic into a fault, as an uncaught throw faults a task upstream; the fault's
@@ -2200,16 +2319,18 @@ func (s *TaskScheduler) runAbort(reserved reservation) error {
 	phase := &phaseState{snapshot: reserved.snapshot, task: reserved.task}
 	runtime := s.runtime(invocation, phase)
 	abort := reserved.task.AnyDefinition().Abort
-	var failure error
-	if abort == nil {
-		failure = fmt.Errorf("Task %s has no abort handler", current.Kind)
-	} else {
-		failure = runHandler(func() error { return abort(invocation.ctx, current, runtime) })
-	}
-	if failure == nil {
-		failure = fmt.Errorf("Abort handler of task %d returned without a terminal outcome", invocation.taskId)
-	}
-	s.step(invocation, func(*session.Transaction, anyTaskRecord) decision { return decision{fault: failure} })
+	s.phase(invocation, current, func(ctx context.Context) (anyTaskRecord, bool) {
+		var failure error
+		if abort == nil {
+			failure = fmt.Errorf("Task %s has no abort handler", current.Kind)
+		} else {
+			failure = runHandler(func() error { return abort(ctx, current, runtime) })
+		}
+		if failure == nil {
+			failure = fmt.Errorf("Abort handler of task %d returned without a terminal outcome", invocation.taskId)
+		}
+		return s.step(invocation, func(*session.Transaction, anyTaskRecord) decision { return decision{fault: failure} })
+	})
 	return nil
 }
 
@@ -2223,7 +2344,7 @@ func (s *TaskScheduler) step(invocation *invocation, decide func(tx *session.Tra
 		proceed bool
 	}
 	var fault error
-	result, err := commitOnLine(s.options.Context, s.options.Session, session.TransactionScope{}, func(tx *session.Transaction) (stepped, error) {
+	result, err := commitOnLine(chordctx.WithTelemetry(s.options.Context, invocation.currentSpan()), s.options.Session, session.TransactionScope{}, func(tx *session.Transaction) (stepped, error) {
 		fault = nil
 		s.mu.Lock()
 		defer s.mu.Unlock()
@@ -2239,7 +2360,9 @@ func (s *TaskScheduler) step(invocation *invocation, decide func(tx *session.Tra
 		s.endLocked(invocation)
 		if outcome.fault != nil {
 			fault = outcome.fault
-			if err := s.terminateLocked(tx, found, anyOutcome{Status: durable.OutcomeFaulted, Error: &durable.TaskOutcomeError{Message: outcome.fault.Error()}}); err != nil {
+			faulted := anyOutcome{Status: durable.OutcomeFaulted, Error: &durable.TaskOutcomeError{Message: outcome.fault.Error()}}
+			invocation.fault = &faulted
+			if err := s.terminateLocked(tx, found, faulted); err != nil {
 				return stepped{}, err
 			}
 		}
@@ -2249,7 +2372,7 @@ func (s *TaskScheduler) step(invocation *invocation, decide func(tx *session.Tra
 		// The step writes the scheduler's own decision, a fault or a terminal record; a failure there would otherwise leave
 		// the task running, to be reserved and run again.
 		s.end(invocation)
-		s.failSession(err)
+		s.failSession(invocation.telemetryContext(), err)
 		return anyTaskRecord{}, false
 	}
 	// Reported once the fault is durable: a host may count it, for example toward a breaker.
@@ -2683,6 +2806,8 @@ func (hold *lineHold) release() {
 }
 
 func (runtime *taskRuntime) Commit(ctx context.Context, change func(tx durable.Tx, current durable.ErasedRunningTask) (*durable.NextTaskState[durable.JsonValue, durable.JsonValue], error)) error {
+	var checkpoint string
+	var committed bool
 	_, err := gated(ctx, runtime, func(tx *session.Transaction, current anyTaskRecord) (struct{}, error) {
 		next, err := change(tx, current)
 		if err != nil || next == nil {
@@ -2695,8 +2820,19 @@ func (runtime *taskRuntime) Commit(ctx context.Context, change func(tx durable.T
 		}
 		runtime.scheduler.mu.Lock()
 		defer runtime.scheduler.mu.Unlock()
-		return struct{}{}, runtime.scheduler.commitStateLocked(tx, runtime.invocation, current, *next)
+		if err := runtime.scheduler.commitStateLocked(tx, runtime.invocation, current, *next); err != nil {
+			return struct{}{}, err
+		}
+		if next.Status == durable.TaskRunning && next.Checkpoint != nil {
+			if after := phaseName(*next.Checkpoint); phaseName(*current.State.Checkpoint) != after {
+				checkpoint, committed = after, true
+			}
+		}
+		return struct{}{}, nil
 	})
+	if err == nil && committed {
+		runtime.invocation.currentSpan().AddEvent("pi.durable.checkpoint", telemetry.SpanAttributes{"phase": checkpoint})
+	}
 	return err
 }
 

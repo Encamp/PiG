@@ -294,7 +294,9 @@ var listenerInfo = durable.ReportInfo{Type: durable.ReportListenerError}
 
 // Report is session.ts report with its default info: it hands a non-fatal failure, such as the error of a state or
 // watch listener, to the host; a plain Session drops it.
-func (session *SessionImpl) Report(err error) { session.report(context.Background(), err, listenerInfo) }
+func (session *SessionImpl) Report(err error) {
+	session.report(context.Background(), err, listenerInfo)
+}
 
 // ReportAs is session.ts report with info: it hands a non-fatal failure to the host; a plain Session drops it.
 func (session *SessionImpl) ReportAs(ctx context.Context, err error, info durable.ReportInfo) {

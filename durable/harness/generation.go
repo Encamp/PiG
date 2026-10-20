@@ -963,7 +963,7 @@ func answer(ctx context.Context, runtime generationRuntime, message ai.Assistant
 			if _, err := durable.TxAppendEntry(tx, durable.UserEntry, conversationId, durable.TypedEntryDraft[durable.Never]{Model: []ai.Message{user}}); err != nil {
 				return nil, err
 			}
-			successor, err := createGeneration(tx, conversationId)
+			successor, err := createGeneration(tx, conversationId, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -1205,7 +1205,7 @@ func finishToolRound(ctx context.Context, runtime generationRuntime, assistant d
 						return nil, err
 					}
 				}
-				successor, err := createGeneration(tx, conversationId)
+				successor, err := createGeneration(tx, conversationId, nil)
 				if err != nil {
 					return nil, err
 				}
@@ -1227,19 +1227,36 @@ func appendAssistant(tx durable.Tx, conversationId durable.ConversationId, messa
 	return durable.TxAppendEntry(tx, durable.AssistantEntry, conversationId, durable.TypedEntryDraft[durable.Never]{Model: []ai.Message{message}})
 }
 
-// StartRun starts a run for inputs, placed input submissions: a new generation takes pi.live.run.
+// StartRun starts a run for inputs, placed input submissions: a new generation takes pi.live.run. The generation starts
+// in its first input's trace and links to the others.
 func StartRun(tx durable.Tx, conversationId durable.ConversationId, live *delta.Object, inputs []durable.SubmissionId) error {
-	taskId, err := createGeneration(tx, conversationId)
+	taskId, err := createGeneration(tx, conversationId, nonNil(inputs))
 	if err != nil {
 		return err
 	}
 	return setJSON(live, "run", LiveRun{TaskId: taskId, Inputs: nonNil(inputs)})
 }
 
-// createGeneration creates a generation owned by its conversation.
-func createGeneration(tx durable.Tx, conversationId durable.ConversationId) (durable.TaskId, error) {
+// submissionTaskCreator is the Session transaction's internal creation entry, which resolves the carriers of the
+// submissions a run starts for (transaction.ts TaskCreationOptions.submissionIds).
+type submissionTaskCreator interface {
+	CreateTaskFromSubmissions(task durable.AnyTask, input durable.JsonValue, options durable.TaskOptions, submissionIds []durable.SubmissionId) (durable.TaskId, error)
+}
+
+// createGeneration creates a generation owned by its conversation; submissionIds, when not nil, are the inputs a new run
+// starts for.
+func createGeneration(tx durable.Tx, conversationId durable.ConversationId, submissionIds []durable.SubmissionId) (durable.TaskId, error) {
 	id := conversationId
-	return durable.CreateTask(tx, GenerationTask, GenerationInput{}, durable.TaskOptions{Ownership: durable.TaskOwnership{Kind: durable.TaskOwnedByConversation}, ConversationId: &id})
+	options := durable.TaskOptions{Ownership: durable.TaskOwnership{Kind: durable.TaskOwnedByConversation}, ConversationId: &id}
+	creator, ok := tx.(submissionTaskCreator)
+	if !ok || submissionIds == nil {
+		return durable.CreateTask(tx, GenerationTask, GenerationInput{}, options)
+	}
+	encoded, err := durable.ToJsonValue(GenerationInput{})
+	if err != nil {
+		return 0, err
+	}
+	return creator.CreateTaskFromSubmissions(GenerationTask.Erased(), encoded, options, submissionIds)
 }
 
 // handOver hands run control from one task to another; the run's inputs move with it.

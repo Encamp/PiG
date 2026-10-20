@@ -9,9 +9,11 @@ import (
 	"sync"
 
 	"github.com/MichaelKinsy/PiG/ai"
+	chordctx "github.com/MichaelKinsy/PiG/chord/context"
 	"github.com/MichaelKinsy/PiG/chord/delta"
 	"github.com/MichaelKinsy/PiG/durable"
 	"github.com/MichaelKinsy/PiG/internal/jsstring"
+	"github.com/MichaelKinsy/PiG/telemetry"
 )
 
 // Ports the nested-call half of packages/durable/src/harness/tool.ts (executeTool, startNestedCall, settle's nested
@@ -290,7 +292,9 @@ func startNestedCall(ctx context.Context, runtime NestedCaller, parentCallId, na
 	}
 	progress := option.Progress
 	var id durable.TaskId
+	replayed := false
 	err = runtime.CommitFenced(ctx, func(tx durable.Tx) error {
+		replayed = false
 		// Opened, or created empty for a key not made yet.
 		state, err := tx.Doc(NestedCallDoc, runtime.TaskId(), key, nil)
 		if err != nil {
@@ -311,6 +315,7 @@ func startNestedCall(ctx context.Context, runtime NestedCaller, parentCallId, na
 				return fmt.Errorf("Nested call %s was already made with another tool or other arguments", call.ID)
 			}
 			id = durable.TaskId(existing)
+			replayed = state.Has("result")
 			return nil
 		}
 		input := ToolTaskInput{Kind: ToolTaskNested, Parent: runtime.TaskId(), ParentCallId: parentCallId, Key: key, Call: &call}
@@ -343,6 +348,9 @@ func startNestedCall(ctx context.Context, runtime NestedCaller, parentCallId, na
 		id = created
 		return nil
 	})
+	if err == nil && replayed {
+		chordctx.Telemetry(ctx).AddEvent("pi.durable.replay", telemetry.SpanAttributes{"tool.name": name})
+	}
 	return id, err
 }
 

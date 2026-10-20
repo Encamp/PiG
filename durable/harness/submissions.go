@@ -39,9 +39,9 @@ func readOnLine[T any](line *session.SessionImpl, read func() (T, error)) (T, er
 // Submissions is admission, waits, and withdrawal of the durable submissions of one Harness (submissions.ts:21-118).
 type Submissions struct {
 	telemetry telemetry.TelemetryContext
-	line    *session.SessionImpl
-	storage durable.Storage
-	now     func() float64
+	line      *session.SessionImpl
+	storage   durable.Storage
+	now       func() float64
 	// queueModes is read at each admission, on the Session line.
 	queueModes func() QueueModes
 	// resume enables task scheduling; submitting or waiting asks for progress.
@@ -288,7 +288,7 @@ func AdmitSubmission(tx durable.Tx, conversationId durable.ConversationId, draft
 		}
 		if existing != nil {
 			if existing.Type != draft.Type {
-				return 0, fmt.Errorf("Request %s already identifies a submission of type %s", *draft.RequestId, existing.Type)
+				return Admission{}, fmt.Errorf("Request %s already identifies a submission of type %s", *draft.RequestId, existing.Type)
 			}
 			status := string(existing.Status)
 			if existing.Status == durable.SubmissionUnanswered {
