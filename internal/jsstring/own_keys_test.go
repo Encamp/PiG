@@ -32,9 +32,11 @@ func TestArrayIndexTable(t *testing.T) {
 	}
 }
 
+var arrayIndexSink uint32
+
 func TestArrayIndexNonNumericNamesDoNotAllocate(t *testing.T) {
 	for _, key := range []string{"provider", "usage.input", "x1", "12345678901", "0123"} {
-		if allocs := testing.AllocsPerRun(100, func() { ArrayIndex(key) }); allocs != 0 {
+		if allocs := testing.AllocsPerRun(100, func() { arrayIndexSink, _ = ArrayIndex(key) }); allocs != 0 {
 			t.Errorf("ArrayIndex(%q) allocates %v", key, allocs)
 		}
 	}
