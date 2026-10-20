@@ -79,8 +79,8 @@ func (submissions *Submissions) Submit(ctx context.Context, conversationId durab
 		parent = chordctx.Telemetry(ctx)
 	}
 	return telemetry.StartTypedSpan(telemetry.CreateTypedSpanStarter(parent, DurableTelemetrySchema), "pi.durable.submit", telemetry.SpanAttributes{
-		"submission.type": string(draft.Type),
-		"conversation.id": float64(conversationId),
+		telemetry.Attr("submission.type", string(draft.Type)),
+		telemetry.Attr("conversation.id", float64(conversationId)),
 	}, func(span telemetry.TelemetrySpan, _ telemetry.TypedSpanStarter) (durable.Submission, error) {
 		if draft.Type == durable.SubmissionTypeInput {
 			span.AddLink(telemetry.SpanLink{Context: chordctx.Telemetry(ctx)})
@@ -93,7 +93,7 @@ func (submissions *Submissions) Submit(ctx context.Context, conversationId durab
 			span.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError})
 			return nil, err
 		}
-		span.SetAttributes(telemetry.SpanAttributes{"submission.id": float64(admission.Id), "result": admission.Status})
+		span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("submission.id", float64(admission.Id)), telemetry.Attr("result", admission.Status)})
 		return &submissionHandle{id: admission.Id, submissions: submissions}, nil
 	})
 }

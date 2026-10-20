@@ -983,17 +983,17 @@ func (session *SessionImpl) publish(ctx context.Context, seq durable.Seq, writes
 		switch write := table.(type) {
 		case durable.EntryWrite:
 			span.AddEvent("pi.durable.entry", telemetry.SpanAttributes{
-				"entry.id":   float64(write.Value.Id),
-				"entry.kind": write.Value.Kind,
+				telemetry.Attr("entry.id", float64(write.Value.Id)),
+				telemetry.Attr("entry.kind", write.Value.Kind),
 			})
 		case durable.SubmissionWrite:
 			if write.Value.Status == durable.SubmissionDone || write.Value.Status == durable.SubmissionUnanswered {
 				attributes := telemetry.SpanAttributes{
-					"submission.id": float64(write.Value.Id),
-					"status":        string(write.Value.Status),
+					telemetry.Attr("submission.id", float64(write.Value.Id)),
+					telemetry.Attr("status", string(write.Value.Status)),
 				}
 				if write.Value.Answer != nil {
-					attributes["answer.entry_id"] = float64(*write.Value.Answer)
+					attributes = attributes.Set("answer.entry_id", float64(*write.Value.Answer))
 				}
 				span.AddEvent("pi.durable.submission", attributes)
 			}

@@ -33,21 +33,21 @@ func telemetryReport(onReport func(err error, info durable.ReportInfo), adapter 
 	reports := telemetry.CreateTypedMetrics(metricsOf(adapter), DurableTelemetrySchema).Counter("pi.durable.reports")
 	return func(ctx context.Context, err error, info durable.ReportInfo) {
 		onReport(err, info)
-		attributes := telemetry.SpanAttributes{"type": string(info.Type)}
+		attributes := telemetry.SpanAttributes{telemetry.Attr("type", string(info.Type))}
 		taskId := func() {
 			if info.Task != nil {
-				attributes["task.id"] = float64(info.Task.Id)
+				attributes = attributes.Set("task.id", float64(info.Task.Id))
 			}
 		}
 		extension := func() {
 			if info.Extension != "" {
-				attributes["extension"] = info.Extension
+				attributes = attributes.Set("extension", info.Extension)
 			}
 		}
 		switch info.Type {
 		case durable.ReportTaskFaulted, durable.ReportTaskOutdated:
 			if info.Reason != "" {
-				attributes["reason"] = info.Reason
+				attributes = attributes.Set("reason", info.Reason)
 			}
 			extension()
 			taskId()
@@ -57,7 +57,7 @@ func telemetryReport(onReport func(err error, info durable.ReportInfo), adapter 
 		case durable.ReportHostError:
 			taskId()
 		}
-		reports.Add(1, telemetry.SpanAttributes{"type": string(info.Type)})
+		reports.Add(1, telemetry.SpanAttributes{telemetry.Attr("type", string(info.Type))})
 		chordctx.Telemetry(ctx).AddEvent("pi.durable.report", attributes)
 	}
 }

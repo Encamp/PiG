@@ -1652,7 +1652,7 @@ func (s *TaskScheduler) seal() {
 func (s *TaskScheduler) finishSealLocked() {
 	// Closing the Harness releases its active counts.
 	for _, kind := range s.counted {
-		s.activeMetric.Add(-1, telemetry.SpanAttributes{"task": kind})
+		s.activeMetric.Add(-1, telemetry.SpanAttributes{telemetry.Attr("task", kind)})
 	}
 	clear(s.counted)
 	clear(s.resumed)
@@ -2145,24 +2145,26 @@ func (s *TaskScheduler) phase(invocation *invocation, task anyTaskRecord, run fu
 		checkpoint = *task.State.Checkpoint
 	}
 	phaseOf := phaseName(checkpoint)
-	attributes := telemetry.SpanAttributes{
-		"task.id":   float64(task.Id),
-		"task.name": task.Kind,
-		"phase":     phaseOf,
-		"kind":      "run",
-	}
+	kind := "run"
 	if invocation.mode == modeAbort {
-		attributes["kind"] = "abort"
-	}
-	if attempt, ok := jsonMember(checkpoint, "attempt").(float64); ok {
-		attributes["attempt"] = attempt
+		kind = "abort"
 	}
 	s.mu.Lock()
 	_, resumed := s.resumed[task.Id]
 	delete(s.resumed, task.Id)
 	links := invocation.links
 	s.mu.Unlock()
-	attributes["resumed"] = resumed
+	// Pi's literal order: task.id, task.name, phase, kind, resumed, then attempt when present.
+	attributes := telemetry.SpanAttributes{
+		telemetry.Attr("task.id", float64(task.Id)),
+		telemetry.Attr("task.name", task.Kind),
+		telemetry.Attr("phase", phaseOf),
+		telemetry.Attr("kind", kind),
+		telemetry.Attr("resumed", resumed),
+	}
+	if attempt, ok := jsonMember(checkpoint, "attempt").(float64); ok {
+		attributes = attributes.Set("attempt", attempt)
+	}
 	type stepped struct {
 		record anyTaskRecord
 		ok     bool
@@ -2223,7 +2225,7 @@ func (s *TaskScheduler) finishPhase(invocation *invocation, span telemetry.Telem
 		outcome = "next=" + next
 	}
 	s.mu.Unlock()
-	span.SetAttributes(telemetry.SpanAttributes{"outcome": outcome})
+	span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("outcome", outcome)})
 	if terminal != nil && (terminal.Status == durable.OutcomeFaulted || terminal.Status == durable.OutcomeFailed || terminal.Status == durable.OutcomeOrphaned) {
 		message := ""
 		switch {
@@ -2236,7 +2238,7 @@ func (s *TaskScheduler) finishPhase(invocation *invocation, span telemetry.Telem
 	} else if outcome == "aborted" {
 		span.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeOK})
 	}
-	s.durationMetric.Record(durationMs, telemetry.SpanAttributes{"task": task.Kind, "phase": phaseOf, "outcome": outcome}, span)
+	s.durationMetric.Record(durationMs, telemetry.SpanAttributes{telemetry.Attr("task", task.Kind), telemetry.Attr("phase", phaseOf), telemetry.Attr("outcome", outcome)}, span)
 }
 
 // runHandler runs task code and turns a panic into a fault, as an uncaught throw faults a task upstream; the fault's
@@ -2831,7 +2833,7 @@ func (runtime *taskRuntime) Commit(ctx context.Context, change func(tx durable.T
 		return struct{}{}, nil
 	})
 	if err == nil && committed {
-		runtime.invocation.currentSpan().AddEvent("pi.durable.checkpoint", telemetry.SpanAttributes{"phase": checkpoint})
+		runtime.invocation.currentSpan().AddEvent("pi.durable.checkpoint", telemetry.SpanAttributes{telemetry.Attr("phase", checkpoint)})
 	}
 	return err
 }

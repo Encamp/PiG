@@ -392,7 +392,7 @@ func awaitEarlierAborts(ctx context.Context, runtime toolRuntime) error {
 func readCall(ctx context.Context, runtime toolRuntime, input ToolTaskInput) (ai.ToolCall, error) {
 	if input.Kind == ToolTaskNested {
 		// A nested call carries its call, because no entry holds it.
-		chordctx.Telemetry(ctx).SetAttributes(telemetry.SpanAttributes{"tool.name": input.Call.Name, "tool.call_id": input.Call.ID})
+		chordctx.Telemetry(ctx).SetAttributes(telemetry.SpanAttributes{telemetry.Attr("tool.name", input.Call.Name), telemetry.Attr("tool.call_id", input.Call.ID)})
 		return *input.Call, nil
 	}
 	call, found, err := durable.TaskAssistantToolCall(ctx, runtime, input.Assistant, input.CallId)
@@ -400,7 +400,7 @@ func readCall(ctx context.Context, runtime toolRuntime, input ToolTaskInput) (ai
 		return ai.ToolCall{}, err
 	}
 	if found {
-		chordctx.Telemetry(ctx).SetAttributes(telemetry.SpanAttributes{"tool.name": call.Name, "tool.call_id": call.ID})
+		chordctx.Telemetry(ctx).SetAttributes(telemetry.SpanAttributes{telemetry.Attr("tool.name", call.Name), telemetry.Attr("tool.call_id", call.ID)})
 		return call, nil
 	}
 	return ai.ToolCall{}, fmt.Errorf("Entry %d has no tool call %s", input.Assistant, input.CallId)
