@@ -1,5 +1,7 @@
 // Package telemetry provides backend-neutral span carriers, propagation, links, metrics and in-memory recording.
 // Ports packages/telemetry/src/index.ts and packages/telemetry/src/noop.ts.
+//
+// The adapter contract trusts typed inputs: malformed input behavior is unspecified, as upstream states.
 package telemetry
 
 // AttributeValue is a string, number, boolean, or slice of those values.
@@ -52,8 +54,12 @@ type SpanStatus struct {
 	Error  *SpanStatusError
 }
 
-// TelemetryContext starts child spans and waits for their callbacks.
+// TelemetryContext starts child spans and waits for their callbacks. Metrics and Propagation are the adapter's optional
+// capabilities, upstream's readonly `metrics` and `propagation` members: they stay available on child spans and
+// extracted parents, and a nil result is an absent capability.
 type TelemetryContext interface {
+	Metrics() TelemetryMetrics
+	Propagation() TelemetryPropagation
 	StartSpan(SpanOptions, func(TelemetrySpan) error) error
 }
 
@@ -85,6 +91,8 @@ type TelemetrySpan interface {
 
 type noopTelemetrySpan struct{}
 
+func (noopTelemetrySpan) Metrics() TelemetryMetrics         { return NoopTelemetryMetrics }
+func (noopTelemetrySpan) Propagation() TelemetryPropagation { return NoopTelemetryPropagation }
 func (noopTelemetrySpan) StartSpan(_ SpanOptions, callback func(TelemetrySpan) error) error {
 	return callback(NoopTelemetryContext)
 }
@@ -93,7 +101,8 @@ func (noopTelemetrySpan) AddEvent(string, SpanAttributes) {}
 func (noopTelemetrySpan) SetAttributes(SpanAttributes)    {}
 func (noopTelemetrySpan) SetStatus(SpanStatus)            {}
 
-// NoopTelemetryContext is the shared parent used without a recording backend.
+// NoopTelemetryContext is the shared parent used without a recording backend. It is a span, so a Context's telemetry
+// parent is always a span.
 var NoopTelemetryContext TelemetrySpan = noopTelemetrySpan{}
 
 type noopTelemetryPropagation struct{}
