@@ -1,14 +1,14 @@
 # PORT_MAP coverage report
 
-Generated from `706` PORT_MAP entries and `783` parity scenarios.
+Generated from `707` PORT_MAP entries and `783` parity scenarios.
 
 ## Status
 
-- **Porting:** 617 / 632 intended-portable entries ✅ (97.6%).
-- **Behavior verification:** 557 / 617 ported entries (90.3%); 0 weak-only, 60 untested.
-- **Upstream test porting:** 673 ported / 1 partial / 0 pending (4 other dispositions; [file mapping](interfaces/test-mapping-v1.3.0+73f8de80.json)). Of the partial/pending files, 0 deferred to 0.3.x by the [release policy](interfaces/test-porting-policy-v1.3.0+73f8de80.json) (`deferred-0.3.x`).
+- **Porting:** 618 / 633 intended-portable entries ✅ (97.6%).
+- **Behavior verification:** 557 / 618 ported entries (90.1%); 0 weak-only, 61 untested.
+- **Upstream test porting:** 675 ported / 1 partial / 0 pending (4 other dispositions; [file mapping](interfaces/test-mapping-v1.3.0+fdce48eb.json)). Of the partial/pending files, 0 deferred to 0.3.x by the [release policy](interfaces/test-porting-policy-v1.3.0+fdce48eb.json) (`deferred-0.3.x`).
 
-Raw PORT_MAP rows: 706. Breakdown: 74 n/a (designed out) · 15 🟡 partial. See docs/parity/DIVERGENCES.md for the documented exceptions.
+Raw PORT_MAP rows: 707. Breakdown: 74 n/a (designed out) · 15 🟡 partial. See docs/parity/DIVERGENCES.md for the documented exceptions.
 
 ## Packages
 
@@ -16,7 +16,7 @@ Raw PORT_MAP rows: 706. Breakdown: 74 n/a (designed out) · 15 🟡 partial. See
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | `agent` | 6 | 1 | 5 | 5 | 0 | 0 | 100.0% | 100.0% |
 | `ai` | 206 | 22 | 184 | 182 | 2 | 0 | 98.9% | 98.4% |
-| `chord` | 39 | 5 | 34 | 31 | 3 | 0 | 91.2% | 29.0% |
+| `chord` | 40 | 5 | 35 | 32 | 3 | 0 | 91.4% | 28.1% |
 | `codemode` | 17 | 4 | 13 | 13 | 0 | 0 | 100.0% | 53.8% |
 | `coding-agent` | 254 | 27 | 227 | 227 | 0 | 0 | 100.0% | 97.8% |
 | `durable` | 84 | 8 | 76 | 73 | 3 | 0 | 96.1% | 86.3% |
@@ -28,8 +28,8 @@ Raw PORT_MAP rows: 706. Breakdown: 74 n/a (designed out) · 15 🟡 partial. See
 
 - **Four core packages (agent, ai, coding-agent, tui):** 460 / 462 intended-portable files ✅ (99.6%) from 512 rows; 452 behavioral (98.3%), 0 weak-only, 8 untested.
 - **Shipped surface (agent, ai, codemode, coding-agent, mcp, telemetry, tui; coding-agent without ):** 489 / 497 intended-portable files ✅ (98.4%) from 555 rows; 475 behavioral (97.1%), 0 weak-only, 14 untested.
-- **Whole monorepo (11 packages):** 617 / 632 intended-portable files ✅ (97.6%) from 706 rows; 557 behavioral (90.3%), 0 weak-only, 60 untested.
-- **Interface closure:** 13092 of 13092 semantic interface IDs closed (180 designed-out, 12912 ported). A file-level ✅ does not close an interface ID.
+- **Whole monorepo (11 packages):** 618 / 633 intended-portable files ✅ (97.6%) from 707 rows; 557 behavioral (90.1%), 0 weak-only, 61 untested.
+- **Interface closure:** 13101 of 13101 semantic interface IDs closed (180 designed-out, 12921 ported). A file-level ✅ does not close an interface ID.
 
 Behavioral evidence includes paired scenarios and reviewed mutation-proven Go unit tests. Unit tests are listed separately; last run refers only to paired scenarios, not unit execution or exhaustive parity.
 
@@ -599,6 +599,7 @@ Behavioral evidence includes paired scenarios and reviewed mutation-proven Go un
 | `packages/chord/src/sqlite/index.ts` | n/a | 0 | 0 | not run |  |
 | `packages/chord/src/sqlite/migrations.ts` | ✅ | **0 (untested)** | **0** | not run |  |
 | `packages/chord/src/sqlite/node.ts` | ✅ | 0 | 6 (unit:./chord/sqlite/node:TestNodeSqliteDatabaseCloseReportsTheFinallyFailure, unit:./chord/sqlite/node:TestNodeSqliteDriver, unit:./chord/sqlite/node:TestSqliteDatabaseContractReportsBothErrorsWhenRollbackFails, unit:./chord/sqlite/node:TestSqliteDatabaseContractRollsBackAFailedTransactionAndClosesIdempotently, unit:./chord/sqlite/node:TestSqliteDatabaseContractRollsBackAFailedTransactionAndClosesIdempotently, unit:./chord/sqlite/node:TestSqliteExecutorAllThroughDatabaseAndTransaction) | not run | ./chord/sqlite/node:TestNodeSqliteDatabaseCloseReportsTheFinallyFailure, ./chord/sqlite/node:TestNodeSqliteDriver, ./chord/sqlite/node:TestSqliteDatabaseContractReportsBothErrorsWhenRollbackFails, ./chord/sqlite/node:TestSqliteDatabaseContractRollsBackAFailedTransactionAndClosesIdempotently, ./chord/sqlite/node:TestSqliteDatabaseContractRollsBackAFailedTransactionAndClosesIdempotently, ./chord/sqlite/node:TestSqliteExecutorAllThroughDatabaseAndTransaction |
+| `packages/chord/src/sqlite/replication/node.ts` | ✅ | **0 (untested)** | **0** | not run |  |
 | `packages/chord/src/sqlite/schema.ts` | ✅ | **0 (untested)** | **0** | not run |  |
 | `packages/chord/src/cell.ts` | ✅ | **0 (untested)** | **0** | not run |  |
 | `packages/chord/src/publish.ts` | ✅ | **0 (untested)** | **0** | not run |  |

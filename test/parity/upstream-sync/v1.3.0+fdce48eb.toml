@@ -1670,9 +1670,9 @@ rationale = ""
 [[files]]
 path = "packages/chord/src/sqlite/replication/node.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteCanOnlyBeCreatedByOpeningAFile", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteOpensInWALModeAndNeverCheckpointsOnItsOwn", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteRunsTheCloseHookAfterEarlierOperationsWhileTheWALHoldsEveryCommit"]
+rationale = "Pi 48c8f322 adds the internal replicated connection wrapper; chord/sqlite/replication/node.go ports it with Pi's six replication-node.test.ts cases."
 
 [[files]]
 path = "packages/chord/src/sqlite/schema.ts"
@@ -4802,3 +4802,4 @@ change = "added"
 disposition = "pending"
 evidence = []
 rationale = ""
+
