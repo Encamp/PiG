@@ -62,7 +62,7 @@ func telemetryReport(onReport func(err error, info durable.ReportInfo), adapter 
 	}
 }
 
-func attribute(attributeType telemetry.TelemetryAttributeType, required bool, description string, values ...telemetry.AttributeValue) telemetry.TelemetryStartAttributeDefinition {
+func attribute(attributeType telemetry.TelemetryAttributeType, required bool, description string, values ...string) telemetry.TelemetryStartAttributeDefinition {
 	return telemetry.TelemetryStartAttributeDefinition{
 		TelemetryAttributeDefinition: telemetry.TelemetryAttributeDefinition{
 			TelemetryAttributeMetadata: telemetry.TelemetryAttributeMetadata{Description: description},
@@ -189,7 +189,7 @@ var DurableTelemetrySchema = telemetry.DefineTelemetrySchema(&telemetry.Telemetr
 		},
 		"pi.durable.phase.duration": {
 			Kind:        telemetry.TelemetryMetricKindHistogram,
-			Unit:        new("ms"),
+			Unit:        "ms",
 			Description: "Duration of a phase invocation and its decision commit.",
 			Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{
 				"task":    attribute(attrString, true, "Registered task name."),

@@ -25362,6 +25362,39 @@
       "shapeHash": "sha256:cc45f6d684f3bc0e14c72afb138c1ff5cd8a95464acca8cabcc862a671faf476"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiModel.MarshalJSON",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiModel.MarshalJSON",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func() ([]byte, error)"
+      },
+      "shapeHash": "sha256:57179946cef7df4d918e29b424f6d9096a9653a12925304bcb5da9ee7ff359ee"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiModel.UnmarshalJSON",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiModel.UnmarshalJSON",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func(data []byte) error"
+      },
+      "shapeHash": "sha256:2e7a46ef7c2011cd2aa41a3ad171f9b6f5461f06a15b57547cff43508937a222"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiModel.wire",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiModel.wire",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func() github.com/MichaelKinsy/PiG/telemetry.attributeDefinitionWire"
+      },
+      "shapeHash": "sha256:80323e7d8fad052ebf40e0a5554de3306e9fe89271a31a07ea2b0c31c1e7338d"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#aiProvider",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "aiProvider",
@@ -25371,6 +25404,39 @@
         "type": "github.com/MichaelKinsy/PiG/telemetry.TelemetryStartAttributeDefinition"
       },
       "shapeHash": "sha256:cc45f6d684f3bc0e14c72afb138c1ff5cd8a95464acca8cabcc862a671faf476"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiProvider.MarshalJSON",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiProvider.MarshalJSON",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func() ([]byte, error)"
+      },
+      "shapeHash": "sha256:57179946cef7df4d918e29b424f6d9096a9653a12925304bcb5da9ee7ff359ee"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiProvider.UnmarshalJSON",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiProvider.UnmarshalJSON",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func(data []byte) error"
+      },
+      "shapeHash": "sha256:2e7a46ef7c2011cd2aa41a3ad171f9b6f5461f06a15b57547cff43508937a222"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiProvider.wire",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiProvider.wire",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func() github.com/MichaelKinsy/PiG/telemetry.attributeDefinitionWire"
+      },
+      "shapeHash": "sha256:80323e7d8fad052ebf40e0a5554de3306e9fe89271a31a07ea2b0c31c1e7338d"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#aiRequestSpan",
@@ -25393,6 +25459,39 @@
         "type": "github.com/MichaelKinsy/PiG/telemetry.TelemetryAttributeDefinition"
       },
       "shapeHash": "sha256:aca9a44485175964e7c5bfb3cc6c2e81672e852029867d87659ba9591c30e321"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiStop.MarshalJSON",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiStop.MarshalJSON",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func() ([]byte, error)"
+      },
+      "shapeHash": "sha256:57179946cef7df4d918e29b424f6d9096a9653a12925304bcb5da9ee7ff359ee"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiStop.UnmarshalJSON",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiStop.UnmarshalJSON",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func(data []byte) error"
+      },
+      "shapeHash": "sha256:2e7a46ef7c2011cd2aa41a3ad171f9b6f5461f06a15b57547cff43508937a222"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#aiStop.wire",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "aiStop.wire",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func() github.com/MichaelKinsy/PiG/telemetry.attributeDefinitionWire"
+      },
+      "shapeHash": "sha256:80323e7d8fad052ebf40e0a5554de3306e9fe89271a31a07ea2b0c31c1e7338d"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#allHex",

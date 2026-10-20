@@ -44,7 +44,7 @@ var (
 	aiStop = telemetry.TelemetryAttributeDefinition{
 		TelemetryAttributeMetadata: telemetry.TelemetryAttributeMetadata{Description: "Normalized stop reason."},
 		Type:                       telemetry.TelemetryAttributeTypeString,
-		Values:                     []telemetry.AttributeValue{"pending", "stop", "length", "toolUse", "error", "aborted", "deferred"},
+		Values:                     []string{"pending", "stop", "length", "toolUse", "error", "aborted", "deferred"},
 	}
 )
 
@@ -67,7 +67,7 @@ func aiEndAttribute(description string) telemetry.TelemetryAttributeDefinition {
 
 func aiRequestSpan(description string) telemetry.TelemetrySpanDefinition {
 	blockType := aiAttribute(telemetry.TelemetryAttributeTypeString, "Block kind.", true)
-	blockType.Values = []telemetry.AttributeValue{"text", "thinking", "tool_call"}
+	blockType.Values = []string{"text", "thinking", "tool_call"}
 	responseID := telemetry.TelemetryAttributeDefinition{
 		TelemetryAttributeMetadata: telemetry.TelemetryAttributeMetadata{Description: "Provider response identifier.", Cardinality: telemetry.TelemetryAttributeCardinalityHigh},
 		Type:                       telemetry.TelemetryAttributeTypeString,
@@ -127,25 +127,25 @@ var AITelemetrySchema = telemetry.DefineTelemetrySchema(&telemetry.TelemetrySche
 		"pi.ai.request.duration": {
 			Kind:        telemetry.TelemetryMetricKindHistogram,
 			Description: "Logical request or poll duration.",
-			Unit:        new("ms"),
+			Unit:        "ms",
 			Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel, "stop": aiMetricStop()},
 		},
 		"pi.ai.first_chunk.duration": {
 			Kind:        telemetry.TelemetryMetricKindHistogram,
 			Description: "Time to the first normalized stream event.",
-			Unit:        new("ms"),
+			Unit:        "ms",
 			Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel},
 		},
 		"pi.ai.tokens": {
 			Kind:        telemetry.TelemetryMetricKindCounter,
 			Description: "Reported model token usage; pending and deferred polls are excluded.",
-			Unit:        new("token"),
+			Unit:        "token",
 			Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{
 				"provider": aiProvider,
 				"model":    aiModel,
 				"kind": func() telemetry.TelemetryMetricAttributeDefinition {
 					kind := aiAttribute(telemetry.TelemetryAttributeTypeString, "Token usage category.", true)
-					kind.Values = []telemetry.AttributeValue{"input", "output", "cache_read", "cache_write"}
+					kind.Values = []string{"input", "output", "cache_read", "cache_write"}
 					return kind
 				}(),
 			},
@@ -153,7 +153,7 @@ var AITelemetrySchema = telemetry.DefineTelemetrySchema(&telemetry.TelemetrySche
 		"pi.ai.cost": {
 			Kind:        telemetry.TelemetryMetricKindCounter,
 			Description: "Reported model cost; pending and deferred polls are excluded.",
-			Unit:        new("USD"),
+			Unit:        "USD",
 			Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel},
 		},
 	},

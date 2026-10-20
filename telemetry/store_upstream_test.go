@@ -46,7 +46,8 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		}); err != nil {
 			t.Fatal(err)
 		}
-		trace, err := recorder.GetTrace(id)
+		var store telemetry.TelemetryStore = recorder // the recorder is the store, as the fixture of store.test.ts:9-13 passes it
+		trace, err := store.GetTrace(id)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -71,7 +72,8 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		recorder := telemetry.NewInMemoryTelemetryContext()
 		recorder.Counter("calls", telemetry.InstrumentOptions{}).Add(2, nil)
 		recorder.Counter("calls", telemetry.InstrumentOptions{}).Add(3, nil)
-		rows, err := recorder.FindMetrics(telemetry.MetricQuery{Name: "calls"})
+		var store telemetry.TelemetryStore = recorder
+		rows, err := store.FindMetrics(telemetry.MetricQuery{Name: "calls"})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -106,7 +108,8 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		}); err != nil {
 			t.Fatal(err)
 		}
-		found, err := recorder.FindTraces(telemetry.TraceQuery{Name: new("source")})
+		var store telemetry.TelemetryStore = recorder
+		found, err := store.FindTraces(telemetry.TraceQuery{Name: new("source")})
 		if err != nil || len(found.Traces) != 1 {
 			t.Fatalf("FindTraces = %+v, %v", found, err)
 		}
@@ -116,7 +119,7 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		if span.Status.Error != nil {
 			span.Status.Error.Message = "changed"
 		}
-		fresh, err := recorder.GetTrace(trace.TraceID)
+		fresh, err := store.GetTrace(trace.TraceID)
 		if err != nil || fresh == nil {
 			t.Fatalf("GetTrace = %v, %v", fresh, err)
 		}

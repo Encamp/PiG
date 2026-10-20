@@ -638,7 +638,7 @@ func (d *detector) evalValue(e *upstreamEntry, c *sym, chk *checker, out map[str
 	if s := chk.aliases[satisfiesKey+parseID(e.ID).Pkg][e.Name]; s != nil {
 		up = *s // V3: `as const satisfies X` narrows the literal at compile time only; the declared contract is X
 	}
-	v := valueVerdict(chk, up, c.Obj)
+	v := d.reviewedVerdict(e.ID, c.Target(), valueVerdict(chk, up, c.Obj)) // a reviewed exception closes a value no rule decided, as for a function value, a call, an alias or a member
 	r := refute(v, reasonType, c.Target())
 	if r == nil {
 		r = d.exercise(c, []string{c.Key}, selfExclude(c.Name))

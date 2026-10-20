@@ -227,7 +227,7 @@ func TestContextToStringIsTheStringMethodOfEveryLayer(t *testing.T) {
 	}
 }
 
-// context.test.ts "derives telemetry independently from values and cancellation". The Go callback of TraceIn receives the span next to the derived context, where Pi reads it as `child.telemetry`.
+// context.test.ts "derives telemetry independently from values and cancellation". The Go callback of TraceIn receives the derived context and reads the span as Telemetry(child), where Pi reads `child.telemetry`.
 func TestContextDerivesTelemetryIndependentlyFromValuesAndCancellation(t *testing.T) {
 	recorder := telemetry.NewInMemoryTelemetryContext()
 	other := telemetry.NewInMemoryTelemetryContext()
@@ -268,18 +268,20 @@ func testContextDerivesTelemetry(t *testing.T, recorder *telemetry.InMemoryTelem
 		t.Fatalf("String = %q", got)
 	}
 
-	_, err := TraceIn(derived, telemetry.SpanOptions{Name: "outer"}, func(child context.Context, outer telemetry.TelemetrySpan) (struct{}, error) {
+	_, err := TraceIn(derived, telemetry.SpanOptions{Name: "outer"}, func(child context.Context) (struct{}, error) {
+		outer := Telemetry(child)
 		if got, _ := Value(child, key); got != "owner" {
 			t.Fatalf("child value = %q", got)
 		}
 		if child.Done() != derived.Done() {
 			t.Fatal("the child span's context changed cancellation")
 		}
-		if Telemetry(child) != telemetry.TelemetrySpan(outer) {
-			t.Fatal("the derived context's telemetry is not the span")
+		if Telemetry(child) == callerSpan {
+			t.Fatal("the derived context's telemetry is the parent, not the new span")
 		}
 		outer.AddEvent("started", nil)
-		return TraceIn(child, telemetry.SpanOptions{Name: "inner"}, func(_ context.Context, inner telemetry.TelemetrySpan) (struct{}, error) {
+		return TraceIn(child, telemetry.SpanOptions{Name: "inner"}, func(innerContext context.Context) (struct{}, error) {
+			inner := Telemetry(innerContext)
 			inner.AddLink(telemetry.SpanLink{Context: outer})
 			return struct{}{}, nil
 		})
@@ -329,15 +331,15 @@ func testIsolatesConcurrentTraceInBranches(t *testing.T, recorder *telemetry.InM
 	first := make(chan Settled[string], 1)
 	second := make(chan Settled[string], 1)
 	go func() {
-		value, err := TraceIn(ctx, telemetry.SpanOptions{Name: "first"}, func(child context.Context, _ telemetry.TelemetrySpan) (string, error) {
+		value, err := TraceIn(ctx, telemetry.SpanOptions{Name: "first"}, func(child context.Context) (string, error) {
 			<-gate
-			return TraceIn(child, telemetry.SpanOptions{Name: "first.child"}, func(context.Context, telemetry.TelemetrySpan) (string, error) { return "first", nil })
+			return TraceIn(child, telemetry.SpanOptions{Name: "first.child"}, func(context.Context) (string, error) { return "first", nil })
 		})
 		first <- Settled[string]{Value: value, Err: err}
 	}()
 	go func() {
-		value, err := TraceIn(ctx, telemetry.SpanOptions{Name: "second"}, func(child context.Context, _ telemetry.TelemetrySpan) (string, error) {
-			result, err := TraceIn(child, telemetry.SpanOptions{Name: "second.child"}, func(context.Context, telemetry.TelemetrySpan) (string, error) { return "second", nil })
+		value, err := TraceIn(ctx, telemetry.SpanOptions{Name: "second"}, func(child context.Context) (string, error) {
+			result, err := TraceIn(child, telemetry.SpanOptions{Name: "second.child"}, func(context.Context) (string, error) { return "second", nil })
 			close(gate)
 			return result, err
 		})
@@ -368,7 +370,7 @@ func testIsolatesConcurrentTraceInBranches(t *testing.T, recorder *telemetry.InM
 	}
 
 	failure := errors.New("same value")
-	if _, err := TraceIn(ctx, telemetry.SpanOptions{Name: "reject"}, func(context.Context, telemetry.TelemetrySpan) (struct{}, error) { return struct{}{}, failure }); err != failure {
+	if _, err := TraceIn(ctx, telemetry.SpanOptions{Name: "reject"}, func(context.Context) (struct{}, error) { return struct{}{}, failure }); err != failure {
 		t.Fatalf("error = %v, want the callback's own", err)
 	}
 	// Upstream's synchronous throw is a panic in Go: it reaches the caller as the identical value, after the span ends.
@@ -378,10 +380,11 @@ func testIsolatesConcurrentTraceInBranches(t *testing.T, recorder *telemetry.InM
 				t.Fatalf("recovered = %v, want the callback's own panic value", recovered)
 			}
 		}()
-		_, _ = TraceIn(ctx, telemetry.SpanOptions{Name: "throw"}, func(context.Context, telemetry.TelemetrySpan) (struct{}, error) { panic(failure) })
+		_, _ = TraceIn(ctx, telemetry.SpanOptions{Name: "throw"}, func(context.Context) (struct{}, error) { panic(failure) })
 		t.Fatal("TraceIn returned after a panicking callback")
 	}()
-	value, err := TraceIn(Background(), telemetry.SpanOptions{Name: "noop"}, func(_ context.Context, span telemetry.TelemetrySpan) (int, error) {
+	value, err := TraceIn(Background(), telemetry.SpanOptions{Name: "noop"}, func(child context.Context) (int, error) {
+		span := Telemetry(child)
 		span.AddLink(telemetry.SpanLink{Context: parentSpan})
 		return 42, nil
 	})

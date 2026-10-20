@@ -35,7 +35,7 @@ func TestTelemetryUpstream(t *testing.T) {
 					Parents:     TelemetryParentDefinition{Kind: TelemetryParentKindAny},
 					StartAttributes: map[string]TelemetryStartAttributeDefinition{
 						"kind": {Required: true, TelemetryAttributeDefinition: TelemetryAttributeDefinition{
-							Type: TelemetryAttributeTypeString, Values: []AttributeValue{"read", "write"},
+							Type: TelemetryAttributeTypeString, Values: []string{"read", "write"},
 							TelemetryAttributeMetadata: TelemetryAttributeMetadata{Description: "Kind"},
 						}},
 					},
@@ -45,7 +45,7 @@ func TestTelemetryUpstream(t *testing.T) {
 							Description: "Result",
 							Attributes: map[string]TelemetryEventAttributeDefinition{
 								"outcome": {Required: true, TelemetryAttributeDefinition: TelemetryAttributeDefinition{
-									Type: TelemetryAttributeTypeString, Values: []AttributeValue{"ok", "error"},
+									Type: TelemetryAttributeTypeString, Values: []string{"ok", "error"},
 									TelemetryAttributeMetadata: TelemetryAttributeMetadata{Description: "Outcome"},
 								}},
 							},
@@ -80,7 +80,7 @@ func TestTelemetryUpstream(t *testing.T) {
 				Description: "Operation",
 				Parents:     TelemetryParentDefinition{Kind: TelemetryParentKindRootOrExternal},
 				StartAttributes: map[string]TelemetryStartAttributeDefinition{"kind": {Required: true, TelemetryAttributeDefinition: TelemetryAttributeDefinition{
-					Type: TelemetryAttributeTypeString, Values: []AttributeValue{"read", "write"}, TelemetryAttributeMetadata: TelemetryAttributeMetadata{Description: "Kind"},
+					Type: TelemetryAttributeTypeString, Values: []string{"read", "write"}, TelemetryAttributeMetadata: TelemetryAttributeMetadata{Description: "Kind"},
 				}}},
 				EndAttributes: map[string]TelemetryAttributeDefinition{},
 				Status:        TelemetrySpanStatusDefinition{Default: SpanStatusCodeOK, ErrorWhen: "The operation fails"},
@@ -214,11 +214,11 @@ func TestTelemetrySchemaKeepsEmptyMembers(t *testing.T) {
 		Parents:     TelemetryParentDefinition{Kind: TelemetryParentKindSpans, Spans: []string{}},
 		StartAttributes: map[string]TelemetryStartAttributeDefinition{"kind": {TelemetryAttributeDefinition: TelemetryAttributeDefinition{
 			TelemetryAttributeMetadata: TelemetryAttributeMetadata{Description: "Kind"},
-			Type:                       TelemetryAttributeTypeStringArray, ElementValues: []AttributeValue{}, Examples: []AttributeValue{},
+			Type:                       TelemetryAttributeTypeStringArray, ElementValues: []string{}, ArrayExamples: [][]string{},
 		}}},
 		EndAttributes: map[string]TelemetryAttributeDefinition{"outcome": {
 			TelemetryAttributeMetadata: TelemetryAttributeMetadata{Description: "Outcome"},
-			Type:                       TelemetryAttributeTypeString, Values: []AttributeValue{},
+			Type:                       TelemetryAttributeTypeString, Values: []string{},
 		}},
 		Events: map[string]TelemetryEventDefinition{},
 		Status: TelemetrySpanStatusDefinition{Default: SpanStatusCodeOK, ErrorWhen: "Never"},
@@ -333,7 +333,7 @@ func TestTelemetryEventDefinitionAttributesSurviveTheSchemaRoundTrip(t *testing.
 			}, Required: true},
 			"reason": {TelemetryAttributeDefinition: TelemetryAttributeDefinition{
 				TelemetryAttributeMetadata: TelemetryAttributeMetadata{Description: "Why"},
-				Type:                       TelemetryAttributeTypeString, Values: []AttributeValue{"timeout", "overload"},
+				Type:                       TelemetryAttributeTypeString, Values: []string{"timeout", "overload"},
 			}},
 		},
 	}

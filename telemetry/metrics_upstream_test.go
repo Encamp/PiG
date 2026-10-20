@@ -16,7 +16,7 @@ import (
 	"github.com/MichaelKinsy/PiG/telemetry"
 )
 
-func metricAttribute(attributeType telemetry.TelemetryAttributeType, description string, required bool, values ...telemetry.AttributeValue) telemetry.TelemetryMetricAttributeDefinition {
+func metricAttribute(attributeType telemetry.TelemetryAttributeType, description string, required bool, values ...string) telemetry.TelemetryMetricAttributeDefinition {
 	definition := telemetry.TelemetryMetricAttributeDefinition{Required: required}
 	definition.Type = attributeType
 	definition.Description = description
@@ -32,7 +32,7 @@ func trafficSchema() *telemetry.TelemetrySchemaDefinition {
 		Spans:   map[string]telemetry.TelemetrySpanDefinition{},
 		Metrics: map[string]telemetry.TelemetryMetricDefinition{
 			"network.bytes": {
-				Kind: telemetry.TelemetryMetricKindCounter, Description: "Encoded bytes", Unit: new("By"),
+				Kind: telemetry.TelemetryMetricKindCounter, Description: "Encoded bytes", Unit: "By",
 				Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{"direction": direction},
 			},
 			"network.active": {Kind: telemetry.TelemetryMetricKindUpDownCounter, Description: "Open links", Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{}},
@@ -46,7 +46,7 @@ func latencySchema() *telemetry.TelemetrySchemaDefinition {
 		Spans:   map[string]telemetry.TelemetrySpanDefinition{},
 		Metrics: map[string]telemetry.TelemetryMetricDefinition{
 			"call.duration": {
-				Kind: telemetry.TelemetryMetricKindHistogram, Description: "Call duration", Unit: new("ms"), Boundaries: []float64{1, 10, 100},
+				Kind: telemetry.TelemetryMetricKindHistogram, Description: "Call duration", Unit: "ms", Boundaries: []float64{1, 10, 100},
 				Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{"method": metricAttribute(telemetry.TelemetryAttributeTypeString, "Method", false)},
 			},
 		},
@@ -184,7 +184,7 @@ func TestMetricsUpstream(t *testing.T) {
 func TestCreateTypedMetricsReadsSchemaMetadataForDeclaredNamesOnly(t *testing.T) {
 	adapter := telemetry.NewInMemoryTelemetryContext()
 	first := telemetry.DefineTelemetrySchema(&telemetry.TelemetrySchemaDefinition{Version: 1, Spans: map[string]telemetry.TelemetrySpanDefinition{}, Metrics: map[string]telemetry.TelemetryMetricDefinition{
-		"shared": {Kind: telemetry.TelemetryMetricKindCounter, Description: "first", Unit: new("a"), Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{}},
+		"shared": {Kind: telemetry.TelemetryMetricKindCounter, Description: "first", Unit: "a", Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{}},
 	}})
 	second := telemetry.DefineTelemetrySchema(&telemetry.TelemetrySchemaDefinition{Version: 1, Spans: map[string]telemetry.TelemetrySpanDefinition{}, Metrics: map[string]telemetry.TelemetryMetricDefinition{
 		"shared": {Kind: telemetry.TelemetryMetricKindCounter, Description: "second", Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{}},

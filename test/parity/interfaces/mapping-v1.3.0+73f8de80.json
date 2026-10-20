@@ -5442,8 +5442,24 @@
     },
     {
       "id": "pkg:ai/.#AI_TELEMETRY_SCHEMA",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:26611e69d9d287c0bd5fa282ea777eac892dbf466489db08ace578a00c928f80"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:26611e69d9d287c0bd5fa282ea777eac892dbf466489db08ace578a00c928f80",
+      "rationale": "Derived by the interface gap detector: AI_TELEMETRY_SCHEMA is Go ai/telemetry.go#AITelemetrySchema (name rule N2), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/telemetry.go#AITelemetrySchema"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/telemetry.go#createAIInstruments"
+      ],
+      "evidence": [
+        "test:ai/telemetry_schema_oracle_test.go#TestAITelemetrySchemaMatchesPi",
+        "test:ai/telemetry_upstream_test.go#TestAITelemetryDefaultsToNoopUpstream"
+      ]
     },
     {
       "id": "pkg:ai/.#AnthropicAllowedFallbackModel",
@@ -46312,8 +46328,24 @@
     },
     {
       "id": "pkg:ai/compat#AI_TELEMETRY_SCHEMA",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:26611e69d9d287c0bd5fa282ea777eac892dbf466489db08ace578a00c928f80"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:26611e69d9d287c0bd5fa282ea777eac892dbf466489db08ace578a00c928f80",
+      "rationale": "Derived by the interface gap detector: AI_TELEMETRY_SCHEMA is Go ai/telemetry.go#AITelemetrySchema (name rule N2), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/telemetry.go#AITelemetrySchema"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/telemetry.go#createAIInstruments"
+      ],
+      "evidence": [
+        "test:ai/telemetry_schema_oracle_test.go#TestAITelemetrySchemaMatchesPi",
+        "test:ai/telemetry_upstream_test.go#TestAITelemetryDefaultsToNoopUpstream"
+      ]
     },
     {
       "id": "pkg:ai/compat#ANTHROPIC_API_KEY_ENV",
@@ -77236,8 +77268,24 @@
     },
     {
       "id": "pkg:ai/models#AI_TELEMETRY_SCHEMA",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:26611e69d9d287c0bd5fa282ea777eac892dbf466489db08ace578a00c928f80"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:26611e69d9d287c0bd5fa282ea777eac892dbf466489db08ace578a00c928f80",
+      "rationale": "Derived by the interface gap detector: AI_TELEMETRY_SCHEMA is Go ai/telemetry.go#AITelemetrySchema (name rule N2), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/telemetry.go#AITelemetrySchema"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/telemetry.go#createAIInstruments"
+      ],
+      "evidence": [
+        "test:ai/telemetry_schema_oracle_test.go#TestAITelemetrySchemaMatchesPi",
+        "test:ai/telemetry_upstream_test.go#TestAITelemetryDefaultsToNoopUpstream"
+      ]
     },
     {
       "id": "pkg:ai/models#calculateCost",
@@ -98221,23 +98269,39 @@
     },
     {
       "id": "pkg:chord/.#Context::property:toString",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:5161157377b20bef4f55d268055a33d18ce18e28338252327333e9b276c177d7"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:5161157377b20bef4f55d268055a33d18ce18e28338252327333e9b276c177d7",
+      "rationale": "Pi chord/src/context/index.ts:15 Context.toString(): string describes a context by its layers ([Context BACKGROUND_CONTEXT].WithValue(first)). A Go context.Context has no member to add, and Go's equivalent of toString is the String method fmt.Sprint reads: every context chord/context returns (the Background and TODO roots, the value layer, the abort-signal layer) implements String with Pi's text. TestContextToStringIsTheStringMethodOfEveryLayer and TestContextDerivedAbortContextsPrintAsPiPrintsThem (chord/context/chordctx_upstream_test.go:207, :75) compare the printed text with the strings Pi's tests expect. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the text is the String method of chord/context's own context types, not a member of a Go interface.",
+      "pigTargets": [
+        "chord/context/chordctx.go#emptyContext.String"
+      ]
     },
     {
       "id": "pkg:chord/.#Context::property:toString::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:9231ea69ae1121c895c1d3b2d307df795c874c1f1f85688b3ac32e9d1e7168c4"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:9231ea69ae1121c895c1d3b2d307df795c874c1f1f85688b3ac32e9d1e7168c4",
+      "rationale": "Pi chord/src/context/index.ts:15 Context.toString(): string describes a context by its layers ([Context BACKGROUND_CONTEXT].WithValue(first)). A Go context.Context has no member to add, and Go's equivalent of toString is the String method fmt.Sprint reads: every context chord/context returns (the Background and TODO roots, the value layer, the abort-signal layer) implements String with Pi's text. TestContextToStringIsTheStringMethodOfEveryLayer and TestContextDerivedAbortContextsPrintAsPiPrintsThem (chord/context/chordctx_upstream_test.go:207, :75) compare the printed text with the strings Pi's tests expect. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the text is the String method of chord/context's own context types, not a member of a Go interface.",
+      "pigTargets": [
+        "chord/context/chordctx.go#emptyContext.String"
+      ]
     },
     {
       "id": "pkg:chord/.#Context::property:value",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:b9c3b0428be59e41f45639face00bd7cfe9efbe27e29093662c4ee9a35291203"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:b9c3b0428be59e41f45639face00bd7cfe9efbe27e29093662c4ee9a35291203",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "pigTargets": [
+        "chord/context/chordctx.go#Value"
+      ]
     },
     {
       "id": "pkg:chord/.#Context::property:value::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:132522b5a2656386cc83aa437163326cb9d7295c64d5b28268590c573257d44d"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:132522b5a2656386cc83aa437163326cb9d7295c64d5b28268590c573257d44d",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "pigTargets": [
+        "chord/context/chordctx.go#Value"
+      ]
     },
     {
       "id": "pkg:chord/.#ContextKey",
@@ -105660,23 +105724,39 @@
     },
     {
       "id": "pkg:chord/context#Context::property:toString",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:5161157377b20bef4f55d268055a33d18ce18e28338252327333e9b276c177d7"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:5161157377b20bef4f55d268055a33d18ce18e28338252327333e9b276c177d7",
+      "rationale": "Pi chord/src/context/index.ts:15 Context.toString(): string describes a context by its layers ([Context BACKGROUND_CONTEXT].WithValue(first)). A Go context.Context has no member to add, and Go's equivalent of toString is the String method fmt.Sprint reads: every context chord/context returns (the Background and TODO roots, the value layer, the abort-signal layer) implements String with Pi's text. TestContextToStringIsTheStringMethodOfEveryLayer and TestContextDerivedAbortContextsPrintAsPiPrintsThem (chord/context/chordctx_upstream_test.go:207, :75) compare the printed text with the strings Pi's tests expect. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the text is the String method of chord/context's own context types, not a member of a Go interface.",
+      "pigTargets": [
+        "chord/context/chordctx.go#emptyContext.String"
+      ]
     },
     {
       "id": "pkg:chord/context#Context::property:toString::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:9231ea69ae1121c895c1d3b2d307df795c874c1f1f85688b3ac32e9d1e7168c4"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:9231ea69ae1121c895c1d3b2d307df795c874c1f1f85688b3ac32e9d1e7168c4",
+      "rationale": "Pi chord/src/context/index.ts:15 Context.toString(): string describes a context by its layers ([Context BACKGROUND_CONTEXT].WithValue(first)). A Go context.Context has no member to add, and Go's equivalent of toString is the String method fmt.Sprint reads: every context chord/context returns (the Background and TODO roots, the value layer, the abort-signal layer) implements String with Pi's text. TestContextToStringIsTheStringMethodOfEveryLayer and TestContextDerivedAbortContextsPrintAsPiPrintsThem (chord/context/chordctx_upstream_test.go:207, :75) compare the printed text with the strings Pi's tests expect. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the text is the String method of chord/context's own context types, not a member of a Go interface.",
+      "pigTargets": [
+        "chord/context/chordctx.go#emptyContext.String"
+      ]
     },
     {
       "id": "pkg:chord/context#Context::property:value",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:b9c3b0428be59e41f45639face00bd7cfe9efbe27e29093662c4ee9a35291203"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:b9c3b0428be59e41f45639face00bd7cfe9efbe27e29093662c4ee9a35291203",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "pigTargets": [
+        "chord/context/chordctx.go#Value"
+      ]
     },
     {
       "id": "pkg:chord/context#Context::property:value::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:132522b5a2656386cc83aa437163326cb9d7295c64d5b28268590c573257d44d"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:132522b5a2656386cc83aa437163326cb9d7295c64d5b28268590c573257d44d",
+      "rationale": "Pi chord/src/context/index.ts:14 Context.value<T>(key: ContextKey<T>): T | undefined reads the value an invocation context carries for a typed key. A Go context.Context is the standard library's closed interface and has no member to add, so the read is the generic function chordctx.Value[T](ctx, Key[T]) (T, bool) in chord/context/chordctx.go: the (T, bool) pair is `T | undefined`, a key of another value type is not interchangeable (Key[T] carries T), and a context outside this package reads as carrying nothing. TestContextLayersTypedValuesWithoutModifyingParents (layering, replacement and the parent left unchanged, chord/context/chordctx_upstream_test.go:38) and TestContextProvidesDistinctEmptyRootContexts (the roots carry no value) port packages/chord/test/context.test.ts. Designed out as a language mechanic, as the reviewed Context.abortSignal and Context.telemetry: the member is a function over context.Context, not a method of a Go type.",
+      "pigTargets": [
+        "chord/context/chordctx.go#Value"
+      ]
     },
     {
       "id": "pkg:chord/context#ContextKey",
@@ -105797,13 +105877,47 @@
     },
     {
       "id": "pkg:chord/context#traceIn",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:16798a7fb4b94c2a16a0eb87b52dd22dbac441c3de4bba65dd3e610d310e130f"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:16798a7fb4b94c2a16a0eb87b52dd22dbac441c3de4bba65dd3e610d310e130f",
+      "rationale": "Derived by the interface gap detector: traceIn is Go chord/context/chordctx.go#TraceIn (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/context/chordctx.go#TraceIn"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/context/chordctx.go#TraceIn"
+      ],
+      "evidence": [
+        "test:chord/context/chordctx_upstream_test.go#TestContextDerivesTelemetryIndependentlyFromValuesAndCancellation",
+        "test:chord/context/chordctx_upstream_test.go#TestContextIsolatesConcurrentTraceInBranchesAndPreservesCallbackResultsAndErrors"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:chord/context#traceIn::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:378b01fabcda5099ccdd2f1733b6689d96bed179082cfc0892fa394bb2db9070"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:378b01fabcda5099ccdd2f1733b6689d96bed179082cfc0892fa394bb2db9070",
+      "rationale": "Derived by the interface gap detector: traceIn::call:0 is Go chord/context/chordctx.go#TraceIn (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/context/chordctx.go#TraceIn"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/context/chordctx.go#TraceIn"
+      ],
+      "evidence": [
+        "test:chord/context/chordctx_upstream_test.go#TestContextDerivesTelemetryIndependentlyFromValuesAndCancellation",
+        "test:chord/context/chordctx_upstream_test.go#TestContextIsolatesConcurrentTraceInBranchesAndPreservesCallbackResultsAndErrors"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:chord/context#withAbortSignal",
@@ -204851,8 +204965,23 @@
     },
     {
       "id": "pkg:durable/.#DURABLE_TELEMETRY_SCHEMA",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:5c7f983f98954439bb1916efbef3710ee84da38dff29df83408d1215e1d2ea58"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:5c7f983f98954439bb1916efbef3710ee84da38dff29df83408d1215e1d2ea58",
+      "rationale": "Derived by the interface gap detector: DURABLE_TELEMETRY_SCHEMA is Go durable/harness/telemetry.go#DurableTelemetrySchema (name rule N2), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/harness/telemetry.go#DurableTelemetrySchema"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/harness/scheduler.go#NewTaskScheduler"
+      ],
+      "evidence": [
+        "test:durable/harness/telemetry_schema_oracle_test.go#TestDurableTelemetrySchemaMatchesPi"
+      ]
     },
     {
       "id": "pkg:durable/.#Entry",
@@ -248972,7 +249101,7 @@
       "id": "pkg:telemetry/.#AttributeValue",
       "disposition": "ported",
       "upstreamShapeHash": "sha256:76a3ec17b65ed4cb97caa926b66f3860830ffe2c75ec7bb061c911349f9be06a",
-      "rationale": "Derived by the interface gap detector: AttributeValue is Go telemetry/context.go#AttributeValue (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "rationale": "Derived by the interface gap detector: AttributeValue is Go telemetry/context.go#AttributeValue (name rule N1), every shape rule holds, and it is exercised by a function reachable from cmd/pig. The row is re-derived on every run of make interface-gaps-update.",
       "pigTargets": [
         "telemetry/context.go#AttributeValue"
       ],
@@ -248985,9 +249114,7 @@
         "call:telemetry/context.go#Attr"
       ],
       "evidence": [
-        "test:telemetry/telemetry_upstream_test.go#TestTelemetryEventDefinitionAttributesSurviveTheSchemaRoundTrip",
-        "test:telemetry/telemetry_upstream_test.go#TestTelemetrySchemaKeepsEmptyMembers",
-        "test:telemetry/telemetry_upstream_test.go#TestTelemetryUpstream"
+        "reach:telemetry/context.go#Attr"
       ]
     },
     {
@@ -249228,8 +249355,26 @@
     },
     {
       "id": "pkg:telemetry/.#InMemoryTelemetryContext",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:1ee3188602313bb04fdd95526c672a0c63acd9ae5305264fe0f6c6d99717ff13"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:1ee3188602313bb04fdd95526c672a0c63acd9ae5305264fe0f6c6d99717ff13",
+      "rationale": "Derived by the interface gap detector: InMemoryTelemetryContext is Go telemetry/memory.go#InMemoryTelemetryContext (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/memory.go#InMemoryTelemetryContext"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:telemetry/metrics.go#TypedTelemetryMetrics.Counter"
+      ],
+      "evidence": [
+        "test:ai/telemetry_upstream_test.go#TestAITelemetryBoundsPollErrorMessagesUpstream",
+        "test:ai/telemetry_upstream_test.go#TestAITelemetryCountsInterleavedToolDeltasIndependentlyUpstream",
+        "test:ai/telemetry_upstream_test.go#TestAITelemetryCreatesInstrumentsOncePerMetricsObjectUpstream"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#InMemoryTelemetryContext::construct:0",
@@ -249629,13 +249774,43 @@
     },
     {
       "id": "pkg:telemetry/.#InMemoryTelemetryContext::property:metrics",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:3c3f541c90117dc35618ded514e0e66be15b3e22e8e4032e1b254039f1f3bf27"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:3c3f541c90117dc35618ded514e0e66be15b3e22e8e4032e1b254039f1f3bf27",
+      "rationale": "Derived by the interface gap detector: InMemoryTelemetryContext::property:metrics is Go telemetry/memory.go#InMemoryTelemetryContext.Metrics (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/memory.go#InMemoryTelemetryContext.Metrics"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/memory.go#InMemoryTelemetryContext.Metrics"
+      ],
+      "evidence": [
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
+      ]
     },
     {
       "id": "pkg:telemetry/.#InMemoryTelemetryContext::property:propagation",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:762121f4a3eedc13c22f50267dd23418c3bd7f848069c07224a0e9f8ffa0fc63"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:762121f4a3eedc13c22f50267dd23418c3bd7f848069c07224a0e9f8ffa0fc63",
+      "rationale": "Derived by the interface gap detector: InMemoryTelemetryContext::property:propagation is Go telemetry/memory.go#InMemoryTelemetryContext.Propagation (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/memory.go#InMemoryTelemetryContext.Propagation"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/memory.go#InMemoryTelemetryContext.Propagation"
+      ],
+      "evidence": [
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
+      ]
     },
     {
       "id": "pkg:telemetry/.#InMemoryTelemetryContext::property:startSpan",
@@ -251430,7 +251605,8 @@
         "call:ai/telemetry.go#observeModelRequest"
       ],
       "evidence": [
-        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities"
+        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251450,7 +251626,8 @@
         "call:durable/harness/scheduler.go#TaskScheduler.phase"
       ],
       "evidence": [
-        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities"
+        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251777,7 +251954,8 @@
         "call:telemetry/context.go#noopTelemetrySpan.Metrics"
       ],
       "evidence": [
-        "test:telemetry/metrics_upstream_test.go#TestMetricsUpstream"
+        "test:telemetry/metrics_upstream_test.go#TestMetricsUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251797,7 +251975,8 @@
         "call:telemetry/metrics.go#TypedTelemetryMetrics.Counter"
       ],
       "evidence": [
-        "test:telemetry/metrics_upstream_test.go#TestMetricsUpstream"
+        "test:telemetry/metrics_upstream_test.go#TestMetricsUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251817,7 +251996,8 @@
         "call:telemetry/metrics.go#TypedTelemetryMetrics.Counter"
       ],
       "evidence": [
-        "test:telemetry/metrics_upstream_test.go#TestMetricsUpstream"
+        "test:telemetry/metrics_upstream_test.go#TestMetricsUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251939,7 +252119,8 @@
         "call:telemetry/context.go#noopTelemetrySpan.Propagation"
       ],
       "evidence": [
-        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream"
+        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251959,7 +252140,8 @@
         "call:durable/harness/scheduler.go#TaskScheduler.phase"
       ],
       "evidence": [
-        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream"
+        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251979,7 +252161,8 @@
         "call:durable/harness/scheduler.go#TaskScheduler.phase"
       ],
       "evidence": [
-        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream"
+        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -251999,7 +252182,8 @@
         "call:durable/harness/submissions.go#injectTrace"
       ],
       "evidence": [
-        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream"
+        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -252019,7 +252203,8 @@
         "call:durable/harness/submissions.go#injectTrace"
       ],
       "evidence": [
-        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream"
+        "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -252287,7 +252472,8 @@
         "call:ai/telemetry.go#observeModelRequest"
       ],
       "evidence": [
-        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities"
+        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -252307,7 +252493,8 @@
         "call:durable/harness/scheduler.go#TaskScheduler.phase"
       ],
       "evidence": [
-        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities"
+        "test:durable/harness/harness_telemetry_options_test.go#TestHarnessOptionsTelemetryAcceptsOneAdapterWithOptionalPropagationAndMetricsCapabilities",
+        "test:telemetry/memory_capabilities_test.go#TestInMemoryRecorderIsItsOwnMetricsAndPropagationCapability"
       ]
     },
     {
@@ -252622,38 +252809,150 @@
     },
     {
       "id": "pkg:telemetry/.#TelemetryStore",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:4351326b76ea812b037bd9c8a816925080479261bcb19091ddcbd3a063d79d92"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:4351326b76ea812b037bd9c8a816925080479261bcb19091ddcbd3a063d79d92",
+      "rationale": "Derived by the interface gap detector: TelemetryStore is Go telemetry/store.go#TelemetryStore (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/store.go#TelemetryStore"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/store.go#TelemetryStore"
+      ],
+      "evidence": [
+        "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#TelemetryStore::property:findMetrics",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:e752fadcf7bca5f1d8de8cecc560a4a4777a83da17f0fddae68d19ecdc4eaf23"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:e752fadcf7bca5f1d8de8cecc560a4a4777a83da17f0fddae68d19ecdc4eaf23",
+      "rationale": "Derived by the interface gap detector: TelemetryStore::property:findMetrics is Go telemetry/store.go#TelemetryStore.FindMetrics (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/store.go#TelemetryStore.FindMetrics"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/store.go#TelemetryStore.FindMetrics"
+      ],
+      "evidence": [
+        "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#TelemetryStore::property:findMetrics::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:4270b6182eccc54dbef0d8bd9ed2bd8807ff8ff7979705aac76dc2e6c1a16a3e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:4270b6182eccc54dbef0d8bd9ed2bd8807ff8ff7979705aac76dc2e6c1a16a3e",
+      "rationale": "Derived by the interface gap detector: TelemetryStore::property:findMetrics::call:0 is Go telemetry/store.go#TelemetryStore.FindMetrics (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/store.go#TelemetryStore.FindMetrics"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/store.go#TelemetryStore.FindMetrics"
+      ],
+      "evidence": [
+        "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#TelemetryStore::property:findTraces",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:f35cd47b727eba1e1da5c06c4893c0433b69ee060a95adb19d62c1c9b19f1daa"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:f35cd47b727eba1e1da5c06c4893c0433b69ee060a95adb19d62c1c9b19f1daa",
+      "rationale": "Derived by the interface gap detector: TelemetryStore::property:findTraces is Go telemetry/store.go#TelemetryStore.FindTraces (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/store.go#TelemetryStore.FindTraces"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/store.go#TelemetryStore.FindTraces"
+      ],
+      "evidence": [
+        "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#TelemetryStore::property:findTraces::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:df809686d82dd017cd25efa84a34270911b2518b9de34631e61762b458130cf1"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:df809686d82dd017cd25efa84a34270911b2518b9de34631e61762b458130cf1",
+      "rationale": "Derived by the interface gap detector: TelemetryStore::property:findTraces::call:0 is Go telemetry/store.go#TelemetryStore.FindTraces (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/store.go#TelemetryStore.FindTraces"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/store.go#TelemetryStore.FindTraces"
+      ],
+      "evidence": [
+        "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#TelemetryStore::property:getTrace",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:3de4948973d181eeee41697fd092b649032b3ab26dc98142762b14340a8ac1cc"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:3de4948973d181eeee41697fd092b649032b3ab26dc98142762b14340a8ac1cc",
+      "rationale": "Derived by the interface gap detector: TelemetryStore::property:getTrace is Go telemetry/store.go#TelemetryStore.GetTrace (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/store.go#TelemetryStore.GetTrace"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/store.go#TelemetryStore.GetTrace"
+      ],
+      "evidence": [
+        "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#TelemetryStore::property:getTrace::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:89703931e07f4193d17dbc63f9f9e7df7020b28a45b5a9fa98cec983b35a5e6f"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:89703931e07f4193d17dbc63f9f9e7df7020b28a45b5a9fa98cec983b35a5e6f",
+      "rationale": "Derived by the interface gap detector: TelemetryStore::property:getTrace::call:0 is Go telemetry/store.go#TelemetryStore.GetTrace (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "telemetry/store.go#TelemetryStore.GetTrace"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:telemetry/store.go#TelemetryStore.GetTrace"
+      ],
+      "evidence": [
+        "test:telemetry/store_upstream_test.go#TestInMemoryStoreSnapshots"
+      ],
+      "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
     {
       "id": "pkg:telemetry/.#TelemetryUpDownCounter",

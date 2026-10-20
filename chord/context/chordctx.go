@@ -131,10 +131,10 @@ func WithTelemetry(parent context.Context, t telemetry.TelemetrySpan) context.Co
 }
 
 // TraceIn runs a child span of Telemetry(ctx) and passes fn a derived context whose telemetry is that span: Pi's traceIn. It returns fn's result, and fn's error as the identical value, after the span ends, as telemetry.StartSpan does.
-// Pi's callback receives one `Context & { telemetry: TelemetrySpan }`, narrowed by the type system. Go cannot narrow a context's type, so the callback receives the context and the span; Telemetry(child) is that same span.
-func TraceIn[T any](ctx context.Context, options telemetry.SpanOptions, fn func(child context.Context, span telemetry.TelemetrySpan) (T, error)) (T, error) {
+// Pi's callback receives one `Context & { telemetry: TelemetrySpan }`, narrowed by the type system. Go cannot narrow a context's type, so the callback receives the context and reads the span as Telemetry(child), which is always a span.
+func TraceIn[T any](ctx context.Context, options telemetry.SpanOptions, fn func(child context.Context) (T, error)) (T, error) {
 	return telemetry.StartSpan(Telemetry(ctx), options, func(span telemetry.TelemetrySpan) (T, error) {
-		return fn(WithTelemetry(ctx, span), span)
+		return fn(WithTelemetry(ctx, span))
 	})
 }
 
