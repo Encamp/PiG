@@ -21,7 +21,7 @@ func TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans(t *testing.T) {
 	// harness-telemetry.test.ts: "records content-free submit and phase spans, nested parents, checkpoints, entry events, and metrics"
 	setup := chatSetup(t)
 	recorder := telemetry.NewInMemoryTelemetryContext()
-	secret := map[string]any{"type": "object", "properties": map[string]any{"secret": map[string]any{telemetry.Attr("type", "string")}}}
+	secret := map[string]any{"type": "object", "properties": map[string]any{"secret": map[string]any{"type": "string"}}}
 	addTool(t, setup.Registry, ownTool("inner", "inner", secret, func(ctx context.Context, _ any, _ durable.ToolExecutionApi) (durable.ToolExecutionResult, error) {
 		return ownText("private-result"), nil
 	}))
@@ -127,9 +127,9 @@ func TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans(t *testing.T) {
 		if !strings.HasPrefix(measurement.Name, "pi.durable.") {
 			continue
 		}
-		for key := range measurement.Attributes {
-			if strings.Contains(key, "id") {
-				t.Fatalf("metric %s has attribute %s", measurement.Name, key)
+		for _, attribute := range measurement.Attributes {
+			if strings.Contains(attribute.Name, "id") {
+				t.Fatalf("metric %s has attribute %s", measurement.Name, attribute.Name)
 			}
 		}
 	}
