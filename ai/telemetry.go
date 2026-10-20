@@ -16,7 +16,10 @@ package ai
 // the forwarding always reaches.
 
 import (
+	"reflect"
+	"runtime"
 	"sync"
+	"weak"
 
 	"github.com/MichaelKinsy/PiG/internal/jsclock"
 	"github.com/MichaelKinsy/PiG/internal/jsstring"
@@ -156,14 +159,14 @@ var AITelemetrySchema = telemetry.DefineTelemetrySchema(&telemetry.TelemetrySche
 	},
 })
 
-type aiInstruments struct {
+type aiInstrumentSet struct {
 	requestDuration, firstChunkDuration telemetry.TelemetryHistogram
 	tokens, cost                        telemetry.TelemetryCounter
 }
 
-func createAIInstruments(adapter telemetry.TelemetryMetrics) *aiInstruments {
+func createAIInstruments(adapter telemetry.TelemetryMetrics) *aiInstrumentSet {
 	metrics := telemetry.CreateTypedMetrics(adapter, AITelemetrySchema)
-	return &aiInstruments{
+	return &aiInstrumentSet{
 		requestDuration:    metrics.Histogram("pi.ai.request.duration"),
 		firstChunkDuration: metrics.Histogram("pi.ai.first_chunk.duration"),
 		tokens:             metrics.Counter("pi.ai.tokens"),
@@ -171,18 +174,51 @@ func createAIInstruments(adapter telemetry.TelemetryMetrics) *aiInstruments {
 	}
 }
 
-// aiInstrumentCache is Pi's instrumentCache WeakMap<TelemetryMetrics, instruments>, keyed by the adapter's identity.
-// Go has no weak map over interface keys, so an adapter stays referenced for the process lifetime; an adapter whose
+// aiInstruments caches Pi's instrumentCache WeakMap<TelemetryMetrics, instruments>: instruments are created once per
+// metrics object.
+//
+// A pointer adapter is keyed by a weak pointer to its allocation, and runtime.AddCleanup drops the entry once the
+// adapter is collected. Go has no ephemeron: the entry's instruments reference the adapter strongly when the adapter's
+// own instruments do (the in-memory recorder's do), and then the adapter stays reachable through its entry, where Pi's
+// WeakMap value does not pin its key. An adapter whose instruments do not reference it is released with its entry.
+// A non-pointer adapter has no allocation to weaken, so it is keyed by value for the process lifetime; one whose
 // dynamic type is not comparable cannot key a map and creates its instruments per request.
-var aiInstrumentCache sync.Map
+var aiInstruments = struct {
+	sync.Mutex
+	weak  map[weak.Pointer[byte]]*aiInstrumentSet
+	value map[telemetry.TelemetryMetrics]*aiInstrumentSet
+}{weak: map[weak.Pointer[byte]]*aiInstrumentSet{}, value: map[telemetry.TelemetryMetrics]*aiInstrumentSet{}}
 
-func aiInstrumentsFor(adapter telemetry.TelemetryMetrics) *aiInstruments {
-	defer func() { _ = recover() }() // an uncomparable dynamic type panics in Load and Store
-	if cached, ok := aiInstrumentCache.Load(adapter); ok {
-		return cached.(*aiInstruments)
+func aiInstrumentsFor(adapter telemetry.TelemetryMetrics) *aiInstrumentSet {
+	reflected := reflect.ValueOf(adapter)
+	if reflected.Kind() == reflect.Pointer && !reflected.IsNil() && reflected.Type().Elem().Size() != 0 {
+		address := (*byte)(reflected.UnsafePointer())
+		key := weak.Make(address)
+		aiInstruments.Lock()
+		defer aiInstruments.Unlock()
+		if cached, ok := aiInstruments.weak[key]; ok {
+			return cached
+		}
+		instruments := createAIInstruments(adapter)
+		aiInstruments.weak[key] = instruments
+		runtime.AddCleanup(address, func(key weak.Pointer[byte]) {
+			aiInstruments.Lock()
+			delete(aiInstruments.weak, key)
+			aiInstruments.Unlock()
+		}, key)
+		return instruments
 	}
-	instruments, _ := aiInstrumentCache.LoadOrStore(adapter, createAIInstruments(adapter))
-	return instruments.(*aiInstruments)
+	if !reflected.IsValid() || !reflected.Type().Comparable() {
+		return createAIInstruments(adapter)
+	}
+	aiInstruments.Lock()
+	defer aiInstruments.Unlock()
+	if cached, ok := aiInstruments.value[adapter]; ok {
+		return cached
+	}
+	instruments := createAIInstruments(adapter)
+	aiInstruments.value[adapter] = instruments
+	return instruments
 }
 
 // modelRequestObservation is the state observeModelRequest closes over.
@@ -190,7 +226,7 @@ type modelRequestObservation struct {
 	started    float64
 	attributes telemetry.SpanAttributes
 	poll       bool
-	instr      *aiInstruments
+	instr      *aiInstrumentSet
 	span       telemetry.TelemetrySpan
 	finished   chan struct{}
 	first      bool
@@ -221,9 +257,6 @@ func observeModelRequest(requestedModel *Model, options *StreamOptions, poll boo
 		adapter = telemetry.NoopTelemetryMetrics
 	}
 	o.instr = aiInstrumentsFor(adapter)
-	if o.instr == nil {
-		o.instr = createAIInstruments(adapter)
-	}
 	startAttributes := o.attributes.Merge(telemetry.SpanAttributes{telemetry.Attr("api", string(requestedModel.ProviderMeta.API))})
 	if options.Thinking != "" {
 		startAttributes = startAttributes.Set("reasoning", string(options.Thinking))
