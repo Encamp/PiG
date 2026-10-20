@@ -158,7 +158,7 @@ func TestPropagationUpstream(t *testing.T) {
 		if !reflect.DeepEqual(adapter.Inject(target), original) {
 			t.Fatal("mutating an injected carrier changed the span's identity")
 		}
-		if err := adapter.StartSpan(telemetry.SpanOptions{Name: "linked", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{"tags": []string{"original"}}}}}, func(telemetry.TelemetrySpan) error { return nil }); err != nil {
+		if err := adapter.StartSpan(telemetry.SpanOptions{Name: "linked", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})}}}}, func(telemetry.TelemetrySpan) error { return nil }); err != nil {
 			t.Fatal(err)
 		}
 		spans := adapter.GetSpans()
@@ -168,9 +168,9 @@ func TestPropagationUpstream(t *testing.T) {
 		}
 		first.Context["pi-memory-span"] = "123"
 		linked.Links[0].Context["pi-memory-span"] = "456"
-		linked.Links[0].Attributes["tags"].([]string)[0] = "mutated"
-		linked.Links[0].Attributes["tags"] = []string{"mutated"}
-		if got := adapter.GetSpans()[1].Links; !reflect.DeepEqual(got, []telemetry.RecordedTelemetryLink{{Context: original, Attributes: telemetry.SpanAttributes{"tags": []string{"original"}}}}) {
+		linked.Links[0].Attributes.Value("tags").([]string)[0] = "mutated"
+		linked.Links[0].Attributes.Set("tags", []string{"mutated"})
+		if got := adapter.GetSpans()[1].Links; !reflect.DeepEqual(got, []telemetry.RecordedTelemetryLink{{Context: original, Attributes: telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})}}}) {
 			t.Fatalf("links = %v, want the original target and attributes", got)
 		}
 	})
@@ -195,7 +195,7 @@ func TestPropagationUpstream(t *testing.T) {
 			t.Fatal(err)
 		}
 		target := receiver.Extract(wire)
-		if err := receiver.StartSpan(telemetry.SpanOptions{Name: "background", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{"reason": "restart"}}}}, func(span telemetry.TelemetrySpan) error {
+		if err := receiver.StartSpan(telemetry.SpanOptions{Name: "background", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", "restart")}}}}, func(span telemetry.TelemetrySpan) error {
 			span.AddLink(telemetry.SpanLink{Context: target})
 			return nil
 		}); err != nil {
@@ -206,7 +206,7 @@ func TestPropagationUpstream(t *testing.T) {
 			t.Fatalf("parentContext = %v, want null", recorded.ParentContext)
 		}
 		if want := []telemetry.RecordedTelemetryLink{
-			{Context: carrier, Attributes: telemetry.SpanAttributes{"reason": "restart"}},
+			{Context: carrier, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", "restart")}},
 			{Context: carrier, Attributes: telemetry.SpanAttributes{}},
 		}; !reflect.DeepEqual(recorded.Links, want) {
 			t.Fatalf("links = %v, want %v", recorded.Links, want)
