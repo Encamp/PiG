@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"os/exec"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/MichaelKinsy/PiG/internal/coding/pigversion"
@@ -84,7 +83,7 @@ func linksOf(recorder *telemetry.InMemoryTelemetryContext, kept []telemetry.Tele
 	return out
 }
 
-// carrierOf is the carrier a remote step extracts: the injected carrier of a kept span, a malformed or foreign shape, or none.
+// carrierOf is the carrier a remote step extracts: the injected carrier of a kept span, an incomplete, foreign or opaque shape, or none.
 func carrierOf(recorder *telemetry.InMemoryTelemetryContext, kept []telemetry.TelemetrySpan, op opSpec) telemetry.TelemetryCarrier {
 	var own telemetry.TelemetryCarrier
 	if len(kept) > 0 {
@@ -92,7 +91,7 @@ func carrierOf(recorder *telemetry.InMemoryTelemetryContext, kept []telemetry.Te
 	}
 	scope := own["pi-memory-scope"]
 	foreign := func(span string) telemetry.TelemetryCarrier {
-		return telemetry.TelemetryCarrier{"pi-memory-scope": foreignScope, "pi-memory-span": span}
+		return telemetry.TelemetryCarrier{"pi-memory-scope": foreignScope, "pi-memory-span": span, "pi-memory-trace": "foreign-trace"}
 	}
 	switch op.Carrier {
 	case "kept":
@@ -102,31 +101,18 @@ func carrierOf(recorder *telemetry.InMemoryTelemetryContext, kept []telemetry.Te
 			own["extra"] = "key"
 		}
 		return own
-	case "missingSpan":
+	case "missingScope", "missingSpan", "missingTrace":
 		if own != nil {
-			return telemetry.TelemetryCarrier{"pi-memory-scope": scope}
+			delete(own, map[string]string{"missingScope": "pi-memory-scope", "missingSpan": "pi-memory-span", "missingTrace": "pi-memory-trace"}[op.Carrier])
+			return own
 		}
-	case "badScope":
-		return telemetry.TelemetryCarrier{"pi-memory-scope": "X", "pi-memory-span": "1"}
-	case "upperScope":
-		return telemetry.TelemetryCarrier{"pi-memory-scope": strings.ToUpper(foreignScope), "pi-memory-span": "1"}
-	case "spanZero":
-		return foreign("0")
-	case "spanLeadingZero":
-		return foreign("01")
-	case "spanSign":
-		return foreign("+1")
-	case "spanUnsafe":
-		return foreign("9007199254740992")
-	case "spanHuge":
-		return foreign("99999999999999999999999")
-	case "spanMaxSafe":
-		return foreign("9007199254740991")
 	case "foreign":
 		return foreign("1")
+	case "opaque":
+		return telemetry.TelemetryCarrier{"pi-memory-scope": "external-recorder", "pi-memory-span": "external-span", "pi-memory-trace": "external-trace"}
 	case "ownUnknown":
 		if own != nil {
-			return telemetry.TelemetryCarrier{"pi-memory-scope": scope, "pi-memory-span": "99999"}
+			return telemetry.TelemetryCarrier{"pi-memory-scope": scope, "pi-memory-span": "99999", "pi-memory-trace": own["pi-memory-trace"]}
 		}
 	case "empty":
 		return telemetry.TelemetryCarrier{}
@@ -305,7 +291,7 @@ func TestInMemoryTelemetryMatchesPiOnRandomPrograms(t *testing.T) {
 					continue
 				}
 				o := outcome()
-				carrier := pick("kept", "kept", "kept", "extra", "missingSpan", "badScope", "upperScope", "spanZero", "spanLeadingZero", "spanSign", "spanUnsafe", "spanHuge", "spanMaxSafe", "foreign", "ownUnknown", "empty", "none")
+				carrier := pick("kept", "kept", "kept", "extra", "missingScope", "missingSpan", "missingTrace", "foreign", "opaque", "ownUnknown", "empty", "none")
 				return opSpec{Op: "remote", Carrier: carrier, Idx: rng.Intn(4), Name: pick("r1", "r2", ""), Attrs: attributes(), Links: links(), Body: body(depth + 1), Outcome: &o}
 			default:
 				if depth >= 3 {
