@@ -154,8 +154,8 @@ type ClassifierResult struct {
 
 // ClassifierOptions configures classifier provider requests. Cancellation comes from the request context.
 type ClassifierOptions struct {
-	// TelemetryContext parents provider request spans; nil means no recording backend.
-	TelemetryContext telemetry.TelemetryContext
+	// Telemetry is the explicit parent span for telemetry produced by this logical request; nil is Pi's omitted option, which uses the no-op span.
+	Telemetry telemetry.TelemetrySpan
 	// Fetch replaces HTTP execution without changing the caller's request context or redirect policy.
 	Fetch  *http.Client
 	APIKey string

@@ -89,14 +89,18 @@ func (m *Models) applyAuth(ctx context.Context, model *Model, options StreamOpti
 }
 
 // lazyStream returns immediately and forwards an owned setup/stream operation. It drains terminal events even after the caller cancels iteration.
-func (m *Models) lazyStream(ctx context.Context, model *Model, setup func() (*AssistantMessageEventStream, error)) *AssistantMessageEventStream {
+func (m *Models) lazyStream(ctx context.Context, model *Model, setup func() (*AssistantMessageEventStream, error), observer *LazyStreamObserver) *AssistantMessageEventStream {
+	var observation *lazyObservation
+	if observer != nil {
+		observation = &lazyObservation{observer: *observer}
+	}
 	return startLazyStream(ctx, model, func(context.Context) (*AssistantMessageEventStream, error) {
 		inner, err := setup()
 		if err == nil && inner == nil {
 			err = fmt.Errorf("provider returned no stream")
 		}
 		return inner, err
-	}, m.operations.Go)
+	}, m.operations.Go, observation)
 }
 
 // pushModelsSetupError ends stream with lazy.ts createSetupErrorMessage's message, errorMessage before timestamp.
@@ -140,7 +144,7 @@ func (m *Models) stream(ctx context.Context, model *Model, request Context, simp
 			return nil, NewModelsError(ModelsErrorStream, "Provider "+provider.ID+" has no stream implementation", nil)
 		}
 		return stream(ctx, prepared, transcript, params)
-	})
+	}, observeModelRequest(model, &opts, false, m.operations.Go))
 }
 
 func (m *Models) Complete(ctx context.Context, model *Model, request Context, options ...StreamOptions) *AssistantMessage {
@@ -171,7 +175,7 @@ func (m *Models) StreamDeferred(ctx context.Context, model *Model, handle Deferr
 		}
 		opts.StreamOptions = params
 		return provider.FetchDeferred(ctx, prepared, handle, opts)
-	})
+	}, observeModelRequest(model, &opts.StreamOptions, true, m.operations.Go))
 }
 
 func (m *Models) FetchDeferred(ctx context.Context, model *Model, handle DeferredHandle, options ...DeferredFetchOptions) *AssistantMessage {
