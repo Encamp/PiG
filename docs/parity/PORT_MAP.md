@@ -245,7 +245,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/ai/src/utils/json-parse.ts` | `ai/json_repair.go (repairJSON, ParseJSONWithRepair) + ai/streaming_json.go (ParseStreamingJson; ai/json_parse_upstream_test.go)` | ✅ |
 | `packages/ai/src/utils/diagnostics.ts` | `ai/diagnostics.go (FormatThrownValue, ExtractDiagnosticError, CreateAssistantMessageDiagnostic, AppendAssistantMessageDiagnostic; ai/diagnostics_upstream_test.go) + ai/types.go (DiagnosticErrorInfo, AssistantMessageDiagnostic)` | ✅ |
 | `packages/ai/src/utils/node-http-proxy.ts` | `ai/node_http_proxy.go + ai/bedrock.go` | ✅ |
-| `packages/ai/src/utils/overflow.ts` | `ai/overflow.go (IsContextOverflow, IsRecoverableLength, GetOverflowPatterns; overflow_test.go)`, `internal/codingagent/auto_recovery.go` | ✅ |
+| `packages/ai/src/utils/overflow.ts` | `ai/overflow.go (IsContextOverflow, IsRecoverableLength, GetOverflowPatterns; overflow_test.go)`, `internal/codingagent/auto_recovery.go`, `durable/core/turn/patterns.go (generated)` | ✅ |
 | `packages/ai/src/utils/text.ts` | `ai/text.go + ai/transcript.go + agent/context_tokens.go + internal/codingagent/export/tool_renderer.go`, `ai/estimate.go` | ✅ |
 | `packages/ai/src/utils/uuid.ts` | `ai/uuid.go (UUIDv7, uuidv7Generator: the process-wide last-ordinary-timestamp and 41-bit sequence state with an injected clock and random source; internal/codingagent session ids, the Codex WebSocket request id, the compaction summary routing session id and the bug-report id call it)` | ✅ |
 | `packages/ai/src/utils/abort-signals.ts` | `(stdlib context.Context combines signals)` | n/a |

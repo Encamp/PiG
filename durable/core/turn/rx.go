@@ -5,8 +5,8 @@ package turn
 
 // A small backtracking matcher for the case-insensitive JavaScript patterns of pi-ai's overflow and retry classifiers
 // (utils/overflow.ts, utils/retry.ts). The core cannot import regexp (it uses sync), so the subset those patterns use is
-// implemented here: literals, `.`, `\d`, `\s`, character classes of ranges and `\d`, groups `(?:…)`, alternation, the
-// quantifiers `*`, `+` and `?`, and the `^` anchor. Matching is unanchored search over code points, folding ASCII letters
+// implemented here: literals, `.`, `\d`, `\s`, character classes of ranges, `\d` and `\w`, groups `(?:…)`, alternation, the
+// quantifiers `*`, `+` and `?`, and the `^` and `$` anchors. Matching is unanchored search over code points, folding ASCII letters
 // only, as the non-Unicode `i` flag does for a pattern of ASCII letters.
 
 type rxKind uint8
@@ -19,6 +19,7 @@ const (
 	rxClass
 	rxGroup
 	rxStart
+	rxEnd
 )
 
 type rxNode struct {
@@ -26,6 +27,7 @@ type rxNode struct {
 	ch       rune
 	ranges   []rune // rxClass: lo, hi pairs
 	digits   bool   // rxClass includes \d
+	word     bool   // rxClass includes \w
 	alts     [][]rxNode
 	min, max int // max < 0: unbounded
 }
@@ -88,6 +90,8 @@ func (p *rxParser) atom() rxNode {
 	switch c {
 	case '^':
 		return rxNode{kind: rxStart}
+	case '$':
+		return rxNode{kind: rxEnd}
 	case '.':
 		return rxNode{kind: rxAny}
 	case '(':
@@ -107,6 +111,10 @@ func (p *rxParser) atom() rxNode {
 				p.i++
 				if e == 'd' {
 					n.digits = true
+					continue
+				}
+				if e == 'w' {
+					n.word = true
 					continue
 				}
 				lo = e
@@ -164,6 +172,9 @@ func (n *rxNode) one(r rune) bool {
 		if n.digits && r >= '0' && r <= '9' {
 			return true
 		}
+		if n.word && (r >= '0' && r <= '9' || r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r == '_') {
+			return true
+		}
 		f := foldASCII(r)
 		for i := 0; i < len(n.ranges); i += 2 {
 			lo, hi := n.ranges[i], n.ranges[i+1]
@@ -204,11 +215,15 @@ func matchSeq(seq []rxNode, text []rune, pos int, k func(int) bool) bool {
 	if n.kind == rxStart {
 		return pos == 0 && matchSeq(rest, text, pos, k)
 	}
+	if n.kind == rxEnd {
+		return pos == len(text) && matchSeq(rest, text, pos, k)
+	}
 	var try func(count, pos int) bool
 	try = func(count, pos int) bool {
 		// Greedy: take another repetition first, then continue with the rest.
 		if n.max < 0 || count < n.max {
-			more := func(next int) bool { return next != pos && try(count+1, next) }
+			// An empty repetition (a group matching `$`) still counts toward the minimum, and ends the loop once it is met.
+			more := func(next int) bool { return (next != pos || count < n.min) && try(count+1, next) }
 			if n.kind == rxGroup {
 				if matchAlts(n.alts, text, pos, more) {
 					return true

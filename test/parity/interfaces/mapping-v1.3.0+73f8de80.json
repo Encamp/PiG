@@ -1,5 +1,5 @@
 {
-  "upstreamVersion": "1.3.0+0ed1b043",
+  "upstreamVersion": "1.3.0+73f8de80",
   "mappings": [
     {
       "id": "pkg:agent/.#AfterToolCallContext",
@@ -35775,7 +35775,7 @@
       "id": "pkg:ai/api/classifier-shared#ClassifierHttpError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "ai/classifier_http.go#ClassifierHTTPError"
       ]
@@ -43950,7 +43950,7 @@
       "id": "pkg:ai/api/pi-messages#PiMessagesResponseError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "ai/pi_messages.go#PiMessagesResponseError"
       ]
@@ -104908,7 +104908,7 @@
       "id": "pkg:chord/delta#PathError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "chord/delta/delta.go#PathError"
       ]
@@ -105477,7 +105477,7 @@
       "id": "pkg:chord/delta#UnsafePathError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "chord/delta/delta.go#UnsafePathError"
       ]
@@ -111413,7 +111413,7 @@
       "id": "pkg:codemode/.#CodemodeSourceError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "codemode/source.go#SourceError"
       ]
@@ -120891,7 +120891,7 @@
       "id": "pkg:codemode/source#CodemodeSourceError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "codemode/source.go#SourceError"
       ]
@@ -199576,8 +199576,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/core/driver/docs_core_test.go#TestCoreCheckpointPredicateFailureRollsBackEveryDocument",
-        "test:durable/core/driver/docs_core_test.go#TestCoreCheckpointPredicateSkipsEmptyBatchesButSeesStructuralNoOps"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
       ]
     },
     {
@@ -199642,8 +199642,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreMigratesCurrentAndHistoricalRewindableValuesAndFollowsForkAncestry"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -200679,7 +200679,7 @@
       "id": "pkg:durable/.#ConversationBusy::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "durable/errors.go#ConversationBusy"
       ]
@@ -200799,8 +200799,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/documents_typed_state_test.go#TestDocFamilyDefinitionCarriesPisFamilyDiscriminator"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -200821,8 +200821,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/codemode/constants_test.go#TestExportedConstantsAndDocumentMatchPi",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
       ]
     },
     {
@@ -201427,8 +201427,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreMigratesCurrentAndHistoricalRewindableValuesAndFollowsForkAncestry"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201449,8 +201449,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreMigratesCurrentAndHistoricalRewindableValuesAndFollowsForkAncestry"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201471,8 +201471,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreMigratesCurrentAndHistoricalRewindableValuesAndFollowsForkAncestry"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201493,8 +201493,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreMigratesCurrentAndHistoricalRewindableValuesAndFollowsForkAncestry"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201515,8 +201515,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreMigratesCurrentAndHistoricalRewindableValuesAndFollowsForkAncestry"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201537,8 +201537,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreForkCopiesEveryFamilyMemberAcrossScanPages"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201559,8 +201559,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreForkCopiesEveryFamilyMemberAcrossScanPages"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201581,8 +201581,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreForkCopiesEveryFamilyMemberAcrossScanPages"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201603,8 +201603,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreForkCopiesEveryFamilyMemberAcrossScanPages"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201625,8 +201625,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreForkCopiesEveryFamilyMemberAcrossScanPages"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201821,8 +201821,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreMigratesCurrentAndHistoricalRewindableValuesAndFollowsForkAncestry"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201843,8 +201843,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/core/driver/docs_core_test.go#TestCoreForkCopiesEveryFamilyMemberAcrossScanPages"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201865,8 +201865,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/documents_typed_state_test.go#TestDocFamilyDefinitionCarriesPisFamilyDiscriminator"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201896,8 +201896,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/documents_typed_state_test.go#TestDocFamilyDefinitionCarriesPisFamilyDiscriminator"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -201918,8 +201918,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/codemode/constants_test.go#TestExportedConstantsAndDocumentMatchPi",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
       ]
     },
     {
@@ -201949,8 +201949,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/codemode/constants_test.go#TestExportedConstantsAndDocumentMatchPi",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
       ]
     },
     {
@@ -201970,9 +201970,9 @@
         "call:durable/documents.go#AddressId"
       ],
       "evidence": [
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
         "test:durable/storage/jsonl/closed_storage_upstream_test.go#TestJsonlStorageEveryOperationAfterCloseFailsWithTheClosedMessage",
-        "test:durable/harness/harness_generation_test.go#TestGeneration",
-        "test:durable/session/session_checkpoints_migrations_test.go#TestSessionDocumentMigrations"
+        "test:durable/harness/harness_generation_test.go#TestGeneration"
       ]
     },
     {
@@ -202014,9 +202014,9 @@
         "call:durable/session/transaction.go#Transaction.adopt"
       ],
       "evidence": [
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
         "test:durable/types_upstream_test.go#TestTypesUpstream",
-        "test:durable/types_upstream_test.go#TestTypesUpstreamExclusivityLiteralsEncodeAsPiObjects",
-        "test:durable/codecs_test.go#TestDocumentContentDecodesOperationObjectsInKeyOrder"
+        "test:durable/types_upstream_test.go#TestTypesUpstreamExclusivityLiteralsEncodeAsPiObjects"
       ]
     },
     {
@@ -202352,9 +202352,9 @@
         "call:durable/documents.go#MaterializeDocument"
       ],
       "evidence": [
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
         "test:durable/types_upstream_test.go#TestTypesUpstreamExclusivityLiteralsEncodeAsPiObjects",
-        "test:durable/codecs_test.go#TestDocumentRecordMarshalsInPiStorageOrder",
-        "test:durable/codemode/codemode_test.go#TestDurableCodeMode"
+        "test:durable/codecs_test.go#TestDocumentRecordMarshalsInPiStorageOrder"
       ]
     },
     {
@@ -203875,8 +203875,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/documents_typed_state_concurrent_test.go#TestTypedDocumentStateAttachesGapFreeUnderConcurrentPublication",
-        "test:durable/json_test.go#TestDocumentConversionsKeepRevisionsAndStayStrict"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy",
+        "test:durable/documents_typed_state_concurrent_test.go#TestTypedDocumentStateAttachesGapFreeUnderConcurrentPublication"
       ]
     },
     {
@@ -204850,6 +204850,7 @@
         "call:durable/harness/tool_nested.go#NestedCalls.Execute"
       ],
       "evidence": [
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
         "test:durable/harness/tool_nested_calls_doc_test.go#TestANestedCallOfAnAbortedCallerRejectsAndLeavesNoDocumentForIt",
         "test:durable/harness/tool_nested_test.go#TestANestedCallIsItsOwnToolTaskAndItsResultGoesToTheCaller"
       ]
@@ -205211,7 +205212,7 @@
       "id": "pkg:durable/.#ReadAfterWrite::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "durable/errors.go#ReadAfterWrite"
       ]
@@ -205939,8 +205940,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/documents_typed_state_test.go#TestDocFamilyDefinitionCarriesPisFamilyDiscriminator"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -205961,8 +205962,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/codemode/constants_test.go#TestExportedConstantsAndDocumentMatchPi",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
       ]
     },
     {
@@ -206883,8 +206884,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/documents_typed_state_test.go#TestDocFamilyDefinitionCarriesPisFamilyDiscriminator"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -206905,8 +206906,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/codemode/constants_test.go#TestExportedConstantsAndDocumentMatchPi",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
       ]
     },
     {
@@ -208008,7 +208009,7 @@
       "id": "pkg:durable/.#StorageRequestError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "durable/errors.go#StorageRequestError"
       ]
@@ -208105,9 +208106,9 @@
         "call:durable/documents.go#MaterializeDocument"
       ],
       "evidence": [
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
         "test:durable/session/session_checkpoints_migrations_test.go#TestSessionDocumentMigrations",
-        "test:durable/session/session_forks_test.go#TestSessionConversationDocumentForks",
-        "test:durable/storage/create_unions_variants_test.go#TestDocumentCreateUnionEveryScopeHistoryAndForkIsStored"
+        "test:durable/session/session_forks_test.go#TestSessionConversationDocumentForks"
       ]
     },
     {
@@ -208487,8 +208488,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue",
-        "test:durable/documents_typed_state_test.go#TestDocFamilyDefinitionCarriesPisFamilyDiscriminator"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
       ]
     },
     {
@@ -208509,8 +208510,8 @@
       ],
       "evidence": [
         "test:durable/doc_token_definition_upstream_test.go#TestDocTokensCarryTheirDefinitionAndValidateTheVersion",
-        "test:durable/codemode/constants_test.go#TestExportedConstantsAndDocumentMatchPi",
-        "test:durable/common_doc_definition_test.go#TestCommonDocDefinitionInitialIsTheSingletonsFirstValue"
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestDefinitionsRequireACheckpointPolicy"
       ]
     },
     {
@@ -213227,6 +213228,7 @@
         "call:durable/codemode/call.go#call.execute"
       ],
       "evidence": [
+        "test:durable/session/codemode_checkpoints_upstream_test.go#TestBuiltInDocumentCheckpointPolicies",
         "test:durable/codemode/constants_test.go#TestExportedConstantsAndDocumentMatchPi"
       ]
     },
@@ -229761,7 +229763,7 @@
       "id": "pkg:env/.#RemoteError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "env/connection.go#RemoteError"
       ]
@@ -232619,7 +232621,7 @@
       "id": "pkg:env/.#SshError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "env/ssh.go#SshError"
       ]
@@ -235307,7 +235309,7 @@
       "id": "pkg:mcp/.#McpAbortError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpAbortError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpAbortError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpAbortError.Cause"
       ]
@@ -236624,7 +236626,7 @@
       "id": "pkg:mcp/.#McpConnectionClosedError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpConnectionClosedError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpConnectionClosedError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpConnectionClosedError.Cause"
       ]
@@ -236726,7 +236728,7 @@
       "id": "pkg:mcp/.#McpError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpError.Cause"
       ]
@@ -237328,7 +237330,7 @@
       "id": "pkg:mcp/.#McpTimeoutError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/jsonrpc.go#McpTimeoutError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/jsonrpc.go#McpTimeoutError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/jsonrpc.go#McpTimeoutError.Cause"
       ]
@@ -241444,7 +241446,7 @@
       "id": "pkg:mcp/oauth#McpOAuthAuthorizationRequiredError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#McpOAuthAuthorizationRequiredError"
       ]
@@ -244405,7 +244407,7 @@
       "id": "pkg:mcp/oauth#OAuthError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthError"
       ]
@@ -244804,7 +244806,7 @@
       "id": "pkg:mcp/oauth#OAuthInsecureEndpointError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthInsecureEndpointError"
       ]
@@ -244927,7 +244929,7 @@
       "id": "pkg:mcp/oauth#OAuthIssuerMismatchError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap().",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthIssuerMismatchError"
       ]
@@ -245180,7 +245182,7 @@
       "id": "pkg:mcp/oauth#OAuthRegistrationError::property:cause",
       "disposition": "designed-out",
       "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
-      "rationale": "ER: mcp/oauth/errors.go#OAuthRegistrationError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+0ed1b043) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+0ed1b043 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
+      "rationale": "ER: mcp/oauth/errors.go#OAuthRegistrationError.Cause returns only a constant, the value Pi's runtime leaves unset. Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.3.0+73f8de80) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.3.0+73f8de80 source); D103 maps a cause that a Go error does carry to Unwrap(). Applied to a constant Go stand-in by LEAD-RULINGS-1520 (lg-imla-2 census 4: inherited Error members as D103).",
       "pigTargets": [
         "mcp/oauth/errors.go#OAuthRegistrationError.Cause"
       ]
