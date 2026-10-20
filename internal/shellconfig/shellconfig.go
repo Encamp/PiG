@@ -31,6 +31,8 @@ var (
 
 // IsLegacyWSLBashPath mirrors upstream isLegacyWslBashPath: the path is the WSL launcher bash.exe in the System32 or
 // Sysnative directory of the Windows directory in SystemRoot, which need not be C:\Windows.
+//
+// Ports packages/coding-agent/src/utils/shell.ts (isLegacyWslBashPath).
 func IsLegacyWSLBashPath(path string) bool {
 	return isLegacyWSLBashPath(path, os.Getenv("SystemRoot"))
 }
@@ -56,6 +58,8 @@ func isLegacyWSLBashPath(path, systemRoot string) bool {
 
 // ForBash mirrors upstream getBashShellConfig: legacy WSL bash reads the
 // command from stdin, every other bash takes it after -c.
+//
+// Ports packages/coding-agent/src/utils/shell.ts (getBashShellConfig).
 func ForBash(shell string) Config {
 	if IsLegacyWSLBashPath(shell) {
 		return Config{Path: shell, Args: []string{"-s"}, CommandTransport: "stdin"}
