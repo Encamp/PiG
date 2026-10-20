@@ -111,7 +111,9 @@ func (wrapped *telCountingSpan) AddEvent(name string, attributes telemetry.SpanA
 func (wrapped *telCountingSpan) SetAttributes(attributes telemetry.SpanAttributes) {
 	wrapped.span.SetAttributes(attributes)
 }
-func (wrapped *telCountingSpan) SetStatus(status telemetry.SpanStatus) { wrapped.span.SetStatus(status) }
+func (wrapped *telCountingSpan) SetStatus(status telemetry.SpanStatus) {
+	wrapped.span.SetStatus(status)
+}
 
 func (propagation *telCountingPropagation) Inject(target telemetry.TelemetryContext) telemetry.TelemetryCarrier {
 	propagation.spy.inject(target)

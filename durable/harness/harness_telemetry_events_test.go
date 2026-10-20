@@ -345,7 +345,7 @@ func TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPh
 	if got, want := reportAttributes(recorder), []telemetry.SpanAttributes{{"type": "extension_error"}, {"type": "host_error"}}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("report counters %+v, want %+v", got, want)
 	}
-	if reports := setup.Reports.all(); len(reports) != 2 || reports[0] != hookError || reports[1].Error() != clockError.Error() {
+	if reports := setup.Reports.all(); len(reports) != 2 || !errors.Is(reports[0], hookError) || reports[1].Error() != clockError.Error() {
 		t.Fatalf("reports %v", reports)
 	}
 	text := jsonText(t, recorder.GetSpans())
@@ -365,12 +365,12 @@ func TestDurableTelemetryCountsAnOutsideSpanSessionFailureWithoutStartingASpan(t
 	_, err := root.Commit(testContext, func(tx durable.Tx) (any, error) {
 		return tx.AppendEntry(root.Id(), durable.EntryDraft{Kind: "app.failed"})
 	})
-	if err != failure {
+	if !errors.Is(err, failure) {
 		t.Fatalf("commit error %v, want %v", err, failure)
 	}
 	<-harness.Closed()
 	waitFor(t, func() bool { return allSettled(recorder) })
-	if reports := setup.Reports.all(); len(reports) != 1 || reports[0] != failure {
+	if reports := setup.Reports.all(); len(reports) != 1 || !errors.Is(reports[0], failure) {
 		t.Fatalf("reports %v", reports)
 	}
 	if spans := recorder.GetSpans(); len(spans) != 0 {
