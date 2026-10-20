@@ -971,6 +971,7 @@ func (session *SessionImpl) publish(ctx context.Context, seq durable.Seq, writes
 	session.mu.Unlock()
 	observed := len(listeners) > 0 || len(internal) > 0
 	span := chordctx.Telemetry(ctx)
+	traced := span != telemetry.NoopTelemetryContext
 	var changes []durable.CommitChange
 	if observed {
 		changes = make([]durable.CommitChange, 0, len(writes)+len(documents))
@@ -982,12 +983,15 @@ func (session *SessionImpl) publish(ctx context.Context, seq durable.Seq, writes
 		}
 		switch write := table.(type) {
 		case durable.EntryWrite:
+			if !traced {
+				break
+			}
 			span.AddEvent("pi.durable.entry", telemetry.SpanAttributes{
 				telemetry.Attr("entry.id", float64(write.Value.Id)),
 				telemetry.Attr("entry.kind", write.Value.Kind),
 			})
 		case durable.SubmissionWrite:
-			if write.Value.Status == durable.SubmissionDone || write.Value.Status == durable.SubmissionUnanswered {
+			if traced && (write.Value.Status == durable.SubmissionDone || write.Value.Status == durable.SubmissionUnanswered) {
 				attributes := telemetry.SpanAttributes{
 					telemetry.Attr("submission.id", float64(write.Value.Id)),
 					telemetry.Attr("status", string(write.Value.Status)),

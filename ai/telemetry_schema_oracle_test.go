@@ -29,7 +29,7 @@ func TestAITelemetrySchemaMatchesPi(t *testing.T) {
 	if err := json.Unmarshal(output, &want); err != nil {
 		t.Fatal(err)
 	}
-	encoded, err := json.Marshal(AITelemetrySchema)
+	encoded, err := json.Marshal(AITelemetrySchema())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -396,7 +396,7 @@ func TestAITelemetryDefaultsToNoopUpstream(t *testing.T) {
 	if got := models.CompleteSimple(t.Context(), aiTelemetryModel(), Context{Messages: []Message{}}); got.StopReason != StopReasonStop {
 		t.Fatalf("stop = %s", got.StopReason)
 	}
-	if !AITelemetrySchema.Spans["pi.ai.request"].StartAttributes["provider"].Required {
+	if !AITelemetrySchema().Spans["pi.ai.request"].StartAttributes["provider"].Required {
 		t.Fatal("provider is not a required start attribute")
 	}
 }

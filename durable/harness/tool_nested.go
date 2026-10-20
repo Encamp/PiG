@@ -349,7 +349,9 @@ func startNestedCall(ctx context.Context, runtime NestedCaller, parentCallId, na
 		return nil
 	})
 	if err == nil && replayed {
-		chordctx.Telemetry(ctx).AddEvent("pi.durable.replay", telemetry.SpanAttributes{telemetry.Attr("tool.name", name)})
+		if span := chordctx.Telemetry(ctx); span != telemetry.NoopTelemetryContext {
+			span.AddEvent("pi.durable.replay", telemetry.SpanAttributes{telemetry.Attr("tool.name", name)})
+		}
 	}
 	return id, err
 }

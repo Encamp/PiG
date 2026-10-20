@@ -74,6 +74,19 @@ func startLazyStream(ctx context.Context, model *Model, setup func(context.Conte
 	outer := NewAssistantMessageEventStream()
 	outer.executor = executor
 	turn := executor.newTurn()
+	// Without an observer the closures capture nothing for it, so the unobserved path allocates as it did before observers existed.
+	if observation == nil {
+		launch(func() {
+			turn.run(func(turn *continuationTurn) {
+				inner, err := setup(context.WithValue(ctx, continuationTurnKey{}, turn))
+				settled := newContinuationPromise[lazySetupResult](executor)
+				settled.resolve(lazySetupResult{stream: inner, err: err})
+				prepared := awaitContinuation(turn, settled)
+				forwardLazySetup(ctx, turn, executor, outer, model, prepared.stream, prepared.err, nil)
+			})
+		})
+		return outer
+	}
 	launch(func() {
 		turn.run(func(turn *continuationTurn) {
 			inner, err := setup(context.WithValue(ctx, continuationTurnKey{}, turn))
@@ -105,6 +118,14 @@ func startLazyStreamSync(ctx context.Context, model *Model, setup func(context.C
 		run(context.WithValue(ctx, continuationTurnKey{}, owned))
 	} else {
 		executor.run(func(turn *continuationTurn) { run(context.WithValue(ctx, continuationTurnKey{}, turn)) })
+	}
+	if observation == nil {
+		launch(func() {
+			forward.run(func(turn *continuationTurn) {
+				forwardLazySetup(ctx, turn, executor, outer, model, prepared.stream, prepared.err, nil)
+			})
+		})
+		return outer
 	}
 	launch(func() {
 		forward.run(func(turn *continuationTurn) {
@@ -183,12 +204,15 @@ func forwardLazySetup(ctx context.Context, turn *continuationTurn, executor *con
 	if err == nil {
 		forwarding := context.WithValue(context.WithoutCancel(ctx), continuationTurnKey{}, turn)
 		var result *AssistantMessage
-		push := func(event AssistantMessageEvent) error {
-			if err := outer.Push(event); err != nil {
-				return err
+		push := outer.Push
+		if observation != nil {
+			push = func(event AssistantMessageEvent) error {
+				if err := outer.Push(event); err != nil {
+					return err
+				}
+				observation.onEvent(event)
+				return nil
 			}
-			observation.onEvent(event)
-			return nil
 		}
 		if result, err = forwardEvents(turn, forwarding, inner, push); err == nil {
 			outer.End(result)

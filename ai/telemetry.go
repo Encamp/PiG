@@ -116,47 +116,50 @@ func aiMetricStop() telemetry.TelemetryMetricAttributeDefinition {
 }
 
 // AITelemetrySchema is Pi's AI_TELEMETRY_SCHEMA: Pi-owned request metadata, bounded error status, events, and
-// low-cardinality metrics.
-var AITelemetrySchema = telemetry.DefineTelemetrySchema(&telemetry.TelemetrySchemaDefinition{
-	Version: 1,
-	Spans: map[string]telemetry.TelemetrySpanDefinition{
-		"pi.ai.request": aiRequestSpan("One logical model request, including authentication and provider setup."),
-		"pi.ai.poll":    aiRequestSpan("One deferred-response poll, not the deferred request's lifetime."),
-	},
-	Metrics: map[string]telemetry.TelemetryMetricDefinition{
-		"pi.ai.request.duration": {
-			Kind:        telemetry.TelemetryMetricKindHistogram,
-			Description: "Logical request or poll duration.",
-			Unit:        "ms",
-			Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel, "stop": aiMetricStop()},
+// low-cardinality metrics. The schema is built on first use, not at package init, so a process that never reads it pays nothing;
+// every call returns the same schema.
+var AITelemetrySchema = sync.OnceValue(func() *telemetry.TelemetrySchemaDefinition {
+	return telemetry.DefineTelemetrySchema(&telemetry.TelemetrySchemaDefinition{
+		Version: 1,
+		Spans: map[string]telemetry.TelemetrySpanDefinition{
+			"pi.ai.request": aiRequestSpan("One logical model request, including authentication and provider setup."),
+			"pi.ai.poll":    aiRequestSpan("One deferred-response poll, not the deferred request's lifetime."),
 		},
-		"pi.ai.first_chunk.duration": {
-			Kind:        telemetry.TelemetryMetricKindHistogram,
-			Description: "Time to the first normalized stream event.",
-			Unit:        "ms",
-			Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel},
-		},
-		"pi.ai.tokens": {
-			Kind:        telemetry.TelemetryMetricKindCounter,
-			Description: "Reported model token usage; pending and deferred polls are excluded.",
-			Unit:        "token",
-			Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{
-				"provider": aiProvider,
-				"model":    aiModel,
-				"kind": func() telemetry.TelemetryMetricAttributeDefinition {
-					kind := aiAttribute(telemetry.TelemetryAttributeTypeString, "Token usage category.", true)
-					kind.Values = []string{"input", "output", "cache_read", "cache_write"}
-					return kind
-				}(),
+		Metrics: map[string]telemetry.TelemetryMetricDefinition{
+			"pi.ai.request.duration": {
+				Kind:        telemetry.TelemetryMetricKindHistogram,
+				Description: "Logical request or poll duration.",
+				Unit:        "ms",
+				Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel, "stop": aiMetricStop()},
+			},
+			"pi.ai.first_chunk.duration": {
+				Kind:        telemetry.TelemetryMetricKindHistogram,
+				Description: "Time to the first normalized stream event.",
+				Unit:        "ms",
+				Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel},
+			},
+			"pi.ai.tokens": {
+				Kind:        telemetry.TelemetryMetricKindCounter,
+				Description: "Reported model token usage; pending and deferred polls are excluded.",
+				Unit:        "token",
+				Attributes: map[string]telemetry.TelemetryMetricAttributeDefinition{
+					"provider": aiProvider,
+					"model":    aiModel,
+					"kind": func() telemetry.TelemetryMetricAttributeDefinition {
+						kind := aiAttribute(telemetry.TelemetryAttributeTypeString, "Token usage category.", true)
+						kind.Values = []string{"input", "output", "cache_read", "cache_write"}
+						return kind
+					}(),
+				},
+			},
+			"pi.ai.cost": {
+				Kind:        telemetry.TelemetryMetricKindCounter,
+				Description: "Reported model cost; pending and deferred polls are excluded.",
+				Unit:        "USD",
+				Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel},
 			},
 		},
-		"pi.ai.cost": {
-			Kind:        telemetry.TelemetryMetricKindCounter,
-			Description: "Reported model cost; pending and deferred polls are excluded.",
-			Unit:        "USD",
-			Attributes:  map[string]telemetry.TelemetryMetricAttributeDefinition{"provider": aiProvider, "model": aiModel},
-		},
-	},
+	})
 })
 
 type aiInstrumentSet struct {
@@ -165,7 +168,7 @@ type aiInstrumentSet struct {
 }
 
 func createAIInstruments(adapter telemetry.TelemetryMetrics) *aiInstrumentSet {
-	metrics := telemetry.CreateTypedMetrics(adapter, AITelemetrySchema)
+	metrics := telemetry.CreateTypedMetrics(adapter, AITelemetrySchema())
 	return &aiInstrumentSet{
 		requestDuration:    metrics.Histogram("pi.ai.request.duration"),
 		firstChunkDuration: metrics.Histogram("pi.ai.first_chunk.duration"),
@@ -187,7 +190,7 @@ var aiInstruments = struct {
 	sync.Mutex
 	weak  map[weak.Pointer[byte]]*aiInstrumentSet
 	value map[telemetry.TelemetryMetrics]*aiInstrumentSet
-}{weak: map[weak.Pointer[byte]]*aiInstrumentSet{}, value: map[telemetry.TelemetryMetrics]*aiInstrumentSet{}}
+}{}
 
 func aiInstrumentsFor(adapter telemetry.TelemetryMetrics) *aiInstrumentSet {
 	reflected := reflect.ValueOf(adapter)
@@ -200,6 +203,9 @@ func aiInstrumentsFor(adapter telemetry.TelemetryMetrics) *aiInstrumentSet {
 			return cached
 		}
 		instruments := createAIInstruments(adapter)
+		if aiInstruments.weak == nil {
+			aiInstruments.weak = map[weak.Pointer[byte]]*aiInstrumentSet{}
+		}
 		aiInstruments.weak[key] = instruments
 		runtime.AddCleanup(address, func(key weak.Pointer[byte]) {
 			aiInstruments.Lock()
@@ -217,6 +223,9 @@ func aiInstrumentsFor(adapter telemetry.TelemetryMetrics) *aiInstrumentSet {
 		return cached
 	}
 	instruments := createAIInstruments(adapter)
+	if aiInstruments.value == nil {
+		aiInstruments.value = map[telemetry.TelemetryMetrics]*aiInstrumentSet{}
+	}
 	aiInstruments.value[adapter] = instruments
 	return instruments
 }
@@ -265,7 +274,7 @@ func observeModelRequest(requestedModel *Model, options *StreamOptions, poll boo
 	if poll {
 		name = "pi.ai.poll"
 	}
-	start := telemetry.CreateTypedSpanStarter(parent, AITelemetrySchema)
+	start := telemetry.CreateTypedSpanStarter(parent, AITelemetrySchema())
 	ready := make(chan struct{})
 	var readyOnce sync.Once
 	markReady := func() { readyOnce.Do(func() { close(ready) }) }
