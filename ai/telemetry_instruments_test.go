@@ -39,23 +39,24 @@ func aiInstrumentCacheLen() int {
 // live metrics object, and a dropped object's entry goes away with it.
 func TestAIInstrumentCacheIsCreatedOncePerLiveAdapterAndReleasedWithIt(t *testing.T) {
 	baseline := aiInstrumentCacheLen()
-	a, b := &releasableMetrics{}, &releasableMetrics{}
-	first, again := aiInstrumentsFor(a), aiInstrumentsFor(a)
+	b := &releasableMetrics{}
 	other := aiInstrumentsFor(b)
-	if first != again || first == other {
-		t.Fatalf("instruments: first %p again %p other %p", first, again, other)
-	}
-	for name, adapter := range map[string]*releasableMetrics{"a": a, "b": b} {
-		if adapter.histograms != 2 || adapter.counters != 2 {
-			t.Fatalf("adapter %s created %d histograms and %d counters, want 2 and 2", name, adapter.histograms, adapter.counters)
+	dropped := func() weak.Pointer[releasableMetrics] {
+		a := &releasableMetrics{}
+		first, again := aiInstrumentsFor(a), aiInstrumentsFor(a)
+		if first != again || first == other {
+			t.Fatalf("instruments: first %p again %p other %p", first, again, other)
 		}
-	}
-	if got := aiInstrumentCacheLen(); got != baseline+2 {
-		t.Fatalf("cache entries = %d, want %d", got, baseline+2)
-	}
-
-	dropped := weak.Make(a)
-	a, first, again = nil, nil, nil
+		for name, adapter := range map[string]*releasableMetrics{"a": a, "b": b} {
+			if adapter.histograms != 2 || adapter.counters != 2 {
+				t.Fatalf("adapter %s created %d histograms and %d counters, want 2 and 2", name, adapter.histograms, adapter.counters)
+			}
+		}
+		if got := aiInstrumentCacheLen(); got != baseline+2 {
+			t.Fatalf("cache entries = %d, want %d", got, baseline+2)
+		}
+		return weak.Make(a)
+	}()
 	deadline := time.Now().Add(10 * time.Second)
 	for dropped.Value() != nil || aiInstrumentCacheLen() != baseline+1 {
 		if time.Now().After(deadline) {
