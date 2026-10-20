@@ -709,11 +709,11 @@ func placeSummary(tx durable.Tx, runtime compactionRuntime, current compactionTa
 	if current.Owner == nil {
 		requestId := fmt.Sprintf("compaction:%d", runtime.TaskId())
 		draft := durable.SubmissionDraft{Type: durable.SubmissionTypeWrite, RequestId: &requestId, Entry: &entry}
-		id, err := AdmitSubmission(tx, runtime.ConversationId(), draft, runtime.Now(), QueueModesOf(runtime.Settings()))
+		admission, err := AdmitSubmission(tx, runtime.ConversationId(), draft, runtime.Now(), QueueModesOf(runtime.Settings()), nil)
 		if err != nil {
 			return nil, err
 		}
-		result.SubmissionId = &id
+		result.SubmissionId = &admission.Id
 	} else {
 		appended, err := tx.AppendEntry(runtime.ConversationId(), entry)
 		if err != nil {

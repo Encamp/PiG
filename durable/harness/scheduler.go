@@ -68,6 +68,38 @@ type invocation struct {
 	nextTimer int
 	ended     atomic.Bool
 	done      chan struct{}
+	// links are the immutable creation-time links of the task's first invocation, attached to its phase spans. Guarded by
+	// the scheduler's mutex; cleared when the invocation finishes.
+	links []telemetry.TelemetryCarrier
+	// record is the invocation's task as last committed, and fault the outcome the scheduler decided for it: they keep
+	// the terminal state available after the task leaves the live index. Guarded by the scheduler's mutex; released when
+	// the invocation finishes.
+	record *anyTaskRecord
+	fault  *anyOutcome
+	// span is the span of the phase in progress; nil between phases, where the scheduler's own steps run under none.
+	spanMu sync.Mutex
+	span   telemetry.TelemetrySpan
+}
+
+// telemetryContext is a context whose telemetry is the invocation's current phase span, for reports raised under it.
+func (invocation *invocation) telemetryContext() context.Context {
+	return chordctx.WithTelemetry(context.Background(), invocation.currentSpan())
+}
+
+// currentSpan is the span of the phase in progress, or the NOOP span.
+func (invocation *invocation) currentSpan() telemetry.TelemetrySpan {
+	invocation.spanMu.Lock()
+	defer invocation.spanMu.Unlock()
+	if invocation.span == nil {
+		return telemetry.NoopTelemetryContext
+	}
+	return invocation.span
+}
+
+func (invocation *invocation) setSpan(span telemetry.TelemetrySpan) {
+	invocation.spanMu.Lock()
+	invocation.span = span
+	invocation.spanMu.Unlock()
 }
 
 func (invocation *invocation) endedError() error {
@@ -171,6 +203,8 @@ type scope struct {
 
 // TaskSchedulerOptions configures NewTaskScheduler (scheduler.ts:134-160).
 type TaskSchedulerOptions struct {
+	// Telemetry is HarnessOptions.telemetry: the root of phase spans and the source of the metrics; nil is the no-op context.
+	Telemetry telemetry.TelemetryContext
 	Session  *session.SessionImpl
 	Storage  durable.Storage
 	Registry RegistryReader
@@ -190,7 +224,7 @@ type TaskSchedulerOptions struct {
 	// WriteAtClose writes what the callback returns straight to Storage, on the line, after the commits admitted before
 	// the seal have settled (BeforeClose of the Session).
 	WriteAtClose func(writes func() []durable.StorageWrite) error
-	Report       func(err error, info durable.ReportInfo)
+	Report       func(ctx context.Context, err error, info durable.ReportInfo)
 	// SettleOutcome is the Harness cleanup staged in the commit that makes an outcome the scheduler wrote itself
 	// terminal.
 	SettleOutcome func(tx durable.Tx, record anyTaskRecord, outcome SchedulerOutcome) error
@@ -218,6 +252,14 @@ type TaskSchedulerOptions struct {
 // rejected. mu guards the in-memory state; it is never held while waiting for the line.
 type TaskScheduler struct {
 	options TaskSchedulerOptions
+	// telemetry is the Harness's root adapter, which parents phase spans whose task has no stored carrier.
+	telemetry      telemetry.TelemetryContext
+	activeMetric   telemetry.TelemetryUpDownCounter
+	durationMetric telemetry.TelemetryHistogram
+	// resumed holds the tasks loaded by Open and not yet invoked: their first invocation is a resumption. Guarded by mu.
+	resumed map[durable.TaskId]struct{}
+	// counted holds the live tasks counted by activeMetric, with the task name they were counted under. Guarded by mu.
+	counted map[durable.TaskId]string
 	// contexts is the context range last read through a task runtime, per conversation: a later read, by any of its
 	// tasks, scans only newer entries. It is derived and never persisted; it is dropped at the first idle check after
 	// Settings().ContextRetentionMs of idleness, and at close (scheduler.ts #contexts).
@@ -329,8 +371,15 @@ type failedMigration struct {
 
 // NewTaskScheduler returns a scheduler; Open loads it.
 func NewTaskScheduler(options TaskSchedulerOptions) *TaskScheduler {
+	root := rootTelemetry(options.Telemetry)
+	metrics := telemetry.CreateTypedMetrics(metricsOf(root), DurableTelemetrySchema)
 	return &TaskScheduler{
 		options:             options,
+		telemetry:           root,
+		activeMetric:        metrics.UpDownCounter("pi.durable.tasks.active"),
+		durationMetric:      metrics.Histogram("pi.durable.phase.duration"),
+		resumed:             map[durable.TaskId]struct{}{},
+		counted:             map[durable.TaskId]string{},
 		contexts:            map[durable.ConversationId]*keptContext{},
 		sealed:              make(chan struct{}),
 		live:                map[durable.TaskId]anyTaskRecord{},
@@ -409,6 +458,7 @@ func (s *TaskScheduler) Open(ctx context.Context) error {
 		for _, records := range scans {
 			for _, record := range records {
 				s.trackLocked(nil, record)
+				s.resumed[record.Id] = struct{}{}
 				if record.AbandonOnRestart {
 					s.abandoned.Add(record.Id)
 				}
@@ -435,7 +485,7 @@ func (s *TaskScheduler) Open(ctx context.Context) error {
 	}
 	for _, record := range parked {
 		restarts := record.Restarts + 1
-		s.options.Report(fmt.Errorf("Task %d (%s) was cut off %d times without progress; it is parked until retryTask()", record.Id, record.Kind, restarts), s.aboutRecord(durable.ReportTaskParked, record))
+		s.options.Report(context.Background(), fmt.Errorf("Task %d (%s) was cut off %d times without progress; it is parked until retryTask()", record.Id, record.Kind, restarts), s.aboutRecord(durable.ReportTaskParked, record))
 	}
 	// Derive abort marks a crash left unapplied below cancelled owners, and finalize held outcomes.
 	s.mu.Lock()
@@ -558,7 +608,7 @@ func (s *TaskScheduler) notifyBlockedLocked() {
 	}
 	s.background.Go(func() {
 		for _, listener := range listeners {
-			session.Contained(listener, func(err error) { s.options.Report(err, durable.ReportInfo{Type: durable.ReportListenerError}) })
+			session.Contained(listener, func(err error) { s.options.Report(context.Background(), err, durable.ReportInfo{Type: durable.ReportListenerError}) })
 		}
 	})
 }
@@ -638,7 +688,7 @@ func (s *TaskScheduler) snapshotOrReportLocked() (snapshot durable.RegistrySnaps
 			if !ok {
 				err = fmt.Errorf("%s", durable.ErrorMessage(recovered))
 			}
-			s.options.Report(err, registryInfo)
+			s.options.Report(context.Background(), err, registryInfo)
 		}
 	}()
 	return s.options.Registry.Snapshot()
@@ -1060,7 +1110,7 @@ func (s *TaskScheduler) resolveIdleWaiters() {
 func (s *TaskScheduler) contextRetentionMs() float64 {
 	retention, err := s.contextRetention()
 	if err != nil {
-		s.options.Report(err, settingsInfo)
+		s.options.Report(context.Background(), err, settingsInfo)
 		return 0
 	}
 	return retention
@@ -1594,6 +1644,12 @@ func (s *TaskScheduler) seal() {
 
 // finishSealLocked completes the seal; it is called with s.mu held and releases it.
 func (s *TaskScheduler) finishSealLocked() {
+	// Closing the Harness releases its active counts.
+	for _, kind := range s.counted {
+		s.activeMetric.Add(-1, telemetry.SpanAttributes{"task": kind})
+	}
+	clear(s.counted)
+	clear(s.resumed)
 	s.sealedRunning = make(map[durable.TaskId]struct{}, len(s.invocations))
 	for id := range s.invocations {
 		s.sealedRunning[id] = struct{}{}
@@ -1809,7 +1865,7 @@ func (s *TaskScheduler) reserve(ticket *session.LineTicket) ([]reservation, erro
 	for _, fault := range faulted {
 		info := s.aboutRecord(durable.ReportTaskFaulted, fault.record)
 		info.Reason = durable.ReasonRestartLimit
-		s.options.Report(errors.New(fault.message), info)
+		s.options.Report(context.Background(), errors.New(fault.message), info)
 	}
 	// Marked, or already marked or gone: done with them. Reserve again, now seeing the marks.
 	if len(abandoned) > 0 {
@@ -1901,7 +1957,7 @@ func (s *TaskScheduler) resolveLocked(record anyTaskRecord, snapshot durable.Reg
 		s.scheduleWakeLocked()
 		info := s.aboutRecord(durable.ReportMigrationFailed, record)
 		info.Extension = installerOf(snapshot, found.task)
-		s.options.Report(err, info)
+		s.options.Report(context.Background(), err, info)
 		return resolution{blocked: blockedMigrationFailed}
 	}
 	return resolution{task: found.task, record: migrated, migrated: true}
@@ -1985,6 +2041,10 @@ func (s *TaskScheduler) createInvocationLocked(record anyTaskRecord, mode invoca
 		watches:        map[durable.WatchHandle[durable.JsonObject]]struct{}{},
 		timers:         map[int]func(){},
 		done:           make(chan struct{}),
+		record:         &record,
+	}
+	if record.StartedAt == nil {
+		created.links = record.Links
 	}
 	s.invocations[record.Id] = created
 	return created
@@ -2006,6 +2066,9 @@ func (s *TaskScheduler) start(reserved reservation) {
 	go func() {
 		defer func() {
 			s.end(invocation)
+			s.mu.Lock()
+			invocation.record, invocation.links, invocation.fault = nil, nil, nil
+			s.mu.Unlock()
 			close(invocation.done)
 			s.kick()
 		}()
@@ -2017,7 +2080,7 @@ func (s *TaskScheduler) start(reserved reservation) {
 		}
 		if err != nil {
 			info := s.aboutInvocation(durable.ReportTaskError, invocation)
-			s.options.Report(err, info)
+			s.options.Report(invocation.telemetryContext(), err, info)
 		}
 	}()
 }
@@ -2030,7 +2093,7 @@ func (s *TaskScheduler) run(reserved reservation) error {
 	var previous *phaseResult
 	for {
 		current, ok := s.step(invocation, func(tx *session.Transaction, current anyTaskRecord) decision {
-			return s.decideLocked(tx, current, previous, phase, invocation.extension)
+			return s.decideLocked(tx, current, previous, phase, invocation)
 		})
 		// Close may seal between the decision and dispatch.
 		if !ok || s.isSealed() {
@@ -2070,7 +2133,7 @@ func runHandler(handler func() error) (err error) {
 
 // decideLocked applies the precedence rules for a run invocation, on the line (scheduler.ts:879-912). Rules 1
 // (terminal, completing, or waiting) and 2 (closing) are applied by step.
-func (s *TaskScheduler) decideLocked(tx *session.Transaction, current anyTaskRecord, previous *phaseResult, phase *phaseState, extension string) decision {
+func (s *TaskScheduler) decideLocked(tx *session.Transaction, current anyTaskRecord, previous *phaseResult, phase *phaseState, invocation *invocation) decision {
 	// 3. abort mark: end; a fresh abort invocation starts once the task's ordinary owned work is gone.
 	if current.AbortRequested {
 		return decision{}
@@ -2116,8 +2179,8 @@ func (s *TaskScheduler) decideLocked(tx *session.Transaction, current anyTaskRec
 				reason = durable.ReasonMissingTask
 			}
 			info := s.aboutRecord(durable.ReportTaskOutdated, current)
-			info.Extension, info.Reason = extension, reason
-			s.options.Report(fmt.Errorf("Task %d keeps running under its old %s definition", current.Id, current.Kind), info)
+			info.Extension, info.Reason = invocation.extension, reason
+			s.options.Report(invocation.telemetryContext(), fmt.Errorf("Task %d keeps running under its old %s definition", current.Id, current.Kind), info)
 		}
 	}
 	return decision{proceed: true}
@@ -2193,7 +2256,7 @@ func (s *TaskScheduler) step(invocation *invocation, decide func(tx *session.Tra
 	if fault != nil {
 		info := s.aboutInvocation(durable.ReportTaskFaulted, invocation)
 		info.Reason = durable.ReasonThrew
-		s.options.Report(fault, info)
+		s.options.Report(invocation.telemetryContext(), fault, info)
 	}
 	return result.record, result.proceed
 }
@@ -2572,7 +2635,7 @@ func (hooks runtimeHooks) Each(name string, invoke func(handlers any) error) err
 			if runtime.invocation.ctx.Err() != nil {
 				return err
 			}
-			runtime.scheduler.options.Report(err, durable.ReportInfo{Type: durable.ReportExtensionError, Extension: hook.Extension, Task: runtime.invocation.reportTask()})
+			runtime.scheduler.options.Report(runtime.invocation.telemetryContext(), err, durable.ReportInfo{Type: durable.ReportExtensionError, Extension: hook.Extension, Task: runtime.invocation.reportTask()})
 		}
 	}
 	return nil
@@ -2857,7 +2920,7 @@ func (s *TaskScheduler) keepContext(runtime *taskRuntime, conversationId durable
 	}
 	s.mu.Unlock()
 	if idle && retentionErr != nil {
-		s.options.Report(retentionErr, settingsInfo)
+		s.options.Report(context.Background(), retentionErr, settingsInfo)
 	}
 }
 
@@ -2877,14 +2940,14 @@ func (runtime *taskRuntime) Report(err error, from ...durable.ReportFrom) {
 	}
 	invocation := runtime.invocation
 	if len(from) == 0 {
-		runtime.scheduler.options.Report(err, runtime.scheduler.aboutInvocation(durable.ReportTaskError, invocation))
+		runtime.scheduler.options.Report(invocation.telemetryContext(), err, runtime.scheduler.aboutInvocation(durable.ReportTaskError, invocation))
 		return
 	}
 	switch from[0].Type {
 	case durable.ReportFromExtension:
-		runtime.scheduler.options.Report(err, durable.ReportInfo{Type: durable.ReportExtensionError, Task: invocation.reportTask(), Extension: from[0].Extension})
+		runtime.scheduler.options.Report(invocation.telemetryContext(), err, durable.ReportInfo{Type: durable.ReportExtensionError, Task: invocation.reportTask(), Extension: from[0].Extension})
 	default:
-		runtime.scheduler.options.Report(err, durable.ReportInfo{Type: durable.ReportHostError, Callback: from[0].Callback, Task: invocation.reportTask()})
+		runtime.scheduler.options.Report(invocation.telemetryContext(), err, durable.ReportInfo{Type: durable.ReportHostError, Callback: from[0].Callback, Task: invocation.reportTask()})
 	}
 }
 
@@ -3298,7 +3361,7 @@ func (s *TaskScheduler) offerWake(wake Wake) {
 		return nil
 	}()
 	if err != nil {
-		s.options.Report(err, onWakeInfo)
+		s.options.Report(context.Background(), err, onWakeInfo)
 		return
 	}
 	s.mu.Lock()
@@ -3428,7 +3491,7 @@ func (s *TaskScheduler) restartLimit() float64 {
 		return s.options.Settings().RestartLimit, nil
 	}()
 	if err != nil {
-		s.options.Report(err, settingsInfo)
+		s.options.Report(context.Background(), err, settingsInfo)
 		return durable.DefaultRestartLimit
 	}
 	return limit
