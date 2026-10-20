@@ -130,7 +130,7 @@ func CreateTelemetryStoreConformance(name string, factory StoreFixtureFactory) [
 		create("pages complete traces without duplicates when trace starts tie", pagesTraces),
 		create("inherits remote trace IDs and preserves remote parents and cross-trace links", remoteTraces),
 		create("accepts external string identities without imposing an ID format", externalIdentities),
-		create("preserves attribute insertion order on spans, events, links, and metric rows", preservesAttributeOrder),
+		create("preserves attribute insertion order on spans, events, and links", preservesAttributeOrder),
 		create("queries metric names, inclusive interval bounds, typed attribute equality, and detached values", queriesMetrics),
 	}
 }
@@ -580,9 +580,10 @@ func attributeNames(attributes telemetry.SpanAttributes) []string {
 }
 
 // preservesAttributeOrder checks that attribute order is observable as in an object: insertion order, an overwritten
-// name keeping its position and integer-like names first.
+// name keeping its position and integer-like names first. Metric rows are checked by name only: a store may report a
+// series' attributes in a canonical order.
 func preservesAttributeOrder(ctx context.Context, factory StoreFixtureFactory) error {
-	_, restore := jsclock.MockDateNow(20_000)
+	now, restore := jsclock.MockDateNow(20_000)
 	defer restore()
 	return withStoreFixture(ctx, factory, func(f StoreFixture) error {
 		bag := func(names ...string) telemetry.SpanAttributes {
@@ -607,6 +608,7 @@ func preservesAttributeOrder(ctx context.Context, factory StoreFixtureFactory) e
 			return err
 		}
 		f.Context.Metrics().Counter("ordered", telemetry.InstrumentOptions{}).Add(1, bag("metric.z", "metric.a"))
+		now.Set(30_001)
 		if err := f.flush(ctx); err != nil {
 			return err
 		}
@@ -632,7 +634,9 @@ func preservesAttributeOrder(ctx context.Context, factory StoreFixtureFactory) e
 			deepStrictEqual(attributeNames(span.Attributes), []string{"2", "10", "zeta", "alpha", "beta"}, "span attribute order"),
 			deepStrictEqual(attributeNames(span.Events[0].Attributes), []string{"event.z", "event.a"}, "event attribute order"),
 			deepStrictEqual(attributeNames(span.Links[0].Attributes), []string{"link.z", "link.a"}, "link attribute order"),
-			deepStrictEqual(attributeNames(rows[0].Attributes), []string{"metric.z", "metric.a"}, "metric attribute order"),
+			// A metric row is an aggregate of a series, and a store may report the series' attributes in a canonical order, as
+			// Pi's SQLite store does with sorted names, so only the row's names are compared.
+			deepStrictEqual(slices.Sorted(slices.Values(attributeNames(rows[0].Attributes))), []string{"metric.a", "metric.z"}, "metric attribute names"),
 		)
 	})
 }

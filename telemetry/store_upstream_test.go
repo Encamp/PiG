@@ -128,3 +128,17 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		}
 	})
 }
+
+// The in-memory store reports a measurement's attributes in insertion order; a store that aggregates a series may
+// report them in a canonical order, so the shared conformance cases compare metric attribute names only.
+func TestInMemoryMetricRowsKeepAttributeInsertionOrder(t *testing.T) {
+	recorder := telemetry.NewInMemoryTelemetryContext()
+	recorder.Counter("ordered", telemetry.InstrumentOptions{}).Add(1, telemetry.SpanAttributes{telemetry.Attr("metric.z", 0), telemetry.Attr("metric.a", 1)})
+	rows, err := recorder.FindMetrics(telemetry.MetricQuery{Name: "ordered"})
+	if err != nil || len(rows) != 1 {
+		t.Fatalf("FindMetrics = %v, %v", rows, err)
+	}
+	if got := attributeNames(rows[0].Attributes); !reflect.DeepEqual(got, []string{"metric.z", "metric.a"}) {
+		t.Fatalf("metric attribute order = %v", got)
+	}
+}
