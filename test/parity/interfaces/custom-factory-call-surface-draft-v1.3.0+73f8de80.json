@@ -1,8 +1,8 @@
 {
-  "upstreamVersion": "1.3.0+0ed1b043",
+  "upstreamVersion": "1.3.0+73f8de80",
   "status": "internal-draft",
   "compatibilityClaim": "none; this draft shapes the private seam and does not assert public source compatibility",
-  "source": "test/parity/interfaces/upstream-v1.3.0+0ed1b043.json",
+  "source": "test/parity/interfaces/upstream-v1.3.0+73f8de80.json",
   "pinnedSources": [
     "packages/tui/src/tui.ts",
     "packages/tui/src/terminal.ts",

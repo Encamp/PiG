@@ -709,8 +709,11 @@ var OVERFLOW_PATTERNS = [
   // Generic fallback
   /too many tokens/i,
   // Generic fallback
-  /token limit exceeded/i
+  /token limit exceeded/i,
   // Generic fallback
+  // HTTP 413 means request-size overflow regardless of provider or body text.
+  // Match raw SDK errors and formatProviderError's prefix, not a status mentioned in the body.
+  /^(?:[\w -]+ API error \(413\):|413(?:\s|:|$))/i
 ];
 var CEREBRAS_BODYLESS_OVERFLOW_PATTERN = /^4(?:00|13)\s*(?:status code)?\s*\(no body\)/i;
 var NON_OVERFLOW_PATTERNS = [
