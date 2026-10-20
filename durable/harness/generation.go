@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/MichaelKinsy/PiG/ai"
+	chordctx "github.com/MichaelKinsy/PiG/chord/context"
 	"github.com/MichaelKinsy/PiG/chord/delta"
 	"github.com/MichaelKinsy/PiG/durable"
 )
@@ -348,6 +349,7 @@ func generationRequestHandler(ctx context.Context, task durable.RunningTask[Gene
 		streamOptions = *checkpoint.StreamOptions
 	}
 	options := streamOptionsOf(streamOptions, runtime.Signal(), checkpoint.ThinkingLevel)
+	options.Telemetry = chordctx.Telemetry(ctx)
 	if options.SessionID, err = ensureProviderSessionId(ctx, runtime); err != nil {
 		return err
 	}
@@ -390,7 +392,7 @@ func generationPollHandler(ctx context.Context, task durable.RunningTask[Generat
 		return failGenerationNoModel(ctx, runtime, &ref)
 	}
 	signal := runtime.Signal()
-	message := runtime.Models().FetchDeferred(signal, model, *checkpoint.Handle, ai.DeferredFetchOptions{StreamOptions: ai.StreamOptions{Signal: signal}})
+	message := runtime.Models().FetchDeferred(signal, model, *checkpoint.Handle, ai.DeferredFetchOptions{StreamOptions: ai.StreamOptions{Signal: signal, Telemetry: chordctx.Telemetry(ctx)}})
 	if message == nil {
 		return errors.New("deferred fetch returned no message")
 	}
@@ -439,7 +441,7 @@ func generationAbortHandler(ctx context.Context, task durable.RunningTask[Genera
 	if checkpoint.Phase == generationPoll && checkpoint.Model != nil && checkpoint.Handle != nil {
 		if model := runtime.Models().GetModel(checkpoint.Model.Provider, checkpoint.Model.ModelId); model != nil {
 			signal := runtime.Signal()
-			if err := runtime.Models().CancelDeferred(signal, model, *checkpoint.Handle, ai.DeferredCancelOptions{Signal: signal}); err != nil {
+			if err := runtime.Models().CancelDeferred(signal, model, *checkpoint.Handle, ai.DeferredCancelOptions{Signal: signal, Telemetry: chordctx.Telemetry(ctx)}); err != nil {
 				runtime.Report(err, durable.ReportFrom{Type: durable.ReportFromHost, Callback: durable.HostCallbackModels})
 			}
 		}

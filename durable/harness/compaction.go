@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/MichaelKinsy/PiG/ai"
+	chordctx "github.com/MichaelKinsy/PiG/chord/context"
 	"github.com/MichaelKinsy/PiG/chord/delta"
 	"github.com/MichaelKinsy/PiG/durable"
 	"github.com/MichaelKinsy/PiG/internal/jsstring"
@@ -247,6 +248,7 @@ func compactionSummarizeHandler(ctx context.Context, task compactionTask, runtim
 	options := streamOptionsOf(forwarded, runtime.Signal(), request.ThinkingLevel)
 	options.CacheRetention = ai.CacheRetention("none")
 	options.MaxTokens = request.MaxTokens
+	options.Telemetry = chordctx.Telemetry(ctx)
 	if options.SessionID, err = ensureProviderSessionId(ctx, runtime); err != nil {
 		return err
 	}
