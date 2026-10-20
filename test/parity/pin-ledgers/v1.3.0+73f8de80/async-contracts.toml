@@ -101,9 +101,9 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/goog
 [[files]]
 path = "packages/ai/src/api/lazy.ts"
 disposition = "deferred"
-contracts = ["awaited", "cancellable"]
-evidence = ["test:ai/models_runtime_result_test.go", "test:coding/model_refresh_metadata_test.go", "scenario:test/parity/scenarios/providers-faux-streaming/23-metadata-refresh-and-native-result.toml"]
-rationale = "Setup returns an outer stream immediately; the Models operation owner forwards inner events in order and awaits the independent result before settling the outer result. Setup errors become error events. An end-only result is not a fabricated terminal event. Dynamic module loading uses static linking in Go. Full setup rejection, cancellation during iteration, and owner shutdown across every deferred API remain under review; this file is not async-closed."
+contracts = ["awaited", "cancellable", "microtask-ordering"]
+evidence = ["test:ai/models_runtime_result_test.go", "test:coding/model_refresh_metadata_test.go", "scenario:test/parity/scenarios/providers-faux-streaming/23-metadata-refresh-and-native-result.toml", "test:ai/telemetry_upstream_test.go#TestLazyStreamObservationOrdersEventResolvedResultUpstream", "test:ai/telemetry_upstream_test.go#TestLazyStreamObservationReportsTerminalResultOnceUpstream", "test:ai/telemetry_upstream_test.go#TestLazyStreamObservationReportsSetupFailureOnceUpstream"]
+rationale = "Setup returns an outer stream immediately; the Models operation owner forwards inner events in order and awaits the independent result before settling the outer result. Setup errors become error events. An end-only result is not a fabricated terminal event. Dynamic module loading uses static linking in Go. Full setup rejection, cancellation during iteration, and owner shutdown across every deferred API remain under review; this file is not async-closed. Pi 2ec55d80 adds the observer: ai.LazyStreamObserver{OnEvent, OnResult} is synchronous and read-only, runs inside the forwarding turn, calls OnEvent after each push and OnResult once after the outer stream ends, and observes a setup failure as the error event and then the result; it adds no cancellation and no tick (tick positions are unchanged)."
 
 [[files]]
 path = "packages/ai/src/api/llama-cpp-classify.lazy.ts"
@@ -382,8 +382,8 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/mode
 path = "packages/ai/src/models.ts"
 disposition = "deferred"
 contracts = ["awaited", "concurrent-joined", "detached-owned", "cancellable"]
-evidence = ["test:ai/models_runtime_refresh_upstream_test.go#TestModelsRuntimeRefreshUpstream", "test:ai/models_runtime_auth_upstream_test.go#TestModelsRuntimeAuthUpstream", "test:ai/models_runtime_available_test.go#TestModelsGetAvailableRejectsBeforeOtherChecksSettle", "test:ai/models_runtime_lifetime_test.go#TestModelsCompletedRefreshSignalFollowsItsCaller", "scenario:test/parity/scenarios/model-runtime-store-catalog/19-models-runtime.toml"]
-rationale = "Reviewed against 0.87.1 only. packages/ai/src/images-models.ts was removed upstream in 0.99.1 and its image-catalog refresh and generation contract (auth and generation are blocking awaited calls; all-provider refresh joins every operation and swallows individual failures) now lives in models.ts; those image-models tests no longer exist; Pi 0.99.1 adds async members (Models.generateImages, Models.classify, getAvailableOfType, getAllAvailable, the getAuthenticatedProviders helper, login options) whose ordering, cancellation and error contract is not yet reviewed (ai/src/models.ts in packages/ai 0.99.1). Cache restoration precedes network auth. Refresh phases share one concrete provider signal and serialized, generation-checked publication; persistence completes before synchronous update. Replacement cancels the prior refresh. Aborted callers receive immutable result snapshots while owned non-cooperative callbacks settle without late publication. getAvailable starts checks concurrently and rejects on the first failure while retaining ownership of other checks. Auth and login preserve caller contexts; login distinguishes queued from started mutations. Stream setup runs in an owned worker and forwards all terminal events. Completed refresh signals stay non-aborted and follow later caller cancellation; weak parent forwarding releases unused subscriptions without changing retained signals."
+evidence = ["test:ai/models_runtime_refresh_upstream_test.go#TestModelsRuntimeRefreshUpstream", "test:ai/models_runtime_auth_upstream_test.go#TestModelsRuntimeAuthUpstream", "test:ai/models_runtime_available_test.go#TestModelsGetAvailableRejectsBeforeOtherChecksSettle", "test:ai/models_runtime_lifetime_test.go#TestModelsCompletedRefreshSignalFollowsItsCaller", "scenario:test/parity/scenarios/model-runtime-store-catalog/19-models-runtime.toml", "test:ai/telemetry_upstream_test.go#TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream"]
+rationale = "Reviewed against 0.87.1 only. packages/ai/src/images-models.ts was removed upstream in 0.99.1 and its image-catalog refresh and generation contract (auth and generation are blocking awaited calls; all-provider refresh joins every operation and swallows individual failures) now lives in models.ts; those image-models tests no longer exist; Pi 0.99.1 adds async members (Models.generateImages, Models.classify, getAvailableOfType, getAllAvailable, the getAuthenticatedProviders helper, login options) whose ordering, cancellation and error contract is not yet reviewed (ai/src/models.ts in packages/ai 0.99.1). Cache restoration precedes network auth. Refresh phases share one concrete provider signal and serialized, generation-checked publication; persistence completes before synchronous update. Replacement cancels the prior refresh. Aborted callers receive immutable result snapshots while owned non-cooperative callbacks settle without late publication. getAvailable starts checks concurrently and rejects on the first failure while retaining ownership of other checks. Auth and login preserve caller contexts; login distinguishes queued from started mutations. Stream setup runs in an owned worker and forwards all terminal events. Completed refresh signals stay non-aborted and follow later caller cancellation; weak parent forwarding releases unused subscriptions without changing retained signals. Pi 2ec55d80 makes stream, streamSimple and streamDeferred install the telemetry observer; its contract is the one of packages/ai/src/telemetry.ts."
 
 [[files]]
 path = "packages/ai/src/providers/amazon-bedrock.ts"
@@ -457,10 +457,10 @@ rationale = "PORT_MAP marks this file 🟡 partial: `ai/models_generated.go + ai
 
 [[files]]
 path = "packages/ai/src/telemetry.ts"
-disposition = "deferred"
-contracts = []
-evidence = []
-rationale = "Pi 2ec55d80 adds the pi.ai.request/pi.ai.poll span schema and the lazy-stream observer. Deferred to a later milestone with the telemetry commits (2ec55d80, d9025a5f): PiG emits no pi.ai spans, so no observer ordering, cancellation or error contract exists to translate yet."
+disposition = "translated"
+contracts = ["detached-owned"]
+evidence = ["test:ai/telemetry_upstream_test.go#TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryIncludesSetupFailuresAndOmitsNonScalarReasoningUpstream", "test:ai/telemetry_upstream_test.go#TestAITelemetryDefaultsToNoopUpstream"]
+rationale = "observeModelRequest starts its span with `void start(...)`: nobody awaits the span callback, and the observer returns once the callback has set the span (Pi's synchronous adapters guarantee that). Go launches the callback on a goroutine through Models.operations.Go, which makes it an owned background task that Models.Close drains, and the observer waits only until the callback has set the span. Events and the result are observed on the forwarding turn, after the outer stream's push and end; the span ends after the result, on the launched goroutine. If StartSpan fails, the no-op span stays in place and nothing is recorded. The observer has no cancellation of its own: it ends with the stream's terminal result. A nil or no-op parent installs no observer."
 
 [[files]]
 path = "packages/ai/src/types.ts"
@@ -646,17 +646,17 @@ rationale = "Async uses in state.ts. (1) StateSubscriber.drain (:126-148): a lis
 
 [[files]]
 path = "packages/chord/src/telemetry-sqlite/index.ts"
-disposition = "deferred"
-contracts = []
-evidence = []
-rationale = "Pi d9025a5f adds the SQLite telemetry sink with a bounded queue and a 1 s batched flush. Deferred to a later milestone with the telemetry commits: PiG has no sink, so the flush, drop-counting and shutdown-drain contracts are not yet translated."
+disposition = "translated"
+contracts = ["awaited", "concurrent-joined", "cancellable"]
+evidence = ["test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestSerializesConcurrentFlushAndCloseWithoutLosingMeasurements", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestStopsPermanentlyAfterAWriteFailureAndReportsTheIdenticalError", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestRemembersABackgroundWriteFailureAndStopsItsTimer", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestFlushesOncePerSecondAndRetainsOnlyRowsInsideTheRetentionWindow", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestCloseDoesNotWaitForActiveCallbacksAndLeavesTheDatabaseOpen", "test:chord/telemetrysqlite/telemetry_sqlite_test.go#TestRollsBackSpansAndMetricAggregatesTogetherOnSQLFailure"]
+rationale = "startSpan awaits the callback: Go's StartSpan blocks and returns the callback's error, the span settles on return, error or panic, and a panic is re-raised. flush and close await the commit: both block until it settles and return its error; a mutex serializes writes so at most one transaction runs at a time, and close is idempotent (every call returns the first call's result; flush after close returns close's result). The one-second `setInterval(...).catch(() => {})` flush is a concurrent task joined by close: Go starts one owned goroutine in CreateSqliteTelemetry, a tick is skipped while a write is in flight, a write failure or close stops it, and close joins it. The failure is not lost: it is remembered and flush and close return the same error value, with no retry. Upstream has no AbortSignal here, so close is the only shutdown and it drains partial metric intervals; close does not wait for active business callbacks."
 
 [[files]]
 path = "packages/chord/src/telemetry-sqlite/store.ts"
-disposition = "deferred"
-contracts = []
-evidence = []
-rationale = "Pi d9025a5f adds the Chord SQLite telemetry store queries. Deferred to a later milestone with the telemetry commits: PiG has no telemetry store yet."
+disposition = "translated"
+contracts = ["awaited"]
+evidence = ["test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestReadsCommittedRowsWithoutImplicitlyFlushingIncludingAfterClose", "test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestUsesTwoSpanQueriesForAPageNotOnePerTrace", "test:chord/telemetrysqlite/telemetry_sqlite_store_test.go#TestSqliteTelemetryStoreConformance"]
+rationale = "findTraces, getTrace and findMetrics await their queries. Go's FindTraces, GetTrace and FindMetrics block and return (value, error); they have no cancellation, as upstream, and they read committed rows without flushing, including after close."
 
 [[files]]
 path = "packages/chord/src/types.ts"
@@ -1655,16 +1655,16 @@ rationale = "Added to the accounting when every monorepo package was listed: the
 [[files]]
 path = "packages/durable/src/harness/scheduler.ts"
 disposition = "pending"
-contracts = []
-evidence = []
-rationale = ""
+contracts = ["awaited"]
+evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryRecordsCheckpointsOnlyWhenTheRunningPhaseChanges", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryKeepsAPublicWriteAdmissionOpenThroughCommitAsAChildOfItsCaller", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryKeepsBothInterruptedRunsAndExplicitAbortHandlersAtStatusOk"]
+rationale = "Pi 2ec55d80 telemetry contracts, translated: the pi.durable.phase span is awaited and covers the handler plus its decision commit, and it settles before the next phase starts; a wait, restart or close ends it with outcome aborted, waiting or sleeping; a handler panic becomes a fault as before; the checkpoint event is added after the runtime commit returns. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
 
 [[files]]
 path = "packages/durable/src/harness/submissions.ts"
 disposition = "translated"
 contracts = ["awaited", "cancellable"]
-evidence = ["test:durable/harness/harness_storage_failure_test.go#TestAFailedStorageCall", "test:durable/harness/harness_inbox_test.go#TestInbox"]
-rationale = "Waiting for a submission to settle is a blocking call on the caller's context: cancelling the context stops only the wait, and closing the Harness rejects every waiter with the closed error of the Session (SessionFailed with the cause after a Session failure)."
+evidence = ["test:durable/harness/harness_storage_failure_test.go#TestAFailedStorageCall", "test:durable/harness/harness_inbox_test.go#TestInbox", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryKeepsAPublicWriteAdmissionOpenThroughCommitAsAChildOfItsCaller", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryReturnsAdmissionResultsWithoutRereadingRecordsOrProbingRootLinkTargets"]
+rationale = "Waiting for a submission to settle is a blocking call on the caller's context: cancelling the context stops only the wait, and closing the Harness rejects every waiter with the closed error of the Session (SessionFailed with the cause after a Session failure). Pi 2ec55d80 wraps each admission in a pi.durable.submit span that encloses the commit: a commit error returns on the same call with a bare error status and no message, cancellation is the commit's context, and the span settles after the commit returns. Run creation from submissions reads each submission from the transaction's staged records, and from storage only when it is not staged, awaited inside the commit."
 
 [[files]]
 path = "packages/durable/src/harness/task-graph.ts"
@@ -1676,9 +1676,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/tool.ts"
 disposition = "pending"
-contracts = []
-evidence = []
-rationale = ""
+contracts = ["awaited"]
+evidence = ["test:durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool"]
+rationale = "Pi 2ec55d80 telemetry contract, translated: a nested call's replay event is added after its commit returns, and the phase span is passed through the nested call. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
 
 [[files]]
 path = "packages/durable/src/harness/types.ts"
@@ -1746,16 +1746,16 @@ rationale = "A watch drains its frames serially: one delivery at a time, in comm
 [[files]]
 path = "packages/durable/src/session/session.ts"
 disposition = "pending"
-contracts = []
-evidence = []
-rationale = ""
+contracts = ["awaited"]
+evidence = ["test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryMirrorsRuntimeReportsAsFixedFieldPhaseEventsAndTypeOnlyCounters", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPhaseContext"]
+rationale = "Pi 2ec55d80 telemetry contract, translated: the report is synchronous (the host callback runs first, then the counter, then the span event) and runs with the context that carries the active span; entry events are published after the commit returns. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
 
 [[files]]
 path = "packages/durable/src/session/transaction.ts"
 disposition = "translated"
 contracts = ["awaited"]
-evidence = ["test:durable/session/task_times_test.go#TestSetTaskStampsLifecycleTimesFromTheSessionClock", "test:durable/harness/harness_tasks_times_test.go#TestTaskTimes"]
-rationale = "The change adds only a synchronous clock read (`now()` in setTask) and a field on createTask; the transaction's awaited reads, preparation and settlement are the blocking calls the port already had, and no Promise outlives the commit."
+evidence = ["test:durable/session/task_times_test.go#TestSetTaskStampsLifecycleTimesFromTheSessionClock", "test:durable/harness/harness_tasks_times_test.go#TestTaskTimes", "test:durable/session/transaction_context_release_internal_test.go"]
+rationale = "The change adds only a synchronous clock read (`now()` in setTask) and a field on createTask; the transaction's awaited reads, preparation and settlement are the blocking calls the port already had, and no Promise outlives the commit. Pi 2ec55d80 keeps the caller's span on the transaction and resets the transaction context to the background context once it settles, so no Promise or span reference outlives the commit; durable/session/transaction.go releases the context however settlement ends."
 
 [[files]]
 path = "packages/durable/src/storage/jsonl/node.ts"
@@ -2055,8 +2055,8 @@ rationale = "TelemetryContext.startSpan and the typed starter (bindTypedSpanStar
 path = "packages/telemetry/src/memory.ts"
 disposition = "translated"
 contracts = ["awaited"]
-evidence = ["test:telemetry/conformance_upstream_test.go#TestConformanceUpstream", "test:telemetry/memory_recording_test.go#TestInMemoryRecorderIdsAttributesSnapshotsAndSettledParents", "test:telemetry/memory_ids_detached_test.go#TestInMemoryTelemetryContextNumbersSpansAndSettlements", "test:telemetry/recorded_status_test.go#TestRecordedTelemetrySpanStatusFollowsDefaultExplicitAndAutomaticErrors", "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream", "test:telemetry/memory_pi_oracle_test.go#TestInMemoryTelemetryMatchesPiOnRandomPrograms"]
-rationale = "startInMemorySpan (:120-185) records the span, calls the callback synchronously, settles at once on a synchronous throw and otherwise settles when Promise.resolve(result) settles, taking the next end sequence then. Go's InMemoryTelemetryContext.start records the span under the recorder mutex, runs the callback on the caller's goroutine and settles it when the callback returns, fails or panics (the panic is re-raised after settling), so a span's end sequence follows its settlement order across goroutines as it follows Promise settlement order. A child started from a settled span, including from work the callback left running, goes to the no-op context, as :126 does. A sync-returning callback's span settles before StartSpan returns, where Pi settles it one microtask later; only code that reads getSpans before awaiting startSpan can see that, which a blocking Go call cannot express. Pi 1402973a adds the in-memory inject/extract carriers, span links and the measurement log, all synchronous; a span started from an extracted carrier settles in the same order contract, in this process or another (TestPropagationUpstream 'continues a parent in another Node process'), and TestInMemoryTelemetryMatchesPiOnRandomPrograms compares settlement order with Pi's memory.ts over random programs."
+evidence = ["test:telemetry/conformance_upstream_test.go#TestConformanceUpstream", "test:telemetry/memory_recording_test.go#TestInMemoryRecorderIdsAttributesSnapshotsAndSettledParents", "test:telemetry/memory_ids_detached_test.go#TestInMemoryTelemetryContextNumbersSpansAndSettlements", "test:telemetry/recorded_status_test.go#TestRecordedTelemetrySpanStatusFollowsDefaultExplicitAndAutomaticErrors", "test:telemetry/propagation_upstream_test.go#TestPropagationUpstream", "test:telemetry/memory_pi_oracle_test.go#TestInMemoryTelemetryMatchesPiOnRandomPrograms", "test:telemetry/store_upstream_test.go#TestInMemoryTelemetryStoreConformance"]
+rationale = "startInMemorySpan (:120-185) records the span, calls the callback synchronously, settles at once on a synchronous throw and otherwise settles when Promise.resolve(result) settles, taking the next end sequence then. Go's InMemoryTelemetryContext.start records the span under the recorder mutex, runs the callback on the caller's goroutine and settles it when the callback returns, fails or panics (the panic is re-raised after settling), so a span's end sequence follows its settlement order across goroutines as it follows Promise settlement order. A child started from a settled span, including from work the callback left running, goes to the no-op context, as :126 does. A sync-returning callback's span settles before StartSpan returns, where Pi settles it one microtask later; only code that reads getSpans before awaiting startSpan can see that, which a blocking Go call cannot express. Pi 1402973a adds the in-memory inject/extract carriers, span links and the measurement log, all synchronous; a span started from an extracted carrier settles in the same order contract, in this process or another (TestPropagationUpstream 'continues a parent in another Node process'), and TestInMemoryTelemetryMatchesPiOnRandomPrograms compares settlement order with Pi's memory.ts over random programs. Pi d9025a5f adds the TelemetryStore reads: FindTraces, GetTrace and FindMetrics block and return (value, error), with no cancellation, as upstream; a span that starts after its parent settled returns an inert span that keeps the recorder's capabilities."
 
 [[files]]
 path = "packages/telemetry/src/noop.ts"
