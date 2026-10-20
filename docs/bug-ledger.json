@@ -2984,6 +2984,7 @@
           "pr": "170"
         }
       ],
+      "commitsFrom": "release note",
       "tests": [
         "coding/cli/rpc_initial_tools_test.go::TestRPCFreshPromptDeclaresStructuredSystemOnce",
         "internal/codingagent/exit_record_test.go::TestBackgroundGroupPanicReachesTheHandlerWithItsStack",
@@ -109848,6 +109849,74 @@
         "tui/word_navigation_pi_test.go::TestFindWordForwardMatchesPi",
         "tui/word_navigation_pi_test.go::TestFindWordNavigationAtomicSegmentsMatchPi"
       ]
+    },
+    {
+      "id": "BF-9076cd5",
+      "title": "Markdown bold and italic render next to CJK punctuation in the terminal, for example…",
+      "symptom": "Markdown bold and italic render next to CJK punctuation in the terminal, for example `**这是测试。**后面` (Pi #10730).",
+      "rootCause": "Port marked-cjk-friendly 0.1.2's emStrong rules to the Go inline lexer: CJK characters count as punctuation in the opening flanking test and in the closing-delimiter classes, and a run next to CJK text can both open and close.",
+      "rootCauseSource": "commit",
+      "userImpact": "Wrong display",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "Markdown bold and italic render next to CJK punctuation in the terminal, for example `**这是测试。**后面` (Pi #10730). Text without CJK keeps the CommonMark flanking rules.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "9076cd5cb8",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "tui/component_width_sweep_test.go::TestComponentRowsMatchUpstream",
+        "tui/markdown_cjk_test.go::TestMarkdownCJKEmphasisMatchesPi",
+        "tui/markdown_cjk_test.go::TestMarkedCJKClassMatchesPinnedPackage",
+        "tui/markdown_marked_test.go::TestMarkedRightDelimiterScanMatchesRegexps"
+      ]
+    },
+    {
+      "id": "BF-c371a13",
+      "title": "OpenAI Responses requests keep the prompt cache across tool changes (Pi #11142)",
+      "symptom": "OpenAI Responses requests keep the prompt cache across tool changes (Pi #11142).",
+      "rootCause": "resolveTranscriptTools takes a TranscriptToolSupport (none, additions, changes) and reports FoldedSystemMessages instead of AnchorsAdditions. A transport that takes additional_tools declares every tool in additional_tools items from the head of the input, precedes each later item with the incremental-tools notice, and announces removals as text with the still-unavailable tools restated. Synthetic tool search and Kimi tool messages move the top-level boundary to the last removal or redeclaration, so later loads stay anchored. The openai-responses, azure-openai-responses and openai-codex-responses paths share one converter; openai-completions counts system messages from the transcript's start.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "OpenAI Responses requests keep the prompt cache across tool changes (Pi #11142). Every tool is declared in `additional_tools` items from the head of the input, a removal is announced as text with the still-unavailable tools restated, and synthetic tool search and Kimi tool messages move the top-level tool list only at the last removal or redefinition, so a later tool load no longer rewrites the cached prefix. Applies to `openai-responses`, `azure-openai-responses`, `openai-codex-responses` and Kimi on `openai-completions`.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "c371a134cc",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "ai/transcript_tool_changes_test.go::TestResolveTranscriptToolsBoundaryPerTransport",
+        "ai/transcript_tool_changes_test.go::TestTranscriptToolChangesKimiPrefixAcrossLoadsAfterARemoval",
+        "ai/transcript_tool_changes_test.go::TestTranscriptToolChangesOpenAIResponsesDoesNotListAToolAsUnavailableBeforeItsRemovalIsAnnounced",
+        "ai/transcript_tool_changes_test.go::TestTranscriptToolChangesOpenAIResponsesKeepsPrefixAcrossRemovalAndLoads",
+        "ai/transcript_tool_changes_test.go::TestTranscriptToolChangesOpenAIResponsesRedefinitionIsNotARemoval",
+        "ai/transcript_tool_changes_test.go::TestTranscriptToolChangesOpenAIResponsesStopsListingAToolAsUnavailableOnceDeclaredAgain",
+        "ai/transcript_tool_changes_test.go::TestTranscriptToolChangesOpenAIResponsesToolSearchPrefixAcrossLoadsAfterARemoval"
+      ]
+    },
+    {
+      "id": "BF-pending-927",
+      "title": "HTML export renders Markdown bold and italic next to CJK punctuation instead of showing literal asterisks (Pi…",
+      "symptom": "HTML export renders Markdown bold and italic next to CJK punctuation instead of showing literal asterisks (Pi #11168).",
+      "rootCause": "",
+      "rootCauseSource": "",
+      "userImpact": "Wrong display",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "HTML export renders Markdown bold and italic next to CJK punctuation instead of showing literal asterisks (Pi #11168).",
+      "origin": "release note",
+      "commits": [],
+      "tests": []
     }
   ],
   "divergences": [
