@@ -191,7 +191,7 @@ func TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream(t *t
 				t.Fatalf("attributes = %#v, want %#v", span.Attributes, want)
 			}
 			wantEvents := []telemetry.RecordedTelemetryEvent{
-				{Name: "pi.ai.first_chunk", Attributes: nil},
+				{Name: "pi.ai.first_chunk", Attributes: telemetry.SpanAttributes{}},
 				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "text"), telemetry.Attr("index", 0), telemetry.Attr("chars", 11)}},
 				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "thinking"), telemetry.Attr("index", 1), telemetry.Attr("chars", 15)}},
 				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "tool_call"), telemetry.Attr("index", 2), telemetry.Attr("chars", 27), telemetry.Attr("tool", "lookup")}},
@@ -323,7 +323,7 @@ func TestAITelemetryIncludesSetupFailuresAndOmitsNonScalarReasoningUpstream(t *t
 	if _, ok := span.Attributes.Get("reasoning"); ok {
 		t.Fatalf("attributes = %#v", span.Attributes)
 	}
-	if !reflect.DeepEqual(span.Events, []telemetry.RecordedTelemetryEvent{{Name: "pi.ai.first_chunk", Attributes: nil}}) {
+	if !reflect.DeepEqual(span.Events, []telemetry.RecordedTelemetryEvent{{Name: "pi.ai.first_chunk", Attributes: telemetry.SpanAttributes{}}}) {
 		t.Fatalf("events = %#v", span.Events)
 	}
 	want := telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError, Error: &telemetry.SpanStatusError{Name: "provider_error", Message: "Unknown provider: test"}}
