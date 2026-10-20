@@ -181,22 +181,20 @@ func TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream(t *t
 			if span.Name != wantName || span.ParentID == nil || *span.ParentID != parent.ID {
 				t.Fatalf("span = %q parent %v, want %q under %d", span.Name, span.ParentID, wantName, parent.ID)
 			}
-			want := telemetry.SpanAttributes{
-				"provider": "test", "api": "telemetry-test", "model": "model", "stop": "stop",
-				"usage.input": 11, "usage.output": 22, "usage.cache_read": 33, "usage.cache_write": 44,
-				"cost.total": 1.0, "response.id": "response",
-			}
+			// Pi's order: the start attributes (provider, model, api, then the scalar reasoning), then the end attributes.
+			want := telemetry.SpanAttributes{telemetry.Attr("provider", "test"), telemetry.Attr("model", "model"), telemetry.Attr("api", "telemetry-test")}
 			if method != "streamDeferred" {
-				want["reasoning"] = "high"
+				want = append(want, telemetry.Attr("reasoning", "high"))
 			}
+			want = append(want, telemetry.Attr("stop", "stop"), telemetry.Attr("usage.input", 11), telemetry.Attr("usage.output", 22), telemetry.Attr("usage.cache_read", 33), telemetry.Attr("usage.cache_write", 44), telemetry.Attr("cost.total", 1.0), telemetry.Attr("response.id", "response"))
 			if !reflect.DeepEqual(span.Attributes, want) {
 				t.Fatalf("attributes = %#v, want %#v", span.Attributes, want)
 			}
 			wantEvents := []telemetry.RecordedTelemetryEvent{
-				{Name: "pi.ai.first_chunk", Attributes: telemetry.SpanAttributes{}},
-				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{"type": "text", "index": 0, "chars": 11}},
-				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{"type": "thinking", "index": 1, "chars": 15}},
-				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{"type": "tool_call", "index": 2, "chars": 27, "tool": "lookup"}},
+				{Name: "pi.ai.first_chunk", Attributes: nil},
+				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "text"), telemetry.Attr("index", 0), telemetry.Attr("chars", 11)}},
+				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "thinking"), telemetry.Attr("index", 1), telemetry.Attr("chars", 15)}},
+				{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "tool_call"), telemetry.Attr("index", 2), telemetry.Attr("chars", 27), telemetry.Attr("tool", "lookup")}},
 			}
 			if !reflect.DeepEqual(span.Events, wantEvents) {
 				t.Fatalf("events = %#v, want %#v", span.Events, wantEvents)
@@ -216,15 +214,15 @@ func TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream(t *t
 					counters = append(counters, measurement.Value)
 				}
 				var keys []string
-				for key := range measurement.Attributes {
-					keys = append(keys, key)
+				for _, attribute := range measurement.Attributes {
+					keys = append(keys, attribute.Name)
 				}
-				wantKeys := map[string][]string{"pi.ai.tokens": {"kind", "model", "provider"}, "pi.ai.request.duration": {"model", "provider", "stop"}}[measurement.Name]
+				wantKeys := map[string][]string{"pi.ai.tokens": {"provider", "model", "kind"}, "pi.ai.request.duration": {"provider", "model", "stop"}}[measurement.Name]
 				if wantKeys == nil {
-					wantKeys = []string{"model", "provider"}
+					wantKeys = []string{"provider", "model"}
 				}
-				if !sameStringSet(keys, wantKeys) {
-					t.Fatalf("%s attributes = %v, want %v", measurement.Name, keys, wantKeys)
+				if !reflect.DeepEqual(keys, wantKeys) {
+					t.Fatalf("%s attribute order = %v, want %v", measurement.Name, keys, wantKeys)
 				}
 				if measurement.Kind == telemetry.TelemetryMetricKindHistogram && !reflect.DeepEqual(measurement.Context, span.Context) {
 					t.Fatalf("%s exemplar = %v, want %v", measurement.Name, measurement.Context, span.Context)
@@ -235,25 +233,6 @@ func TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream(t *t
 			}
 		})
 	}
-}
-
-func sameStringSet(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	seen := map[string]int{}
-	for _, value := range a {
-		seen[value]++
-	}
-	for _, value := range b {
-		seen[value]--
-	}
-	for _, count := range seen {
-		if count != 0 {
-			return false
-		}
-	}
-	return true
 }
 
 // Ports telemetry.test.ts "reports %s status without error attributes or events".
@@ -279,8 +258,8 @@ func TestAITelemetryReportsErrorAndAbortedStatusUpstream(t *testing.T) {
 			if !reflect.DeepEqual(span.Status, want) {
 				t.Fatalf("status = %+v, want %+v", span.Status, want)
 			}
-			if span.Attributes["stop"] != string(reason) {
-				t.Fatalf("stop = %v", span.Attributes["stop"])
+			if span.Attributes.Value("stop") != string(reason) {
+				t.Fatalf("stop = %v", span.Attributes.Value("stop"))
 			}
 			if strings.Contains(aiTelemetryJSON(t, span.Attributes), "error-secret") || strings.Contains(aiTelemetryJSON(t, span.Events), "error-secret") {
 				t.Fatal("error message leaked into attributes or events")
@@ -341,10 +320,10 @@ func TestAITelemetryIncludesSetupFailuresAndOmitsNonScalarReasoningUpstream(t *t
 	}
 	aiTelemetrySettled(t, recorder)
 	span := recorder.GetSpans()[1]
-	if _, ok := span.Attributes["reasoning"]; ok {
+	if _, ok := span.Attributes.Get("reasoning"); ok {
 		t.Fatalf("attributes = %#v", span.Attributes)
 	}
-	if !reflect.DeepEqual(span.Events, []telemetry.RecordedTelemetryEvent{{Name: "pi.ai.first_chunk", Attributes: telemetry.SpanAttributes{}}}) {
+	if !reflect.DeepEqual(span.Events, []telemetry.RecordedTelemetryEvent{{Name: "pi.ai.first_chunk", Attributes: nil}}) {
 		t.Fatalf("events = %#v", span.Events)
 	}
 	want := telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError, Error: &telemetry.SpanStatusError{Name: "provider_error", Message: "Unknown provider: test"}}
@@ -380,9 +359,9 @@ func TestAITelemetryCountsInterleavedToolDeltasIndependentlyUpstream(t *testing.
 	})
 	aiTelemetrySettled(t, recorder)
 	want := []telemetry.RecordedTelemetryEvent{
-		{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{"type": "tool_call", "index": 3, "chars": 3, "tool": "lookup"}},
-		{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{"type": "tool_call", "index": 2, "chars": 3, "tool": "lookup"}},
-		{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{"type": "tool_call", "index": 4, "chars": 0, "tool": "lookup"}},
+		{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "tool_call"), telemetry.Attr("index", 3), telemetry.Attr("chars", 3), telemetry.Attr("tool", "lookup")}},
+		{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "tool_call"), telemetry.Attr("index", 2), telemetry.Attr("chars", 3), telemetry.Attr("tool", "lookup")}},
+		{Name: "pi.ai.block", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "tool_call"), telemetry.Attr("index", 4), telemetry.Attr("chars", 0), telemetry.Attr("tool", "lookup")}},
 	}
 	if got := recorder.GetSpans()[1].Events[1:]; !reflect.DeepEqual(got, want) {
 		t.Fatalf("events = %#v", got)
@@ -449,9 +428,9 @@ func TestAITelemetryRecordsLowCardinalityMetricsWithMonotonicDurationsUpstream(t
 		got = append(got, measured{m.Name, m.Value, m.Attributes, *m.Unit})
 	}
 	base := func(extra ...string) telemetry.SpanAttributes {
-		attributes := telemetry.SpanAttributes{"provider": "test", "model": "model"}
+		attributes := telemetry.SpanAttributes{telemetry.Attr("provider", "test"), telemetry.Attr("model", "model")}
 		if len(extra) == 2 {
-			attributes[extra[0]] = extra[1]
+			attributes = append(attributes, telemetry.Attr(extra[0], extra[1]))
 		}
 		return attributes
 	}
