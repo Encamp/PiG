@@ -2,8 +2,7 @@ package telemetry_test
 
 // Ports packages/telemetry/test/render.test.ts.
 //
-// Go maps have no insertion order, so RenderTrace writes attributes in name order; the first test's expected attribute
-// lists are in name order, where upstream's are in insertion order. Every other expectation is upstream's.
+// SpanAttributes is an ordered bag, so RenderTrace writes attributes in insertion order as upstream does.
 
 import (
 	"reflect"
@@ -31,15 +30,15 @@ func TestRenderTrace(t *testing.T) {
 		root := renderSpan("root", func(span *telemetry.StoredSpan) {
 			span.StartedMs, span.EndedMs = 1000, 1020
 			span.Attributes = telemetry.SpanAttributes{
-				"request": "a b", "attempt": 2, "cached": false,
-				"tags": []string{"a", "b"}, "sizes": []float64{1, 2}, "flags": []bool{true, false},
+				telemetry.Attr("request", "a b"), telemetry.Attr("attempt", 2), telemetry.Attr("cached", false),
+				telemetry.Attr("tags", []string{"a", "b"}), telemetry.Attr("sizes", []float64{1, 2}), telemetry.Attr("flags", []bool{true, false}),
 			}
 			span.Events = []telemetry.StoredSpanEvent{
-				{Name: "checkpoint", TimeMs: 2, Attributes: telemetry.SpanAttributes{"phase": "tools"}},
+				{Name: "checkpoint", TimeMs: 2, Attributes: telemetry.SpanAttributes{telemetry.Attr("phase", "tools")}},
 				{Name: "tick", TimeMs: 3.5, Attributes: telemetry.SpanAttributes{}},
 			}
 			span.Links = []telemetry.StoredSpanLink{
-				{TraceID: "remote-trace", SpanID: "remote", Attributes: telemetry.SpanAttributes{"reason": "steer"}},
+				{TraceID: "remote-trace", SpanID: "remote", Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", "steer")}},
 				{TraceID: "other-trace", SpanID: "other"},
 			}
 		})
@@ -60,7 +59,7 @@ func TestRenderTrace(t *testing.T) {
 		spans := []telemetry.StoredSpan{second, nested, first, root}
 		before := append([]telemetry.StoredSpan(nil), spans...)
 		want := strings.Join([]string{
-			`root attempt=2 cached=false flags=[true,false] request="a b" sizes=[1,2] tags=["a","b"] (20ms)`,
+			`root request="a b" attempt=2 cached=false tags=["a","b"] sizes=[1,2] flags=[true,false] (20ms)`,
 			`  · checkpoint phase="tools" (+2ms)`,
 			"  · tick (+3.5ms)",
 			`  → link trace remote-trace span remote reason="steer"`,
@@ -79,7 +78,9 @@ func TestRenderTrace(t *testing.T) {
 
 	t.Run("treats missing parents as roots and orders roots and children by start time", func(t *testing.T) {
 		got := telemetry.RenderTrace([]telemetry.StoredSpan{
-			renderSpan("later", func(span *telemetry.StoredSpan) { span.ParentID, span.StartedMs, span.EndedMs = new("external"), 20, 30 }),
+			renderSpan("later", func(span *telemetry.StoredSpan) {
+				span.ParentID, span.StartedMs, span.EndedMs = new("external"), 20, 30
+			}),
 			renderSpan("child", func(span *telemetry.StoredSpan) { span.ParentID, span.StartedMs, span.EndedMs = new("later"), 25, 30 }),
 			renderSpan("earlier", func(span *telemetry.StoredSpan) {
 				span.StartedMs, span.EndedMs = 10, 15
@@ -145,7 +146,7 @@ func TestRenderTrace(t *testing.T) {
 
 	t.Run("escapes string attribute values without hiding their contents", func(t *testing.T) {
 		got := telemetry.RenderTrace([]telemetry.StoredSpan{renderSpan("root", func(span *telemetry.StoredSpan) {
-			span.Attributes = telemetry.SpanAttributes{"text": "line one\n\"line two\""}
+			span.Attributes = telemetry.SpanAttributes{telemetry.Attr("text", "line one\n\"line two\"")}
 		})})
 		if want := `root text="line one\n\"line two\"" (10ms)`; got != want {
 			t.Fatalf("RenderTrace = %s, want %s", got, want)

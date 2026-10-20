@@ -185,7 +185,7 @@ func TestConformanceCapabilityCasesCheckTheirRules(t *testing.T) {
 					spans := recorder.GetSpans()
 					for i := range spans {
 						if spans[i].Name == "link-source" {
-							spans[i].Links = append(spans[i].Links, telemetry.RecordedTelemetryLink{Context: spans[i].Context, Attributes: telemetry.SpanAttributes{"late": true}})
+							spans[i].Links = append(spans[i].Links, telemetry.RecordedTelemetryLink{Context: spans[i].Context, Attributes: telemetry.SpanAttributes{telemetry.Attr("late", true)}})
 						}
 					}
 					return spans, nil

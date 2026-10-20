@@ -14,17 +14,11 @@ import (
 	"github.com/MichaelKinsy/PiG/internal/jsonstringify"
 )
 
-// formatAttributes is upstream's formatAttributes. Upstream writes Object.entries in insertion order; a Go map has none,
-// so the entries are written in name order.
+// formatAttributes is upstream's formatAttributes: Object.entries in insertion order.
 func formatAttributes(attributes SpanAttributes) string {
-	names := make([]string, 0, len(attributes))
-	for name := range attributes {
-		names = append(names, name)
-	}
-	sort.Strings(names)
 	var text strings.Builder
-	for _, name := range names {
-		text.WriteString(" " + name + "=" + jsonStringify(attributes[name]))
+	for _, attribute := range attributes {
+		text.WriteString(" " + attribute.Name + "=" + jsonStringify(attribute.Value))
 	}
 	return text.String()
 }
