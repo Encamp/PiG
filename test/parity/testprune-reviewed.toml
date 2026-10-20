@@ -1,1 +1,64 @@
 # Reviewed per-file ledger for testprune lint: each entry satisfies the expected-value finding of exactly one commit+path.
+
+[[entry]]
+path = "ai/openai_record_validation_norace_test.go"
+commit = "af4aea65387d7eb84dcacb6b28f2ad309aa8c71e"
+class = "NOBEHAVIOR"
+cite = ""
+reason = "The test replaces a wall-clock CPU ratio with a count of the wire-record scans through recordScanHook, so a loaded machine cannot fail it; the asserted behavior (each record is scanned once beyond the decode) is unchanged and Pi has no counterpart."
+
+[[entry]]
+path = "ai/telemetry_upstream_test.go"
+commit = "7987ae7da13447ef81e271cc0e91c1d59859b143"
+class = "CITE"
+cite = "packages/ai/src/telemetry.ts:145"
+reason = "The span, event and metric attribute expectations move from unordered maps to ordered SpanAttributes in Pi's key order: the start attributes are provider, model, api and then the scalar reasoning (telemetry.ts:145-149), and the end attributes follow. The values are the ones the test already asserted."
+
+[[entry]]
+path = "telemetry/memory_ids_detached_test.go"
+commit = "4ca61cee8c939660e13fe5a86c60c7b98890c1f7"
+class = "NOBEHAVIOR"
+cite = ""
+reason = "SpanAttributes becomes an ordered list (Pi's JS objects keep insertion order, Go maps do not); the test builds and mutates the same attributes through Attr, Set and Value, and asserts the same detached copies and values."
+
+[[entry]]
+path = "telemetry/memory_recording_test.go"
+commit = "4ca61cee8c939660e13fe5a86c60c7b98890c1f7"
+class = "NOBEHAVIOR"
+cite = ""
+reason = "SpanAttributes becomes an ordered list (Pi's JS objects keep insertion order, Go maps do not); the test builds and mutates the same attributes through Attr, Set and Value, and asserts the same merged values and detached snapshots."
+
+[[entry]]
+path = "telemetry/conformance_capability_cases_test.go"
+commit = "8a01515289e7382bbefcc61ed66dff855ad5eccc"
+class = "CITE"
+cite = "packages/telemetry/src/testing/conformance.ts:109"
+reason = "The expected case lists follow Pi d9025a5f: the capabilities case is new (conformance.ts:51), the metrics case is renamed to 'copies instrument metadata and measurement attributes' (:109), the links case to 'ignores links added after source settlement' (:149) and the propagation case 'absent and unknown carriers produce recorded roots' is new (:179)."
+
+[[entry]]
+path = "chord/context/chordctx_upstream_test.go"
+commit = "2ea25c07563ed54611f11698ce3b80bb983afd6a"
+class = "CITE"
+cite = "packages/chord/src/context/index.ts:13"
+reason = "Pi 2ec55d80 narrows Context.telemetry from TelemetryContext to TelemetrySpan (index.ts:13); the test derives the context from spans started inside a recorder, as Pi's rewritten case does, and compares Telemetry(ctx) with the span."
+
+[[entry]]
+path = "durable/session/session_definitions_test.go"
+commit = "71b4b1e3b6a5cf2d9f2fb089267b91138c614e70"
+class = "CITE"
+cite = "packages/durable/src/types.ts:78"
+reason = "Pi 5c1736f8 makes checkpointWhen required on a document definition (types.ts:78), so every definition in the test gains a checkpointWhen that returns false; no other expectation changes."
+
+[[entry]]
+path = "durable/env/node/shell_test.go"
+commit = "4fd80d1cb2cd846ac6b4c6842f357121ff8aba0f"
+class = "CITE"
+cite = "packages/durable/src/env/node.ts:211"
+reason = "Pi 28bea006 recognizes the legacy WSL bash launcher under the actual Windows directory taken from SystemRoot (node.ts:211-219); the case now runs over SystemRoot unset and set to a custom directory, as the upstream case does."
+
+[[entry]]
+path = "internal/shellconfig/shellconfig_test.go"
+commit = "4fd80d1cb2cd846ac6b4c6842f357121ff8aba0f"
+class = "CITE"
+cite = "packages/coding-agent/src/utils/shell.ts:15"
+reason = "Pi 28bea006 recognizes the legacy WSL bash launcher under the actual Windows directory taken from SystemRoot (shell.ts:15-26); the helper now takes the SystemRoot value, and the existing path cases pass it empty so they assert the conventional-path fallback unchanged."
