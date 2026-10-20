@@ -1,5 +1,5 @@
 {
-  "upstreamVersion": "1.3.0+0ed1b043",
+  "upstreamVersion": "1.3.0+73f8de80",
   "typescriptVersion": "5.9.3",
   "origin": "published",
   "packages": [
@@ -22865,7 +22865,7 @@
       "shapeHash": "sha256:3d5124a24f35b750e2675b5afbea3438a967685b8533849f254b4faa47f15f3b",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 68,
+        "line": 69,
         "column": 1
       }
     },
@@ -22885,7 +22885,7 @@
       "shapeHash": "sha256:b08d9dd02fa7654520f836a41b7118981ab234a464b052c0209404ab5a91d0eb",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 68,
+        "line": 69,
         "column": 1
       }
     },
@@ -26681,7 +26681,7 @@
       "shapeHash": "sha256:158969a00f5eac80c5ef8ee5b0d718e342ae322f1823c7482e9457f460394e26",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 57,
+        "line": 58,
         "column": 1
       }
     },
@@ -26714,7 +26714,7 @@
       "shapeHash": "sha256:54647e6678e3b34876e5c0966a9f871cf24257f6bb0703c3b67ea901468fcdfd",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 57,
+        "line": 58,
         "column": 1
       }
     },
@@ -26847,7 +26847,7 @@
       "shapeHash": "sha256:715811fc9a57741b52704464c4038169a4d82c320f86a52902f7cae0a22b2b6a",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 64,
+        "line": 65,
         "column": 1
       }
     },
@@ -26880,7 +26880,7 @@
       "shapeHash": "sha256:17583c09a891e51a614308a980573760353dff9e79903ec8d759d274d28c3108",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 64,
+        "line": 65,
         "column": 1
       }
     },
@@ -85360,7 +85360,7 @@
       "shapeHash": "sha256:3d5124a24f35b750e2675b5afbea3438a967685b8533849f254b4faa47f15f3b",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 68,
+        "line": 69,
         "column": 1
       }
     },
@@ -85380,7 +85380,7 @@
       "shapeHash": "sha256:b08d9dd02fa7654520f836a41b7118981ab234a464b052c0209404ab5a91d0eb",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 68,
+        "line": 69,
         "column": 1
       }
     },
@@ -89587,7 +89587,7 @@
       "shapeHash": "sha256:158969a00f5eac80c5ef8ee5b0d718e342ae322f1823c7482e9457f460394e26",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 57,
+        "line": 58,
         "column": 1
       }
     },
@@ -89620,7 +89620,7 @@
       "shapeHash": "sha256:54647e6678e3b34876e5c0966a9f871cf24257f6bb0703c3b67ea901468fcdfd",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 57,
+        "line": 58,
         "column": 1
       }
     },
@@ -89753,7 +89753,7 @@
       "shapeHash": "sha256:715811fc9a57741b52704464c4038169a4d82c320f86a52902f7cae0a22b2b6a",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 64,
+        "line": 65,
         "column": 1
       }
     },
@@ -89786,7 +89786,7 @@
       "shapeHash": "sha256:17583c09a891e51a614308a980573760353dff9e79903ec8d759d274d28c3108",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 64,
+        "line": 65,
         "column": 1
       }
     },
@@ -142267,7 +142267,7 @@
       "shapeHash": "sha256:3d5124a24f35b750e2675b5afbea3438a967685b8533849f254b4faa47f15f3b",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 68,
+        "line": 69,
         "column": 1
       }
     },
@@ -142287,7 +142287,7 @@
       "shapeHash": "sha256:b08d9dd02fa7654520f836a41b7118981ab234a464b052c0209404ab5a91d0eb",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 68,
+        "line": 69,
         "column": 1
       }
     },
@@ -142328,7 +142328,7 @@
       "shapeHash": "sha256:158969a00f5eac80c5ef8ee5b0d718e342ae322f1823c7482e9457f460394e26",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 57,
+        "line": 58,
         "column": 1
       }
     },
@@ -142361,7 +142361,7 @@
       "shapeHash": "sha256:54647e6678e3b34876e5c0966a9f871cf24257f6bb0703c3b67ea901468fcdfd",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 57,
+        "line": 58,
         "column": 1
       }
     },
@@ -142402,7 +142402,7 @@
       "shapeHash": "sha256:715811fc9a57741b52704464c4038169a4d82c320f86a52902f7cae0a22b2b6a",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 64,
+        "line": 65,
         "column": 1
       }
     },
@@ -142435,7 +142435,7 @@
       "shapeHash": "sha256:17583c09a891e51a614308a980573760353dff9e79903ec8d759d274d28c3108",
       "source": {
         "path": "node_modules/@earendil-works/pi-ai/dist/utils/overflow.d.ts",
-        "line": 64,
+        "line": 65,
         "column": 1
       }
     },

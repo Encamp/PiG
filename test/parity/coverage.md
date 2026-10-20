@@ -6,7 +6,7 @@ Generated from `706` PORT_MAP entries and `783` parity scenarios.
 
 - **Porting:** 617 / 627 intended-portable entries ✅ (98.4%).
 - **Behavior verification:** 557 / 617 ported entries (90.3%); 0 weak-only, 60 untested.
-- **Upstream test porting:** 659 ported / 1 partial / 12 pending (4 other dispositions; [file mapping](interfaces/test-mapping-v1.3.0+0ed1b043.json)). Of the partial/pending files, 0 deferred to 0.3.x by the [release policy](interfaces/test-porting-policy-v1.3.0+0ed1b043.json) (`deferred-0.3.x`).
+- **Upstream test porting:** 661 ported / 1 partial / 12 pending (4 other dispositions; [file mapping](interfaces/test-mapping-v1.3.0+73f8de80.json)). Of the partial/pending files, 0 deferred to 0.3.x by the [release policy](interfaces/test-porting-policy-v1.3.0+73f8de80.json) (`deferred-0.3.x`).
 
 Raw PORT_MAP rows: 706. Breakdown: 74 n/a (designed out) · 5 ⏸ deferred · 10 🟡 partial. See docs/parity/DIVERGENCES.md for the documented exceptions.
 

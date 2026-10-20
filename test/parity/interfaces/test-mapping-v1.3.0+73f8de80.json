@@ -1,5 +1,5 @@
 {
-  "upstreamVersion": "1.3.0+0ed1b043",
+  "upstreamVersion": "1.3.0+73f8de80",
   "entries": [
     {
       "path": "packages/agent/test/agent-loop.test.ts",
@@ -691,6 +691,15 @@
         "internal/codingagent/copilot_catalog_upstream_test.go#TestCopilotAuthenticatedAccountAvailableModelsUpstream"
       ],
       "rationale": "All original device flow, interval/deadline, safe verification URI, refresh/account-catalog and real picker cases pass after 550d9c92a. Supplemental runtime-key transitions retain the account-filter contract. Owner-reviewed case inputs and current upstream hashes are retained. Named evidence passes on the union with Go 1.27.1, -race and -count=1; unrelated partial and live-service obligations remain open."
+    },
+    {
+      "path": "packages/ai/test/github-copilot-request-size-overflow.test.ts",
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:d69bb071c12aec23a5a70e9ee4c5ffc14ce125996ce3c445e54edbd73f1a36a7",
+      "evidence": [
+        "ai/github_copilot_request_size_overflow_upstream_test.go#TestGitHubCopilotRequestSizeErrors"
+      ],
+      "rationale": "All 3 rows (413 nested, 413 flat, 400 nested) through a real OpenAI Responses provider stream against an httptest server with the provider id github-copilot, as Pi runs them through the SDK with a mocked fetch: one request, provider and stop reason, zero usage, the status and body text in the error message, and the overflow verdict. The two 413 rows fail against the earlier classifier."
     },
     {
       "path": "packages/ai/test/google-raw-stop-reason.test.ts",
@@ -1486,13 +1495,15 @@
     {
       "path": "packages/ai/test/overflow.test.ts",
       "disposition": "ported",
-      "upstreamTestHash": "sha256:b9a4f21e5092f3fe96dd3d538a5efeb6c1c258811a5d5b956ea85a43ff7ee863",
+      "upstreamTestHash": "sha256:be20d39e79e4568044189b9533a1a839a13f92ba4431d9d07fa1a3298c0565b2",
       "evidence": [
         "ai/overflow_upstream_test.go#TestOverflowUpstream",
         "ai/overflow_upstream_test.go#TestOverflowLengthStopsUpstream",
-        "ai/overflow_upstream_test.go#detects z.ai CN endpoint prompt-exceeds-max-length errors"
+        "ai/overflow_upstream_test.go#detects z.ai CN endpoint prompt-exceeds-max-length errors",
+        "ai/overflow_upstream_test.go#TestOverflowRequestSizeUpstream",
+        "ai/overflow_oracle_test.go#TestContextOverflowMatchesPiOnSeededMessages"
       ],
-      "rationale": "All 19 upstream case sites are ported with exact error strings, provider identities, context/output limits and usage values. Includes both DS4 strings, all four Cerebras/bodyless status-provider combinations, and all six length-stop cases. Source-line citations identify every case. Pi 0.99.2 review: 0.99.2 adds \"detects z.ai CN endpoint prompt-exceeds-max-length errors\" (overflow.test.ts:44-48, issue 10208), ported at overflow_upstream_test.go with the upstream inputs. It passes with the `prompt exceeds max length` pattern ported into ai/overflow.go from overflow.ts:39 (the same line port-992-core carries in b69fba184). Pi 99fe1489/90d863f7 rename the Xiaomi model to mimo-v2.6-pro in this file; the Go cases use it (71023aec→8efd314f)."
+      "rationale": "All 19 upstream case sites are ported with exact error strings, provider identities, context/output limits and usage values. Includes both DS4 strings, all four Cerebras/bodyless status-provider combinations, and all six length-stop cases. Source-line citations identify every case. Pi 0.99.2 review: 0.99.2 adds \"detects z.ai CN endpoint prompt-exceeds-max-length errors\" (overflow.test.ts:44-48, issue 10208), ported at overflow_upstream_test.go with the upstream inputs. It passes with the `prompt exceeds max length` pattern ported into ai/overflow.go from overflow.ts:39 (the same line port-992-core carries in b69fba184). Pi 99fe1489/90d863f7 rename the Xiaomi model to mimo-v2.6-pro in this file; the Go cases use it (71023aec→8efd314f). 0.5.2 (Pi 73f8de80): HTTP 413 is request-size overflow for every provider. The Cerebras case loses its 413 rows (a bodyless 413 is now overflow for opencode-go too: TestIsContextOverflowUpstreamCases and TestOverflowUpstream follow), and three new cases are ported as TestOverflowRequestSizeUpstream: the four provider-independent 413 messages with and without a context window, the six unrelated messages that are not overflow (other status, 413 only in the body, 413 not at the start, 4130), and the failed-responses-only check. The seeded Pi oracle adds the 413 forms. Red against the earlier classifier; green with the new pattern in ai/overflow.go (and durable/core/turn/patterns.go, regenerated)."
     },
     {
       "path": "packages/ai/test/pi-messages.test.ts",
@@ -6087,6 +6098,15 @@
         "coding/session_context_9789_upstream_test.go#TestUpstream9789RemovedHeadReportsErrorButHonorsOutput"
       ],
       "rationale": "All six original cases preserve compaction-summary slicing with restored prompt/tools, mid-conversation plan_mode sections, splice-without-return, added system reminders, context-before-context_with_system ordering and tool filtering, and leading-system-removal diagnostics while honoring output. The actual Node factories exercise in-place edits through the subprocess bridge and Session/provider path. The mid-system case additionally rejects handler errors, base-option mutation and lost third-turn section removal. Its one-versus-two-system-message failure was reproduced on 63c032599; the integrated source repair passes all six named tests with Go 1.27.1 -count=1 under isolated HOME and agent directories on 4bd167229. This does not claim broader prompt-option or cross-process identity closure."
+    },
+    {
+      "path": "packages/coding-agent/test/suite/regressions/copilot-request-size-overflow.test.ts",
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:621e8118a32d4b388ca8447aad465c586576de99d2d44994b2b642a69d039c1d",
+      "evidence": [
+        "coding/copilot_request_size_overflow_upstream_test.go#TestCopilotRequestSizeOverflowRecoveryUpstream"
+      ],
+      "rationale": "The one case through the session path: an image-heavy history (89 images of 384 KiB, over 32 MiB of request), a first request that fails with the Copilot 413 at zero usage, one overflow compaction with willRetry, a retried request with no images, and the final answer; the model-call count (3) and the compaction events are asserted. The harness provider is the faux provider, where Pi names the provider github-copilot: the classifier is provider-agnostic. Fails against the earlier classifier (one model call, no compaction)."
     },
     {
       "path": "packages/coding-agent/test/suite/regressions/extension-factory-cache.test.ts",
