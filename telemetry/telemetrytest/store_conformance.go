@@ -130,6 +130,7 @@ func CreateTelemetryStoreConformance(name string, factory StoreFixtureFactory) [
 		create("pages complete traces without duplicates when trace starts tie", pagesTraces),
 		create("inherits remote trace IDs and preserves remote parents and cross-trace links", remoteTraces),
 		create("accepts external string identities without imposing an ID format", externalIdentities),
+		create("preserves attribute insertion order on spans, events, links, and metric rows", preservesAttributeOrder),
 		create("queries metric names, inclusive interval bounds, typed attribute equality, and detached values", queriesMetrics),
 	}
 }
@@ -151,8 +152,8 @@ func settledTraces(ctx context.Context, factory StoreFixtureFactory) error {
 		entered := make(chan struct{})
 		active := make(chan error, 1)
 		go func() {
-			active <- f.Context.StartSpan(telemetry.SpanOptions{Name: "root", Attributes: telemetry.SpanAttributes{"tags": []string{"original"}}}, func(root telemetry.TelemetrySpan) error {
-				root.AddEvent("event", telemetry.SpanAttributes{"tags": []string{"original"}})
+			active <- f.Context.StartSpan(telemetry.SpanOptions{Name: "root", Attributes: telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})}}, func(root telemetry.TelemetrySpan) error {
+				root.AddEvent("event", telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})})
 				close(entered)
 				<-gate
 				return root.StartSpan(telemetry.SpanOptions{Name: "child"}, noop)
@@ -211,8 +212,8 @@ func settledTraces(ctx context.Context, factory StoreFixtureFactory) error {
 		); err != nil {
 			return err
 		}
-		root.Attributes["tags"] = []string{"changed"}
-		root.Events[0].Attributes["tags"] = []string{"changed"}
+		root.Attributes.Set("tags", []string{"changed"})
+		root.Events[0].Attributes.Set("tags", []string{"changed"})
 		fresh, err := f.Store.GetTrace(trace.TraceID)
 		if err != nil {
 			return err
@@ -228,8 +229,8 @@ func settledTraces(ctx context.Context, factory StoreFixtureFactory) error {
 			return errors.New("expected the fresh root event")
 		}
 		return errors.Join(
-			sameJSON(freshRoot.Attributes["tags"], []string{"original"}, "fresh root tags"),
-			sameJSON(freshRoot.Events[0].Attributes["tags"], []string{"original"}, "fresh event tags"),
+			sameJSON(freshRoot.Attributes.Value("tags"), []string{"original"}, "fresh root tags"),
+			sameJSON(freshRoot.Events[0].Attributes.Value("tags"), []string{"original"}, "fresh event tags"),
 		)
 	})
 }
@@ -240,17 +241,17 @@ func filtersTraces(ctx context.Context, factory StoreFixtureFactory) error {
 	return withStoreFixture(ctx, factory, func(f StoreFixture) error {
 		if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "old"}, func(root telemetry.TelemetrySpan) error {
 			now.Set(30_000)
-			if err := root.StartSpan(telemetry.SpanOptions{Name: "recent-child", Attributes: telemetry.SpanAttributes{"left": 1.0}}, noop); err != nil {
+			if err := root.StartSpan(telemetry.SpanOptions{Name: "recent-child", Attributes: telemetry.SpanAttributes{telemetry.Attr("left", 1.0)}}, noop); err != nil {
 				return err
 			}
-			return root.StartSpan(telemetry.SpanOptions{Name: "split", Attributes: telemetry.SpanAttributes{"right": 2.0}}, noop)
+			return root.StartSpan(telemetry.SpanOptions{Name: "split", Attributes: telemetry.SpanAttributes{telemetry.Attr("right", 2.0)}}, noop)
 		}); err != nil {
 			return err
 		}
 		now.Set(20_000)
 		if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "wanted"}, func(root telemetry.TelemetrySpan) error {
 			now.Set(20_001)
-			return root.StartSpan(telemetry.SpanOptions{Name: "failure", Attributes: telemetry.SpanAttributes{"left": 1.0, "right": 2.0, "valid": true, `odd."key`: "value"}}, func(child telemetry.TelemetrySpan) error {
+			return root.StartSpan(telemetry.SpanOptions{Name: "failure", Attributes: telemetry.SpanAttributes{telemetry.Attr("left", 1.0), telemetry.Attr("right", 2.0), telemetry.Attr("valid", true), telemetry.Attr(`odd."key`, "value")}}, func(child telemetry.TelemetrySpan) error {
 				child.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError})
 				return nil
 			})
@@ -258,7 +259,7 @@ func filtersTraces(ctx context.Context, factory StoreFixtureFactory) error {
 			return err
 		}
 		now.Set(40_000)
-		if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "new", Attributes: telemetry.SpanAttributes{"valid": 1.0}}, noop); err != nil {
+		if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "new", Attributes: telemetry.SpanAttributes{telemetry.Attr("valid", 1.0)}}, noop); err != nil {
 			return err
 		}
 		if err := f.flush(ctx); err != nil {
@@ -295,7 +296,7 @@ func pagesTraces(ctx context.Context, factory StoreFixtureFactory) error {
 	return withStoreFixture(ctx, factory, func(f StoreFixture) error {
 		for index := range 25 {
 			now.Set(20_000)
-			if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "root", Attributes: telemetry.SpanAttributes{"index": float64(index)}}, func(root telemetry.TelemetrySpan) error {
+			if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "root", Attributes: telemetry.SpanAttributes{telemetry.Attr("index", float64(index))}}, func(root telemetry.TelemetrySpan) error {
 				now.Set(20_001)
 				return root.StartSpan(telemetry.SpanOptions{Name: "child"}, noop)
 			}); err != nil {
@@ -389,7 +390,7 @@ func remoteTraces(ctx context.Context, factory StoreFixtureFactory) error {
 			if err := remote.StartSpan(telemetry.SpanOptions{Name: "receiver"}, noop); err != nil {
 				return err
 			}
-			if err := receiver.Context.StartSpan(telemetry.SpanOptions{Name: "linked", Links: []telemetry.SpanLink{{Context: remote, Attributes: telemetry.SpanAttributes{"reason": "background"}}}}, noop); err != nil {
+			if err := receiver.Context.StartSpan(telemetry.SpanOptions{Name: "linked", Links: []telemetry.SpanLink{{Context: remote, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", "background")}}}}, noop); err != nil {
 				return err
 			}
 			if err := receiver.flush(ctx); err != nil {
@@ -421,7 +422,7 @@ func remoteTraces(ctx context.Context, factory StoreFixtureFactory) error {
 			linked := linkedTraces.Traces[0]
 			if err := errors.Join(
 				check(linked.TraceID != sent.TraceID, "the linked span joined the linked trace"),
-				sameJSON(linked.Spans[0].Links, []telemetry.StoredSpanLink{{TraceID: sent.TraceID, SpanID: sent.Spans[0].ID, Attributes: telemetry.SpanAttributes{"reason": "background"}}}, "links"),
+				sameJSON(linked.Spans[0].Links, []telemetry.StoredSpanLink{{TraceID: sent.TraceID, SpanID: sent.Spans[0].ID, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", "background")}}}, "links"),
 			); err != nil {
 				return err
 			}
@@ -503,12 +504,12 @@ func queriesMetrics(ctx context.Context, factory StoreFixtureFactory) error {
 	return withStoreFixture(ctx, factory, func(f StoreFixture) error {
 		metrics := f.Context.Metrics()
 		counter := metrics.Counter("hits", telemetry.InstrumentOptions{Unit: new("By")})
-		counter.Add(2, telemetry.SpanAttributes{"method": "read", "valid": true})
-		counter.Add(3, telemetry.SpanAttributes{"valid": true, "method": "read"})
-		counter.Add(11, telemetry.SpanAttributes{"method": "write", "valid": 1.0})
-		metrics.Counter("other", telemetry.InstrumentOptions{}).Add(100, telemetry.SpanAttributes{"method": "read", "valid": true})
+		counter.Add(2, telemetry.SpanAttributes{telemetry.Attr("method", "read"), telemetry.Attr("valid", true)})
+		counter.Add(3, telemetry.SpanAttributes{telemetry.Attr("valid", true), telemetry.Attr("method", "read")})
+		counter.Add(11, telemetry.SpanAttributes{telemetry.Attr("method", "write"), telemetry.Attr("valid", 1.0)})
+		metrics.Counter("other", telemetry.InstrumentOptions{}).Add(100, telemetry.SpanAttributes{telemetry.Attr("method", "read"), telemetry.Attr("valid", true)})
 		now.Set(30_001)
-		counter.Add(7, telemetry.SpanAttributes{"method": "read", "valid": true})
+		counter.Add(7, telemetry.SpanAttributes{telemetry.Attr("method", "read"), telemetry.Attr("valid", true)})
 		now.Set(40_001)
 		if err := f.flush(ctx); err != nil {
 			return err
@@ -537,7 +538,7 @@ func queriesMetrics(ctx context.Context, factory StoreFixtureFactory) error {
 		); err != nil {
 			return err
 		}
-		rows[0].Attributes["method"] = "changed"
+		rows[0].Attributes.Set("method", "changed")
 		again, err := f.Store.FindMetrics(query)
 		if err != nil {
 			return err
@@ -545,7 +546,7 @@ func queriesMetrics(ctx context.Context, factory StoreFixtureFactory) error {
 		if len(again) == 0 {
 			return errors.New("expected metric rows again")
 		}
-		if err := check(again[0].Attributes["method"] == "read", "attributes method = %v, want read", again[0].Attributes["method"]); err != nil {
+		if err := check(again[0].Attributes.Value("method") == "read", "attributes method = %v, want read", again[0].Attributes.Value("method")); err != nil {
 			return err
 		}
 		missing, err := f.Store.FindMetrics(telemetry.MetricQuery{Name: "missing"})
@@ -566,6 +567,72 @@ func queriesMetrics(ctx context.Context, factory StoreFixtureFactory) error {
 			check(len(missing) == 0, "missing metric rows = %v", missing),
 			check(typedSum == 11, "typed sum = %v, want 11", typedSum),
 			check(recentSum == 7, "recent sum = %v, want 7", recentSum),
+		)
+	})
+}
+
+func attributeNames(attributes telemetry.SpanAttributes) []string {
+	names := make([]string, len(attributes))
+	for index, attribute := range attributes {
+		names[index] = attribute.Name
+	}
+	return names
+}
+
+// preservesAttributeOrder checks that attribute order is observable as in an object: insertion order, an overwritten
+// name keeping its position and integer-like names first.
+func preservesAttributeOrder(ctx context.Context, factory StoreFixtureFactory) error {
+	_, restore := jsclock.MockDateNow(20_000)
+	defer restore()
+	return withStoreFixture(ctx, factory, func(f StoreFixture) error {
+		bag := func(names ...string) telemetry.SpanAttributes {
+			attributes := telemetry.SpanAttributes{}
+			for index, name := range names {
+				attributes = append(attributes, telemetry.Attr(name, float64(index)))
+			}
+			return attributes
+		}
+		var target telemetry.TelemetrySpan
+		if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "target"}, func(span telemetry.TelemetrySpan) error {
+			target = span
+			return nil
+		}); err != nil {
+			return err
+		}
+		if err := f.Context.StartSpan(telemetry.SpanOptions{Name: "ordered", Attributes: bag("zeta", "10", "alpha", "2"), Links: []telemetry.SpanLink{{Context: target, Attributes: bag("link.z", "link.a")}}}, func(span telemetry.TelemetrySpan) error {
+			span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("alpha", 9.0), telemetry.Attr("beta", 1.0)})
+			span.AddEvent("event", bag("event.z", "event.a"))
+			return nil
+		}); err != nil {
+			return err
+		}
+		f.Context.Metrics().Counter("ordered", telemetry.InstrumentOptions{}).Add(1, bag("metric.z", "metric.a"))
+		if err := f.flush(ctx); err != nil {
+			return err
+		}
+		found, err := f.Store.FindTraces(telemetry.TraceQuery{Name: new("ordered")})
+		if err != nil {
+			return err
+		}
+		if len(found.Traces) == 0 {
+			return errors.New("expected the ordered trace")
+		}
+		span := found.Traces[0].Spans[0]
+		if len(span.Events) == 0 || len(span.Links) == 0 {
+			return fmt.Errorf("ordered span = %+v, want an event and a link", span)
+		}
+		rows, err := f.Store.FindMetrics(telemetry.MetricQuery{Name: "ordered"})
+		if err != nil {
+			return err
+		}
+		if len(rows) == 0 {
+			return errors.New("expected the ordered metric row")
+		}
+		return errors.Join(
+			deepStrictEqual(attributeNames(span.Attributes), []string{"2", "10", "zeta", "alpha", "beta"}, "span attribute order"),
+			deepStrictEqual(attributeNames(span.Events[0].Attributes), []string{"event.z", "event.a"}, "event attribute order"),
+			deepStrictEqual(attributeNames(span.Links[0].Attributes), []string{"link.z", "link.a"}, "link attribute order"),
+			deepStrictEqual(attributeNames(rows[0].Attributes), []string{"metric.z", "metric.a"}, "metric attribute order"),
 		)
 	})
 }

@@ -40,7 +40,7 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 			carrier := recorder.Inject(span)
 			id = carrier["pi-memory-scope"] + ":" + carrier["pi-memory-span"]
 			clock.Set(110)
-			span.AddEvent("event", telemetry.SpanAttributes{"count": 1})
+			span.AddEvent("event", telemetry.SpanAttributes{telemetry.Attr("count", 1)})
 			clock.Set(125)
 			return nil
 		}); err != nil {
@@ -53,14 +53,14 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		want := &telemetry.StoredTrace{TraceID: id, Spans: []telemetry.StoredSpan{{
 			ID: id, TraceID: id, Name: "timed", StartedMs: 1000, EndedMs: 1025,
 			Attributes: telemetry.SpanAttributes{},
-			Events:     []telemetry.StoredSpanEvent{{Name: "event", TimeMs: 10, Attributes: telemetry.SpanAttributes{"count": 1}}},
+			Events:     []telemetry.StoredSpanEvent{{Name: "event", TimeMs: 10, Attributes: telemetry.SpanAttributes{telemetry.Attr("count", 1)}}},
 			Links:      []telemetry.StoredSpanLink{},
 			Status:     telemetry.SpanStatus{Status: telemetry.SpanStatusCodeOK},
 		}}}
 		if !reflect.DeepEqual(trace, want) {
 			t.Fatalf("GetTrace = %+v, want %+v", trace, want)
 		}
-		if events := recorder.GetSpans()[0].Events; !reflect.DeepEqual(events, []telemetry.RecordedTelemetryEvent{{Name: "event", Attributes: telemetry.SpanAttributes{"count": 1}}}) {
+		if events := recorder.GetSpans()[0].Events; !reflect.DeepEqual(events, []telemetry.RecordedTelemetryEvent{{Name: "event", Attributes: telemetry.SpanAttributes{telemetry.Attr("count", 1)}}}) {
 			t.Fatalf("GetSpans events = %+v", events)
 		}
 	})
@@ -100,7 +100,7 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		}); err != nil {
 			t.Fatal(err)
 		}
-		if err := recorder.StartSpan(telemetry.SpanOptions{Name: "source", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{"tags": []string{"original"}}}}}, func(span telemetry.TelemetrySpan) error {
+		if err := recorder.StartSpan(telemetry.SpanOptions{Name: "source", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})}}}}, func(span telemetry.TelemetrySpan) error {
 			span.SetStatus(telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError, Error: &telemetry.SpanStatusError{Name: "Expected", Message: "original"}})
 			return nil
 		}); err != nil {
@@ -112,7 +112,7 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		}
 		trace := found.Traces[0]
 		span := trace.Spans[0]
-		span.Links[0].Attributes["tags"] = []string{"changed"}
+		span.Links[0].Attributes.Set("tags", []string{"changed"})
 		if span.Status.Error != nil {
 			span.Status.Error.Message = "changed"
 		}
@@ -120,7 +120,7 @@ func TestInMemoryStoreSnapshots(t *testing.T) {
 		if err != nil || fresh == nil {
 			t.Fatalf("GetTrace = %v, %v", fresh, err)
 		}
-		if got := fresh.Spans[0].Links[0].Attributes["tags"]; !reflect.DeepEqual(got, []string{"original"}) {
+		if got := fresh.Spans[0].Links[0].Attributes.Value("tags"); !reflect.DeepEqual(got, []string{"original"}) {
 			t.Fatalf("link tags = %v", got)
 		}
 		if want := (telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError, Error: &telemetry.SpanStatusError{Name: "Expected", Message: "original"}}); !reflect.DeepEqual(fresh.Spans[0].Status, want) {

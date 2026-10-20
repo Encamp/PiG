@@ -196,13 +196,13 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 				return errors.New("Metrics fixtures require a normalized measurement reader")
 			}
 			fixture.Metrics.Counter("bytes", telemetry.InstrumentOptions{Description: new("Encoded bytes"), Unit: new("By")}).
-				Add(12, telemetry.SpanAttributes{"direction": "out"})
+				Add(12, telemetry.SpanAttributes{telemetry.Attr("direction", "out")})
 			active := fixture.Metrics.UpDownCounter("active", telemetry.InstrumentOptions{})
 			active.Add(1, nil)
 			active.Add(-1, nil)
 			histogram := fixture.Metrics.Histogram("duration", telemetry.HistogramOptions{InstrumentOptions: telemetry.InstrumentOptions{Unit: new("ms")}, Boundaries: []float64{1, 10}})
 			if err := fixture.Context.StartSpan(telemetry.SpanOptions{Name: "measured"}, func(span telemetry.TelemetrySpan) error {
-				histogram.Record(5, telemetry.SpanAttributes{"method": "read"}, span)
+				histogram.Record(5, telemetry.SpanAttributes{telemetry.Attr("method", "read")}, span)
 				return nil
 			}); err != nil {
 				return err
@@ -233,7 +233,7 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 				return err
 			}
 			return errors.Join(
-				deepStrictEqual(measurements[0].Attributes, telemetry.SpanAttributes{"direction": "out"}, "counter attributes"),
+				deepStrictEqual(measurements[0].Attributes, telemetry.SpanAttributes{telemetry.Attr("direction", "out")}, "counter attributes"),
 				stringPointerEqual(measurements[0].Description, "Encoded bytes", "counter description"),
 				stringPointerEqual(measurements[0].Unit, "By", "counter unit"),
 				deepStrictEqual(measurements[3].Boundaries, []float64{1, 10}, "histogram boundaries"),
@@ -256,7 +256,7 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 			boundaries[0], boundaries[1] = 2, 100
 			description = "Changed"
 			tags := []string{"original"}
-			histogram.Record(-1, telemetry.SpanAttributes{"tags": tags}, nil)
+			histogram.Record(-1, telemetry.SpanAttributes{telemetry.Attr("tags", tags)}, nil)
 			tags[0] = "changed"
 			measurements, err := fixture.GetMetrics(ctx)
 			if err != nil {
@@ -266,7 +266,7 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 				return err
 			}
 			return errors.Join(
-				deepStrictEqual(measurements[0].Attributes, telemetry.SpanAttributes{"tags": []string{"original"}}, "attributes"),
+				deepStrictEqual(measurements[0].Attributes, telemetry.SpanAttributes{telemetry.Attr("tags", []string{"original"})}, "attributes"),
 				deepStrictEqual(measurements[0].Boundaries, []float64{1, 10}, "boundaries"),
 				stringPointerEqual(measurements[0].Description, "Original", "description"),
 				deepStrictEqual(measurements[0].Context, telemetry.TelemetryCarrier(nil), "context"),
@@ -285,9 +285,9 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 				return errors.New("Expected target span")
 			}
 			reason := []string{"initial"}
-			if err := fixture.Context.StartSpan(telemetry.SpanOptions{Name: "linked", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{"reason": reason}}}}, func(span telemetry.TelemetrySpan) error {
+			if err := fixture.Context.StartSpan(telemetry.SpanOptions{Name: "linked", Links: []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", reason)}}}}, func(span telemetry.TelemetrySpan) error {
 				reason[0] = "mutated"
-				span.AddLink(telemetry.SpanLink{Context: target, Attributes: telemetry.SpanAttributes{"reason": "late"}})
+				span.AddLink(telemetry.SpanLink{Context: target, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", "late")}})
 				span.AddLink(telemetry.SpanLink{Context: telemetry.NoopTelemetryContext})
 				return nil
 			}); err != nil {
@@ -311,8 +311,8 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 			return errors.Join(
 				deepStrictEqual(linked.ParentContext, telemetry.TelemetryCarrier(nil), "linked.parentContext"),
 				deepStrictEqual(linked.Links, []telemetry.RecordedTelemetryLink{
-					{Context: targetSpan.Context, Attributes: telemetry.SpanAttributes{"reason": []string{"initial"}}},
-					{Context: targetSpan.Context, Attributes: telemetry.SpanAttributes{"reason": "late"}},
+					{Context: targetSpan.Context, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", []string{"initial"})}},
+					{Context: targetSpan.Context, Attributes: telemetry.SpanAttributes{telemetry.Attr("reason", "late")}},
 				}, "links"),
 			)
 		}),
@@ -587,12 +587,12 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 		createCase(factory, "recording", "merges attributes and records ordered events", func(ctx context.Context, fixture TelemetryAdapterFixture) error {
 			if err := fixture.Context.StartSpan(telemetry.SpanOptions{
 				Name:       "recording",
-				Attributes: telemetry.SpanAttributes{"start": "value", "overwrite": "start", "ignored": nil},
+				Attributes: telemetry.SpanAttributes{telemetry.Attr("start", "value"), telemetry.Attr("overwrite", "start"), telemetry.Attr("ignored", nil)},
 			}, func(span telemetry.TelemetrySpan) error {
-				span.SetAttributes(telemetry.SpanAttributes{"count": 1, "overwrite": "middle"})
-				span.SetAttributes(telemetry.SpanAttributes{"count": nil, "overwrite": "end"})
-				span.AddEvent("first", telemetry.SpanAttributes{"index": 1, "ignored": nil})
-				span.AddEvent("second", telemetry.SpanAttributes{"index": 2})
+				span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("count", 1), telemetry.Attr("overwrite", "middle")})
+				span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("count", nil), telemetry.Attr("overwrite", "end")})
+				span.AddEvent("first", telemetry.SpanAttributes{telemetry.Attr("index", 1), telemetry.Attr("ignored", nil)})
+				span.AddEvent("second", telemetry.SpanAttributes{telemetry.Attr("index", 2)})
 				return nil
 			}); err != nil {
 				return err
@@ -603,17 +603,17 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 				return err
 			}
 			return errors.Join(
-				deepStrictEqual(span.Attributes, telemetry.SpanAttributes{"start": "value", "overwrite": "end", "count": 1}, "attributes"),
+				deepStrictEqual(span.Attributes, telemetry.SpanAttributes{telemetry.Attr("start", "value"), telemetry.Attr("overwrite", "end"), telemetry.Attr("count", 1)}, "attributes"),
 				deepStrictEqual(span.Events, []telemetry.RecordedTelemetryEvent{
-					{Name: "first", Attributes: telemetry.SpanAttributes{"index": 1}},
-					{Name: "second", Attributes: telemetry.SpanAttributes{"index": 2}},
+					{Name: "first", Attributes: telemetry.SpanAttributes{telemetry.Attr("index", 1)}},
+					{Name: "second", Attributes: telemetry.SpanAttributes{telemetry.Attr("index", 2)}},
 				}, "events"),
 			)
 		}),
 
 		createCase(factory, "recording", "makes calls after settlement inert", func(ctx context.Context, fixture TelemetryAdapterFixture) error {
 			var settledSpan telemetry.TelemetrySpan
-			if err := fixture.Context.StartSpan(telemetry.SpanOptions{Name: "settled", Attributes: telemetry.SpanAttributes{"value": "initial"}}, func(span telemetry.TelemetrySpan) error {
+			if err := fixture.Context.StartSpan(telemetry.SpanOptions{Name: "settled", Attributes: telemetry.SpanAttributes{telemetry.Attr("value", "initial")}}, func(span telemetry.TelemetrySpan) error {
 				settledSpan = span
 				return nil
 			}); err != nil {
@@ -623,8 +623,8 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 				return errors.New("Expected callback span")
 			}
 
-			settledSpan.SetAttributes(telemetry.SpanAttributes{"value": "late"})
-			settledSpan.AddEvent("late", telemetry.SpanAttributes{"value": true})
+			settledSpan.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("value", "late")})
+			settledSpan.AddEvent("late", telemetry.SpanAttributes{telemetry.Attr("value", true)})
 			settledSpan.SetStatus(status(telemetry.SpanStatusCodeError))
 			childAdmitted := false
 			childResult := 0
@@ -647,7 +647,7 @@ func CreateTelemetryAdapterConformance(factory TelemetryAdapterFixtureFactory) [
 				return err
 			}
 			return errors.Join(
-				deepStrictEqual(spans[0].Attributes, telemetry.SpanAttributes{"value": "initial"}, "attributes"),
+				deepStrictEqual(spans[0].Attributes, telemetry.SpanAttributes{telemetry.Attr("value", "initial")}, "attributes"),
 				deepStrictEqual(spans[0].Events, []telemetry.RecordedTelemetryEvent{}, "events"),
 				deepStrictEqual(spans[0].Status, status(telemetry.SpanStatusCodeOK), "status"),
 			)

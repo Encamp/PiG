@@ -162,22 +162,43 @@ func (span *memorySpan) Metrics() TelemetryMetrics         { return span.owner }
 func (span *memorySpan) Propagation() TelemetryPropagation { return span.owner }
 func (span *memorySpan) memoryCarrier() TelemetryCarrier   { return span.record.Context }
 
+// copyAttributes is upstream's copyAttributes: a detached bag in insertion order, without undefined (nil) values and
+// with each name once, a repeated name keeping its first position and taking its last value as an object literal does,
+// so a later undefined value removes the name.
 func copyAttributes(attributes SpanAttributes) SpanAttributes {
-	copy := SpanAttributes{}
-	for name, value := range attributes {
-		if value == nil {
-			// A nil value is upstream's undefined: it is not recorded and does not overwrite a recorded value.
-			continue
+	copied := make(SpanAttributes, 0, len(attributes))
+	undefined := false
+	for _, attribute := range attributes {
+		if attribute.Value == nil {
+			undefined = true
 		}
-		v := reflect.ValueOf(value)
-		if v.Kind() == reflect.Slice {
-			cloned := reflect.MakeSlice(v.Type(), v.Len(), v.Len())
-			reflect.Copy(cloned, v)
-			value = cloned.Interface()
-		}
-		copy[name] = value
+		copied = copied.Set(attribute.Name, cloneAttributeValue(attribute.Value))
 	}
-	return copy
+	if undefined {
+		copied = slices.DeleteFunc(copied, func(attribute SpanAttribute) bool { return attribute.Value == nil })
+	}
+	return copied
+}
+
+// cloneAttributeValue copies an array value, as upstream's `[...value]`.
+func cloneAttributeValue(value AttributeValue) AttributeValue {
+	switch typed := value.(type) {
+	case string, bool, int, int64, float64:
+		return value
+	case []string:
+		return slices.Clone(typed)
+	case []float64:
+		return slices.Clone(typed)
+	case []bool:
+		return slices.Clone(typed)
+	}
+	v := reflect.ValueOf(value)
+	if v.Kind() == reflect.Slice {
+		cloned := reflect.MakeSlice(v.Type(), v.Len(), v.Len())
+		reflect.Copy(cloned, v)
+		return cloned.Interface()
+	}
+	return value
 }
 
 // copyLink is upstream's copyLink: a link whose target has no recorded identity is dropped.
@@ -324,7 +345,9 @@ func (span *memorySpan) SetAttributes(attributes SpanAttributes) {
 	if span.record.Settled {
 		return
 	}
-	maps.Copy(span.record.Attributes, copyAttributes(attributes))
+	for _, attribute := range copyAttributes(attributes) {
+		span.record.Attributes = span.record.Attributes.Set(attribute.Name, attribute.Value)
+	}
 }
 
 func (span *memorySpan) SetStatus(status SpanStatus) {
@@ -561,7 +584,7 @@ func numberOf(value AttributeValue) (float64, bool) {
 // attributesMatch is upstream's `Object.entries(query).every(([key, value]) => attributes[key] === value)`.
 func attributesMatch(query map[string]AttributeValue, attributes SpanAttributes) bool {
 	for key, want := range query {
-		got, ok := attributes[key]
+		got, ok := attributes.Get(key)
 		if !ok || !attributeEqual(got, want) {
 			return false
 		}
