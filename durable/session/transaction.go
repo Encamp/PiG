@@ -1194,12 +1194,24 @@ func (tx *Transaction) settleFailure() {
 	tx.sealed = true
 	tx.abortChangesLocked()
 	tx.drainLocked()
+	tx.releaseContextLocked()
 	tx.mu.Unlock()
 }
+
+// releaseContextLocked drops the caller's context, which carries its telemetry span, once the transaction can no longer
+// read: a transaction or draft that outlives its commit must not keep the span and what it references reachable
+// (transaction.ts `this.#context = BACKGROUND_CONTEXT`). Called with no pending operation left.
+func (tx *Transaction) releaseContextLocked() { tx.ctx = unscoped }
 
 // settleSuccess seals after callback success, prepares every open change, and assembles the atomic batch. Any
 // failure aborts every change before Storage admission.
 func (tx *Transaction) settleSuccess() ([]durable.StorageWrite, error) {
+	// The context is released however settlement ends, once assembly has finished reading with it.
+	defer func() {
+		tx.mu.Lock()
+		tx.releaseContextLocked()
+		tx.mu.Unlock()
+	}()
 	tx.mu.Lock()
 	tx.sealed = true
 	if tx.pendingOps > 0 {

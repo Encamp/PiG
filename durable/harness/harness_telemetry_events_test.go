@@ -317,8 +317,21 @@ func TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPh
 	}
 	waitFor(t, func() bool { return allSettled(recorder) })
 	request := spanAttr(recorder.GetSpans(), "pi.durable.phase", "phase", "request")
-	if request == nil || !hasEvent(request.Events, "pi.durable.report", telemetry.SpanAttributes{"type": "extension_error", "extension": "reporting-hooks", "task.id": request.Attributes["task.id"]}) {
-		t.Fatalf("request phase %+v", request)
+	if request == nil {
+		t.Fatal("no request phase span")
+	}
+	wantReport := telemetry.RecordedTelemetryEvent{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{"type": "extension_error", "extension": "reporting-hooks", "task.id": request.Attributes["task.id"]}}
+	count := 0
+	for _, event := range request.Events {
+		if event.Name == "pi.durable.report" {
+			count++
+			if !reflect.DeepEqual(event, wantReport) {
+				t.Fatalf("report event %+v, want %+v", event, wantReport)
+			}
+		}
+	}
+	if count != 1 {
+		t.Fatalf("request phase has %d pi.durable.report events, want 1: %+v", count, request.Events)
 	}
 	clockError := errors.New("private-clock-error")
 	task := telemetryTask("test.clock", "clock", map[string]telemetryPhase{
