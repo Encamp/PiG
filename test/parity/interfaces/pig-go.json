@@ -6910,9 +6910,9 @@
       "kind": "variable",
       "exported": true,
       "shape": {
-        "type": "*github.com/MichaelKinsy/PiG/telemetry.TelemetrySchemaDefinition"
+        "type": "func() *github.com/MichaelKinsy/PiG/telemetry.TelemetrySchemaDefinition"
       },
-      "shapeHash": "sha256:7fa68ec53194154d69710d26aa51a36f60b4158bcdc2b46f288677654cfa0a69"
+      "shapeHash": "sha256:100e156cbbb8f52a0c1372db5df8fce4b58ab8bde8ca39b65f2f00f5027d6b96"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#API",
