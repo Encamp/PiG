@@ -311,7 +311,7 @@ func TestCodexModelAndCallerHeadersOverrideOriginatorAndUserAgent(t *testing.T) 
 	}))
 	t.Cleanup(server.Close)
 	// The model's headers reach the provider the way Pi's streamOpenAICodexResponses(model, ...) reads model.headers.
-	model := cloneGeneratedModel(t, "openai-codex/gpt-5.5").ToModel()
+	model := cloneGeneratedModel(t, "openai-codex/gpt-5.6-sol").ToModel()
 	model.ProviderMeta.BaseURL = server.URL
 	model.ProviderMeta.Headers = map[string]string{"Originator": "my-app"}
 	stream, err := StreamSimple(t.Context(), model, NormalizeContext(Context{Messages: []Message{UserMessage{Content: UserText("Say hello")}}}), StreamOptions{

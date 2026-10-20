@@ -32,7 +32,7 @@ func responsesImageCases() []responsesImageTestCase {
 		// .upstream/v0.87.1/packages/ai/test/openai-responses-tool-result-images.test.ts:168
 		{"github-copilot", "gpt-5-mini", "PIG_LIVE_COPILOT_TOKEN"},
 		// .upstream/v0.87.1/packages/ai/test/openai-responses-tool-result-images.test.ts:183
-		{"openai-codex", "gpt-5.5", "PIG_LIVE_CODEX_TOKEN"},
+		{"openai-codex", "gpt-6.1-sol", "PIG_LIVE_CODEX_TOKEN"},
 	}
 }
 

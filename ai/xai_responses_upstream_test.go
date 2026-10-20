@@ -19,10 +19,8 @@ func TestXAIResponsesExcludesRetiredAndRedundantModels(t *testing.T) {
 	}
 }
 
-// .upstream/v0.87.1/packages/ai/test/xai-responses.test.ts:129
-// At Pi 1.3.0+73f8de80 the catalog (packages/ai/src/providers/data/xai.json) maps xhigh for grok-4.5 and grok-4.3, so Pi's own
-// assertion of [low medium high] / [off low medium high] for those two fails (vitest run of this test at the pin); the expected levels
-// here are Pi's observed levels, the same data the Go catalog is generated from.
+// .upstream/v1.3.0+fdce48eb/packages/ai/test/xai-responses.test.ts:129 (Pi fbc456d8): Pi's assertion for grok-4.5 and grok-4.3 now
+// includes xhigh, the level the catalog (packages/ai/src/providers/data/xai.json) maps for them, the same data the Go catalog is generated from.
 func TestXAIResponsesRoutesEveryBuiltInModelThroughResponses(t *testing.T) {
 	models := ListModels("xai")
 	if len(models) == 0 {

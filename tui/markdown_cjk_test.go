@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -52,4 +53,32 @@ func TestMarkdownCJKEmphasisMatchesPi(t *testing.T) {
 		"**foo**bar", "foo**bar**", "**「a」**b", "a**「b」**", "a**。**b", "a_。_b", "字**。**a", "a**。**字", "**\u3000a**", "**a\u3000**b",
 	}
 	compareMarkdownWithPi(t, docs)
+}
+
+// TestMarkdownCJKEmphasisPiCases is Pi's "CJK emphasis" block (packages/tui/test/markdown.test.ts, #10154) with Pi's expected strings:
+// bold and italic delimited next to CJK punctuation render, and CommonMark flanking holds for non-CJK text.
+func TestMarkdownCJKEmphasisPiCases(t *testing.T) {
+	tag := func(name string) func(string) string {
+		return func(text string) string { return "<" + name + ">" + text + "</" + name + ">" }
+	}
+	theme := MarkdownTheme{Bold: tag("b"), Italic: tag("i")}
+	render := func(text string) []string {
+		lines := NewMarkdownWithOptions(text, 0, 0, &theme, nil, nil).Render(80)
+		for i, line := range lines {
+			lines[i] = strings.TrimRight(line, " ")
+		}
+		return lines
+	}
+	for _, tc := range []struct{ source, want string }{
+		{"**这是测试。**后面", "<b>这是测试。</b>后面"},
+		{"**一句话说清：**一台机器", "<b>一句话说清：</b>一台机器"},
+		{"**要点到此为止。**20 小时", "<b>要点到此为止。</b>20 小时"},
+		{"字**「引用」**字", "字<b>「引用」</b>字"},
+		{"*斜体。*后面", "<i>斜体。</i>后面"},
+		{"**end.**Then next", "**end.**Then next"},
+	} {
+		if got := render(tc.source); !reflect.DeepEqual(got, []string{tc.want}) {
+			t.Errorf("%q rendered %q, want %q", tc.source, got, []string{tc.want})
+		}
+	}
 }

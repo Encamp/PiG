@@ -29,7 +29,7 @@ func TestImageToolResultMatrixUpstream(t *testing.T) {
 		{"xiaomi-token-plan-ams", "mimo-v2.6-pro"}, {"xiaomi-token-plan-sgp", "mimo-v2.6-pro"}, {"qwen-token-plan", "qwen3.7-max"},
 		{"qwen-token-plan-individual", "qwen3.8-max"}, {"qwen-token-plan-cn", "qwen3.7-max"}, {"kimi-coding", "kimi-for-coding"},
 		{"vercel-ai-gateway", "google/gemini-2.5-flash"}, {"amazon-bedrock", "global.anthropic.claude-sonnet-4-5-20250929-v1:0"},
-		{"anthropic", "claude-sonnet-4-5"}, {"github-copilot", "claude-haiku-4.5"}, {"github-copilot", "claude-sonnet-4.6"}, {"openai-codex", "gpt-5.5"},
+		{"anthropic", "claude-sonnet-4-5"}, {"github-copilot", "claude-haiku-4.5"}, {"github-copilot", "claude-sonnet-4.6"}, {"openai-codex", "gpt-6.1-sol"},
 	}
 	if len(cases) != 2*len(specs) {
 		t.Fatalf("unported matrix change: %d cases for %d models", len(cases), len(specs))

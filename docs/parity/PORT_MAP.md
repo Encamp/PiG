@@ -571,7 +571,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/tui/src/components/image.ts` | `tui/image.go` | ✅ |
 | `packages/tui/src/components/input.ts` | `tui/text_input.go (lossless UTF-16 via internal/jsstring)`, `tui/tui.go` | ✅ |
 | `packages/tui/src/components/loader.ts` | `tui/loader.go` | ✅ |
-| `packages/tui/src/components/markdown.ts` | `tui/markdown.go + tui/markdown_options.go + tui/markdown_style.go + tui/markdown_list.go + tui/markdown_marked.go + tui/markdown_marked_block.go (marked 18.0.11 lexer rules)` | ✅ |
+| `packages/tui/src/components/markdown.ts` | `tui/markdown.go + tui/markdown_options.go + tui/markdown_style.go + tui/markdown_list.go + tui/markdown_marked.go + tui/markdown_marked_block.go (marked 18.0.11 lexer rules) + tui/markdown_cjk.go (marked-cjk-friendly 0.1.2 emStrong: the CJK class and the previous-character recovery; Pi b2d0da6f)` | ✅ |
 | `packages/tui/src/components/select-list.ts` | `tui/select_list.go (SelectList) + tui/select_filterable.go (shared row layout and truncation)`, `tui/select_submenu.go`, `tui/tui.go` | ✅ |
 | `packages/tui/src/components/settings-list.ts` | `tui/settings_list.go`, `tui/tui.go` | ✅ |
 | `packages/tui/src/components/spacer.ts` | `tui/spacer.go`, `tui/tui.go` | ✅ |
@@ -660,7 +660,8 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/chord/src/sqlite/database.ts` | `chord/sqlite/database.go` | ✅ |
 | `packages/chord/src/sqlite/index.ts` | `(re-export barrel: the exports are the Go package surface)` | n/a |
 | `packages/chord/src/sqlite/migrations.ts` | `chord/sqlite/migrations.go` | ✅ |
-| `packages/chord/src/sqlite/node.ts` | `chord/sqlite/node/node.go` | ✅ |
+| `packages/chord/src/sqlite/node.ts` | `chord/sqlite/node/node.go (NodeSqliteDatabase.Exclusive, Pi 48c8f322; DatabaseSync.IsTransaction probes with BEGIN because the pure-Go driver exposes no autocommit query)` | ✅ |
+| `packages/chord/src/sqlite/replication/node.ts` | `chord/sqlite/replication/node.go OpenReplicatedNodeSqliteDatabase, ReplicatedNodeSqliteDatabase, ReplicationHooks (Pi 48c8f322; the module is not exported from the package in Pi either; the "can only be created by opening a file" case is TestReplicatedNodeSqliteCanOnlyBeCreatedByOpeningAFile)` | ✅ |
 | `packages/chord/src/sqlite/schema.ts` | `chord/sqlite/schema.go` | ✅ |
 | `packages/chord/src/cell.ts` | `chord/host/cell.go NewCell, Cell, Source, Derived, IsSource, NotReady` | ✅ |
 | `packages/chord/src/publish.ts` | `chord/host/publish.go enqueue, holdPublications` | ✅ |

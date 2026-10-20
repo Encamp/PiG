@@ -1109,9 +1109,9 @@ func responsesToolCallNormalizer(allowedToolCallProviders map[string]bool) func(
 // prepareResponsesTranscript resolves the transcript's system updates, transforms its messages for the model and resolves which
 // tools the request carries (convertResponsesMessages: resolveTranscript, transformMessages, resolveTranscriptTools).
 func prepareResponsesTranscript(model *Model, transcript TranscriptContext, allowedToolCallProviders map[string]bool, supportsMidConvoSystemMessages bool, toolSupport TranscriptToolSupport) ([]Message, TranscriptTools) {
-	messages := TransformMessages(resolvedMessages(transcript, supportsMidConvoSystemMessages), model, responsesToolCallNormalizer(allowedToolCallProviders))
-	messages = omitEmptyResponsesCallIDs(messages)
-	return messages, ResolveTranscriptTools(messages, toolSupport)
+	resolved := resolvedMessages(transcript, supportsMidConvoSystemMessages)
+	messages := omitEmptyResponsesCallIDs(TransformMessages(resolved, model, responsesToolCallNormalizer(allowedToolCallProviders)))
+	return messages, ResolveTranscriptTools(resolved, toolSupport)
 }
 
 // omitEmptyResponsesCallIDs omits, with the tool results that name it, a tool call whose {call_id}|{item_id} id still has an empty
@@ -1398,12 +1398,17 @@ func (p *openAIResponsesProvider) Stream(ctx context.Context, transcript Transcr
 	if p.modelSupportsImages() {
 		target.Input = append(target.Input, "image")
 	}
-	messages, transcriptTools := prepareResponsesTranscript(target, transcript, p.messageConverter(compat, nil).allowedToolCallProviders, compat.SupportsMidConvoSystemMessages, GetResponsesToolSupport(ResponsesToolSupportOptions{
+	toolSupport := GetResponsesToolSupport(ResponsesToolSupportOptions{
 		SupportsMidConvoSystemMessages: compat.SupportsMidConvoSystemMessages,
 		SupportsAdditionalTools:        compat.SupportsAdditionalTools,
 		SupportsToolSearch:             compat.SupportsToolSearch,
-	}))
-	tools := transcriptTools.RequestTools
+	})
+	messages, transcriptTools := prepareResponsesTranscript(target, transcript, p.messageConverter(compat, nil).allowedToolCallProviders, compat.SupportsMidConvoSystemMessages, toolSupport)
+	// Pi's buildParams resolves the request tools from context.messages as given (openai-responses.ts buildParams), while
+	// convertResponsesMessages resolves the anchored system messages from the transcript after resolveTranscript: a transcript
+	// whose first message is an aborted assistant has no initial system message in the first, though transformMessages drops that
+	// assistant, and a transport without mid-conversation system messages still sees its later system messages there.
+	tools := ResolveTranscriptTools(transcript.borrowed(), toolSupport).RequestTools
 	grammarProps, err := createGrammarToolInputProperties(GetDeclaredTools(messages), compat.SupportsOpenAIGrammarTools)
 	if err != nil {
 		return nil, err
