@@ -134,7 +134,7 @@ func TestMarkedProceduralRulesMatchRegexps(t *testing.T) {
 // markedCJKRegexps are emStrongRDelimAst (GFM) and emStrongRDelimUnd as marked-cjk-friendly 0.1.2 builds them (src/index.ts buildRDelimAst, buildRDelimUnd) over the BMP part of its CJK class: the reference for markedRightDelimiterMatch. The regexp engine has no astral class escapes, so the astral ranges are covered by TestMarkedCJKClassMatchesPinnedPackage and the rendering oracle.
 func markedCJKRegexps() (ast, und *markedRegexp) {
 	var class strings.Builder
-	for _, r := range markedCJKRanges {
+	for _, r := range &markedCJKRanges {
 		if r[1] <= 0xffff {
 			fmt.Fprintf(&class, `\u%04x-\u%04x`, r[0], r[1])
 		}
