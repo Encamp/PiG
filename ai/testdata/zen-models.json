@@ -193,6 +193,10 @@
   },
   {
     "provider": "opencode",
+    "id": "minimax-m3.1-flash-free"
+  },
+  {
+    "provider": "opencode",
     "id": "mistral-large-4"
   },
   {
@@ -210,10 +214,6 @@
   {
     "provider": "opencode",
     "id": "qwen3.8-max"
-  },
-  {
-    "provider": "opencode",
-    "id": "space-bunny-free"
   },
   {
     "provider": "opencode",
@@ -421,7 +421,7 @@
   },
   {
     "provider": "opencode-go",
-    "id": "space-bunny"
+    "id": "minimax-m3.1-flash-free"
   },
   {
     "provider": "opencode-go",

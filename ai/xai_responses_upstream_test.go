@@ -20,6 +20,9 @@ func TestXAIResponsesExcludesRetiredAndRedundantModels(t *testing.T) {
 }
 
 // .upstream/v0.87.1/packages/ai/test/xai-responses.test.ts:129
+// At Pi 1.3.0+73f8de80 the catalog (packages/ai/src/providers/data/xai.json) maps xhigh for grok-4.5 and grok-4.3, so Pi's own
+// assertion of [low medium high] / [off low medium high] for those two fails (vitest run of this test at the pin); the expected levels
+// here are Pi's observed levels, the same data the Go catalog is generated from.
 func TestXAIResponsesRoutesEveryBuiltInModelThroughResponses(t *testing.T) {
 	models := ListModels("xai")
 	if len(models) == 0 {
@@ -34,10 +37,10 @@ func TestXAIResponsesRoutesEveryBuiltInModelThroughResponses(t *testing.T) {
 		id   string
 		want []ModelThinkingLevel
 	}{
-		{"grok-4.5", []ModelThinkingLevel{ThinkingLow, ThinkingMedium, ThinkingHigh}},
+		{"grok-4.5", []ModelThinkingLevel{ThinkingLow, ThinkingMedium, ThinkingHigh, ThinkingXHigh}},
 		{"grok-4.6", []ModelThinkingLevel{ThinkingLow, ThinkingMedium, ThinkingHigh, ThinkingXHigh}},
 		{"grok-4.7", []ModelThinkingLevel{ThinkingLow, ThinkingMedium, ThinkingHigh, ThinkingXHigh}},
-		{"grok-4.3", []ModelThinkingLevel{ThinkingOff, ThinkingLow, ThinkingMedium, ThinkingHigh}},
+		{"grok-4.3", []ModelThinkingLevel{ThinkingOff, ThinkingLow, ThinkingMedium, ThinkingHigh, ThinkingXHigh}},
 	} {
 		if got := GetSupportedThinkingLevels(upstreamThinkingModel(t, "xai/"+tc.id)); !slices.Equal(got, tc.want) {
 			t.Errorf("%s levels = %v, want %v", tc.id, got, tc.want)
