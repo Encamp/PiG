@@ -131,3 +131,13 @@ func telemetryTask(name, initial string, phases map[string]telemetryPhase, abort
 
 // numberOf is a recorded span or event number attribute.
 func numberOf[T ~int | ~int64 | ~uint64](id T) float64 { return float64(id) }
+
+// attributeNames are the names of a recorded attribute bag in recorded order: Pi's object literal order, which the bag keeps
+// end to end (start attributes, then attributes set later in the order they were first set).
+func attributeNames(attributes telemetry.SpanAttributes) []string {
+	names := make([]string, 0, len(attributes))
+	for _, attribute := range attributes {
+		names = append(names, attribute.Name)
+	}
+	return names
+}

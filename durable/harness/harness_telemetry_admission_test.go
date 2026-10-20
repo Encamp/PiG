@@ -251,7 +251,7 @@ func TestDurableTelemetryReturnsAdmissionResultsWithoutRereadingRecordsOrProbing
 	}
 	var results []any
 	for _, span := range telemetrySpans(recorder, "pi.durable.submit") {
-		results = append(results, span.Attributes["result"])
+		results = append(results, span.Attributes.Value("result"))
 	}
 	if !reflect.DeepEqual(results, []any{"placed", "queued", "queued"}) {
 		t.Fatalf("submit results %v", results)
@@ -296,7 +296,7 @@ func TestDurableTelemetryInheritsOmittedOrUndefinedTaskTracesAndStoresNoCarrierF
 	parents := make([]telemetry.TelemetryCarrier, len(ids))
 	for _, phase := range phases {
 		for i, id := range ids {
-			if phase.Attributes["task.id"] == numberOf(id) {
+			if phase.Attributes.Value("task.id") == numberOf(id) {
 				parents[i] = phase.ParentContext
 			}
 		}
@@ -336,7 +336,7 @@ func TestDurableTelemetryRecordsCheckpointsOnlyWhenTheRunningPhaseChanges(t *tes
 			checkpoints = append(checkpoints, event)
 		}
 	}
-	want := []telemetry.RecordedTelemetryEvent{{Name: "pi.durable.checkpoint", Attributes: telemetry.SpanAttributes{"phase": "finish"}}}
+	want := []telemetry.RecordedTelemetryEvent{{Name: "pi.durable.checkpoint", Attributes: telemetry.SpanAttributes{telemetry.Attr("phase", "finish")}}}
 	if !reflect.DeepEqual(checkpoints, want) {
 		t.Fatalf("checkpoint events %+v, want %+v", checkpoints, want)
 	}
@@ -384,7 +384,7 @@ func TestDurableTelemetryStartsEachQueuedInputsRunInItsAdmissionTraceAndLinksInp
 		}
 		found := false
 		for _, span := range spans {
-			found = found || span.Name == "pi.durable.phase" && span.Attributes["phase"] == "prepare" && reflect.DeepEqual(span.ParentContext, submit.Context)
+			found = found || span.Name == "pi.durable.phase" && span.Attributes.Value("phase") == "prepare" && reflect.DeepEqual(span.ParentContext, submit.Context)
 		}
 		if !found {
 			t.Fatalf("no prepare phase parented to the submit %v", submit.Context)
@@ -429,12 +429,12 @@ func TestDurableTelemetryLinksTheOtherQueuedInputsToTheFirstInvocationOfTheirSha
 	}
 	var phases []string
 	for _, phase := range telemetrySpans(recorder, "pi.durable.phase") {
-		if phase.Attributes["task.id"] != numberOf(tasks[1].Id) {
+		if phase.Attributes.Value("task.id") != numberOf(tasks[1].Id) {
 			continue
 		}
-		phases = append(phases, phase.Attributes["phase"].(string))
+		phases = append(phases, phase.Attributes.Value("phase").(string))
 		if !reflect.DeepEqual(phase.Links, telLinks(thirdTrace)) {
-			t.Fatalf("phase %v links %+v, want a link to %v", phase.Attributes["phase"], phase.Links, thirdTrace)
+			t.Fatalf("phase %v links %+v, want a link to %v", phase.Attributes.Value("phase"), phase.Links, thirdTrace)
 		}
 	}
 	if !reflect.DeepEqual(phases, []string{"prepare", "request"}) {
@@ -472,7 +472,7 @@ func TestDurableTelemetryLinksASteerAdmissionToTheCurrentRunWithoutMovingItsWork
 	steerTrace := must(steer.Status(testContext)).Trace
 	var steerSpan *telemetry.RecordedTelemetrySpan
 	for _, span := range recorder.GetSpans() {
-		if span.Attributes["submission.id"] == numberOf(steer.Id()) {
+		if span.Attributes.Value("submission.id") == numberOf(steer.Id()) {
 			steerSpan = &span
 			break
 		}
@@ -530,7 +530,7 @@ func TestDurableTelemetryKeepsAPublicWriteAdmissionOpenThroughCommitAsAChildOfIt
 		record := must(result.submission.Status(testContext))
 		spans := recorder.GetSpans()
 		span := telSpanByName(t, spans, "pi.durable.submit")
-		if !reflect.DeepEqual(span.ParentContext, spans[0].Context) || !span.Settled || span.Attributes["result"] != "done" {
+		if !reflect.DeepEqual(span.ParentContext, spans[0].Context) || !span.Settled || span.Attributes.Value("result") != "done" {
 			t.Fatalf("submit span %+v, want a settled child of the caller %v with result done", span, spans[0].Context)
 		}
 		if !reflect.DeepEqual(record.Trace, span.Context) {
@@ -582,7 +582,7 @@ func TestDurableTelemetryLinksAnInputSubmittedInsideATurnToTheCallingPhaseWithou
 	spans := recorder.GetSpans()
 	var tool *telemetry.RecordedTelemetrySpan
 	for _, span := range spans {
-		if span.Attributes["tool.name"] == "delegate" {
+		if span.Attributes.Value("tool.name") == "delegate" {
 			tool = &span
 			break
 		}
@@ -626,7 +626,7 @@ func TestDurableTelemetryParentsBackgroundCompactionToThePreparePhaseThatCreates
 	}
 	waitFor(t, func() bool {
 		for _, span := range recorder.GetSpans() {
-			if span.Attributes["task.name"] == "pi.compaction" && span.Settled {
+			if span.Attributes.Value("task.name") == "pi.compaction" && span.Settled {
 				return true
 			}
 		}
@@ -635,10 +635,10 @@ func TestDurableTelemetryParentsBackgroundCompactionToThePreparePhaseThatCreates
 	spans := recorder.GetSpans()
 	var prepare, compaction *telemetry.RecordedTelemetrySpan
 	for _, span := range spans {
-		if prepare == nil && span.Attributes["task.name"] == "pi.generation" && span.Attributes["phase"] == "prepare" {
+		if prepare == nil && span.Attributes.Value("task.name") == "pi.generation" && span.Attributes.Value("phase") == "prepare" {
 			prepare = &span
 		}
-		if compaction == nil && span.Attributes["task.name"] == "pi.compaction" {
+		if compaction == nil && span.Attributes.Value("task.name") == "pi.compaction" {
 			compaction = &span
 		}
 	}
@@ -692,13 +692,13 @@ func TestDurableTelemetryMarksOnlyTheFirstInvocationAfterReopenResumedRetainingI
 	phases := append(telemetrySpans(recorder, "pi.durable.phase"), telemetrySpans(reopenedTelemetry, "pi.durable.phase")...)
 	var resumed []any
 	for _, phase := range phases {
-		resumed = append(resumed, phase.Attributes["resumed"])
+		resumed = append(resumed, phase.Attributes.Value("resumed"))
 	}
 	if !reflect.DeepEqual(resumed, []any{false, true, false}) {
 		t.Fatalf("resumed attributes %v, want [false true false]", resumed)
 	}
-	if phases[0].Attributes["outcome"] != "aborted" {
-		t.Fatalf("first phase outcome %v, want aborted", phases[0].Attributes["outcome"])
+	if phases[0].Attributes.Value("outcome") != "aborted" {
+		t.Fatalf("first phase outcome %v, want aborted", phases[0].Attributes.Value("outcome"))
 	}
 	if phases[0].Status != (telemetry.SpanStatus{Status: telemetry.SpanStatusCodeOK}) {
 		t.Fatalf("first phase status %+v, want ok", phases[0].Status)

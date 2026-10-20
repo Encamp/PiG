@@ -57,7 +57,7 @@ func TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningIts
 	replayed := false
 	for _, span := range recorder.GetSpans() {
 		for _, event := range span.Events {
-			if event.Name == "pi.durable.replay" && reflect.DeepEqual(event.Attributes, telemetry.SpanAttributes{"tool.name": "echo"}) {
+			if event.Name == "pi.durable.replay" && reflect.DeepEqual(event.Attributes, telemetry.SpanAttributes{telemetry.Attr("tool.name", "echo")}) {
 				replayed = true
 			}
 		}

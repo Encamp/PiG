@@ -19,7 +19,7 @@ import (
 
 func spanAttr(spans []telemetry.RecordedTelemetrySpan, name string, key string, value any) *telemetry.RecordedTelemetrySpan {
 	for index := range spans {
-		if spans[index].Name == name && spans[index].Attributes[key] == value {
+		if spans[index].Name == name && spans[index].Attributes.Value(key) == value {
 			return &spans[index]
 		}
 	}
@@ -82,8 +82,8 @@ func TestDurableTelemetryEmitsEntryAndSettlementEventsOnlyAfterSuccessfulStorage
 			t.Fatal(err)
 		}
 		want := []telemetry.RecordedTelemetryEvent{
-			{Name: "pi.durable.entry", Attributes: telemetry.SpanAttributes{"entry.id": numberOf(result.entry.Id), "entry.kind": "app.note"}},
-			{Name: "pi.durable.submission", Attributes: telemetry.SpanAttributes{"submission.id": numberOf(submission.Id), "status": "done"}},
+			{Name: "pi.durable.entry", Attributes: telemetry.SpanAttributes{telemetry.Attr("entry.id", numberOf(result.entry.Id)), telemetry.Attr("entry.kind", "app.note")}},
+			{Name: "pi.durable.submission", Attributes: telemetry.SpanAttributes{telemetry.Attr("submission.id", numberOf(submission.Id)), telemetry.Attr("status", "done")}},
 		}
 		if events := recorder.GetSpans()[0].Events; !reflect.DeepEqual(events, want) {
 			t.Fatalf("events %+v, want %+v", events, want)
@@ -142,7 +142,7 @@ func TestDurableTelemetryRecordsInternalCompactionAdmissionsAsPhaseEventsWithout
 	hasEntry, hasDone := false, false
 	for _, event := range phase.Events {
 		hasEntry = hasEntry || event.Name == "pi.durable.entry"
-		hasDone = hasDone || (event.Name == "pi.durable.submission" && event.Attributes["status"] == "done")
+		hasDone = hasDone || (event.Name == "pi.durable.submission" && event.Attributes.Value("status") == "done")
 	}
 	if !hasEntry || !hasDone {
 		t.Fatalf("compaction phase events %+v", phase.Events)
@@ -190,14 +190,14 @@ func TestDurableTelemetryRecordsAFixedCategoryAndABoundedDiagnostic(t *testing.T
 			}
 			waitFor(t, func() bool { return allSettled(recorder) })
 			span := telemetrySpans(recorder, "pi.durable.phase")[0]
-			if span.ParentID != nil || span.Attributes["outcome"] != "faulted" {
+			if span.ParentID != nil || span.Attributes.Value("outcome") != "faulted" {
 				t.Fatalf("phase %+v", span)
 			}
 			want := telemetry.SpanStatus{Status: telemetry.SpanStatusCodeError, Error: &telemetry.SpanStatusError{Name: "task_" + status, Message: message[:500]}}
 			if !reflect.DeepEqual(span.Status, want) {
 				t.Fatalf("status %+v, want %+v", span.Status, want)
 			}
-			if status == "faulted" && !hasEvent(span.Events, "pi.durable.report", telemetry.SpanAttributes{"type": "task_faulted", "reason": "threw", "extension": "task:test.fault", "task.id": numberOf(id)}) {
+			if status == "faulted" && !hasEvent(span.Events, "pi.durable.report", telemetry.SpanAttributes{telemetry.Attr("type", "task_faulted"), telemetry.Attr("reason", "threw"), telemetry.Attr("extension", "task:test.fault"), telemetry.Attr("task.id", numberOf(id))}) {
 				t.Fatalf("events %+v", span.Events)
 			}
 			text := jsonText(t, span)
@@ -239,11 +239,11 @@ func TestDurableTelemetryKeepsBothInterruptedRunsAndExplicitAbortHandlersAtStatu
 	must(harness.WaitForTask(testContext, id))
 	waitFor(t, func() bool { return allSettled(recorder) })
 	phases := telemetrySpans(recorder, "pi.durable.phase")
-	if len(phases) != 2 || phases[0].Attributes["kind"] != "run" || phases[1].Attributes["kind"] != "abort" {
+	if len(phases) != 2 || phases[0].Attributes.Value("kind") != "run" || phases[1].Attributes.Value("kind") != "abort" {
 		t.Fatalf("phases %+v", phases)
 	}
 	for _, span := range phases {
-		if span.Attributes["outcome"] != "aborted" || !reflect.DeepEqual(span.Status, telemetry.SpanStatus{Status: telemetry.SpanStatusCodeOK}) {
+		if span.Attributes.Value("outcome") != "aborted" || !reflect.DeepEqual(span.Status, telemetry.SpanStatus{Status: telemetry.SpanStatusCodeOK}) {
 			t.Fatalf("phase %+v", span)
 		}
 	}
@@ -274,9 +274,9 @@ func TestDurableTelemetryMirrorsRuntimeReportsAsFixedFieldPhaseEventsAndTypeOnly
 	waitFor(t, func() bool { return allSettled(recorder) })
 	span := telemetrySpans(recorder, "pi.durable.phase")[0]
 	want := []telemetry.RecordedTelemetryEvent{
-		{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{"type": "task_error", "extension": "task:test.report", "task.id": numberOf(id)}},
-		{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{"type": "extension_error", "extension": "reporting-extension", "task.id": numberOf(id)}},
-		{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{"type": "host_error", "task.id": numberOf(id)}},
+		{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "task_error"), telemetry.Attr("extension", "task:test.report"), telemetry.Attr("task.id", numberOf(id))}},
+		{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "extension_error"), telemetry.Attr("extension", "reporting-extension"), telemetry.Attr("task.id", numberOf(id))}},
+		{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "host_error"), telemetry.Attr("task.id", numberOf(id))}},
 	}
 	if !reflect.DeepEqual(span.Events, want) {
 		t.Fatalf("events %+v, want %+v", span.Events, want)
@@ -287,7 +287,7 @@ func TestDurableTelemetryMirrorsRuntimeReportsAsFixedFieldPhaseEventsAndTypeOnly
 	if len(telemetrySpans(recorder, "pi.durable.report")) != 0 {
 		t.Fatal("a report span was created")
 	}
-	wantMetrics := []telemetry.SpanAttributes{{"type": "task_error"}, {"type": "extension_error"}, {"type": "host_error"}}
+	wantMetrics := []telemetry.SpanAttributes{{telemetry.Attr("type", "task_error")}, {telemetry.Attr("type", "extension_error")}, {telemetry.Attr("type", "host_error")}}
 	if got := reportAttributes(recorder); !reflect.DeepEqual(got, wantMetrics) {
 		t.Fatalf("report counters %+v, want %+v", got, wantMetrics)
 	}
@@ -320,7 +320,7 @@ func TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPh
 	if request == nil {
 		t.Fatal("no request phase span")
 	}
-	wantReport := telemetry.RecordedTelemetryEvent{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{"type": "extension_error", "extension": "reporting-hooks", "task.id": request.Attributes["task.id"]}}
+	wantReport := telemetry.RecordedTelemetryEvent{Name: "pi.durable.report", Attributes: telemetry.SpanAttributes{telemetry.Attr("type", "extension_error"), telemetry.Attr("extension", "reporting-hooks"), telemetry.Attr("task.id", request.Attributes.Value("task.id"))}}
 	count := 0
 	for _, event := range request.Events {
 		if event.Name == "pi.durable.report" {
@@ -355,7 +355,7 @@ func TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPh
 	if len(telemetrySpans(recorder, "pi.durable.report")) != 0 {
 		t.Fatal("a report span was created")
 	}
-	if got, want := reportAttributes(recorder), []telemetry.SpanAttributes{{"type": "extension_error"}, {"type": "host_error"}}; !reflect.DeepEqual(got, want) {
+	if got, want := reportAttributes(recorder), []telemetry.SpanAttributes{{telemetry.Attr("type", "extension_error")}, {telemetry.Attr("type", "host_error")}}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("report counters %+v, want %+v", got, want)
 	}
 	if reports := setup.Reports.all(); len(reports) != 2 || !errors.Is(reports[0], hookError) || reports[1].Error() != clockError.Error() {
@@ -392,7 +392,7 @@ func TestDurableTelemetryCountsAnOutsideSpanSessionFailureWithoutStartingASpan(t
 	if strings.Contains(jsonText(t, recorder.GetMetrics()), "private-storage-error") {
 		t.Fatal("the storage error was recorded")
 	}
-	if got, want := reportAttributes(recorder), []telemetry.SpanAttributes{{"type": "session_failed"}}; !reflect.DeepEqual(got, want) {
+	if got, want := reportAttributes(recorder), []telemetry.SpanAttributes{{telemetry.Attr("type", "session_failed")}}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("report counters %+v, want %+v", got, want)
 	}
 }
@@ -414,7 +414,7 @@ func TestDurableTelemetryCountsReportsRaisedWithANoopSpanWithoutCreatingARoot(t 
 	if spans := recorder.GetSpans(); len(spans) != 0 {
 		t.Fatalf("spans %+v", spans)
 	}
-	if got, want := reportAttributes(recorder), []telemetry.SpanAttributes{{"type": "listener_error"}}; !reflect.DeepEqual(got, want) {
+	if got, want := reportAttributes(recorder), []telemetry.SpanAttributes{{telemetry.Attr("type", "listener_error")}}; !reflect.DeepEqual(got, want) {
 		t.Fatalf("report counters %+v, want %+v", got, want)
 	}
 	unsubscribe()
@@ -443,7 +443,7 @@ func TestDurableTelemetryAttachesSynchronousCommitListenerReportsToTheActiveSubm
 		t.Fatalf("reports %v", reports)
 	}
 	span := telemetrySpans(recorder, "pi.durable.submit")[0]
-	if !hasEvent(span.Events, "pi.durable.report", telemetry.SpanAttributes{"type": "listener_error"}) {
+	if !hasEvent(span.Events, "pi.durable.report", telemetry.SpanAttributes{telemetry.Attr("type", "listener_error")}) {
 		t.Fatalf("submit events %+v", span.Events)
 	}
 	if strings.Contains(jsonText(t, recorder.GetSpans()), "private-listener-error") {
