@@ -269,34 +269,40 @@ func TestReplicatedNodeSqliteClosesTheConnectionEvenWhenTheCloseHookFails(t *tes
 // or ones the caller still writes through, so the package's only exported function is the opener and the database type has no exported
 // field besides Path.
 func TestReplicatedNodeSqliteCanOnlyBeCreatedByOpeningAFile(t *testing.T) {
-	files, err := parser.ParseDir(token.NewFileSet(), ".", func(info os.FileInfo) bool { return !strings.HasSuffix(info.Name(), "_test.go") }, 0)
+	paths, err := filepath.Glob("*.go")
 	if err != nil {
 		t.Fatal(err)
 	}
+	fileSet := token.NewFileSet()
 	var functions []string
-	for _, pkg := range files {
-		for _, file := range pkg.Files {
-			for _, declaration := range file.Decls {
-				switch declaration := declaration.(type) {
-				case *ast.FuncDecl:
-					if declaration.Recv == nil && declaration.Name.IsExported() {
-						functions = append(functions, declaration.Name.Name)
+	for _, path := range paths {
+		if strings.HasSuffix(path, "_test.go") {
+			continue
+		}
+		file, err := parser.ParseFile(fileSet, path, nil, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, declaration := range file.Decls {
+			switch declaration := declaration.(type) {
+			case *ast.FuncDecl:
+				if declaration.Recv == nil && declaration.Name.IsExported() {
+					functions = append(functions, declaration.Name.Name)
+				}
+			case *ast.GenDecl:
+				for _, spec := range declaration.Specs {
+					typeSpec, ok := spec.(*ast.TypeSpec)
+					if !ok || typeSpec.Name.Name != "ReplicatedNodeSqliteDatabase" {
+						continue
 					}
-				case *ast.GenDecl:
-					for _, spec := range declaration.Specs {
-						typeSpec, ok := spec.(*ast.TypeSpec)
-						if !ok || typeSpec.Name.Name != "ReplicatedNodeSqliteDatabase" {
-							continue
-						}
-						structType, isStruct := typeSpec.Type.(*ast.StructType)
-						if !isStruct {
-							continue
-						}
-						for _, field := range structType.Fields.List {
-							for _, name := range field.Names {
-								if name.IsExported() && name.Name != "Path" {
-									t.Errorf("exported field %s lets a caller build or reach the connection", name.Name)
-								}
+					structType, isStruct := typeSpec.Type.(*ast.StructType)
+					if !isStruct {
+						continue
+					}
+					for _, field := range structType.Fields.List {
+						for _, name := range field.Names {
+							if name.IsExported() && name.Name != "Path" {
+								t.Errorf("exported field %s lets a caller build or reach the connection", name.Name)
 							}
 						}
 					}
@@ -304,6 +310,7 @@ func TestReplicatedNodeSqliteCanOnlyBeCreatedByOpeningAFile(t *testing.T) {
 			}
 		}
 	}
+
 	if want := []string{"OpenReplicatedNodeSqliteDatabase"}; !reflect.DeepEqual(functions, want) {
 		t.Errorf("exported package functions = %v, want %v", functions, want)
 	}

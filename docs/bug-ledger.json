@@ -109904,19 +109904,27 @@
       ]
     },
     {
-      "id": "BF-pending-927",
-      "title": "HTML export renders Markdown bold and italic next to CJK punctuation instead of showing literal asterisks (Pi…",
-      "symptom": "HTML export renders Markdown bold and italic next to CJK punctuation instead of showing literal asterisks (Pi #11168).",
-      "rootCause": "",
-      "rootCauseSource": "",
+      "id": "BF-9abc6ac",
+      "title": "Markdown bold and italic next to CJK punctuation render in HTML exports and in Markdown that Node extensions…",
+      "symptom": "Markdown bold and italic next to CJK punctuation render in HTML exports and in Markdown that Node extensions render through pi-tui, matching the terminal (Pi #11168, #10730).",
+      "rootCause": "pi-tui's Markdown component imports marked-cjk-friendly from Pi. vendor-pi-dist.sh copies the package into the shims, points the import at it and checks the rewrite; the vendored pi-dist is regenerated from the pinned Pi.",
+      "rootCauseSource": "commit",
       "userImpact": "Wrong display",
       "platform": "All platforms",
       "class": "own",
       "fixedIn": "Unreleased",
-      "releaseNote": "HTML export renders Markdown bold and italic next to CJK punctuation instead of showing literal asterisks (Pi #11168).",
+      "releaseNote": "Markdown bold and italic next to CJK punctuation render in HTML exports and in Markdown that Node extensions render through pi-tui, matching the terminal (Pi #11168, #10730).",
       "origin": "release note",
-      "commits": [],
-      "tests": []
+      "commits": [
+        {
+          "hash": "9abc6acfde",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/extension/host/subprocess/builder_node_embed_test.go::TestNodeRuntimeEmbedsVendoredPiDistAndDependencies",
+        "coding/extension/host/subprocess/runtime_node_vendored_test.go::TestVendoredPiDistMatchesThePinnedPackage"
+      ]
     }
   ],
   "divergences": [
