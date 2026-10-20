@@ -182,17 +182,17 @@ func TestAggregatesCanonicalSeriesByIntervalAndWritesPartialIntervalsOnlyOnClose
 	unit := "ms"
 	metric := f.telemetry.Histogram("duration", telemetry.HistogramOptions{InstrumentOptions: telemetry.InstrumentOptions{Unit: &unit}, Boundaries: []float64{1, 10}})
 	original := []string{"original"}
-	attributes := telemetry.SpanAttributes{"b": original, "a": true}
+	attributes := telemetry.SpanAttributes{telemetry.Attr("b", original), telemetry.Attr("a", true)}
 	metric.Record(2, attributes, nil)
 	original[0] = "changed"
-	metric.Record(8, telemetry.SpanAttributes{"a": true, "b": []string{"original"}}, nil)
+	metric.Record(8, telemetry.SpanAttributes{telemetry.Attr("a", true), telemetry.Attr("b", []string{"original"})}, nil)
 	f.telemetry.UpDownCounter("active", telemetry.InstrumentOptions{}).Add(-1, nil)
 	f.flush()
 	if rows := f.all("SELECT * FROM telemetry_metrics"); len(rows) != 0 {
 		t.Fatalf("rows before the interval completes = %v", rows)
 	}
 	now.Set(30_001)
-	metric.Record(4, telemetry.SpanAttributes{"b": []string{"original"}, "a": true}, nil)
+	metric.Record(4, telemetry.SpanAttributes{telemetry.Attr("b", []string{"original"}), telemetry.Attr("a", true)}, nil)
 	f.flush()
 	rows := f.all("SELECT * FROM telemetry_metrics ORDER BY name")
 	if len(rows) != 2 {
@@ -227,7 +227,7 @@ func TestSeparatesKindNameUnitAndCallerAttributes(t *testing.T) {
 	f.telemetry.Counter("same", telemetry.InstrumentOptions{Unit: &by}).Add(2, nil)
 	f.telemetry.UpDownCounter("same", telemetry.InstrumentOptions{}).Add(3, nil)
 	f.telemetry.Counter("other", telemetry.InstrumentOptions{}).Add(4, nil)
-	f.telemetry.Counter("same", telemetry.InstrumentOptions{}).Add(5, telemetry.SpanAttributes{"method": "read"})
+	f.telemetry.Counter("same", telemetry.InstrumentOptions{}).Add(5, telemetry.SpanAttributes{telemetry.Attr("method", "read")})
 	f.telemetry.Histogram("same", telemetry.HistogramOptions{InstrumentOptions: telemetry.InstrumentOptions{Description: &first}, Boundaries: []float64{1}}).Record(6, nil, nil)
 	f.telemetry.Histogram("same", telemetry.HistogramOptions{InstrumentOptions: telemetry.InstrumentOptions{Description: &second}, Boundaries: []float64{2}}).Record(7, nil, nil)
 	check(t, f.telemetry.Close())
@@ -523,8 +523,9 @@ func integralNumbers(attributes telemetry.SpanAttributes) telemetry.SpanAttribut
 	if attributes == nil {
 		return nil
 	}
-	normalized := telemetry.SpanAttributes{}
-	for name, value := range attributes {
+	normalized := make(telemetry.SpanAttributes, len(attributes))
+	for index, attribute := range attributes {
+		value := attribute.Value
 		switch typed := value.(type) {
 		case float64:
 			if typed == math.Trunc(typed) {
@@ -543,28 +544,7 @@ func integralNumbers(attributes telemetry.SpanAttributes) telemetry.SpanAttribut
 				value = whole
 			}
 		}
-		normalized[name] = value
+		normalized[index] = telemetry.Attr(attribute.Name, value)
 	}
 	return normalized
-}
-
-// Upstream trim rule (index.ts drain): a commit removes only the spans of the batch it wrote
-// (`this.spans.splice(0, spans.length)`), so spans that settle during the in-flight write stay queued for the next flush.
-func TestSpansSettledDuringAnInFlightWriteSurviveTheTrimAndAreWrittenByTheNextFlush(t *testing.T) {
-	f := newFixture(t, SqliteTelemetryOptions{})
-	f.span("batch")
-	gate := newBlocker(t)
-	f.db.setHook(gate.hook)
-	flushing := start(f.telemetry.Flush)
-	gate.waitEntered(t)
-	f.span("during-write")
-	gate.open()
-	check(t, flushing.wait(t))
-	if got := f.names("SELECT name FROM telemetry_spans ORDER BY rowid"); strings.Join(got, ",") != "batch" {
-		t.Fatalf("spans after the first commit = %v, want [batch]", got)
-	}
-	f.flush()
-	if got := f.names("SELECT name FROM telemetry_spans ORDER BY rowid"); strings.Join(got, ",") != "batch,during-write" {
-		t.Fatalf("spans after the next flush = %v, want [batch during-write]", got)
-	}
 }

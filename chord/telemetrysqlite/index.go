@@ -334,11 +334,7 @@ func (span *sqliteSpan) AddEvent(name string, attributes telemetry.SpanAttribute
 
 func (span *sqliteSpan) SetAttributes(attributes telemetry.SpanAttributes) {
 	copied := copyAttributes(attributes)
-	span.record(func() {
-		for name, value := range copied {
-			span.attributes[name] = value
-		}
-	})
+	span.record(func() { span.attributes = span.attributes.Merge(copied) })
 }
 
 func (span *sqliteSpan) SetStatus(status telemetry.SpanStatus) {
@@ -351,21 +347,32 @@ func (span *sqliteSpan) SetStatus(status telemetry.SpanStatus) {
 	})
 }
 
+// copyAttributes is upstream's copyAttributes: Object.fromEntries of the defined entries with array values copied. A
+// name written twice keeps its first position and takes its last value, as an object literal does, so a later nil
+// (undefined) value removes the name.
 func copyAttributes(attributes telemetry.SpanAttributes) telemetry.SpanAttributes {
-	copied := telemetry.SpanAttributes{}
-	for name, value := range attributes {
-		if value == nil {
-			// A nil value is upstream's undefined: it is not recorded.
-			continue
+	copied := make(telemetry.SpanAttributes, 0, len(attributes))
+	undefined := false
+	for _, attribute := range attributes {
+		if attribute.Value == nil {
+			undefined = true
 		}
-		if reflected := reflect.ValueOf(value); reflected.Kind() == reflect.Slice {
-			cloned := reflect.MakeSlice(reflected.Type(), reflected.Len(), reflected.Len())
-			reflect.Copy(cloned, reflected)
-			value = cloned.Interface()
-		}
-		copied[name] = value
+		copied = copied.Set(attribute.Name, cloneAttributeValue(attribute.Value))
+	}
+	if undefined {
+		copied = slices.DeleteFunc(copied, func(attribute telemetry.SpanAttribute) bool { return attribute.Value == nil })
 	}
 	return copied
+}
+
+// cloneAttributeValue copies an array value, as upstream's `[...value]`.
+func cloneAttributeValue(value telemetry.AttributeValue) telemetry.AttributeValue {
+	if reflected := reflect.ValueOf(value); reflected.Kind() == reflect.Slice {
+		cloned := reflect.MakeSlice(reflected.Type(), reflected.Len(), reflected.Len())
+		reflect.Copy(cloned, reflected)
+		return cloned.Interface()
+	}
+	return value
 }
 
 // copyLink is upstream's copyLink: a link whose target has no recorded identity is dropped.
@@ -470,7 +477,7 @@ func (recorder *SqliteTelemetry) measurement(kind telemetry.TelemetryMetricKind,
 		if recorder.stopped {
 			return
 		}
-		encoded := string(appendAttributes(nil, copyAttributes(attributes)))
+		encoded := string(appendCanonicalAttributes(nil, copyAttributes(attributes)))
 		key := string(appendSeriesKey(nil, name, kind, unit, encoded))
 		interval := math.Floor(jsclock.DateNow()/intervalMs) * intervalMs
 		pendingKey := strconv.FormatFloat(interval, 'f', -1, 64) + ":" + key
@@ -651,8 +658,7 @@ func (recorder *SqliteTelemetry) write(spans [][]chordsqlite.SqliteValue, metric
 	})
 }
 
-// JSON encoders. JSON.stringify keeps an object's insertion order; a Go map has none, so attribute keys are written in
-// JavaScript's own-key order of their sorted keys, the order the metric series key canonicalizes to.
+// JSON encoders: JSON.stringify of the recorded values, attribute objects in insertion order.
 
 func appendString(dst []byte, text string) []byte { return jsstring.AppendString(dst, text) }
 
@@ -698,24 +704,33 @@ func appendNumber(dst []byte, value float64) []byte {
 	return append(dst, jsnumber.String(value)...)
 }
 
+// appendAttributes is JSON.stringify of an attribute object: members in insertion order.
 func appendAttributes(dst []byte, attributes telemetry.SpanAttributes) []byte {
-	keys := make([]string, 0, len(attributes))
-	for key := range attributes {
-		keys = append(keys, key)
-	}
-	// Object.keys(...).sort() compares UTF-16 code units.
-	slices.SortFunc(keys, func(a, b string) int { return slices.Compare(jsstring.ToUTF16(a), jsstring.ToUTF16(b)) })
-	jsstring.SortOwnKeys(keys, func(key string) string { return key })
 	dst = append(dst, '{')
-	for i, key := range keys {
+	for i, attribute := range attributes {
 		if i > 0 {
 			dst = append(dst, ',')
 		}
-		dst = appendString(dst, key)
+		dst = appendString(dst, attribute.Name)
 		dst = append(dst, ':')
-		dst = appendValue(dst, attributes[key])
+		dst = appendValue(dst, attribute.Value)
 	}
 	return append(dst, '}')
+}
+
+// appendCanonicalAttributes is the metric series' attribute object: `Object.fromEntries(Object.keys(copied).sort()
+// .map(key => [key, copied[key]]))`, the keys sorted by UTF-16 code unit and then listed as an object lists them
+// (array-index names first, ascending).
+func appendCanonicalAttributes(dst []byte, attributes telemetry.SpanAttributes) []byte {
+	sorted := slices.Clone(attributes)
+	slices.SortFunc(sorted, func(a, b telemetry.SpanAttribute) int {
+		return slices.Compare(jsstring.ToUTF16(a.Name), jsstring.ToUTF16(b.Name))
+	})
+	var canonical telemetry.SpanAttributes
+	for _, attribute := range sorted {
+		canonical = canonical.Set(attribute.Name, attribute.Value)
+	}
+	return appendAttributes(dst, canonical)
 }
 
 func appendEvents(dst []byte, events []event) []byte {

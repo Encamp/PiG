@@ -5,6 +5,7 @@ package telemetrysqlite
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	chordsqlite "github.com/MichaelKinsy/PiG/chord/sqlite"
@@ -170,4 +171,71 @@ func TestDurableObjectSqliteTelemetryStoreConformance(t *testing.T) {
 		}
 		return storeFixture(recorder, db.Close), nil
 	})
+}
+
+func attributeNames(attributes telemetry.SpanAttributes) []string {
+	names := make([]string, len(attributes))
+	for i, attribute := range attributes {
+		names[i] = attribute.Name
+	}
+	return names
+}
+
+// Span, event and link attributes keep Pi's insertion order end to end: rows are written in the order a JavaScript
+// object lists its keys (array-index names first, ascending; an overwrite keeps its position, a new name appends), and
+// they are read back in that order. Metric series attributes are the sorted canonical object.
+func TestAttributesKeepInsertionOrderInRowsAndReads(t *testing.T) {
+	mockDate(t, 20_001)
+	f := newFixture(t, SqliteTelemetryOptions{})
+	var target telemetry.TelemetryContext
+	check(t, f.telemetry.StartSpan(telemetry.SpanOptions{Name: "target"}, func(span telemetry.TelemetrySpan) error {
+		target = span
+		return nil
+	}))
+	check(t, f.telemetry.StartSpan(telemetry.SpanOptions{
+		Name:       "ordered",
+		Attributes: telemetry.SpanAttributes{telemetry.Attr("zeta", 1.0), telemetry.Attr("alpha", 2.0), telemetry.Attr("10", 3.0), telemetry.Attr("2", 4.0)},
+		Links:      []telemetry.SpanLink{{Context: target, Attributes: telemetry.SpanAttributes{telemetry.Attr("right", "r"), telemetry.Attr("left", "l")}}},
+	}, func(span telemetry.TelemetrySpan) error {
+		span.SetAttributes(telemetry.SpanAttributes{telemetry.Attr("alpha", 5.0), telemetry.Attr("late", true)})
+		span.AddEvent("event", telemetry.SpanAttributes{telemetry.Attr("second", "b"), telemetry.Attr("first", "a")})
+		return nil
+	}))
+	f.telemetry.Counter("hits", telemetry.InstrumentOptions{}).Add(1, telemetry.SpanAttributes{telemetry.Attr("b", 1.0), telemetry.Attr("a", 2.0), telemetry.Attr("10", 3.0), telemetry.Attr("2", 4.0)})
+	check(t, f.telemetry.Close())
+
+	row, err := f.db.Get("SELECT attributes, events, links FROM telemetry_spans WHERE name = 'ordered'")
+	check(t, err)
+	if got, want := row["attributes"], `{"2":4,"10":3,"zeta":1,"alpha":5,"late":true}`; got != want {
+		t.Fatalf("attributes = %v, want %s", got, want)
+	}
+	if got := row["events"].(string); !strings.Contains(got, `"attributes":{"second":"b","first":"a"}`) {
+		t.Fatalf("events = %s, want attributes in written order", got)
+	}
+	if got := row["links"].(string); !strings.Contains(got, `"attributes":{"right":"r","left":"l"}`) {
+		t.Fatalf("links = %s, want attributes in written order", got)
+	}
+	metricRow, err := f.db.Get("SELECT attributes FROM telemetry_metrics WHERE name = 'hits'")
+	check(t, err)
+	if got, want := metricRow["attributes"], `{"2":4,"10":3,"a":2,"b":1}`; got != want {
+		t.Fatalf("series attributes = %v, want %s", got, want)
+	}
+
+	found, err := f.telemetry.FindTraces(telemetry.TraceQuery{Name: new("ordered")})
+	check(t, err)
+	span := found.Traces[0].Spans[0]
+	if got := strings.Join(attributeNames(span.Attributes), ","); got != "2,10,zeta,alpha,late" {
+		t.Fatalf("read attributes = %s", got)
+	}
+	if got := strings.Join(attributeNames(span.Events[0].Attributes), ","); got != "second,first" {
+		t.Fatalf("read event attributes = %s", got)
+	}
+	if got := strings.Join(attributeNames(span.Links[0].Attributes), ","); got != "right,left" {
+		t.Fatalf("read link attributes = %s", got)
+	}
+	metrics, err := f.telemetry.FindMetrics(telemetry.MetricQuery{Name: "hits"})
+	check(t, err)
+	if got := strings.Join(attributeNames(metrics[0].Attributes), ","); got != "2,10,a,b" {
+		t.Fatalf("read metric attributes = %s", got)
+	}
 }

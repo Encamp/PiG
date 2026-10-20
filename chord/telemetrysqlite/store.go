@@ -138,20 +138,37 @@ func unmarshalAll(items []json.RawMessage, decode func(int, json.RawMessage) err
 	return nil
 }
 
+// decodeAttributes is JSON.parse of an attribute object: members in the order written, with array-index names listed
+// first as a JavaScript object lists them.
 func decodeAttributes(text string) (telemetry.SpanAttributes, error) {
-	var members map[string]json.RawMessage
-	if err := json.Unmarshal([]byte(text), &members); err != nil {
+	decoder := json.NewDecoder(strings.NewReader(text))
+	opening, err := decoder.Token()
+	if err != nil {
 		return nil, err
 	}
+	if delimiter, ok := opening.(json.Delim); !ok || delimiter != '{' {
+		return nil, errors.New("telemetry-sqlite: attributes are not an object")
+	}
 	attributes := telemetry.SpanAttributes{}
-	for name, raw := range members {
+	for decoder.More() {
+		name, err := decoder.Token()
+		if err != nil {
+			return nil, err
+		}
+		var raw json.RawMessage
+		if err := decoder.Decode(&raw); err != nil {
+			return nil, err
+		}
 		value, err := decodeAttributeValue(raw)
 		if err != nil {
 			return nil, err
 		}
 		if value != nil {
-			attributes[name] = value
+			attributes = attributes.Set(name.(string), value)
 		}
+	}
+	if _, err := decoder.Token(); err != nil {
+		return nil, err
 	}
 	return attributes, nil
 }
