@@ -412,18 +412,26 @@ func (adapter *NodeSqliteDatabase) run(operation func() error) error {
 }
 
 // scopedExecutor is the handle passed to a transaction or exclusive operation: it runs SQL directly and answers inactive
-// once its scope ends (NodeSqliteScopedExecutor).
-func (adapter *NodeSqliteDatabase) scopedExecutor(active *atomic.Bool, inactive error) *nodeSqliteExecutor {
-	return &nodeSqliteExecutor{
-		database:   adapter.database,
-		statements: adapter.statements,
-		runOperation: func(operation func() error) error {
+// once its scope ends (NodeSqliteScopedExecutor). The handle's closure captures the active flag alone, so a handle costs what it
+// did before exclusive operations existed; inactive is the package error of the scope's kind, never captured.
+func (adapter *NodeSqliteDatabase) scopedExecutor(active *atomic.Bool, exclusive bool) *nodeSqliteExecutor {
+	executor := &nodeSqliteExecutor{database: adapter.database, statements: adapter.statements}
+	if exclusive {
+		executor.runOperation = func(operation func() error) error {
 			if !active.Load() {
-				return inactive
+				return errExclusiveInactive
 			}
 			return operation()
-		},
+		}
+		return executor
 	}
+	executor.runOperation = func(operation func() error) error {
+		if !active.Load() {
+			return errTransactionInactive
+		}
+		return operation()
+	}
+	return executor
 }
 
 // Transaction runs callback inside BEGIN IMMEDIATE ... COMMIT and rolls back when it fails or panics.
@@ -437,7 +445,7 @@ func (adapter *NodeSqliteDatabase) Transaction(
 	}
 	var active atomic.Bool
 	active.Store(true)
-	handle := adapter.scopedExecutor(&active, errTransactionInactive)
+	handle := adapter.scopedExecutor(&active, false)
 	settled := false
 	defer func() {
 		if settled {
@@ -503,7 +511,7 @@ func (adapter *NodeSqliteDatabase) Exclusive(operation func(executor chordsqlite
 			_ = adapter.database.Exec("ROLLBACK")
 		}
 	}()
-	operationErr := operation(adapter.scopedExecutor(&active, errExclusiveInactive))
+	operationErr := operation(adapter.scopedExecutor(&active, true))
 	active.Store(false)
 	settled = true
 	open, err := adapter.database.IsTransaction()

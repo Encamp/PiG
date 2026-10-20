@@ -553,38 +553,51 @@ func HasToolRedefinitions[M RoleMessage](messages TranscriptMessages[M]) bool {
 }
 
 func HasNonAdditiveToolChanges[M RoleMessage](messages TranscriptMessages[M]) bool {
-	return findLastNonAdditiveToolChange(systemMessagesOf(messages)) >= 0
+	return scanToolChanges(messages, true).lastChange >= 0
 }
 
-// systemMessagesOf is messages.filter(isSystemMessage): the transcript's system messages in order.
-func systemMessagesOf[M RoleMessage](messages TranscriptMessages[M]) []SystemMessage {
-	var systemMessages []SystemMessage
-	for _, item := range messages {
-		if message, ok := systemMessageOf(item); ok {
-			systemMessages = append(systemMessages, message)
-		}
-	}
-	return systemMessages
+// toolChangeScan is one walk over a transcript's system messages.
+type toolChangeScan struct {
+	// systemMessages is the number of system messages.
+	systemMessages int
+	// lastChange is the index, among the system messages, of the last one with a removal or same-name redeclaration, or -1.
+	// A name declared before counts as a redeclaration even after its removal: Kimi K3 ignores a removed tool that a later tool
+	// message declares again.
+	lastChange int
+	// lastChangeEnd is the transcript index just past that message; 0 without one.
+	lastChangeEnd int
 }
 
-// findLastNonAdditiveToolChange is the index of the last system message with a removal or same-name redeclaration, or -1.
-// A name declared before counts as a redeclaration even after its removal: Kimi K3 ignores a removed tool that a later tool
-// message declares again.
-func findLastNonAdditiveToolChange(systemMessages []SystemMessage) int {
-	declared := map[string]struct{}{}
-	last := -1
-	for index, message := range systemMessages {
-		if len(message.ToolsRemoved) > 0 {
-			last = index
+// scanToolChanges walks the transcript once, in place: replays run on every request, so it copies no system message into a slice
+// of its own and boxes none. Without findChanges it only counts the system messages and keeps no record of declared names.
+func scanToolChanges[M RoleMessage](messages TranscriptMessages[M], findChanges bool) toolChangeScan {
+	scan := toolChangeScan{lastChange: -1}
+	var declared map[string]struct{}
+	for position, item := range messages {
+		message, ok := systemMessageOf(item)
+		if !ok {
+			continue
 		}
+		if !findChanges {
+			scan.systemMessages++
+			continue
+		}
+		changed := len(message.ToolsRemoved) > 0
 		for _, tool := range message.ToolsAdded {
 			if _, exists := declared[tool.Name]; exists {
-				last = index
+				changed = true
+			}
+			if declared == nil {
+				declared = map[string]struct{}{}
 			}
 			declared[tool.Name] = struct{}{}
 		}
+		if changed {
+			scan.lastChange, scan.lastChangeEnd = scan.systemMessages, position+1
+		}
+		scan.systemMessages++
 	}
-	return last
+	return scan
 }
 
 // TranscriptToolSupport is how a transport can express tool changes after the first request.
@@ -618,20 +631,22 @@ type TranscriptTools struct {
 // tool state after the last such change; later additions stay anchored, and the cached prefix is invalidated once per
 // removal instead of on every later addition. With TranscriptToolSupportNone, the top-level list is the current tool set.
 func ResolveTranscriptTools[M RoleMessage](messages TranscriptMessages[M], support TranscriptToolSupport) TranscriptTools {
-	systemMessages := systemMessagesOf(messages)
 	switch support {
 	case TranscriptToolSupportNone:
-		return TranscriptTools{RequestTools: GetCurrentTools(systemMessages), FoldedSystemMessages: len(systemMessages)}
+		return TranscriptTools{RequestTools: GetCurrentTools(messages), FoldedSystemMessages: scanToolChanges(messages, false).systemMessages}
 	case TranscriptToolSupportChanges:
 		return TranscriptTools{}
 	}
-	folded := max(findLastNonAdditiveToolChange(systemMessages)+1, 0)
-	if len(messages) > 0 {
+	scan := scanToolChanges(messages, true)
+	folded, end := scan.lastChange+1, scan.lastChangeEnd
+	if len(messages) > 0 && folded < 1 {
 		if _, ok := systemMessageOf(messages[0]); ok {
-			folded = max(folded, 1)
+			folded, end = 1, 1
 		}
 	}
-	return TranscriptTools{RequestTools: GetCurrentTools(systemMessages[:folded]), FoldedSystemMessages: folded}
+	// Only system messages change tools, so the replay of the transcript up to the last folded message holds the same state as the
+	// replay of the folded system messages alone.
+	return TranscriptTools{RequestTools: GetCurrentTools(messages[:end]), FoldedSystemMessages: folded}
 }
 
 func systemContentText(content SystemContent) string {

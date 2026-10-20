@@ -928,25 +928,27 @@ func (state *responsesToolChanges) systemMessageInstruction(message SystemMessag
 	} else {
 		first = RenderSystemMessageUpdate(message)
 	}
-	parts := []string{first}
-	if anchorsToolChanges {
-		var removed []string
-		for _, tool := range message.ToolsRemoved {
-			if !slices.ContainsFunc(message.ToolsAdded, func(added ToolSchema) bool { return added.Name == tool.Name }) {
-				removed = append(removed, tool.Name)
-			}
-		}
-		if len(removed) > 0 {
-			parts = append(parts, renderToolRemovalNotice(removed))
-		}
-		for _, name := range removed {
-			if !slices.Contains(state.unavailable, name) {
-				state.unavailable = append(state.unavailable, name)
-			}
+	if !anchorsToolChanges || len(message.ToolsRemoved) == 0 {
+		return first
+	}
+	var removed []string
+	for _, tool := range message.ToolsRemoved {
+		if !slices.ContainsFunc(message.ToolsAdded, func(added ToolSchema) bool { return added.Name == tool.Name }) {
+			removed = append(removed, tool.Name)
 		}
 	}
-	parts = slices.DeleteFunc(parts, func(part string) bool { return part == "" })
-	return strings.Join(parts, "\n\n")
+	if len(removed) == 0 {
+		return first
+	}
+	for _, name := range removed {
+		if !slices.Contains(state.unavailable, name) {
+			state.unavailable = append(state.unavailable, name)
+		}
+	}
+	if first == "" {
+		return renderToolRemovalNotice(removed)
+	}
+	return first + "\n\n" + renderToolRemovalNotice(removed)
 }
 
 // convertMessages converts messages as a whole transcript with every tool declared at the request's top level.
