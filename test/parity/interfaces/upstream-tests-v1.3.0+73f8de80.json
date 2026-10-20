@@ -1,8 +1,8 @@
 {
-  "upstreamVersion": "1.3.0+0ed1b043",
+  "upstreamVersion": "1.3.0+73f8de80",
   "generator": "extract-test-inventory.mjs",
-  "fileCount": 676,
-  "caseCount": 7260,
+  "fileCount": 678,
+  "caseCount": 7265,
   "dynamicCaseSiteCount": 2,
   "files": [
     {
@@ -4578,6 +4578,22 @@
       ]
     },
     {
+      "path": "packages/ai/test/github-copilot-request-size-overflow.test.ts",
+      "package": "ai",
+      "sha256": "sha256:d69bb071c12aec23a5a70e9ee4c5ffc14ce125996ce3c445e54edbd73f1a36a7",
+      "caseCount": 1,
+      "cases": [
+        {
+          "id": "Copilot HTTP request-size errors › classifies HTTP $status with nested=$nested through the real SDK",
+          "kind": "it",
+          "modifiers": [
+            "each"
+          ],
+          "line": 21
+        }
+      ]
+    },
+    {
       "path": "packages/ai/test/google-raw-stop-reason.test.ts",
       "package": "ai",
       "sha256": "sha256:53052b72decb431612347f9e875db4a780842fc715a8a0565d7e44118cee7ede",
@@ -8730,128 +8746,150 @@
     {
       "path": "packages/ai/test/overflow.test.ts",
       "package": "ai",
-      "sha256": "sha256:b9a4f21e5092f3fe96dd3d538a5efeb6c1c258811a5d5b956ea85a43ff7ee863",
-      "caseCount": 20,
+      "sha256": "sha256:be20d39e79e4568044189b9533a1a839a13f92ba4431d9d07fa1a3298c0565b2",
+      "caseCount": 23,
       "cases": [
         {
-          "id": "isContextOverflow › detects explicit Ollama prompt-too-long errors",
+          "id": "isContextOverflow › detects provider-independent request-size overflow: %s",
           "kind": "it",
-          "modifiers": [],
-          "line": 33
+          "modifiers": [
+            "each"
+          ],
+          "line": 35
         },
         {
-          "id": "isContextOverflow › detects z.ai prompt-too-long errors",
+          "id": "isContextOverflow › does not mistake unrelated errors for request-size overflow: %s",
           "kind": "it",
-          "modifiers": [],
-          "line": 38
+          "modifiers": [
+            "each"
+          ],
+          "line": 46
         },
         {
-          "id": "isContextOverflow › detects z.ai CN endpoint prompt-exceeds-max-length errors",
-          "kind": "it",
-          "modifiers": [],
-          "line": 44
-        },
-        {
-          "id": "isContextOverflow › detects Together AI context length errors",
-          "kind": "it",
-          "modifiers": [],
-          "line": 50
-        },
-        {
-          "id": "isContextOverflow › detects LiteLLM-wrapped OpenAI maximum context length errors",
+          "id": "isContextOverflow › limits HTTP-status matching to failed responses",
           "kind": "it",
           "modifiers": [],
           "line": 57
         },
         {
+          "id": "isContextOverflow › detects explicit Ollama prompt-too-long errors",
+          "kind": "it",
+          "modifiers": [],
+          "line": 63
+        },
+        {
+          "id": "isContextOverflow › detects z.ai prompt-too-long errors",
+          "kind": "it",
+          "modifiers": [],
+          "line": 68
+        },
+        {
+          "id": "isContextOverflow › detects z.ai CN endpoint prompt-exceeds-max-length errors",
+          "kind": "it",
+          "modifiers": [],
+          "line": 74
+        },
+        {
+          "id": "isContextOverflow › detects Together AI context length errors",
+          "kind": "it",
+          "modifiers": [],
+          "line": 80
+        },
+        {
+          "id": "isContextOverflow › detects LiteLLM-wrapped OpenAI maximum context length errors",
+          "kind": "it",
+          "modifiers": [],
+          "line": 87
+        },
+        {
           "id": "isContextOverflow › detects OpenAI-compatible parenthesized maximum context length errors",
           "kind": "it",
           "modifiers": [],
-          "line": 64
+          "line": 94
         },
         {
           "id": "isContextOverflow › detects OpenRouter Poolside maximum allowed input length errors",
           "kind": "it",
           "modifiers": [],
-          "line": 71
+          "line": 101
         },
         {
           "id": "isContextOverflow › detects DS4 configured context size errors",
           "kind": "it",
           "modifiers": [],
-          "line": 78
+          "line": 108
         },
         {
           "id": "isContextOverflow › does not treat generic non-overflow Ollama errors as overflow",
           "kind": "it",
           "modifiers": [],
-          "line": 90
+          "line": 120
         },
         {
-          "id": "isContextOverflow › only treats bodyless 400 and 413 errors as overflow for Cerebras",
+          "id": "isContextOverflow › only treats bodyless 400 errors as overflow for Cerebras",
           "kind": "it",
           "modifiers": [],
-          "line": 95
+          "line": 125
         },
         {
           "id": "isContextOverflow › does not treat Bedrock throttling 'Too many tokens' as overflow",
           "kind": "it",
           "modifiers": [],
-          "line": 103
+          "line": 133
         },
         {
           "id": "isContextOverflow › does not treat Bedrock service unavailable as overflow",
           "kind": "it",
           "modifiers": [],
-          "line": 110
+          "line": 140
         },
         {
           "id": "isContextOverflow › does not treat generic rate limit errors as overflow",
           "kind": "it",
           "modifiers": [],
-          "line": 115
+          "line": 145
         },
         {
           "id": "isContextOverflow › does not treat HTTP 429 style errors as overflow",
           "kind": "it",
           "modifiers": [],
-          "line": 120
+          "line": 150
         },
         {
           "id": "isContextOverflow › detects Xiaomi-style overflow (length stop with zero output and filled context)",
           "kind": "it",
           "modifiers": [],
-          "line": 154
+          "line": 184
         },
         {
           "id": "isContextOverflow › treats a length stop below the desired output limit as recoverable",
           "kind": "it",
           "modifiers": [],
-          "line": 165
+          "line": 195
         },
         {
           "id": "isContextOverflow › does not recover a length stop that reached the desired output limit",
           "kind": "it",
           "modifiers": [],
-          "line": 178
+          "line": 208
         },
         {
           "id": "isContextOverflow › treats zero-output length stops as recoverable without context metadata",
           "kind": "it",
           "modifiers": [],
-          "line": 183
+          "line": 213
         },
         {
           "id": "isContextOverflow › does not treat normal length stops with output as context overflow",
           "kind": "it",
           "modifiers": [],
-          "line": 188
+          "line": 218
         },
         {
           "id": "isContextOverflow › does not treat zero-output length stops far below context as context overflow",
           "kind": "it",
           "modifiers": [],
-          "line": 193
+          "line": 223
         }
       ]
     },
@@ -33419,6 +33457,20 @@
           "kind": "it",
           "modifiers": [],
           "line": 202
+        }
+      ]
+    },
+    {
+      "path": "packages/coding-agent/test/suite/regressions/copilot-request-size-overflow.test.ts",
+      "package": "coding-agent",
+      "sha256": "sha256:621e8118a32d4b388ca8447aad465c586576de99d2d44994b2b642a69d039c1d",
+      "caseCount": 1,
+      "cases": [
+        {
+          "id": "Copilot request-size overflow recovery › compacts an image-heavy history and retries after the real 413",
+          "kind": "it",
+          "modifiers": [],
+          "line": 67
         }
       ]
     },
