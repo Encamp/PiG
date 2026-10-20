@@ -4,7 +4,7 @@
 // The adapter contract trusts typed inputs: malformed input behavior is unspecified, as upstream states.
 package telemetry
 
-import "encoding/json"
+import "github.com/MichaelKinsy/PiG/internal/jsstring"
 
 // AttributeValue is a string, number, boolean, or slice of those values.
 type AttributeValue = any
@@ -54,10 +54,10 @@ func (attributes SpanAttributes) Set(name string, value AttributeValue) SpanAttr
 	}
 	attribute := SpanAttribute{Name: name, Value: value}
 	position := len(attributes)
-	if number, ok := arrayIndex(name); ok {
+	if number, ok := jsstring.ArrayIndex(name); ok {
 		position = 0
 		for position < len(attributes) {
-			existing, ok := arrayIndex(attributes[position].Name)
+			existing, ok := jsstring.ArrayIndex(attributes[position].Name)
 			if !ok || existing > number {
 				break
 			}
@@ -70,22 +70,6 @@ func (attributes SpanAttributes) Set(name string, value AttributeValue) SpanAttr
 	return attributes
 }
 
-// arrayIndex reports whether name is a canonical array index, an integer from 0 to 2^32-2 written without sign, leading
-// zeros or fraction: the keys JavaScript orders before all other string keys.
-func arrayIndex(name string) (uint64, bool) {
-	if name == "" || len(name) > 10 || name[0] == '0' && len(name) > 1 {
-		return 0, false
-	}
-	var number uint64
-	for _, digit := range []byte(name) {
-		if digit < '0' || digit > '9' {
-			return 0, false
-		}
-		number = number*10 + uint64(digit-'0')
-	}
-	return number, number <= 1<<32-2
-}
-
 // MarshalJSON is JSON.stringify of the object: the attributes as members in insertion order. A nil bag is null.
 func (attributes SpanAttributes) MarshalJSON() ([]byte, error) {
 	if attributes == nil {
@@ -96,11 +80,11 @@ func (attributes SpanAttributes) MarshalJSON() ([]byte, error) {
 		if index > 0 {
 			encoded = append(encoded, ',')
 		}
-		name, err := json.Marshal(attribute.Name)
+		name, err := jsstring.MarshalJSON(attribute.Name)
 		if err != nil {
 			return nil, err
 		}
-		value, err := json.Marshal(attribute.Value)
+		value, err := jsstring.MarshalJSON(attribute.Value)
 		if err != nil {
 			return nil, err
 		}

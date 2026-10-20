@@ -15,6 +15,8 @@ import (
 	"sync"
 
 	"github.com/MichaelKinsy/PiG/internal/jsclock"
+	"github.com/MichaelKinsy/PiG/internal/jsnumber"
+	"github.com/MichaelKinsy/PiG/internal/jsstring"
 )
 
 // RecordedTelemetryEvent is a detached span event snapshot.
@@ -410,8 +412,10 @@ func (recorder *InMemoryTelemetryContext) Extract(carrier TelemetryCarrier) Tele
 	defer recorder.mu.Unlock()
 	remote := &memoryRemoteParent{owner: recorder, parent: inMemoryParent{context: TelemetryCarrier{carrierScopeKey: scope, carrierSpanKey: span, carrierTraceKey: trace}}}
 	if scope == recorder.scopeLocked() {
-		if number, err := strconv.Atoi(span); err == nil {
-			remote.parent.localID = &number
+		// localId = Number(span). A span that is not an integer (NaN, a fraction) names no local span, so Go leaves the parent unset where Pi keeps the number.
+		if number := jsnumber.Parse(span); number == math.Trunc(number) && math.Abs(number) <= 1<<53 {
+			id := int(number) //portlint:allow numbers number is a finite integer (NaN fails the Trunc equality) within 2^53, so the conversion is exact
+			remote.parent.localID = &id
 		}
 	}
 	return remote
@@ -666,7 +670,7 @@ func (recorder *InMemoryTelemetryContext) FindTraces(query TraceQuery) (FindTrac
 	}
 	if len(matches) > limit {
 		last := page[len(page)-1]
-		cursor, err := json.Marshal([]any{last.Spans[0].StartedMs, last.TraceID})
+		cursor, err := jsstring.MarshalJSON([]any{last.Spans[0].StartedMs, last.TraceID})
 		if err != nil {
 			return FindTracesResult{}, err
 		}

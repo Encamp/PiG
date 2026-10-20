@@ -11,7 +11,6 @@ package telemetrytest
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
@@ -21,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/MichaelKinsy/PiG/internal/jsclock"
+	"github.com/MichaelKinsy/PiG/internal/jsstring"
 	"github.com/MichaelKinsy/PiG/telemetry"
 )
 
@@ -65,7 +65,7 @@ func newStoreFixture(ctx context.Context, factory StoreFixtureFactory) (StoreFix
 }
 
 func jsonOf(value any) string {
-	encoded, err := json.Marshal(value)
+	encoded, err := jsstring.MarshalJSON(value)
 	if err != nil {
 		return fmt.Sprintf("%#v", value)
 	}

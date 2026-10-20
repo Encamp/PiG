@@ -2026,18 +2026,6 @@ snippet = "go s.runPending()"
 
 [[hit]]
 check = "golifetime"
-file = "ai/provider_streams.go"
-func = "LazyStream"
-snippet = "return startLazyStream(ctx, model, setup, func(body func()) { go body() })"
-
-[[hit]]
-check = "golifetime"
-file = "ai/provider_streams.go"
-func = "LazyStreamSync"
-snippet = "return startLazyStreamSync(ctx, model, setup, func(body func()) { go body() })"
-
-[[hit]]
-check = "golifetime"
 file = "coding/cli/config_command.go"
 func = "driveConfigSelector"
 snippet = "select {"

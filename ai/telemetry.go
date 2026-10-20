@@ -336,5 +336,6 @@ func (o *modelRequestObservation) onResult(message *AssistantMessage) {
 			o.instr.cost.Add(message.Usage.Cost.Total, o.attributes)
 		}
 	}
+	//portlint:allow doubleclose newLazyObservation reports the terminal result once, so onResult and this close run once
 	close(o.finished)
 }
