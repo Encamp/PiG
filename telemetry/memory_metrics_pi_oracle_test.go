@@ -57,12 +57,20 @@ type stepSpec struct {
 	Calls       []callSpec   `json:"calls"`
 }
 
+// jsonNumber is JSON.stringify of a number: a non-finite number is null.
+func jsonNumber(value float64) any {
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return nil
+	}
+	return value
+}
+
 type metricsProgram struct {
 	Spans int        `json:"spans"`
 	Steps []stepSpec `json:"steps"`
 }
 
-// The measurements Pi's InMemoryTelemetryContext records for seeded random instrument programs (counters, up-down counters and histograms with absent, empty and invalid
+// The measurements Pi's InMemoryTelemetryContext records for seeded random instrument programs (counters, up-down counters and histograms with absent, empty and unusual
 // metadata, boundaries that are unsorted, repeated or non-finite, non-finite and negative values, attributes with undefined and array values, and exemplar contexts that are kept spans,
 // the open span, the no-op context, the recorder root or omitted) against PiG's, as the JSON of getMetrics().
 func TestInMemoryMetricsMatchPiOnRandomPrograms(t *testing.T) {
@@ -245,7 +253,7 @@ func TestInMemoryMetricsMatchPiOnRandomPrograms(t *testing.T) {
 		measured += len(recorded)
 		got := make([]map[string]any, len(recorded))
 		for j, measurement := range recorded {
-			got[j] = map[string]any{"kind": string(measurement.Kind), "name": measurement.Name, "value": measurement.Value, "attributes": measurement.Attributes, "context": nil}
+			got[j] = map[string]any{"kind": string(measurement.Kind), "name": measurement.Name, "value": jsonNumber(measurement.Value), "attributes": measurement.Attributes, "context": nil}
 			if measurement.Description != nil {
 				got[j]["description"] = *measurement.Description
 			}
@@ -253,7 +261,11 @@ func TestInMemoryMetricsMatchPiOnRandomPrograms(t *testing.T) {
 				got[j]["unit"] = *measurement.Unit
 			}
 			if measurement.Boundaries != nil {
-				got[j]["boundaries"] = measurement.Boundaries
+				boundaries := make([]any, len(measurement.Boundaries))
+				for k, boundary := range measurement.Boundaries {
+					boundaries[k] = jsonNumber(boundary)
+				}
+				got[j]["boundaries"] = boundaries
 			}
 			if measurement.Context != nil {
 				got[j]["context"] = measurement.Context
