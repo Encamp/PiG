@@ -5620,21 +5620,33 @@ function tokenizeInlineLatex(source) {
   return { type: "latex", raw, text };
 }
 __name(tokenizeInlineLatex, "tokenizeInlineLatex");
+var TABLE_DELIMITER_ROW_REGEX = /^ {0,3}\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*$/;
+function containsTableStart(source) {
+  const lines = source.split("\n");
+  for (let index = 0; index < lines.length - 1; index++) {
+    const delimiterRow = lines[index + 1];
+    if ((delimiterRow.includes("|") || lines[index].includes("|")) && TABLE_DELIMITER_ROW_REGEX.test(delimiterRow)) {
+      return true;
+    }
+  }
+  return false;
+}
+__name(containsTableStart, "containsTableStart");
 function tokenizeBlockLatex(source) {
   const dollarMatch = /^ {0,3}\$\$[ \t]*(?:\n)?([\s\S]*?)\$\$[ \t]*(?:\n|$)/.exec(source);
-  if (dollarMatch?.[1]) {
+  if (dollarMatch?.[1] && !containsTableStart(dollarMatch[1])) {
     return { type: "latexBlock", raw: dollarMatch[0], text: dollarMatch[1].trim() };
   }
   const bracketMatch = /^ {0,3}\\\[[ \t]*(?:\n)?([\s\S]*?)\\\][ \t]*(?:\n|$)/.exec(source);
-  if (bracketMatch?.[1]) {
+  if (bracketMatch?.[1] && !containsTableStart(bracketMatch[1])) {
     return { type: "latexBlock", raw: bracketMatch[0], text: bracketMatch[1].trim() };
   }
   const pendingBracket = /^ {0,3}\\\[[ \t]*(?:\n)?([\s\S]*)$/.exec(source);
-  if (pendingBracket) {
+  if (pendingBracket?.[1] && !containsTableStart(pendingBracket[1])) {
     return { type: "latexBlock", raw: pendingBracket[0], text: pendingBracket[1], pending: true };
   }
   const pendingDollar = /^ {0,3}\$\$[ \t]*(?:\n)?([\s\S]*)$/.exec(source);
-  if (pendingDollar?.[1] && looksLikePendingDollarMath(pendingDollar[1])) {
+  if (pendingDollar?.[1] && looksLikePendingDollarMath(pendingDollar[1]) && !containsTableStart(pendingDollar[1])) {
     return { type: "latexBlock", raw: pendingDollar[0], text: pendingDollar[1], pending: true };
   }
   return void 0;
@@ -7572,6 +7584,21 @@ var ProcessTerminal = class {
       process.stdin.setRawMode(this.wasRaw);
     }
   }
+  restoreOnExit(before, after) {
+    let sequence = before;
+    if (this.progressInterval)
+      sequence += TERMINAL_PROGRESS_CLEAR_SEQUENCE;
+    sequence += "\x1B[?2004l";
+    if (this.keyboardProtocolPushed || this._kittyProtocolActive)
+      sequence += "\x1B[<u";
+    if (this._modifyOtherKeysActive)
+      sequence += "\x1B[>4;0m";
+    sequence += after;
+    try {
+      fs.writeSync(process.stdout.fd, sequence);
+    } catch {
+    }
+  }
   write(data) {
     process.stdout.write(data);
     if (this.writeLogPath) {
@@ -8599,6 +8626,15 @@ var TuiAltScreen = class extends TuiBase {
       setCapabilities(this.savedCapabilities);
       this.savedCapabilities = void 0;
     }
+  }
+  getExitRestorePrefix() {
+    const prefix = super.getExitRestorePrefix();
+    if (!this.altScreenActive)
+      return prefix;
+    return `${END_SYNCHRONIZED_OUTPUT}${this.mouseEnabled ? DISABLE_MOUSE : ""}${ENABLE_AUTOWRAP}${prefix}`;
+  }
+  getExitRestoreSuffix() {
+    return `${super.getExitRestoreSuffix()}${this.altScreenActive ? `${EXIT_ALT_SCREEN}\x1B[?25h` : ""}`;
   }
   deleteKittyImages() {
     return this.imageProtocol === "kitty" ? deleteAllKittyImages() : "";
