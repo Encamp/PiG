@@ -746,5 +746,27 @@
    "old": "\tif settings.IsInstallTelemetryEnabled() {",
    "new": "\tif !settings.IsInstallTelemetryEnabled() {"
   }
+ ],
+ "packages/chord/src/telemetry-sqlite/store.ts": [
+  {
+   "file": "chord/telemetrysqlite/store.go",
+   "old": "ORDER BY started_ms DESC, trace_id LIMIT ?",
+   "new": "ORDER BY started_ms, trace_id LIMIT ?"
+  },
+  {
+   "file": "chord/telemetrysqlite/store.go",
+   "old": "int64(limit)+1",
+   "new": "int64(limit)"
+  },
+  {
+   "file": "chord/telemetrysqlite/store.go",
+   "old": "ORDER BY started_ms, id LIMIT 1) = ?",
+   "new": "ORDER BY started_ms DESC, id LIMIT 1) = ?"
+  },
+  {
+   "file": "chord/telemetrysqlite/store.go",
+   "old": "ORDER BY started_ms, id\", string(encoded))",
+   "new": "ORDER BY started_ms DESC, id\", string(encoded))"
+  }
  ]
 }
