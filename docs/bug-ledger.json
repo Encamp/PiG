@@ -14114,7 +14114,6 @@
         }
       ],
       "tests": [
-        "coding/provider_attribution_host_test.go::TestAttributionMixedCaseHostProductionRequests",
         "coding/session_dispose_leak_test.go::TestSessionDisposeReleasesEventProducers",
         "coding/session_dispose_leak_test.go::TestSessionDisposeReleasesTheSession",
         "coding/session_rpc33_observation_test.go::TestSessionObservationCloseJoinsClaimedCallback",
@@ -31360,6 +31359,97 @@
       ]
     },
     {
+      "id": "BF-0ef8071",
+      "title": "RPC mode no longer runs `ctx.ui.setWidget` component factories or emits `setWidget` requests carrying their…",
+      "symptom": "RPC mode no longer runs `ctx.ui.setWidget` component factories or emits `setWidget` requests carrying their rendered lines.",
+      "rootCause": "",
+      "rootCauseSource": "",
+      "userImpact": "An operation failed or was rejected",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "RPC mode no longer runs `ctx.ui.setWidget` component factories or emits `setWidget` requests carrying their rendered lines. Like Pi's `rpc-mode.ts`, it forwards string arrays and clears only; print and JSON modes ignore a factory too.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "0ef8071f5d",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "4e473be630",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "7429bbf718",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "af5c9c6234",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "b17c37f1db",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "f276957b8c",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/extension/host/subprocess/integration_test.go::TestHost_Integration_TSWidgetFactoryIsNotRunOutsideTheTUI",
+        "coding/extension/host/subprocess/integration_test.go::TestHost_Integration_TSWidgetFactoryRendersInvalidatesResizesAndClears",
+        "coding/extension/host/subprocess/push_proxy_test.go::TestPushProxyIsFrameOnlyForRenderedFrames",
+        "coding/extension/host/subprocess/ui_bridge_test.go::TestUIBridge_HandleCall_SetWidget_RequestObserverDropsRenderedFrames",
+        "test/extension-conformance/rpc_widget_frames_test.go::TestConformance_RPCModeDropsFrameWidgetsInEverySDK",
+        "test/parity/scenarios/rpc/61-rpc-set-widget-factory.toml"
+      ]
+    },
+    {
+      "id": "BF-2e967c7",
+      "title": "A run that an extension's `sendMessage` with `triggerTurn` starts now carries the session's system prompt",
+      "symptom": "A run that an extension's `sendMessage` with `triggerTurn` starts now carries the session's system prompt.",
+      "rootCause": "A session's first run started by an extension's sendMessage with triggerTurn reached the provider with no system prompt, and the instruction sections of any later run that a custom message started were never diffed against the transcript.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "A run that an extension's `sendMessage` with `triggerTurn` starts now carries the session's system prompt. The first run of a session reached the model with no system prompt, as did any later run that a custom message started after the instructions changed. Pi records the run's prompt sections for a custom starting message as for a prompt.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "2e967c7c8b",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/session_custom_run_first_system_prompt_test.go::TestCustomMessageFirstRunCarriesTheSessionSystemPrompt"
+      ]
+    },
+    {
+      "id": "BF-4ac1e5d",
+      "title": "A tool that an extension activates with `setActiveTools` now appears in the system prompt's tool list of the…",
+      "symptom": "A tool that an extension activates with `setActiveTools` now appears in the system prompt's tool list of the next run that a `triggerTurn` message starts.",
+      "rootCause": "The cause is the one fixed for a session's first custom-message run: preparePrompt now diffs the run's prompt sections for every starting message. This branch carries that one-line fix and the guards for the activated-tool shape.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "A tool that an extension activates with `setActiveTools` now appears in the system prompt's tool list of the next run that a `triggerTurn` message starts. The request already declared the tool, but the prompt left its snippet out, so the model was not told about it.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "4ac1e5dc92",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/session_custom_run_activated_tools_test.go::TestCustomMessageRunListsToolsActivatedSinceTheLastRun"
+      ]
+    },
+    {
       "id": "BF-ab1324d",
       "title": "A `/reload` that arrived while the supervisor was restarting a crashed isolated extension could end the…",
       "symptom": "A `/reload` that arrived while the supervisor was restarting a crashed isolated extension could end the process the reloaded extension runs in, so its next call failed with a reset or closed connection.",
@@ -31385,6 +31475,91 @@
       "tests": [
         "coding/extension/host/subprocess/retained_factory_test.go::TestNodeIsolatedCrashAfterRetainedReloadRestarts",
         "coding/extension/host/subprocess/retained_factory_test.go::TestNodeIsolatedReloadWaitsForCrashRestart"
+      ]
+    },
+    {
+      "id": "BF-6b381a3",
+      "title": "The bug fix ledger no longer credits a squash commit's tests to a release note that names no fix commit",
+      "symptom": "The bug fix ledger no longer credits a squash commit's tests to a release note that names no fix commit.",
+      "rootCause": "Train #255 attributed the 0.5.0 squash (13,725 files, ~11,000 tests) to five release notes that had no fix marker, growing docs/bug-ledger.json from about 2.1 MB to 9.8 MB and the root module past its size budget.",
+      "rootCauseSource": "commit",
+      "userImpact": "An operation failed or was rejected",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "The bug fix ledger no longer credits a squash commit's tests to a release note that names no fix commit. A release note without a `\u003c!-- fix: \u003csha\u003e --\u003e` marker had its commits guessed from the history, and the only commit it found for five notes was the 0.5.0 squash, which grew `docs/bug-ledger.json` from about 2.1 MB to 9.8 MB and pushed the root module past its size budget. `make changelog-check` now fails a `### Fixed` bullet without a marker, a marker or fragment name that names a commit `HEAD` does not reach, and `make bug-ledger` refuses, naming the entry, to attribute the tests of a commit that touches more than 500 files.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "6b381a37fb",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "automation/ci/bugledger/bugledger_test.go::TestAFixTitledSquashWithNoNoteIsRefusedNotAttributed",
+        "automation/ci/bugledger/bugledger_test.go::TestTheLedgerRefusesToAttributeTheTestsOfASquash",
+        "automation/ci/bugledger/bugledger_test.go::TestTheSquashThresholdIsTheCountOfTouchedFiles",
+        "automation/ci/changelogfrag/history_test.go::TestAFragmentNamedAfterAPreRebaseCommitFails",
+        "automation/ci/changelogfrag/history_test.go::TestAMarkerNamingAnUnreachableCommitFails",
+        "automation/ci/changelogfrag/history_test.go::TestAShallowCloneFailsTheCheckInsteadOfGuessing",
+        "automation/ci/changelogfrag/history_test.go::TestEveryCommitOfAMarkerMustBeReachable",
+        "automation/ci/changelogfrag/history_test.go::TestEveryFixedBulletNeedsAFixMarker",
+        "automation/ci/changelogfrag/history_test.go::TestLegacyFragmentsAreExemptFromTheHistoryChecks",
+        "automation/ci/changelogfrag/history_test.go::TestNoFragmentsNeedNoHistory",
+        "automation/ci/changelogfrag/history_test.go::TestOnlyTheSectionsTheLedgerReadsNeedAMarker"
+      ]
+    },
+    {
+      "id": "BF-7fbd629",
+      "title": "Two calls of a Go, Python or Rust extension tool in one assistant message that each open a dialog now behave…",
+      "symptom": "Two calls of a Go, Python or Rust extension tool in one assistant message that each open a dialog now behave as Pi's one thread makes them behave, as Node extensions already did: the dialogs open in call order (a port's second dialog could open first), and when the user answers them back to back the calls respond, and end, in the order of the answers.",
+      "rootCause": "Dialogs of a batch open in call order (arrival-ordered queue, passing never waits), and the tool_call responses of handlers whose dialogs were answered back to back follow the order the reader read the answers (settle gate, yield on the next host call, close on request end). Slot and wait event are made lazily, so a handler that opens no dialog is never gated.",
+      "rootCauseSource": "commit",
+      "userImpact": "An operation failed or was rejected",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "Two calls of a Go, Python or Rust extension tool in one assistant message that each open a dialog now behave as Pi's one thread makes them behave, as Node extensions already did: the dialogs open in call order (a port's second dialog could open first), and when the user answers them back to back the calls respond, and end, in the order of the answers. The SDKs keep these orders for the calls of one parallel batch, which the host now names on each `tool_call` request (`batch`); calls of other batches, other sessions' calls and tools that make no host call take no part and are never held. A handler that blocks on something other than a host call before its first host call holds the first dialogs of the later calls of its batch, while a call that awaits a host call such as `exec` before its dialog is overtaken by the later calls' dialogs, as in Pi, and a handler whose dialog was answered holds the later-answered handlers' responses until it returns or makes its next host call (recorded as divergence D187: Pi's single thread lets a call that awaits work the SDK cannot see be overtaken).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "0bb10c0c59",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "3e4404a2d1",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "631ca46e27",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "710ef28883",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "7fbd629d13",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "835390ada3",
+          "date": "2026-10-20"
+        },
+        {
+          "hash": "b4ae58aeb4",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "agent/settle_order_test.go::TestToolBatchFromContextNamesTheParallelBatch",
+        "extensions/sdk-py/tests/test_tool_dialog_order.py",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolBatchOrdersAreIndependentAcrossBatches",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogOrderPassesAnEndedRequest",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogsOpenInCallOrder",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolResponsesFollowTheOrderTheAnswersWereRead",
+        "extensions/sdk/tool_prepare_arguments_test.go::TestToolCallHandlersStartInArrivalOrder",
+        "test/extension-conformance/tool_dialog_order_test.go::TestToolBatchDialogsOpenInCallOrderAndResumeInAnswerOrderAcrossSDKs"
       ]
     },
     {
@@ -31503,6 +31678,29 @@
       ]
     },
     {
+      "id": "BF-be97501",
+      "title": "The Node extension runtime's `ctx.modelRegistry.runtime` is now a model runtime that a nested Session can…",
+      "symptom": "The Node extension runtime's `ctx.modelRegistry.runtime` is now a model runtime that a nested Session can share.",
+      "rootCause": "Pi's ModelRegistry keeps its ModelRuntime in the `runtime` field (model-registry.ts:48-52), and createAgentSession takes it as `modelRuntime`: an extension that starts a nested Session passes ctx.modelRegistry.runtime to share the parent's providers and credentials. The completion auditor of pi-goal-x does this.",
+      "rootCauseSource": "commit",
+      "userImpact": "Credential or permission exposure",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "The Node extension runtime's `ctx.modelRegistry.runtime` is now a model runtime that a nested Session can share. An extension that passes it to `createAgentSession({ modelRuntime })`, as the pi-goal-x completion auditor does, failed with `this._modelRuntime.hasConfiguredAuth is not a function`. The nested Session now uses the parent's providers and credentials, as in Pi.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "be97501ff9",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/extension/host/subprocess/runtime_node_registry_runtime_test.go::TestNodeModelRegistryRuntimeAnswersAsAModelRuntime",
+        "test/parity/scenarios/extensions-runtime/53-node-shared-model-runtime-session.toml"
+      ]
+    },
+    {
       "id": "BF-bfd090d",
       "title": "Starting a child host could wait out its 30-second ready timeout (\"child not ready in time\") although the…",
       "symptom": "Starting a child host could wait out its 30-second ready timeout (\"child not ready in time\") although the child was up.",
@@ -31524,6 +31722,56 @@
         "chord/host/manager_fork_test.go::TestForkInstanceReplaysControlMessagesReceivedBeforeTheFirstListener",
         "chord/host/manager_ipc_listener_test.go::TestNodeChannelGivesTheFirstMessageListenerTheMessagesThatCameBeforeIt",
         "chord/host/manager_ipc_listener_test.go::TestNodeChannelQueuesAMessageThatArrivesDuringTheReplayBehindTheBacklog"
+      ]
+    },
+    {
+      "id": "BF-d988f58",
+      "title": "`pig update --extensions` no longer fails when two Git Packages come from one repository",
+      "symptom": "`pig update --extensions` no longer fails when two Git Packages come from one repository.",
+      "rootCause": "`pig update --extensions` with two Git Packages from one repository (one managed checkout, different subdirectories or tags) ran both updates at once. Both fetched into one FETCH_HEAD and both ran `git reset --hard`, which failed with `Unable to create '.../.git/index.lock': File exists` and `git reset --hard FETCH_HEAD^{commit} failed with code 128` (Pigpen CI run 39474751367). Pi starts a task per Git source (package-manager.ts:1171-1181) and names the checkout by host and path only (:2160), so it has the same race.",
+      "rootCauseSource": "commit",
+      "userImpact": "An operation failed or was rejected",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "`pig update --extensions` no longer fails when two Git Packages come from one repository. Packages of one repository share a managed checkout, and their updates ran at once: both fetched into one `FETCH_HEAD` and both ran `git reset --hard`, which failed with `Unable to create '.../.git/index.lock': File exists` and `git reset --hard FETCH_HEAD^{commit} failed with code 128`. The packages of one checkout now update one at a time, in the order of the settings file, and the last one decides the commit the checkout is left on. Packages from other repositories still update at the same time, and a package that fails does not stop the others.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "d988f584a6",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/cli/package_update_shared_checkout_test.go::TestUpdateExtensionsRunsThePackagesOfOneCheckoutOneAtATime",
+        "internal/packagemanager/package_update_shared_checkout_test.go::TestUpdateRunsThePackagesOfOneCheckoutOneAtATime"
+      ]
+    },
+    {
+      "id": "BF-df5e91e",
+      "title": "A Go, Python or Rust extension tool that awaits a host call such as `exec` before its first dialog no longer…",
+      "symptom": "A Go, Python or Rust extension tool that awaits a host call such as `exec` before its first dialog no longer holds the first dialogs of the later calls of its parallel batch: the SDK passes the call's dialog place at its first host call of any kind, so the later calls' dialogs open while the `exec` runs and the call's own dialog opens after it, as Pi's single thread does (D187).",
+      "rootCause": "The Go, Python and Rust SDKs held a call's dialog place across any host call that was not a dialog, so the later calls' dialogs waited until the exec returned. beforeCall/before_call now gates a request's first host call of any kind on the earlier requests' first host calls, and afterCall/after_call passes the place after it; only a dialog call still carries the response slot. D187, its docs row, the parity doc and the changelog bullet state the behavior: a handler that blocks on work the SDK cannot see before its first host call still holds the later calls, a host call such as exec does not. Unit tests of each SDK pin that a first non-dialog call passes the place.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "A Go, Python or Rust extension tool that awaits a host call such as `exec` before its first dialog no longer holds the first dialogs of the later calls of its parallel batch: the SDK passes the call's dialog place at its first host call of any kind, so the later calls' dialogs open while the `exec` runs and the call's own dialog opens after it, as Pi's single thread does (D187). A handler that blocks on something other than a host call before its first host call still holds them.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "df5e91e373",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "extensions/sdk/tool_dialog_order_test.go::TestToolBatchOrdersAreIndependentAcrossBatches",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogOrderPassesAnEndedRequest",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogsOpenInCallOrder",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolFirstHostCallOfAnyKindPassesTheDialogPlace",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolResponsesFollowTheOrderTheAnswersWereRead",
+        "extensions/sdk/tool_dialog_order_test.go::TestToolRetainedContextDialogAfterTheRequestEndedLeavesNoSlot"
       ]
     },
     {
@@ -31718,225 +31966,48 @@
       ]
     },
     {
-      "id": "BF-0ef8071",
-      "title": "RPC mode no longer runs `ctx.ui.setWidget` component factories or emits `setWidget` requests carrying their…",
-      "symptom": "RPC mode no longer runs `ctx.ui.setWidget` component factories or emits `setWidget` requests carrying their rendered lines.",
-      "rootCause": "",
-      "rootCauseSource": "",
-      "userImpact": "An operation failed or was rejected",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "releaseNote": "RPC mode no longer runs `ctx.ui.setWidget` component factories or emits `setWidget` requests carrying their rendered lines. Like Pi's `rpc-mode.ts`, it forwards string arrays and clears only; print and JSON modes ignore a factory too.",
-      "origin": "release note",
-      "commits": [
-        {
-          "hash": "0ef8071f5d",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "4e473be630",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "7429bbf718",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "af5c9c6234",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "b17c37f1db",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "f276957b8c",
-          "date": "2026-10-20"
-        }
-      ],
-      "tests": [
-        "coding/extension/host/subprocess/integration_test.go::TestHost_Integration_TSWidgetFactoryIsNotRunOutsideTheTUI",
-        "coding/extension/host/subprocess/integration_test.go::TestHost_Integration_TSWidgetFactoryRendersInvalidatesResizesAndClears",
-        "coding/extension/host/subprocess/push_proxy_test.go::TestPushProxyIsFrameOnlyForRenderedFrames",
-        "coding/extension/host/subprocess/ui_bridge_test.go::TestUIBridge_HandleCall_SetWidget_RequestObserverDropsRenderedFrames",
-        "test/extension-conformance/rpc_widget_frames_test.go::TestConformance_RPCModeDropsFrameWidgetsInEverySDK",
-        "test/parity/scenarios/rpc/61-rpc-set-widget-factory.toml"
-      ]
-    },
-    {
-      "id": "BF-7fbd629",
-      "title": "Two calls of a Go, Python or Rust extension tool in one assistant message that each open a dialog now behave…",
-      "symptom": "Two calls of a Go, Python or Rust extension tool in one assistant message that each open a dialog now behave as Pi's one thread makes them behave, as Node extensions already did: the dialogs open in call order (a port's second dialog could open first), and when the user answers them back to back the calls respond, and end, in the order of the answers.",
-      "rootCause": "Dialogs of a batch open in call order (arrival-ordered queue, passing never waits), and the tool_call responses of handlers whose dialogs were answered back to back follow the order the reader read the answers (settle gate, yield on the next host call, close on request end). Slot and wait event are made lazily, so a handler that opens no dialog is never gated.",
-      "rootCauseSource": "commit",
-      "userImpact": "An operation failed or was rejected",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "releaseNote": "Two calls of a Go, Python or Rust extension tool in one assistant message that each open a dialog now behave as Pi's one thread makes them behave, as Node extensions already did: the dialogs open in call order (a port's second dialog could open first), and when the user answers them back to back the calls respond, and end, in the order of the answers. The SDKs keep these orders for the calls of one parallel batch, which the host now names on each `tool_call` request (`batch`); calls of other batches, other sessions' calls and tools that make no host call take no part and are never held. A handler that blocks on something other than a host call before its first host call holds the first dialogs of the later calls of its batch, while a call that awaits a host call such as `exec` before its dialog is overtaken by the later calls' dialogs, as in Pi, and a handler whose dialog was answered holds the later-answered handlers' responses until it returns or makes its next host call (recorded as divergence D187: Pi's single thread lets a call that awaits work the SDK cannot see be overtaken).",
-      "origin": "release note",
-      "commits": [
-        {
-          "hash": "0bb10c0c59",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "3e4404a2d1",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "631ca46e27",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "710ef28883",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "7fbd629d13",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "835390ada3",
-          "date": "2026-10-20"
-        },
-        {
-          "hash": "b4ae58aeb4",
-          "date": "2026-10-20"
-        }
-      ],
-      "tests": [
-        "agent/settle_order_test.go::TestToolBatchFromContextNamesTheParallelBatch",
-        "extensions/sdk-py/tests/test_tool_dialog_order.py",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolBatchOrdersAreIndependentAcrossBatches",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogOrderPassesAnEndedRequest",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogsOpenInCallOrder",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolResponsesFollowTheOrderTheAnswersWereRead",
-        "extensions/sdk/tool_prepare_arguments_test.go::TestToolCallHandlersStartInArrivalOrder",
-        "test/extension-conformance/tool_dialog_order_test.go::TestToolBatchDialogsOpenInCallOrderAndResumeInAnswerOrderAcrossSDKs"
-      ]
-    },
-    {
-      "id": "BF-2e967c7",
-      "title": "A run that an extension's `sendMessage` with `triggerTurn` starts now carries the session's system prompt",
-      "symptom": "A run that an extension's `sendMessage` with `triggerTurn` starts now carries the session's system prompt.",
-      "rootCause": "A session's first run started by an extension's sendMessage with triggerTurn reached the provider with no system prompt, and the instruction sections of any later run that a custom message started were never diffed against the transcript.",
+      "id": "BF-d084d86",
+      "title": "Fixed the chord host's `Close` waiting forever when a hold that a link was still delivering created an object…",
+      "symptom": "Fixed the chord host's `Close` waiting forever when a hold that a link was still delivering created an object after `Close` had taken its snapshot of the host's objects: that object's resource open kept waiting for an abort that nothing raised.",
+      "rootCause": "Host.Close took one snapshot of the host's objects, disposed them, and closed the links. An object created after the snapshot by a hold a link was still delivering was never disposed, so a resource open waiting on its abort signal kept waitTasks blocked for good: the portmap-3 chord/host evidence run timed out after 10 minutes in the cleanup of TestAwaitingACtxGetStillWaitingWhenItsCallSettlesRejectsAbortedAndReleasesItsReference, and the same hang fails main (three of three runs of go test -count=1000 -cpu 2,4 -run Awaiting time out on; none of the same runs, nor a 3000-iteration loop of that test, hang with the sweep). Close now disposes what is left, holders first, once the links are…",
       "rootCauseSource": "commit",
       "userImpact": "Behavior differed from Pi",
       "platform": "All platforms",
       "class": "own",
       "fixedIn": "Unreleased",
-      "releaseNote": "A run that an extension's `sendMessage` with `triggerTurn` starts now carries the session's system prompt. The first run of a session reached the model with no system prompt, as did any later run that a custom message started after the instructions changed. Pi records the run's prompt sections for a custom starting message as for a prompt.",
+      "releaseNote": "Fixed the chord host's `Close` waiting forever when a hold that a link was still delivering created an object after `Close` had taken its snapshot of the host's objects: that object's resource open kept waiting for an abort that nothing raised. `Close` now disposes what is left once the links are closed.",
       "origin": "release note",
       "commits": [
         {
-          "hash": "2e967c7c8b",
-          "date": "2026-10-20"
+          "hash": "d084d8683e",
+          "date": "2026-10-21"
         }
       ],
       "tests": [
-        "coding/session_custom_run_first_system_prompt_test.go::TestCustomMessageFirstRunCarriesTheSessionSystemPrompt"
+        "chord/host/awaiting_upstream_test.go::TestAwaitingACtxGetStillWaitingWhenItsCallSettlesRejectsAbortedAndReleasesItsReference"
       ]
     },
     {
-      "id": "BF-4ac1e5d",
-      "title": "A tool that an extension activates with `setActiveTools` now appears in the system prompt's tool list of the…",
-      "symptom": "A tool that an extension activates with `setActiveTools` now appears in the system prompt's tool list of the next run that a `triggerTurn` message starts.",
-      "rootCause": "The cause is the one fixed for a session's first custom-message run: preparePrompt now diffs the run's prompt sections for every starting message. This branch carries that one-line fix and the guards for the activated-tool shape.",
+      "id": "BF-f6e6b97",
+      "title": "Fixed `pig --mode rpc` exiting 143 instead of 0 when stdin ended while a termination signal's shutdown was…",
+      "symptom": "Fixed `pig --mode rpc` exiting 143 instead of 0 when stdin ended while a termination signal's shutdown was still running: the first exit of the shutdown now decides the exit status, as Pi's first `process.exit` does.",
+      "rootCause": "Stdin end while a signal-triggered dispose is still running exits 0 at once in Pi (rpc-mode.ts:728-731). Pig's exit stops the extension processes before os.Exit, which completes the pending dispose, and the signal path's own exit (128+SIGTERM) then raced the first one's os.Exit: macOS cli-2 TestRPCInputEndDuringSignalShutdownExitsZero got 143. flushAndExit now lets only the first exit that starts run, as the first process.exit does. TestRPCShutdownInputEndDuringSignalDisposeKeepsItsExitStatus forces the interleaving.",
       "rootCauseSource": "commit",
-      "userImpact": "Behavior differed from Pi",
+      "userImpact": "Wrong output or ordering",
       "platform": "All platforms",
       "class": "own",
       "fixedIn": "Unreleased",
-      "releaseNote": "A tool that an extension activates with `setActiveTools` now appears in the system prompt's tool list of the next run that a `triggerTurn` message starts. The request already declared the tool, but the prompt left its snippet out, so the model was not told about it.",
+      "releaseNote": "Fixed `pig --mode rpc` exiting 143 instead of 0 when stdin ended while a termination signal's shutdown was still running: the first exit of the shutdown now decides the exit status, as Pi's first `process.exit` does.",
       "origin": "release note",
       "commits": [
         {
-          "hash": "4ac1e5dc92",
-          "date": "2026-10-20"
+          "hash": "f6e6b97f00",
+          "date": "2026-10-21"
         }
       ],
       "tests": [
-        "coding/session_custom_run_activated_tools_test.go::TestCustomMessageRunListsToolsActivatedSinceTheLastRun"
-      ]
-    },
-    {
-      "id": "BF-be97501",
-      "title": "The Node extension runtime's `ctx.modelRegistry.runtime` is now a model runtime that a nested Session can…",
-      "symptom": "The Node extension runtime's `ctx.modelRegistry.runtime` is now a model runtime that a nested Session can share.",
-      "rootCause": "Pi's ModelRegistry keeps its ModelRuntime in the `runtime` field (model-registry.ts:48-52), and createAgentSession takes it as `modelRuntime`: an extension that starts a nested Session passes ctx.modelRegistry.runtime to share the parent's providers and credentials. The completion auditor of pi-goal-x does this.",
-      "rootCauseSource": "commit",
-      "userImpact": "Credential or permission exposure",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "releaseNote": "The Node extension runtime's `ctx.modelRegistry.runtime` is now a model runtime that a nested Session can share. An extension that passes it to `createAgentSession({ modelRuntime })`, as the pi-goal-x completion auditor does, failed with `this._modelRuntime.hasConfiguredAuth is not a function`. The nested Session now uses the parent's providers and credentials, as in Pi.",
-      "origin": "release note",
-      "commits": [
-        {
-          "hash": "be97501ff9",
-          "date": "2026-10-20"
-        }
-      ],
-      "tests": [
-        "coding/extension/host/subprocess/runtime_node_registry_runtime_test.go::TestNodeModelRegistryRuntimeAnswersAsAModelRuntime",
-        "test/parity/scenarios/extensions-runtime/53-node-shared-model-runtime-session.toml"
-      ]
-    },
-    {
-      "id": "BF-d988f58",
-      "title": "`pig update --extensions` no longer fails when two Git Packages come from one repository",
-      "symptom": "`pig update --extensions` no longer fails when two Git Packages come from one repository.",
-      "rootCause": "`pig update --extensions` with two Git Packages from one repository (one managed checkout, different subdirectories or tags) ran both updates at once. Both fetched into one FETCH_HEAD and both ran `git reset --hard`, which failed with `Unable to create '.../.git/index.lock': File exists` and `git reset --hard FETCH_HEAD^{commit} failed with code 128` (Pigpen CI run 39474751367). Pi starts a task per Git source (package-manager.ts:1171-1181) and names the checkout by host and path only (:2160), so it has the same race.",
-      "rootCauseSource": "commit",
-      "userImpact": "An operation failed or was rejected",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "releaseNote": "`pig update --extensions` no longer fails when two Git Packages come from one repository. Packages of one repository share a managed checkout, and their updates ran at once: both fetched into one `FETCH_HEAD` and both ran `git reset --hard`, which failed with `Unable to create '.../.git/index.lock': File exists` and `git reset --hard FETCH_HEAD^{commit} failed with code 128`. The packages of one checkout now update one at a time, in the order of the settings file, and the last one decides the commit the checkout is left on. Packages from other repositories still update at the same time, and a package that fails does not stop the others.",
-      "origin": "release note",
-      "commits": [
-        {
-          "hash": "d988f584a6",
-          "date": "2026-10-20"
-        }
-      ],
-      "tests": [
-        "coding/cli/package_update_shared_checkout_test.go::TestUpdateExtensionsRunsThePackagesOfOneCheckoutOneAtATime",
-        "internal/packagemanager/package_update_shared_checkout_test.go::TestUpdateRunsThePackagesOfOneCheckoutOneAtATime"
-      ]
-    },
-    {
-      "id": "BF-6b381a3",
-      "title": "The bug fix ledger no longer credits a squash commit's tests to a release note that names no fix commit",
-      "symptom": "The bug fix ledger no longer credits a squash commit's tests to a release note that names no fix commit.",
-      "rootCause": "Train #255 attributed the 0.5.0 squash (13,725 files, ~11,000 tests) to five release notes that had no fix marker, growing docs/bug-ledger.json from about 2.1 MB to 9.8 MB and the root module past its size budget.",
-      "rootCauseSource": "commit",
-      "userImpact": "An operation failed or was rejected",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "releaseNote": "The bug fix ledger no longer credits a squash commit's tests to a release note that names no fix commit. A release note without a `\u003c!-- fix: \u003csha\u003e --\u003e` marker had its commits guessed from the history, and the only commit it found for five notes was the 0.5.0 squash, which grew `docs/bug-ledger.json` from about 2.1 MB to 9.8 MB and pushed the root module past its size budget. `make changelog-check` now fails a `### Fixed` bullet without a marker, a marker or fragment name that names a commit `HEAD` does not reach, and `make bug-ledger` refuses, naming the entry, to attribute the tests of a commit that touches more than 500 files.",
-      "origin": "release note",
-      "commits": [
-        {
-          "hash": "6b381a37fb",
-          "date": "2026-10-20"
-        }
-      ],
-      "tests": [
-        "automation/ci/bugledger/bugledger_test.go::TestAFixTitledSquashWithNoNoteIsRefusedNotAttributed",
-        "automation/ci/bugledger/bugledger_test.go::TestTheLedgerRefusesToAttributeTheTestsOfASquash",
-        "automation/ci/bugledger/bugledger_test.go::TestTheSquashThresholdIsTheCountOfTouchedFiles",
-        "automation/ci/changelogfrag/history_test.go::TestAFragmentNamedAfterAPreRebaseCommitFails",
-        "automation/ci/changelogfrag/history_test.go::TestAMarkerNamingAnUnreachableCommitFails",
-        "automation/ci/changelogfrag/history_test.go::TestAShallowCloneFailsTheCheckInsteadOfGuessing",
-        "automation/ci/changelogfrag/history_test.go::TestEveryCommitOfAMarkerMustBeReachable",
-        "automation/ci/changelogfrag/history_test.go::TestEveryFixedBulletNeedsAFixMarker",
-        "automation/ci/changelogfrag/history_test.go::TestLegacyFragmentsAreExemptFromTheHistoryChecks",
-        "automation/ci/changelogfrag/history_test.go::TestNoFragmentsNeedNoHistory",
-        "automation/ci/changelogfrag/history_test.go::TestOnlyTheSectionsTheLedgerReadsNeedAMarker"
+        "coding/cli/rpc_shutdown_settle_test.go::TestRPCShutdownInputEndDuringSignalDisposeKeepsItsExitStatus",
+        "coding/cli/rpc_shutdown_signal_test.go::TestRPCInputEndDuringSignalShutdownExitsZero"
       ]
     },
     {
@@ -32216,33 +32287,6 @@
       ]
     },
     {
-      "id": "BF-df5e91e",
-      "title": "A Go, Python or Rust extension tool that awaits a host call such as `exec` before its first dialog no longer…",
-      "symptom": "A Go, Python or Rust extension tool that awaits a host call such as `exec` before its first dialog no longer holds the first dialogs of the later calls of its parallel batch: the SDK passes the call's dialog place at its first host call of any kind, so the later calls' dialogs open while the `exec` runs and the call's own dialog opens after it, as Pi's single thread does (D187).",
-      "rootCause": "The Go, Python and Rust SDKs held a call's dialog place across any host call that was not a dialog, so the later calls' dialogs waited until the exec returned. beforeCall/before_call now gates a request's first host call of any kind on the earlier requests' first host calls, and afterCall/after_call passes the place after it; only a dialog call still carries the response slot. D187, its docs row, the parity doc and the changelog bullet state the behavior: a handler that blocks on work the SDK cannot see before its first host call still holds the later calls, a host call such as exec does not. Unit tests of each SDK pin that a first non-dialog call passes the place.",
-      "rootCauseSource": "commit",
-      "userImpact": "Behavior differed from Pi",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "releaseNote": "A Go, Python or Rust extension tool that awaits a host call such as `exec` before its first dialog no longer holds the first dialogs of the later calls of its parallel batch: the SDK passes the call's dialog place at its first host call of any kind, so the later calls' dialogs open while the `exec` runs and the call's own dialog opens after it, as Pi's single thread does (D187). A handler that blocks on something other than a host call before its first host call still holds them.",
-      "origin": "release note",
-      "commits": [
-        {
-          "hash": "df5e91e373",
-          "date": "2026-10-20"
-        }
-      ],
-      "tests": [
-        "extensions/sdk/tool_dialog_order_test.go::TestToolBatchOrdersAreIndependentAcrossBatches",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogOrderPassesAnEndedRequest",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolDialogsOpenInCallOrder",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolFirstHostCallOfAnyKindPassesTheDialogPlace",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolResponsesFollowTheOrderTheAnswersWereRead",
-        "extensions/sdk/tool_dialog_order_test.go::TestToolRetainedContextDialogAfterTheRequestEndedLeavesNoSlot"
-      ]
-    },
-    {
       "id": "BF-725e104",
       "title": "The upstream test inventory records Pi's `shell-path-exists.test.ts` as ported instead of partial: Pi mocks…",
       "symptom": "The upstream test inventory records Pi's `shell-path-exists.test.ts` as ported instead of partial: Pi mocks `accessSync` and `spawnSync`, PiG's Windows alias and Unix cases match them case for case, and the native Windows check ran and passed on the Windows runner.",
@@ -32289,49 +32333,23 @@
       ]
     },
     {
-      "id": "BF-f6e6b97",
-      "title": "Fixed `pig --mode rpc` exiting 143 instead of 0 when stdin ended while a termination signal's shutdown was…",
-      "symptom": "Fixed `pig --mode rpc` exiting 143 instead of 0 when stdin ended while a termination signal's shutdown was still running: the first exit of the shutdown now decides the exit status, as Pi's first `process.exit` does.",
-      "rootCause": "Stdin end while a signal-triggered dispose is still running exits 0 at once in Pi (rpc-mode.ts:728-731). Pig's exit stops the extension processes before os.Exit, which completes the pending dispose, and the signal path's own exit (128+SIGTERM) then raced the first one's os.Exit: macOS cli-2 TestRPCInputEndDuringSignalShutdownExitsZero got 143. flushAndExit now lets only the first exit that starts run, as the first process.exit does. TestRPCShutdownInputEndDuringSignalDisposeKeepsItsExitStatus forces the interleaving.",
-      "rootCauseSource": "commit",
-      "userImpact": "Wrong output or ordering",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "releaseNote": "Fixed `pig --mode rpc` exiting 143 instead of 0 when stdin ended while a termination signal's shutdown was still running: the first exit of the shutdown now decides the exit status, as Pi's first `process.exit` does.",
-      "origin": "release note",
-      "commits": [
-        {
-          "hash": "f6e6b97f00",
-          "date": "2026-10-21"
-        }
-      ],
-      "tests": [
-        "coding/cli/rpc_shutdown_settle_test.go::TestRPCShutdownInputEndDuringSignalDisposeKeepsItsExitStatus",
-        "coding/cli/rpc_shutdown_signal_test.go::TestRPCInputEndDuringSignalShutdownExitsZero"
-      ]
-    },
-    {
-      "id": "BF-d084d86",
-      "title": "Fixed the chord host's `Close` waiting forever when a hold that a link was still delivering created an object…",
-      "symptom": "Fixed the chord host's `Close` waiting forever when a hold that a link was still delivering created an object after `Close` had taken its snapshot of the host's objects: that object's resource open kept waiting for an abort that nothing raised.",
-      "rootCause": "Host.Close took one snapshot of the host's objects, disposed them, and closed the links. An object created after the snapshot by a hold a link was still delivering was never disposed, so a resource open waiting on its abort signal kept waitTasks blocked for good: the portmap-3 chord/host evidence run timed out after 10 minutes in the cleanup of TestAwaitingACtxGetStillWaitingWhenItsCallSettlesRejectsAbortedAndReleasesItsReference, and the same hang fails main (three of three runs of go test -count=1000 -cpu 2,4 -run Awaiting time out on; none of the same runs, nor a 3000-iteration loop of that test, hang with the sweep). Close now disposes what is left, holders first, once the links are…",
-      "rootCauseSource": "commit",
+      "id": "BF-46abed3",
+      "title": "Fix in shipped code",
+      "symptom": "Fix in shipped code",
+      "rootCause": "",
+      "rootCauseSource": "",
       "userImpact": "Behavior differed from Pi",
       "platform": "All platforms",
       "class": "own",
       "fixedIn": "Unreleased",
-      "releaseNote": "Fixed the chord host's `Close` waiting forever when a hold that a link was still delivering created an object after `Close` had taken its snapshot of the host's objects: that object's resource open kept waiting for an abort that nothing raised. `Close` now disposes what is left once the links are closed.",
-      "origin": "release note",
+      "origin": "commit",
       "commits": [
         {
-          "hash": "d084d8683e",
+          "hash": "46abed3453",
           "date": "2026-10-21"
         }
       ],
-      "tests": [
-        "chord/host/awaiting_upstream_test.go::TestAwaitingACtxGetStillWaitingWhenItsCallSettlesRejectsAbortedAndReleasesItsReference"
-      ]
+      "tests": []
     }
   ],
   "divergences": [
