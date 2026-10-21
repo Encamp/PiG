@@ -5098,7 +5098,7 @@
     },
     {
       "path": "packages/coding-agent/test/shell-path-exists.test.ts",
-      "disposition": "partial",
+      "disposition": "ported",
       "upstreamTestHash": "sha256:fc6c6a21cbded0df578509953649ae3491d0e99129b3414e170df2c681ffe5db",
       "evidence": [
         "internal/codingagent/tools/shell_path_exists_upstream_test.go#TestUpstreamWindowsStoreShellAliases",
@@ -5107,7 +5107,7 @@
         "internal/shellconfig/shellconfig_test.go#TestFirstMatch",
         "internal/nodefs/access_windows_test.go#TestAccessAcceptsReparsePointWithMissingTarget"
       ],
-      "rationale": "Missing: the Windows Store alias cases are not run against a real Windows host. Pi mocks accessSync and spawnSync around getShellConfig() and getPowerShellConfig(); here the same four cases (bash.exe and pwsh.exe found on PATH, an explicitly configured alias, a PATH result that fails the existence check) run on the parsing of `where` output (shellconfig.FirstMatch) and the shell resolvers with the existence check as a parameter, and the three Unix cases run with the same seam. The production Windows check, nodefs.Access (GetFileAttributes, as libuv's fs__access), is asserted natively only by TestAccessAcceptsReparsePointWithMissingTarget, a junction standing in for a Store alias, which has not run on Windows in this change; a real Store alias has not been tried. Native Windows run: go test ./internal/nodefs ./internal/shellconfig ./internal/codingagent/tools."
+      "rationale": "Pi's test mocks accessSync and spawnSync around getShellConfig() and getPowerShellConfig(); it never touches a real Windows Store alias, and PiG's cases match it case for case: the four Windows alias cases (bash.exe and pwsh.exe found on PATH, an explicitly configured alias, a PATH result that fails the existence check) run on the parsing of `where` output (shellconfig.FirstMatch) and the shell resolvers with the existence check as a parameter, and the three Unix cases run with the same seam. The production Windows check, nodefs.Access (GetFileAttributes, as libuv's fs__access), is asserted natively by TestAccessAcceptsReparsePointWithMissingTarget, a junction standing in for a Store alias: it ran and passed on the Windows runner (package internal/nodefs ok, 'Test every package with Windows tests', job Windows native-4, https://github.com/MichaelKinsy/PiG/actions/runs/39542805906/job/119039998303, head 74825c6421; the test has no skip path and fails on any error)."
     },
     {
       "path": "packages/coding-agent/test/skills.test.ts",
