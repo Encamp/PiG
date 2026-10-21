@@ -78,8 +78,8 @@ func TestMarkdownContainsTableStart(t *testing.T) {
 		{"Value\n---", false}, // thematic break or setext underline: no pipe in either row
 		{"A\n---", false},
 		{"| A |\n|---|x", false},
-		{"|---|---|", false}, // a delimiter needs a header row above it
-		{"a | b\n    ---", false},
+		{"|---|---|", false},     // a delimiter needs a header row above it
+		{"a | b\n    ---", true}, // the regex's [ \t]* after the optional pipe takes the extra indent, as in Pi
 		{"", false},
 	} {
 		if got := containsTableStart(tc.source); got != tc.want {
