@@ -381,6 +381,30 @@ func TestTurnPrefixSummaryUsesMarkdownHeadingFraming(t *testing.T) {
 	}
 }
 
+// Ports packages/coding-agent/test/compaction-summary-reasoning.test.ts "applies custom instructions to the turn prefix summary of a split turn" (#11058).
+func TestCompactAppliesCustomInstructionsToTheTurnPrefixSummaryOfASplitTurn(t *testing.T) {
+	var prompts []string
+	completer := simpleCompleterFunc(func(_ context.Context, _ *ai.Model, _ string, messages []agent.AgentMessage, _ ai.StreamOptions) (string, *ai.Usage, error) {
+		prompts = append(prompts, projectedMessageText(messages[0]))
+		return "prefix summary", nil, nil
+	})
+	prefix := []agent.AgentMessage{editUser("build the parser"), editAssistant("started on lexer.go", defaultEditUsage)}
+	_, err := Compact(context.Background(), CompactionPreparation{
+		FirstKeptEntryID:   "keep",
+		TurnPrefixMessages: prefix,
+		IsSplitTurn:        true,
+		PreviousSummary:    "previous checkpoint",
+		Settings:           CompactionSettings{ReserveTokens: 2000, KeepRecentTokens: 20},
+	}, &ai.Model{}, "test-key", nil, "keep migration decisions", "", CompleterStreamFn(completer), nil, nil, ai.RetryCallbacks{}, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "# Conversation\n" + SerializeConversation(convertToLlm(prefix)) + "\n\n# Instructions\n" + turnPrefixSummarizationPrompt + "\n\nAdditional focus: keep migration decisions"
+	if len(prompts) != 1 || prompts[0] != want {
+		t.Fatalf("turn prefix prompt:\n got %q\nwant %q", prompts, want)
+	}
+}
+
 func projectedMessageText(message agent.AgentMessage) string {
 	var text strings.Builder
 	if message.User != nil {
