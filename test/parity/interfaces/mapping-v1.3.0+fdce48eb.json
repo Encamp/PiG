@@ -1251,6 +1251,7 @@
         "call:agent/agent.go#Agent.StreamFunction"
       ],
       "evidence": [
+        "test:agent/stream_fn_descriptor_test.go#TestAgentEffectiveStreamFunction",
         "test:agent/stream_fn_descriptor_test.go#TestAgentStreamFunctionOverrideAndRestore"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
@@ -1272,6 +1273,7 @@
         "call:agent/agent.go#Agent.StreamFunction"
       ],
       "evidence": [
+        "test:agent/stream_fn_descriptor_test.go#TestAgentEffectiveStreamFunction",
         "test:agent/stream_fn_descriptor_test.go#TestAgentStreamFunctionOverrideAndRestore"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
@@ -3066,7 +3068,7 @@
         "shape": "complete"
       },
       "production": [
-        "call:agent/agent.go#Agent.SetStreamFunction"
+        "call:agent/agent.go#Agent.EffectiveStreamFunction"
       ],
       "evidence": [
         "test:agent/agent_class_pi_oracle_test.go#TestAgentClassMatchesPi",
@@ -3089,7 +3091,7 @@
         "shape": "complete"
       },
       "production": [
-        "call:agent/agent.go#Agent.SetStreamFunction"
+        "call:agent/agent.go#Agent.EffectiveStreamFunction"
       ],
       "evidence": [
         "test:agent/agent_class_pi_oracle_test.go#TestAgentClassMatchesPi",
@@ -5294,7 +5296,7 @@
       "id": "pkg:agent/.#StreamFn",
       "disposition": "ported",
       "upstreamShapeHash": "sha256:b90009542ac129849551bc17189e16dd66dc3a7ca043717ef49cd9b84a672b8b",
-      "rationale": "Derived by the interface gap detector: StreamFn is Go agent/agent.go#StreamFn (name rule N1), every shape rule holds, and it is exercised by a function reachable from cmd/pig. The row is re-derived on every run of make interface-gaps-update.",
+      "rationale": "Derived by the interface gap detector: StreamFn is Go agent/agent.go#StreamFn (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
       "pigTargets": [
         "agent/agent.go#StreamFn"
       ],
@@ -5304,10 +5306,10 @@
         "shape": "complete"
       },
       "production": [
-        "call:agent/agent.go#Agent.SetStreamFunction"
+        "call:agent/agent.go#Agent.EffectiveStreamFunction"
       ],
       "evidence": [
-        "reach:agent/agent.go#Agent.SetStreamFunction"
+        "test:agent/stream_fn_descriptor_test.go#TestAgentEffectiveStreamFunction"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -5315,7 +5317,7 @@
       "id": "pkg:agent/.#StreamFn::call:0",
       "disposition": "ported",
       "upstreamShapeHash": "sha256:88713d6e27b9a23b7e91b9a041457670e02a29df75dac9762f42aeabdd6c676a",
-      "rationale": "Derived by the interface gap detector: StreamFn::call:0 is Go agent/agent.go#StreamFn (name rule N1), every shape rule holds, and it is exercised by a function reachable from cmd/pig. The row is re-derived on every run of make interface-gaps-update.",
+      "rationale": "Derived by the interface gap detector: StreamFn::call:0 is Go agent/agent.go#StreamFn (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
       "pigTargets": [
         "agent/agent.go#StreamFn"
       ],
@@ -5325,10 +5327,10 @@
         "shape": "complete"
       },
       "production": [
-        "call:agent/agent.go#Agent.SetStreamFunction"
+        "call:agent/agent.go#Agent.EffectiveStreamFunction"
       ],
       "evidence": [
-        "reach:agent/agent.go#Agent.SetStreamFunction"
+        "test:agent/stream_fn_descriptor_test.go#TestAgentEffectiveStreamFunction"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -30260,7 +30262,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -30282,7 +30284,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -32971,7 +32973,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -32993,7 +32995,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -33015,7 +33017,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -33037,7 +33039,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -73177,7 +73179,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -73199,7 +73201,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -76696,7 +76698,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -76718,7 +76720,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -76740,7 +76742,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -76762,7 +76764,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -96460,7 +96462,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -96482,7 +96484,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -96656,7 +96658,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -96678,7 +96680,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -96700,7 +96702,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -96722,7 +96724,7 @@
       "evidence": [
         "test:ai/interface_ledger_test.go#TestDeclaredToolsAndTranscriptToolsFollowTheToolHistoryLikeUpstream",
         "test:ai/transcript_messages_declared_test.go#TestResolveTranscriptToolsOverACustomRoleTranscript",
-        "test:ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport"
+        "test:ai/transcript_resolve_equivalence_test.go#TestResolveTranscriptToolsMatchesTheCopyingReference"
       ]
     },
     {
@@ -108158,9 +108160,9 @@
         "call:chord/host/loader.go#NodeLoaderImpl.Load"
       ],
       "evidence": [
+        "test:chord/host/manager_fork_test.go#TestForkInstanceReplaysControlMessagesReceivedBeforeTheFirstListener",
         "test:chord/host/manager_upstream_test.go#TestHostManagerAChildOwnedKernelLockAdmitsOneLiveProcessReplaceWaitsForTheExitBeforeTheNextStart",
-        "test:chord/host/manager_upstream_test.go#TestHostManagerAChildWithoutALockDoesNotInheritTheParentsLock",
-        "test:chord/host/manager_upstream_test.go#TestHostManagerAGracefulExitStillTakesTheChildsDescendantsWithIt"
+        "test:chord/host/manager_upstream_test.go#TestHostManagerAChildWithoutALockDoesNotInheritTheParentsLock"
       ]
     },
     {
@@ -108297,7 +108299,7 @@
       "id": "pkg:chord/node#ForkDriverOptions::property:onMessage",
       "disposition": "ported",
       "upstreamShapeHash": "sha256:4571c20a6934b181590a6e97df8dc05f2ddb62444eac67c4fbb6fba05a08086e",
-      "rationale": "Derived by the interface gap detector: ForkDriverOptions::property:onMessage is Go chord/host/manager.go#ForkDriverOptions.OnMessage (name rule N1), every shape rule holds, and it is exercised by a function reachable from cmd/pig. The row is re-derived on every run of make interface-gaps-update.",
+      "rationale": "Derived by the interface gap detector: ForkDriverOptions::property:onMessage is Go chord/host/manager.go#ForkDriverOptions.OnMessage (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
       "pigTargets": [
         "chord/host/manager.go#ForkDriverOptions.OnMessage"
       ],
@@ -108310,7 +108312,7 @@
         "call:chord/host/loader.go#NodeLoaderImpl.Load"
       ],
       "evidence": [
-        "reach:chord/host/loader.go#NodeLoaderImpl.Load"
+        "test:chord/host/manager_fork_test.go#TestForkInstanceReplaysControlMessagesReceivedBeforeTheFirstListener"
       ]
     },
     {
@@ -134838,7 +134840,9 @@
         "call:internal/codingagent/compaction/compaction.go#Compact"
       ],
       "evidence": [
-        "test:coding/session_summarization_test.go#TestSummarizationRejectsIncompleteResponses"
+        "test:internal/codingagent/compaction/coding_compaction_upstream_test.go#TestCodingCompactionUpstream",
+        "test:coding/session_summarization_test.go#TestSummarizationRejectsIncompleteResponses",
+        "test:internal/codingagent/compaction/compaction_summary_reasoning_test.go#TestCompactSplitTurnPreservesPreviousSummaryWithoutHistoryRequest"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -134859,7 +134863,9 @@
         "call:internal/codingagent/compaction/compaction.go#Compact"
       ],
       "evidence": [
-        "test:coding/session_summarization_test.go#TestSummarizationRejectsIncompleteResponses"
+        "test:internal/codingagent/compaction/coding_compaction_upstream_test.go#TestCodingCompactionUpstream",
+        "test:coding/session_summarization_test.go#TestSummarizationRejectsIncompleteResponses",
+        "test:internal/codingagent/compaction/compaction_summary_reasoning_test.go#TestCompactSplitTurnPreservesPreviousSummaryWithoutHistoryRequest"
       ],
       "asyncContract": "An awaited Promise is a blocking Go call that returns the value or error; AbortSignal is the context.Context argument; no detached goroutine."
     },
@@ -178241,7 +178247,8 @@
       ],
       "evidence": [
         "test:coding/cli/rpc_closed_unions_test.go#TestRPCClosedUnionConstantsAreTheUpstreamLiterals",
-        "test:coding/cli/rpc_ui_set_widget_factory_test.go#TestRPCUIContextSetWidgetFactoryRemovesOnNilAndIgnoresAFactory"
+        "test:coding/cli/rpc_ui_set_widget_factory_test.go#TestRPCUIContextSetWidgetFactoryRemovesOnNilAndIgnoresAFactory",
+        "test:coding/cli/rpc_ui_settle_test.go#TestRPCUIResponsesSettleTheirDialogsInStdinOrder"
       ]
     },
     {
@@ -235929,6 +235936,7 @@
         "call:env/terminal.go#RemoteTerminal.Foreground"
       ],
       "evidence": [
+        "test:env/terminal_linux_test.go#TestTerminalForegroundOfANameCutInsideACharacterHasNoName",
         "test:env/terminal_test.go#TestOpenTerminalReportsTheJobInTheForegroundNotTheShellAtItsPrompt"
       ]
     },
