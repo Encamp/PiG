@@ -6,7 +6,7 @@ import {
   createToolSearchDocument,
   getCodemodeCallableTools,
   toCodemodeDeclaration
-} from "./chunk-YEXAUOVW.js";
+} from "./chunk-XIVHZPV4.js";
 import {
   combineUsage
 } from "./chunk-UFSRWEFA.js";
@@ -30,8 +30,48 @@ var ARGS_PREVIEW_CHARS = 200;
 var ERROR_PREVIEW_CHARS = 500;
 var MAX_CONCURRENT_MODEL_CALLS = 4;
 var CODEMODE_MEMORY_LIMIT_BYTES = 256 * 1024 * 1024;
-var MAX_CONCURRENT_CODEMODE_WORKERS = 2;
+var DEFAULT_MAX_CODEMODE_WORKERS = 2;
+function maxCodemodeWorkers() {
+  const value = Number(process.env.PI_CODEMODE_MAX_WORKERS);
+  return Number.isInteger(value) && value > 0 ? value : DEFAULT_MAX_CODEMODE_WORKERS;
+}
+__name(maxCodemodeWorkers, "maxCodemodeWorkers");
+var CODEMODE_WORKER_WAIT_MS = 6e4;
 var activeCodemodeWorkers = 0;
+var codemodeWorkerWaiters = [];
+function reserveCodemodeWorker(signal, timeoutMs) {
+  if (signal?.aborted)
+    return Promise.resolve("aborted");
+  return new Promise((resolve) => {
+    const settle = /* @__PURE__ */ __name((outcome) => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      const index = codemodeWorkerWaiters.indexOf(grant);
+      if (index >= 0)
+        codemodeWorkerWaiters.splice(index, 1);
+      resolve(outcome);
+    }, "settle");
+    const grant = /* @__PURE__ */ __name(() => settle("reserved"), "grant");
+    const onAbort = /* @__PURE__ */ __name(() => settle("aborted"), "onAbort");
+    const timer = setTimeout(() => settle("timeout"), timeoutMs);
+    codemodeWorkerWaiters.push(grant);
+    signal?.addEventListener("abort", onAbort, { once: true });
+    admitCodemodeWorkers();
+  });
+}
+__name(reserveCodemodeWorker, "reserveCodemodeWorker");
+function admitCodemodeWorkers() {
+  while (codemodeWorkerWaiters.length > 0 && activeCodemodeWorkers < maxCodemodeWorkers()) {
+    activeCodemodeWorkers++;
+    codemodeWorkerWaiters.shift()?.();
+  }
+}
+__name(admitCodemodeWorkers, "admitCodemodeWorkers");
+function releaseCodemodeWorker() {
+  activeCodemodeWorkers--;
+  admitCodemodeWorkers();
+}
+__name(releaseCodemodeWorker, "releaseCodemodeWorker");
 var MODEL_TYPES = /* @__PURE__ */ new Set(["chat", "image", "classifier"]);
 function truncateText(text, maxChars) {
   return text.length > maxChars ? `${text.slice(0, maxChars - 3)}...` : text;
@@ -395,32 +435,58 @@ async function executeCodemode(toolCallId, input, signal, onUpdate, ctx, options
       return toScriptValue(tool, outcome);
     }, "execute")
   }));
-  const sandbox = new CodemodeSandbox({
-    tools: sandboxTools,
-    globals: [
-      ...createDiscoveryGlobals(callable, samples, options),
-      ...options.models && ctx ? createModelGlobals(ctx.modelRegistry, toolCallId, calls, publish, addModelUsage, addGeneratedImages) : []
-    ],
-    timeoutMs: sourceOptions.timeoutMs ?? Number.POSITIVE_INFINITY,
-    memoryLimitBytes: CODEMODE_MEMORY_LIMIT_BYTES,
-    wasm: loadQuickJSWasm(getQuickJSWasmPath()),
-    workerUrl: getCodemodeWorkerSpecifier(),
-    acquireWorker: /* @__PURE__ */ __name(() => {
-      if (activeCodemodeWorkers >= MAX_CONCURRENT_CODEMODE_WORKERS) {
-        throw new Error(`Codemode worker limit reached (${MAX_CONCURRENT_CODEMODE_WORKERS} workers are still running or shutting down). Retry after they exit.`);
-      }
-      activeCodemodeWorkers++;
-      return () => {
-        activeCodemodeWorkers--;
-      };
-    }, "acquireWorker")
-  });
+  const deadline = sourceOptions.timeoutMs ?? Number.POSITIVE_INFINITY;
+  const waitStartedAt = performance.now();
+  const admission = await reserveCodemodeWorker(signal, Math.min(deadline, CODEMODE_WORKER_WAIT_MS));
+  const waitedMs = performance.now() - waitStartedAt;
+  if (admission !== "reserved") {
+    const waited = ((performance.now() - startedAt) / 1e3).toFixed(1);
+    const reason = signal?.reason;
+    const error = admission === "aborted" ? `Script aborted: ${reason instanceof Error ? reason.message : "Execution aborted"}` : deadline <= CODEMODE_WORKER_WAIT_MS ? `Script timed out: Execution timed out after ${deadline} ms while waiting for a free codemode worker` : `No codemode worker became free within ${CODEMODE_WORKER_WAIT_MS / 1e3} seconds. All ${maxCodemodeWorkers()} workers, shared by every session in this process, are held by other scripts. Retry after they finish.`;
+    return {
+      content: [
+        { type: "text", text: `Script failed
+Wall time ${waited} seconds
+Output:
+` },
+        { type: "text", text: `Script error:
+${error}
+
+The script did not start.` }
+      ],
+      details: snapshot(),
+      isError: true
+    };
+  }
+  let reserved = true;
+  let sandbox;
   let result;
   try {
+    sandbox = new CodemodeSandbox({
+      tools: sandboxTools,
+      globals: [
+        ...createDiscoveryGlobals(callable, samples, options),
+        ...options.models && ctx ? createModelGlobals(ctx.modelRegistry, toolCallId, calls, publish, addModelUsage, addGeneratedImages) : []
+      ],
+      timeoutMs: Math.max(1, Math.round(deadline - waitedMs)),
+      memoryLimitBytes: CODEMODE_MEMORY_LIMIT_BYTES,
+      wasm: loadQuickJSWasm(getQuickJSWasmPath()),
+      workerUrl: getCodemodeWorkerSpecifier(),
+      acquireWorker: /* @__PURE__ */ __name(() => {
+        if (!reserved)
+          throw new Error("The script already settled");
+        reserved = false;
+        return releaseCodemodeWorker;
+      }, "acquireWorker")
+    });
     const store = ctx ? readCodemodeStore(ctx.sessionManager.getBranch()) : {};
     result = await sandbox.execute(code, { signal, store });
   } finally {
-    await sandbox.close();
+    await sandbox?.close();
+    if (reserved) {
+      reserved = false;
+      releaseCodemodeWorker();
+    }
   }
   for (const call of calls) {
     if (call.status === "running")

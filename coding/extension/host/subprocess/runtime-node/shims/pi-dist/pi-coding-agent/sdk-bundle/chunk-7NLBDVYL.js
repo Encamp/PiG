@@ -240,7 +240,7 @@ function readConfigFile(path, scope, state) {
     return;
   let parsed;
   try {
-    parsed = JSON.parse(readFileSync2(path, "utf8"));
+    parsed = JSON.parse(stripBom(readFileSync2(path, "utf8")));
   } catch (error) {
     errors.push(`${path}: ${error instanceof Error ? error.message : String(error)}`);
     return;
@@ -355,7 +355,7 @@ function removeMcpServerConfig(path, name) {
 }
 __name(removeMcpServerConfig, "removeMcpServerConfig");
 function editMcpServers(path, edit) {
-  const text = existsSync2(path) ? readFileSync2(path, "utf8") : void 0;
+  const text = existsSync2(path) ? stripBom(readFileSync2(path, "utf8")) : void 0;
   const parsed = text === void 0 ? {} : JSON.parse(text);
   if (!isRecord(parsed) || parsed.mcpServers !== void 0 && !isRecord(parsed.mcpServers)) {
     throw new Error(`${path}: expected an object with an "mcpServers" object`);
