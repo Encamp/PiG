@@ -3339,6 +3339,15 @@
       "rationale": "Main Screen input, message/tool rendering, terminal integration, or selected presentation."
     },
     {
+      "path": "packages/coding-agent/test/interactive-mode-extension-dialogs.test.ts",
+      "upstreamTestHash": "sha256:568bdd8a00cc8d839b2e99799d3693785e83c035c29a77ec5301ab1c581d5d91",
+      "area": "tui",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Main Screen input, message/tool rendering, terminal integration, or selected presentation."
+    },
+    {
       "path": "packages/coding-agent/test/interactive-mode-status.test.ts",
       "upstreamTestHash": "sha256:0862ef9511b5b8f7afbc87380d90a761de166c01c22613e97676156aa7188142",
       "area": "tui",
@@ -4304,6 +4313,15 @@
         "hot-path"
       ],
       "rationale": "Main Screen input, message/tool rendering, terminal integration, or selected presentation: tool call renderers resolved by extensions in the transcript and HTML export."
+    },
+    {
+      "path": "packages/coding-agent/test/suite/regressions/11156-pi-ai-models-virtual-module.test.ts",
+      "upstreamTestHash": "sha256:67744b3012241b96e0944257e69bb422673d6997fc7dbbce6663b0cf9380bdc4",
+      "area": "extensions",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Extension API, discovery, runtime callbacks, or Resources on startup and turns."
     },
     {
       "path": "packages/coding-agent/test/suite/regressions/1717-2113-agent-session-event-settlement.test.ts",
@@ -6189,6 +6207,15 @@
     {
       "path": "packages/tui/test/editor.test.ts",
       "upstreamTestHash": "sha256:5e56bef4b2ab9051492ceedec190a285c6b0267531f54ce3cdcc3d22e143fbc6",
+      "area": "tui",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "Main Screen input, message/tool rendering, terminal integration, or selected presentation."
+    },
+    {
+      "path": "packages/tui/test/exit-restore.test.ts",
+      "upstreamTestHash": "sha256:7d48fe738854f16479d463ef6a0d17683ceeaf3e8fe5e5eaf4c2a4b3a41959d4",
       "area": "tui",
       "tags": [
         "hot-path"
