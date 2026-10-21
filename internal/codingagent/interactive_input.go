@@ -674,7 +674,7 @@ func (m *InteractiveMode) dispatchInputChunk(ctx context.Context, data string, t
 		}
 		data = current
 	}
-	if m.extensionDialog != nil {
+	if dialog := m.shownExtensionDialog(); dialog != nil {
 		// The dialog is the focused component, so releases are dropped unless
 		// it opts in. The editor's equivalent check sits below this branch and
 		// never runs while a dialog is open, which is what made every arrow
@@ -685,10 +685,10 @@ func (m *InteractiveMode) dispatchInputChunk(ctx context.Context, data string, t
 		if m.tuiInst != nil && m.tuiInst.ConsumeDebugKey(data) {
 			return nil
 		}
-		if !tui.ShouldDeliverKey(m.extensionDialog.component, data) {
+		if !tui.ShouldDeliverKey(dialog.component, data) {
 			return nil
 		}
-		m.extensionDialog.handle(data)
+		dialog.handle(data)
 		return nil
 	}
 

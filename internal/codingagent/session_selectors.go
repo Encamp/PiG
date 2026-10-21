@@ -161,8 +161,8 @@ func (m *InteractiveMode) disposeActiveSelector() {
 	}
 }
 
-// takeEditorSlot puts component in the editor slot. As Pi's extension dialogs, selectors and custom components do
-// (interactive-mode.ts:2714, 2790, 2832, 3010, 4860), it first disposes the active selector.
+// takeEditorSlot puts component in the editor slot. As Pi's selectors do (interactive-mode.ts:2832, 3010, 4860), it first
+// disposes the active selector.
 func (m *InteractiveMode) takeEditorSlot(component tui.Component) {
 	m.disposeActiveSelector()
 	m.editorContainer.SetChildren(component)
