@@ -59,6 +59,8 @@ func (m *InteractiveMode) emergencyTerminalExit(reason string) {
 		m.opts.TerminateExtensionProcesses()
 	}
 	EndSessionMarker()
+	// Pi's process.exit(129) runs the TUI's exit handler, which restores the terminal modes (9df819de, #11170).
+	tui.RestoreTerminalOnExit()
 	os.Exit(129)
 }
 

@@ -118,6 +118,8 @@ type ProcessTerminal struct {
 	programStatusQueryPending bool
 	// programStatusElsewhere is whether a frontend session shows the status instead (SetProgramStatusElsewhere).
 	programStatusElsewhere bool
+	// colorSchemeReports is whether the terminal's light/dark reports (mode 2031) are on, which the exit restore turns off (tui.ts getExitRestorePrefix).
+	colorSchemeReports atomic.Bool
 	// sizeCache is the window size kept between SIGWINCHs while the interactive resize handler holds it.
 	sizeCache terminalSizeCache
 }
@@ -370,7 +372,14 @@ func (t *ProcessTerminal) enterRawMode(drainOnRestore bool) (restore func(), err
 	vtRestore := t.enableVTProcessing()
 	t.writeUnlogged("\x1b[?2004h")
 	t.queryAndEnableKittyProtocol()
+	// The process-exit restore (RestoreTerminalOnExit) owns the terminal from here until restore runs, as Pi's exit handler
+	// owns it from start() to stop(). It also hands the terminal back in cooked mode, which libuv does when Node exits.
+	registerExitRestoreTerminal(t, func() {
+		_ = term.Restore(fd, state)
+		vtRestore()
+	})
 	return func() {
+		unregisterExitRestoreTerminal(t)
 		t.stopProgramStatus()
 		// Stop the terminal generating extended-key sequences before anything
 		// else, so the drain below has a finite amount of input to consume.
