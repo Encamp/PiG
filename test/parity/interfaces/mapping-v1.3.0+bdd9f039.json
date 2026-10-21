@@ -272157,8 +272157,27 @@
     },
     {
       "id": "pkg:tui/.#Terminal::property:restoreOnExit",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:575c71e06aad28c3bdd2e2ee2659dc630a358da918a0b1676486032847aa72e8"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:575c71e06aad28c3bdd2e2ee2659dc630a358da918a0b1676486032847aa72e8",
+      "rationale": "Terminal.restoreOnExit (Pi 9df819de, #11170) is an optional member the TUI calls from a process 'exit' handler with the mode resets to write before and after the terminal's own resets, synchronously, when stop() did not run. Go has no exit hook, so the member is the package function tui.RestoreTerminalOnExit (tui/terminal_exit_restore.go): a registry of the started ProcessTerminal and TuiAltScreen that writes the same ordered bytes (TuiBase prefix ?2031l?25h, TuiAltScreen prefix ?2026l, mouse off, ?7h, then the terminal's progress clear, ?2004l, Kitty pop, \u003e4;0m, then ?1049l?25h) through ProcessTerminal.restoreOnExit, once, and nothing after a normal Stop. Every os.Exit path reachable while the TUI runs, and cli.Main's return and panic unwinding, call it (TestEveryExitPathReachableWhileATUIRunsRestoresTheTerminal, TestMainDefersTheTerminalExitRestoreFirst). It is not a method of the Go Terminal interface: the interface has a single implementation that owns the registry, and a method on it would force every fake terminal to implement a hook only the process terminal can honour.",
+      "pigTargets": [
+        "tui/terminal_exit_restore.go#RestoreTerminalOnExit",
+        "tui/terminal_exit_restore.go#ProcessTerminal.restoreOnExit"
+      ],
+      "layers": {
+        "shape": "complete",
+        "production": "complete",
+        "behavior": "complete"
+      },
+      "production": [
+        "call:coding/cli/profiling.go#exitProcess",
+        "call:internal/codingagent/interactive_input.go#emergencyTerminalExit"
+      ],
+      "evidence": [
+        "test:tui/terminal_exit_restore_test.go#TestTerminalRestoreOnProcessExit",
+        "test:tui/terminal_exit_restore_test.go#TestTerminalRestoreOnProcessExitDoesNotRepeatAfterStop",
+        "test:coding/cli/exit_restore_paths_test.go#TestEveryExitPathReachableWhileATUIRunsRestoresTheTerminal"
+      ]
     },
     {
       "id": "pkg:tui/.#Terminal::property:rows",

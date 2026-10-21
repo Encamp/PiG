@@ -1150,10 +1150,10 @@ rationale = "async/Promise source new in 0.99.1; PORT_MAP status 🟡 (coding/ex
 
 [[files]]
 path = "packages/coding-agent/src/extensions/codemode/execute.ts"
-disposition = "deferred"
-contracts = []
-evidence = []
-rationale = "async/Promise source new in 0.99.1; PORT_MAP status ⬜ ((not started: codemode runs Pi's own extension code in the Node extension runtime, D-B)); no per-file ordering, cancellation and error contract has been reviewed yet, and no evidence is claimed. Review with the owning family before marking translated. Pi 3daa2028: worker admission is a synchronous slot count released when the worker exits."
+disposition = "translated"
+contracts = ["awaited", "cancellable"]
+evidence = ["test:coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionQueuesABurstInArrivalOrder", "test:coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionDropsAbortedAndTimedOutWaiters", "test:coding/extension/builtin/codemode/worker_admission_test.go#TestWorkerReservationReleasesExactlyOnce", "test:codemode/worker_settled_launch_test.go#TestLaunchResumingAfterTheResultSettledTakesNoWorker", "test:coding/extension/builtin/codemode/worker_admission_test.go#TestExecuteStartsNoWorkerForALaunchThatResumesAfterItsResultSettled"]
+rationale = "Pi 885a564b (#11184): executeCodemode awaits reserveCodemodeWorker before it builds the sandbox. A script that finds every worker taken joins a FIFO of waiters (admitCodemodeWorkers grants free slots in arrival order whenever a slot is released or the limit is read), waits at most min(timeout_ms, 60 s), and settles as aborted (the signal's reason), timed out (while waiting for a free codemode worker) or no-worker-in-60-s without starting; the wait is subtracted from the script's own deadline. The reservation covers the one worker the script starts: acquireWorker hands it to the sandbox, which releases it when the worker actually exits, and a launch that resumes after the result settled finds it released and starts nothing; a script that never reached the sandbox releases it in finally, exactly once. PI_CODEMODE_MAX_WORKERS is read on every grant. Go keeps this in coding/extension/builtin/codemode/execute.go (reserve, admit, release, workerReserved) and codemode/workerlauncher.go (settled launches skip AcquireWorker)."
 
 [[files]]
 path = "packages/coding-agent/src/extensions/codemode/tool.ts"
@@ -1339,10 +1339,10 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ported+
 
 [[files]]
 path = "packages/coding-agent/src/modes/interactive/interactive-mode.ts"
-disposition = "pending"
+disposition = "deferred"
 contracts = []
-evidence = []
-rationale = ""
+evidence = ["test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsShowTheEarlierConfirmAgainAfterTheLaterIsAnswered", "test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsRemoveAHiddenDialogWhenItsSignalAborts", "test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsStackConcurrentInlineCustomComponents", "test:test/extension-conformance/ui_concurrent_dialogs_test.go#TestConformance_ConcurrentDialogsAgreeAcrossSDKs"]
+rationale = "Only the extension-dialog ordering is reviewed (Pi 38847563): showExtensionSelector, showExtensionInput, showExtensionEditor and inline showExtensionCustom resolve their own promise when their dialog is answered, aborted or timed out, in any order, because the dialogs form a stack on the UI loop (pushExtensionDialog, removeExtensionDialog of the one answered, showTopExtensionDialog); no promise is left pending by a later dialog, and a hidden dialog's abort removes only itself. internal/codingagent/ext_ui_dialog_stack.go owns the stack and the cross-SDK conformance row covers every realization. The rest of interactive-mode.ts is not reviewed for async contracts in this pin."
 
 [[files]]
 path = "packages/coding-agent/src/modes/interactive/model-catalog-refresh.ts"

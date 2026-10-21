@@ -3142,8 +3142,15 @@
     },
     {
       "path": "packages/coding-agent/test/clipboard-command.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:8a75a2f5b44112da7705bcb4b45fc601796c72420c4a8d05669f0d69adf05b05"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:8a75a2f5b44112da7705bcb4b45fc601796c72420c4a8d05669f0d69adf05b05",
+      "evidence": [
+        "internal/codingagent/clipboard_copy_test.go",
+        "internal/codingagent/clipboard_command_upstream_test.go#TestClipboardCommandUpstream",
+        "internal/codingagent/clipboard_image_command_bounds_upstream_test.go#TestClipboardImageCommandEnforcesDefaultBufferLimit",
+        "internal/codingagent/clipboard_command_pi_test.go#TestRunClipboardCommandRunsOutsideOwnProcessGroup"
+      ],
+      "rationale": "The complete pinned upstream case set is reviewed in gate-close-08 and its delivered tests are composed from e503bb258. All named added evidence passes on the release union with Go 1.27.1, -race and -count=1; original upstream hashes and existing evidence are retained. The additional image-command overflow guard also passes after the shared bounded-runner fix 2e8ba49b9; native clipboard and BMP obligations remain separately partial. This closes the test file, not unrelated partial or live-service obligations. Pi f8ab362c (#11179): the new case 'runs commands outside pi's process group' is TestRunClipboardCommandRunsOutsideOwnProcessGroup (child pgid differs from ours; every clipboard helper goes through runClipboardCommandContext, which sets Setsid on unix). Mutation: removing the detach call fails it with 'clipboard helper pgid 1 shares pi's process group'."
     },
     {
       "path": "packages/coding-agent/test/clipboard-image-bmp-conversion.test.ts",
@@ -3232,8 +3239,22 @@
     },
     {
       "path": "packages/coding-agent/test/codemode-worker-admission.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:6a6d0e139ebadb6149a38246ee65d55203aa64aedb953a9908d0accf70034ed5"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:6a6d0e139ebadb6149a38246ee65d55203aa64aedb953a9908d0accf70034ed5",
+      "evidence": [
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionBoundsSurvivingWorkers",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerHoldsItsSlotWhileRunning",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionQueuesABurstInArrivalOrder",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionQueuesARealScriptBurstBehindTwoWorkers",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionReadsTheLimitFromPICodemodeMaxWorkers",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionIgnoresAnInvalidPICodemodeMaxWorkers",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestMaxCodemodeWorkersFollowsNumberOfTheEnvironmentValue",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionDropsAbortedAndTimedOutWaiters",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestWorkerReservationReleasesExactlyOnce",
+        "coding/extension/builtin/codemode/worker_admission_test.go#TestExecuteStartsNoWorkerForALaunchThatResumesAfterItsResultSettled",
+        "codemode/worker_settled_launch_test.go#TestLaunchResumingAfterTheResultSettledTakesNoWorker"
+      ],
+      "rationale": "Pi 3daa2028: the execute tool admits at most 2 live codemode workers and reports Pi's limit message. Pi 885a564b (#11184): a script at the worker limit waits up to 60 s in arrival order (aborts and timeouts leave the queue, error texts verbatim), PI_CODEMODE_MAX_WORKERS (positive integer, read per call), and a launch resuming after its result settled starts no worker. The old 'fails at once' and 'admits only two from a burst' cases are replaced by the queueing cases; Pi keeps workers alive by mocking Worker.terminate, PiG holds reservations. Mutation (old behaviour stubbed) fails seven of them."
     },
     {
       "path": "packages/coding-agent/test/codemode-worker-config.test.ts",
@@ -3824,8 +3845,19 @@
     },
     {
       "path": "packages/coding-agent/test/interactive-mode-extension-dialogs.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:568bdd8a00cc8d839b2e99799d3693785e83c035c29a77ec5301ab1c581d5d91"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:568bdd8a00cc8d839b2e99799d3693785e83c035c29a77ec5301ab1c581d5d91",
+      "evidence": [
+        "internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsShowTheEarlierConfirmAgainAfterTheLaterIsAnswered",
+        "internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsRemoveAHiddenDialogWhenItsSignalAborts",
+        "internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsStackConcurrentInlineCustomComponents",
+        "internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsShowAConfirmOpenedFromACustomComponentThenRestoreIt",
+        "internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsAnswerASelectInputAndEditorMixInStackOrder",
+        "internal/codingagent/ext_ui_dialog_bridge_test.go#TestExtensionDialogsFromOneExtensionStackThroughTheHostBridge",
+        "test/extension-conformance/ui_concurrent_dialogs_test.go#TestConformance_ConcurrentDialogsAgreeAcrossSDKs",
+        "coding/cli/rpc_ui_concurrent_dialogs_test.go#TestRpcConcurrentExtensionDialogsResolveEachByItsOwnID"
+      ],
+      "rationale": "Pi 38847563 (#11166, #9909): all four cases are ported to the real InteractiveMode (earlier confirm shown again with the blocked status of each, hidden dialog removed when its signal aborts, stacked inline custom components, a confirm opened from a custom component). Extra: select/input/editor mix, hidden dialog timeout, session replacement and /reload disposing every dialog, remote editor-slot focus hand-back, and a cross-SDK conformance row over every realization (Node, Go, Python, Rust; isolated, packed, fused). Mutation: with the old displace-and-hide code 14 of the new tests fail."
     },
     {
       "path": "packages/coding-agent/test/interactive-mode-import-command.test.ts",
@@ -3854,8 +3886,33 @@
     },
     {
       "path": "packages/coding-agent/test/interactive-mode-status.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:0862ef9511b5b8f7afbc87380d90a761de166c01c22613e97676156aa7188142"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:0862ef9511b5b8f7afbc87380d90a761de166c01c22613e97676156aa7188142",
+      "evidence": [
+        "internal/codingagent/interactive_mode_status_upstream_test.go#TestInteractiveStatusCoalescingUpstream",
+        "internal/codingagent/interactive_mode_status_upstream_test.go#TestInteractiveManagedToolStatusContiguousGroupUpstream",
+        "internal/codingagent/tools_expansion_upstream_test.go#TestSetToolsExpandedAppliesToHeaderAndMountedChildrenUpstream",
+        "internal/codingagent/ext_theme_settings_upstream_test.go#TestExtensionSetThemePersistsToSettingsManagerUpstream",
+        "internal/codingagent/ext_theme_settings_upstream_test.go#TestExtensionSetThemeDoesNotPersistInvalidNamesUpstream",
+        "internal/codingagent/custom_focus_upstream_test.go#TestRemoteOverlayReclaimsInputAfterEditorReplacementUpstream",
+        "internal/codingagent/autocomplete_wrappers_test.go#TestAutocompleteFactoriesRebuildOnOwnerLoop",
+        "internal/codingagent/model_autocomplete_upstream_test.go#TestInteractiveModelArgumentCompletionUpstream",
+        "internal/codingagent/login_autocomplete_upstream_test.go#TestInteractiveLoginArgumentCompletionUpstream",
+        "internal/codingagent/loaded_resources_listing_upstream_test.go#TestLoadedResourcesSkillAndExtensionListingsUpstream",
+        "internal/codingagent/loaded_resources_test.go#TestShowLoadedResourcesListsEachSectionUnderItsHeading",
+        "internal/codingagent/loaded_resources_test.go#TestLoadedResourcesExtensionLabelsMatchUpstream",
+        "internal/codingagent/loaded_resources_test.go#TestLoadedResourcesExpandedExtensionsMatchUpstream",
+        "internal/codingagent/loaded_resources_test.go#TestLoadedResourcesContextMatchesUpstream",
+        "internal/codingagent/loaded_resources_test.go#TestLoadedResourcesQuietAndVerboseStartup",
+        "internal/codingagent/loaded_resources_quiet_upstream_test.go#TestLoadedResourcesQuietReloadUpstream",
+        "internal/codingagent/loaded_resources_diagnostics_test.go#TestShowLoadedResourcesQuietDiagnosticsAllKinds",
+        "internal/codingagent/startup_quiet_diagnostics_test.go#TestQuietStartupBindShowsDiagnosticsOnly",
+        "internal/codingagent/loaded_resources_quiet_header_upstream_test.go#TestLoadedResourcesQuietStartupHeaderUpstream",
+        "internal/codingagent/ext_ui_custom_stack_test.go#TestHostCustomOverlayCloseOutOfOrderRemovesItsOwnOverlay",
+        "internal/codingagent/ext_ui_custom_stack_test.go#TestRemoteCustomOverlayCloseOutOfOrderRemovesItsOwnOverlay",
+        "internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsStackConcurrentInlineCustomComponents"
+      ],
+      "rationale": "1.0.0 added :1245 hides resource listing but keeps the startup header with header-only quiet startup and :1260 hides the startup header with full quiet startup unless verbose (TestLoadedResourcesQuietStartupHeaderUpstream), and extended :456 matches login command arguments with the /login radius account label at :511 (TestInteractiveLoginArgumentCompletionUpstream). Production paths: shouldShowStartupDetails in showLoadedResources and loginProviderSubscription in the /login and /logout provider lists. Every other case keeps its 0.99.2 evidence. Pi a4f67eb6 (#10999) adds \"closing a lower $lowerKind overlay custom UI removes its own overlay, not the topmost one\" (capturing and non-capturing lower overlay): TestHostCustomOverlayCloseOutOfOrderRemovesItsOwnOverlay has both rows with the same expectations (the upper overlay keeps the focus and the keys, the closed one gets none, closing the upper leaves no overlay and the editor focused) and the subprocess twin covers RunRemoteOverlay; reverting either hide site fails them. Pi 38847563 adds the extension dialog stack state to the showExtensionCustom cases; no new case. PiG's showExtensionCustom counterparts (remote overlay routing and editor-slot custom tests) run through the same stack."
     },
     {
       "path": "packages/coding-agent/test/interactive-mode-suspend.test.ts",
@@ -3977,8 +4034,22 @@
     },
     {
       "path": "packages/coding-agent/test/mcp-extension.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:ad9c45559f3c7d9e13d7a52ef21bf5a0e6b38a34b958a1d6cc1cec0c8643308d"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:ad9c45559f3c7d9e13d7a52ef21bf5a0e6b38a34b958a1d6cc1cec0c8643308d",
+      "evidence": [
+        "coding/mcpext/config_test.go#TestMCPConfigMergesGlobalAndTrustedProjectServersAndValidatesEntries",
+        "coding/mcpext/extension_test.go#TestAgentSessionMCPDeclaresDirectlyExposedMCPToolsToTheModel",
+        "coding/mcpext/config_test.go#TestMCPConfigValidatesTheOAuthCallbackURLScopeAndClientName",
+        "coding/mcpext/config_test.go#TestMCPConfigLetsProjectEntriesOverrideEnabledAndExposureOfGlobalServers",
+        "coding/mcpext/connection_test.go#TestMCPConnectionsClosesAConnectionThatIsStillInitializingBeforeCloseReturns",
+        "coding/mcpext/connection_test.go#TestMCPConnectionsStopsWaitingToRetryAConnectionWhenClosed",
+        "coding/mcpext/tools_test.go#TestMCPToolsDeclaresTheCallToolResultScriptsReceiveKeepingReferencesInTheServersOutputSchema",
+        "coding/mcpext/tools_test.go#67996ab75 (#10416): array structured content reaches the model as JSON and scripts as sent",
+        "coding/mcpext/connection_test.go#TestMCPConnectionsConnectsToServersWithResourcesWithoutListingThem",
+        "coding/mcpext/config_test.go#TestMCPConfigReadsAndEditsMcpJSONFilesThatStartWithAUTF8BOM",
+        "internal/codingagent/radius_login_mcp_offer_upstream_test.go#TestRadiusMcpServerConfigReadsAMcpJSONThatStartsWithAUTF8BOM"
+      ],
+      "rationale": "28 it blocks. Earlier cases are ported in coding/mcpext/{config,tools,connection,manager,servers_section,tools_render,extension}_test.go (reviewed row carried, including the 1.0.0 authServerMetadataUrl entries and the 1.0.4 shutdown cases). 1.2.0 adds three changes: 'declares the CallToolResult scripts receive, keeping references in the server's output schema' is TestMCPToolsDeclaresTheCallToolResultScriptsReceiveKeepingReferencesInTheServersOutputSchema (same schema, same expected renderToolOutputType strings via codemode.RenderToolOutputType; red before 8217a5923f); the array structured content assertion added to 'converts results, passing the CallToolResult to scripts and flagging errors' (#10416) is in TestMCPToolsConvertsResultsPassingTheCallToolResultToScriptsAndFlaggingErrors; 'connects to servers with resources without listing them' (#10526) is TestMCPConnectionsConnectsToServersWithResourcesWithoutListingThem. The createTransport resources option is the Go fake server's capability setting. Pi bdd9f039 (#11191): 'reads and edits mcp.json files that start with a UTF-8 BOM' is TestMCPConfigReadsAndEditsMcpJSONFilesThatStartWithAUTF8BOM (global and project, load without errors, addMcpServerConfig rewrites the whole document); the Radius offer reads mcp.json directly where Pi goes through loadMcpConfig, so it strips the BOM too."
     },
     {
       "path": "packages/coding-agent/test/mcp-manager-view.test.ts",
@@ -5355,8 +5426,12 @@
     },
     {
       "path": "packages/coding-agent/test/suite/regressions/11156-pi-ai-models-virtual-module.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:67744b3012241b96e0944257e69bb422673d6997fc7dbbce6663b0cf9380bdc4"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:67744b3012241b96e0944257e69bb422673d6997fc7dbbce6663b0cf9380bdc4",
+      "evidence": [
+        "coding/extension/host/subprocess/node_pi_ai_models_test.go#TestNodeExtensionImportsPiAiModelsSubpath"
+      ],
+      "rationale": "Pi 22dc6c26 (#11156): both cases (the @earendil-works/pi-ai/models virtual module exposes clampThinkingLevel, and the legacy @mariozechner scope is the same module) are TestNodeExtensionImportsPiAiModelsSubpath, which loads a jiti extension and a native import through the real Node runtime under both scopes. Mutation: dropping the loader shim entries fails it with Cannot find module and fails TestNodeRuntimeLoaderCoversPiVirtualModules."
     },
     {
       "path": "packages/coding-agent/test/suite/regressions/1717-2113-agent-session-event-settlement.test.ts",
@@ -7897,8 +7972,15 @@
     },
     {
       "path": "packages/tui/test/exit-restore.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:7d48fe738854f16479d463ef6a0d17683ceeaf3e8fe5e5eaf4c2a4b3a41959d4"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:7d48fe738854f16479d463ef6a0d17683ceeaf3e8fe5e5eaf4c2a4b3a41959d4",
+      "evidence": [
+        "tui/terminal_exit_restore_test.go#TestTerminalRestoreOnProcessExit",
+        "tui/terminal_exit_restore_test.go#TestTerminalRestoreOnProcessExitDoesNotRepeatAfterStop",
+        "tui/terminal_exit_restore_test.go#TestTerminalRestoreOnReturnAndOnPanicUnwinding",
+        "coding/cli/exit_restore_paths_test.go#TestEveryExitPathReachableWhileATUIRunsRestoresTheTerminal"
+      ],
+      "rationale": "Pi 9df819de (#11170): both cases ('restores terminal modes when the process exits without stop()', 'does not restore twice after a normal stop()') run a fixture process on a pty (exit-without-stop.ts is the TestExitRestoreFixture helper) and assert the same sequences once each, the Kitty pop before ?1049l, and the ?1049l?25h tail. Go has no exit hook, so the guard tests prove every os.Exit path reachable while the TUI runs, and Main's return and panic unwinding, call tui.RestoreTerminalOnExit. Mutations: dropping the call from exitProcess, or moving the Kitty pop after ?1049l, fails them."
     },
     {
       "path": "packages/tui/test/fuzzy.test.ts",
@@ -7975,8 +8057,29 @@
     },
     {
       "path": "packages/tui/test/markdown.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:c1fb6261e02e2a01de24ccebd6c6381c88d21e963e33cbe14a58e870c457fba9"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:c1fb6261e02e2a01de24ccebd6c6381c88d21e963e33cbe14a58e870c457fba9",
+      "evidence": [
+        "tui/markdown_test.go#TestMarkdownTableSimple",
+        "tui/w3_sessions_test.go#TestMarkdownRuleWidthCap",
+        "internal/codingagent/w3_pi_test.go#TestW3SessionPiComparison",
+        "tui/markdown_codeblock_wrap_test.go#TestCodeBlockKeepsEveryCharacterAtNarrowWidth",
+        "tui/markdown_row_invariant_test.go#TestRealMarkdownNeverEmitsAnOverWideRow",
+        "tui/markdown_width_test.go#TestMarkdownRender_NeverExceedsWidth",
+        "tui/markdown_latex_test.go#TestMarkdownLatexMatchesUpstream",
+        "tui/markdown_upstream_test.go#TestUpstreamMarkdown",
+        "tui/markdown_upstream_fixture_test.go",
+        "tui/markdown_port_regressions_test.go",
+        "test/parity/scenarios/tui-components/16-markdown-user-components.toml",
+        "tui/markdown_cjk_test.go#TestMarkdownCJKEmphasisPiCases",
+        "tui/markdown_cjk_test.go#TestMarkdownCJKEmphasisMatchesPi",
+        "tui/markdown_cjk_test.go#TestMarkedCJKClassMatchesPinnedPackage",
+        "tui/markdown_marked_test.go#TestMarkedRightDelimiterScanMatchesRegexps",
+        "tui/markdown_latex_table_test.go#TestMarkdownUnclosedDisplayMathBeforeTables",
+        "tui/markdown_latex_table_test.go#TestMarkdownUnclosedDisplayMathBeforeTablesMatchesPi",
+        "tui/markdown_latex_table_test.go#TestMarkdownContainsTableStart"
+      ],
+      "rationale": "All 81 upstream cases are ported with source-line citations, original names, exact inputs and assertion predicates, including every table row, callback/cache transition and terminal-cell style check. The strict generator rejects unknown source constructs; six complex cases have explicit Go ports. Red failures expose constructor options, nested list blocks, style restoration, escapes and streamed fences. Compiling mutations and complete ANSI/padding observations against real Pi prove the fixes. D54 is retired because current Pi wraps every non-image rendered row in its final pass. Pi 2ed3118b (#11159): the eight 'unclosed display math before tables' cases are TestMarkdownUnclosedDisplayMathBeforeTables (seven fail on the old tokenizer), plus a live-Pi comparison of them and about thirty neighbouring documents."
     },
     {
       "path": "packages/tui/test/mouse-components.test.ts",
@@ -8168,8 +8271,26 @@
     },
     {
       "path": "packages/tui/test/terminal-image.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:e6d6d246c6134cdf846f7302f1f5edf2a9ea939eecfd2e0f536e26a783697b99"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:e6d6d246c6134cdf846f7302f1f5edf2a9ea939eecfd2e0f536e26a783697b99",
+      "evidence": [
+        "tui/terminal_image_test.go#TestIsImageLine",
+        "tui/terminal_image_test.go#TestDetectCapabilities",
+        "tui/terminal_image_test.go#TestImageFallbackAndHyperlink",
+        "coding/extension/host/subprocess/runtime_node_tui_upstream_test.go#TestNodeVendoredTuiUpstreamTests",
+        "tui/terminal_image_detection_upstream_test.go#TestUpstreamTerminalImageDetection",
+        "tui/terminal_image_upstream_test.go#TestUpstreamTerminalImageCapabilities",
+        "tui/terminal_image_upstream_test.go#TestUpstreamTerminalImageEncoding",
+        "tui/terminal_image_upstream_test.go#TestUpstreamImageFallback",
+        "tui/terminal_image_upstream_test.go#TestUpstreamImageHyperlink",
+        "tui/terminal_image_sizing_upstream_test.go#TestUpstreamTerminalImageDetectsTruecolorFromDirectColorTerm",
+        "tui/terminal_image_sizing_upstream_test.go#TestUpstreamImageCellSizing",
+        "tui/image_transcoder_upstream_test.go#TestUpstreamImageTranscoding",
+        "tui/terminal_image_upstream_test.go#enables hyperlinks and Kitty images for Herdr",
+        "tui/terminal_image_upstream_test.go#enables hyperlinks without images for Rex",
+        "tui/terminal_image_upstream_test.go#lets PI_HYPERLINKS=0 disable Rex hyperlinks"
+      ],
+      "rationale": "79 cases; the other 78 keep the prior evidence. 1.2.0 changes one case: \"enables hyperlinks without images for Herdr\" becomes \"enables hyperlinks and Kitty images for Herdr\" (#10573), expecting images \"kitty\" for TERM_PROGRAM=herdr. The base already ports it: tui/terminal_image.go detectCapabilities returns ImageProtocolKitty for TERM_PROGRAM=herdr (terminal-image.ts), and the TestUpstreamTerminalImageCapabilities row of that name passes; the PI_HYPERLINKS=0 environment only turns hyperlinks off. Pig's D44 HERDR_ENV/HERDR_KITTY_GRAPHICS branches stay ahead of it. 0.5.2 (Pi 0ed1b043, #11131): one new case, \"enables hyperlinks without images for Rex\": TERM_PROGRAM=rex with TERM=xterm-256color and a leaked KITTY_WINDOW_ID gives hyperlinks and truecolor with images off, and PI_HYPERLINKS=0 turns hyperlinks off. It is ported as two rows of TestUpstreamTerminalImageCapabilities (the case's two withEnv blocks), red before the rex branch in tui/terminal_image.go (the leaked KITTY_WINDOW_ID gave Kitty images; the PI_HYPERLINKS row had no truecolor). Pi 396ecd7b: Rex reports Kitty images (the two Rex cases of TestUpstreamTerminalImageCapabilities expect images kitty, truecolor, hyperlinks; the live Pi decides TestColorDetectionMatchesPi)."
     },
     {
       "path": "packages/tui/test/terminal.test.ts",

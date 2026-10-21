@@ -2160,9 +2160,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/extensions/loader.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/extension/host/subprocess/node_pi_ai_models_test.go#TestNodeExtensionImportsPiAiModelsSubpath"]
+rationale = "Pi 22dc6c26 (#11156): the loader aliases @earendil-works/pi-ai/models and the legacy @mariozechner scope to the models entry; the Node runtime loader shim map and register-loader carry both scopes."
 
 [[files]]
 path = "packages/coding-agent/src/core/extensions/runner.ts"
@@ -2181,9 +2181,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/extensions/virtual-modules.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/extension/host/subprocess/node_pi_ai_models_test.go#TestNodeExtensionImportsPiAiModelsSubpath", "test:coding/extension/host/subprocess/node_loader_test.go#TestNodeRuntimeLoaderCoversPiVirtualModules"]
+rationale = "Pi 22dc6c26 (#11156): VIRTUAL_MODULES gains pi-ai/models under both scopes; the vendored runtime bundles a models entry (shims/pi-dist/pi-ai/sdk-bundle/models.js) and runtime-modules lists it."
 
 [[files]]
 path = "packages/coding-agent/src/core/extensions/wrapper.ts"
@@ -2678,9 +2678,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/extensions/codemode/execute.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionQueuesABurstInArrivalOrder", "test:coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionDropsAbortedAndTimedOutWaiters", "test:codemode/worker_settled_launch_test.go#TestLaunchResumingAfterTheResultSettledTakesNoWorker"]
+rationale = "Pi 885a564b (#11184): a script waits up to 60 s for a worker in arrival order instead of failing at the limit, the wait counts toward timeout_ms, PI_CODEMODE_MAX_WORKERS (positive integer, read per call) sets the limit, a launch resuming after its result settled starts no worker, and the reservation is released exactly once; the Go reserve/admit/release, execute.go error texts and codemode/workerlauncher.go follow, with docs in both mirrors."
 
 [[files]]
 path = "packages/coding-agent/src/extensions/codemode/index.ts"
@@ -2769,9 +2769,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/extensions/mcp/config.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/mcpext/config_test.go#TestMCPConfigReadsAndEditsMcpJSONFilesThatStartWithAUTF8BOM", "test:internal/codingagent/radius_login_mcp_offer_upstream_test.go#TestRadiusMcpServerConfigReadsAMcpJSONThatStartsWithAUTF8BOM"]
+rationale = "Pi bdd9f039 (#11191): readConfigFile and editMcpServers strip a UTF-8 BOM before parsing; coding/mcpext/config.go does the same for both and so do pig mcp add and remove."
 
 [[files]]
 path = "packages/coding-agent/src/extensions/mcp/index.ts"
@@ -3231,9 +3231,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/modes/interactive/interactive-mode.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsShowTheEarlierConfirmAgainAfterTheLaterIsAnswered", "test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsRemoveAHiddenDialogWhenItsSignalAborts", "test:test/extension-conformance/ui_concurrent_dialogs_test.go#TestConformance_ConcurrentDialogsAgreeAcrossSDKs"]
+rationale = "Pi 38847563 (#11166, #9909): select, confirm, input, editor and inline custom dialogs form a stack (pushExtensionDialog, removeExtensionDialog, showTopExtensionDialog) instead of replacing each other, the visible one is the last, closing it shows the previous one, a hidden dialog's abort removes only itself, and resetExtensionUI disposes every dialog; internal/codingagent/ext_ui_dialog_stack.go owns the stack for in-process, remote and custom dialogs, session replacement and /reload reset it, and a conformance row covers every SDK realization."
 
 [[files]]
 path = "packages/coding-agent/src/modes/interactive/model-catalog-refresh.ts"
@@ -3392,9 +3392,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/utils/clipboard-command.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:internal/codingagent/clipboard_command_pi_test.go#TestRunClipboardCommandRunsOutsideOwnProcessGroup"]
+rationale = "Pi f8ab362c (#11179): clipboard helpers spawn detached on POSIX so Ctrl+Z (SIGTSTP to the group) does not stop the daemon that serves the clipboard; runClipboardCommandContext sets Setsid through detachClipboardChild on unix and nothing on Windows."
 
 [[files]]
 path = "packages/coding-agent/src/utils/clipboard-image.ts"
@@ -4561,9 +4561,9 @@ rationale = ""
 [[files]]
 path = "packages/tui/src/components/markdown.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:tui/markdown_latex_table_test.go#TestMarkdownUnclosedDisplayMathBeforeTables", "test:tui/markdown_latex_table_test.go#TestMarkdownUnclosedDisplayMathBeforeTablesMatchesPi"]
+rationale = "Pi 2ed3118b (#11159): tokenizeBlockLatex refuses a display-math token whose body contains a GFM table start (containsTableStart, TABLE_DELIMITER_ROW_REGEX), including the pending \\[ and pending $$ fallbacks; tui/markdown_latex.go ports the helper and the four guards, and the clipping and list paths reach it through tokenizeBlockLatex. Seven of the eight ported cases fail on the old tokenizer; a live-Pi comparison covers them and about thirty neighbours."
 
 [[files]]
 path = "packages/tui/src/components/mouse-region.ts"
@@ -4743,23 +4743,23 @@ rationale = ""
 [[files]]
 path = "packages/tui/src/terminal-image.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:tui/terminal_image_upstream_test.go#TestUpstreamTerminalImageCapabilities"]
+rationale = "Pi 396ecd7b: Rex reports Kitty images with true color and hyperlinks; tui/terminal_image.go detectCapabilitiesFromEnvironment follows, the two Rex cases of the upstream test are ported, and the docs table row says images yes."
 
 [[files]]
 path = "packages/tui/src/terminal.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:tui/terminal_exit_restore_test.go#TestTerminalRestoreOnProcessExit", "test:tui/terminal_exit_restore_test.go#TestRestoreTerminalOnExitMainScreenWritesOnceAndRestoresCookedMode"]
+rationale = "Pi 9df819de (#11170): Terminal.restoreOnExit and ProcessTerminal.restoreOnExit write the progress clear, ?2004l, the Kitty pop and >4;0m synchronously between the before and after sequences; tui/terminal_exit_restore.go ProcessTerminal.restoreOnExit does the same through the tui.RestoreTerminalOnExit registry (Go has no exit hook, so every os.Exit path and Main's return call it) and also restores cooked mode, which libuv does for Node."
 
 [[files]]
 path = "packages/tui/src/tui-alt-screen.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:tui/terminal_exit_restore_test.go#TestRestoreTerminalOnExitAltScreenWithColorSchemeReportsAndModifyOtherKeys", "test:tui/terminal_exit_restore_test.go#TestTerminalRestoreOnProcessExit"]
+rationale = "Pi 9df819de: TuiAltScreen adds END_SYNCHRONIZED_OUTPUT, the mouse disable when mouse is on and ENABLE_AUTOWRAP to the exit prefix and EXIT_ALT_SCREEN plus ?25h after the Kitty pop to the suffix; tui.exitRestorePrefix and exitRestoreSuffix write the same bytes in the same order."
 
 [[files]]
 path = "packages/tui/src/tui-main-screen.ts"
@@ -4771,9 +4771,9 @@ rationale = ""
 [[files]]
 path = "packages/tui/src/tui.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:tui/terminal_exit_restore_test.go#TestTerminalRestoreOnProcessExitDoesNotRepeatAfterStop", "test:coding/cli/exit_restore_paths_test.go#TestEveryExitPathReachableWhileATUIRunsRestoresTheTerminal"]
+rationale = "Pi 9df819de: TuiBase installs a process exit handler in start(), removes it in stop(), and the handler writes getExitRestorePrefix (?2031l when color-scheme reports are on, then ?25h) unless stopped; the Go registry is entered when raw mode starts and left on Stop, so nothing is written twice."
 
 [[files]]
 path = "packages/tui/src/undo-stack.ts"
