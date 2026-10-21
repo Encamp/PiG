@@ -142412,7 +142412,8 @@
         "call:internal/packagemanager/package_manager.go#PackageManager.SetProgressCallback"
       ],
       "evidence": [
-        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback"
+        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback",
+        "test:internal/packagemanager/package_update_shared_checkout_test.go#TestUpdateRunsThePackagesOfOneCheckoutOneAtATime"
       ]
     },
     {
@@ -142432,7 +142433,8 @@
         "call:internal/packagemanager/package_manager.go#PackageManager.SetProgressCallback"
       ],
       "evidence": [
-        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback"
+        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback",
+        "test:internal/packagemanager/package_update_shared_checkout_test.go#TestUpdateRunsThePackagesOfOneCheckoutOneAtATime"
       ]
     },
     {
@@ -157609,9 +157611,9 @@
         "call:coding/extension/host/subprocess/ui_bridge.go#UIBridge.SetWidgetRequestFunc"
       ],
       "evidence": [
+        "test:test/extension-conformance/rpc_widget_frames_test.go#TestConformance_RPCModeDropsFrameWidgetsInEverySDK",
         "test:coding/cli/rpc_ui_set_widget_factory_test.go#TestRPCUIContextSetWidgetFactoryRemovesOnNilAndIgnoresAFactory",
-        "test:coding/extension/host/subprocess/ui_bridge_test.go#TestUIBridge_HandleCall_SetWidget_RequestObserverPreservesPlacement",
-        "test:coding/extension/ui_test.go#TestUIContext_SettersTakePiTypedFactories"
+        "test:coding/extension/host/subprocess/integration_test.go#TestHost_Integration_TSWidgetFactoryIsNotRunOutsideTheTUI"
       ]
     },
     {
@@ -170746,7 +170748,8 @@
         "call:internal/packagemanager/package_manager.go#PackageManager.SetProgressCallback"
       ],
       "evidence": [
-        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback"
+        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback",
+        "test:internal/packagemanager/package_update_shared_checkout_test.go#TestUpdateRunsThePackagesOfOneCheckoutOneAtATime"
       ]
     },
     {
@@ -170766,7 +170769,8 @@
         "call:internal/packagemanager/package_manager.go#PackageManager.SetProgressCallback"
       ],
       "evidence": [
-        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback"
+        "test:internal/packagemanager/package_manager_test.go#TestPackageManagerReportsProgressToTheInstalledCallback",
+        "test:internal/packagemanager/package_update_shared_checkout_test.go#TestUpdateRunsThePackagesOfOneCheckoutOneAtATime"
       ]
     },
     {
