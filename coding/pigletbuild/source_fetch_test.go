@@ -338,14 +338,17 @@ func TestGoModDownloadFetchesPublishedPigSource(t *testing.T) {
 // TestPublishedPigReleaseResolvesThroughTheModuleProxy resolves the published v0.3.1 release
 // through the real module proxy and checksum database. It fetches only the release metadata
 // (.info and go.mod, a few KB; a failed go.mod hash check fails the command), not the 50 MB source zip, and checks the go.mod hash against
-// sum.golang.org. It skips when the proxy is unreachable.
+// sum.golang.org. An unreachable proxy fails the test; a run that has no network on purpose says so with PIG_TEST_OFFLINE=1 (or -short).
 func TestPublishedPigReleaseResolvesThroughTheModuleProxy(t *testing.T) {
 	if testing.Short() {
 		t.Skip("network metadata lookup")
 	}
+	if os.Getenv("PIG_TEST_OFFLINE") == "1" {
+		t.Skip("PIG_TEST_OFFLINE=1: no network by request")
+	}
 	conn, err := net.DialTimeout("tcp", "proxy.golang.org:443", 3*time.Second)
 	if err != nil {
-		t.Skipf("Go module proxy unreachable: %v", err)
+		t.Fatalf("Go module proxy unreachable (set PIG_TEST_OFFLINE=1 to run offline on purpose): %v", err)
 	}
 	_ = conn.Close()
 	t.Setenv("GOMODCACHE", t.TempDir())
