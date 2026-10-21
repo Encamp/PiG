@@ -4,6 +4,10 @@
 #
 # Pi bd3c9b82 (#11062, #11075): _restoreToolsFromTranscript. The staged branch recorded read and retired, then removed retired. The extension registers
 # fresh (never mentioned), retired (removed), and quiet (defaultActive false). The extension's getActiveTools after resume lists read and fresh only.
+#
+# Upstream evidence (2026-10-21, 100x35 tmux, pinned Pi 1.3.0+bd3c9b82 built from the oracle): `go test -tags=parity ./test/parity/runner -run
+# 'TestParity/36-resume-activates-extension-tools$'` passed 3 of 3 declared pairs with byte-identical crops:
+#   active-tools:fresh,read:end
 
 name = "36-resume-activates-extension-tools"
 description = "Resume activates extension tools the branch never mentioned and keeps removed and defaultActive false tools inactive."
