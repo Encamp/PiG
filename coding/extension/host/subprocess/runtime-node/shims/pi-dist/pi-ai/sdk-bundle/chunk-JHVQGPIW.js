@@ -1,6 +1,7 @@
 import {
-  calculateCost
-} from "./chunk-5ZOONRKO.js";
+  calculateCost,
+  getIdentityHeaders
+} from "./chunk-4QEFVS4X.js";
 import {
   __name
 } from "./chunk-SHUYVCID.js";
@@ -147,8 +148,8 @@ function requiredNumber(label, value, field) {
   return value;
 }
 __name(requiredNumber, "requiredNumber");
-function requestHeaders(model, apiKey, optionsHeaders) {
-  return providerHeadersToRecord({ authorization: `Bearer ${apiKey}`, "content-type": "application/json" }, model.headers, optionsHeaders) ?? {};
+function requestHeaders(model, apiKey, optionsHeaders, identity) {
+  return providerHeadersToRecord(getIdentityHeaders(model, identity), { authorization: `Bearer ${apiKey}`, "content-type": "application/json" }, model.headers, optionsHeaders) ?? {};
 }
 __name(requestHeaders, "requestHeaders");
 async function postClassifierRequest(label, url, model, body, options, noRetryStatuses) {
@@ -166,7 +167,7 @@ async function postClassifierRequest(label, url, model, body, options, noRetrySt
     try {
       const next = await requestFetch(url, {
         method: "POST",
-        headers: requestHeaders(model, apiKey, options.headers),
+        headers: requestHeaders(model, apiKey, options.headers, options.identity),
         body: JSON.stringify(payload),
         signal
       });

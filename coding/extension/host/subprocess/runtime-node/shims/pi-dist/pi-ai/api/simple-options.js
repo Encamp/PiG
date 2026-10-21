@@ -29,6 +29,7 @@ export function buildBaseOptions(model, context, options, apiKey) {
         cacheRetention: options?.cacheRetention,
         sessionId: options?.sessionId,
         headers: options?.headers,
+        identity: options?.identity,
         onPayload: options?.onPayload,
         onResponse: options?.onResponse,
         onProviderStreamEvent: options?.onProviderStreamEvent,

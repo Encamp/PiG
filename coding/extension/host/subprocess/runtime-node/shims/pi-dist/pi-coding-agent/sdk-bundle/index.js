@@ -78,7 +78,6 @@ import {
   getLastAssistantUsage,
   getLatestCompactionEntry,
   getMissingSessionCwdIssue,
-  getPiUserAgent,
   isBashToolResult,
   isBuiltinExtension,
   isEditToolResult,
@@ -123,7 +122,7 @@ import {
   wrapRegisteredTools,
   writeBugReportArchive,
   writeRawStdout
-} from "./chunk-AXA566RN.js";
+} from "./chunk-3YI37CVX.js";
 import {
   convertToPng,
   createBashToolDefinition,
@@ -147,6 +146,7 @@ import {
   formatDimensionNote,
   generateDiffString,
   generateUnifiedPatch,
+  getPiUserAgent,
   grepRenderers,
   loadPhoton,
   lsRenderers,
@@ -157,7 +157,7 @@ import {
   resolveReadPath,
   withFileMutationQueue,
   writeRenderers
-} from "./chunk-6HW2EHDY.js";
+} from "./chunk-5EKWCXVB.js";
 import {
   CODEMODE_TOOL_NAME,
   TOOL_SEARCH_TOOL_NAME,

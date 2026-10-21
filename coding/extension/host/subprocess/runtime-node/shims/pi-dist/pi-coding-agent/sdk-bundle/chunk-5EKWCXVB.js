@@ -36,7 +36,7 @@ import {
   untrackDetachedChildPid
 } from "./chunk-RVJYK3FO.js";
 import {
-  APP_NAME,
+  VERSION,
   formatPathRelativeToCwdOrAbsolute,
   getBinDir,
   getReadmePath,
@@ -1581,6 +1581,13 @@ async function fetchWithRetry(input, init = void 0, options = {}) {
 }
 __name(fetchWithRetry, "fetchWithRetry");
 
+// pi-dist/pi-coding-agent/utils/pi-user-agent.js
+import { formatUserAgent } from "../../pi-ai/sdk-bundle/index.js";
+function getPiUserAgent(version) {
+  return formatUserAgent({ userAgent: "detailed" });
+}
+__name(getPiUserAgent, "getPiUserAgent");
+
 // pi-dist/pi-coding-agent/utils/tools-manager.js
 var TOOLS_DIR = getBinDir();
 var NETWORK_TIMEOUT_MS = 1e4;
@@ -1661,7 +1668,7 @@ function getToolPath(tool) {
 __name(getToolPath, "getToolPath");
 async function getLatestVersion(repo) {
   const response = await fetchWithRetry(`https://github.com/${repo}/releases/latest`, {
-    headers: { "User-Agent": `${APP_NAME}-coding-agent` },
+    headers: { "User-Agent": getPiUserAgent(VERSION) },
     redirect: "manual"
   }, { timeoutMs: NETWORK_TIMEOUT_MS });
   try {
@@ -4016,6 +4023,7 @@ export {
   resizeImage,
   formatDimensionNote,
   processImage,
+  getPiUserAgent,
   createShellRenderers,
   createLocalBashOperations,
   createBashToolDefinition,

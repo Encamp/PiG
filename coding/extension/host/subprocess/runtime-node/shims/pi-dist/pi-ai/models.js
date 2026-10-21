@@ -5,6 +5,7 @@ import { ModelsError, refreshStoredOAuthCredential, resolveProviderAuth, } from 
 import { InMemoryModelsStore } from "./models-store.js";
 import { observeModelRequest } from "./telemetry.js";
 import { operationSignal, raceWithAbortSignal } from "./utils/abort.js";
+import { getOpenCodeSessionHeaders, mergeClientIdentity } from "./utils/identity.js";
 import { assertChatModel, assertClassifierInputSupported, assertClassifierModel, assertImageModel, classifierErrorResult, getModelType, imageErrorResult, isModelType, } from "./utils/model-operations.js";
 import { normalizeContext } from "./utils/transcript.js";
 export { ModelsError } from "./auth/resolve.js";
@@ -38,6 +39,7 @@ class ModelsImpl {
     credentials;
     modelsStore;
     authContext;
+    identity;
     refreshGenerations = new Map();
     refreshControllers = new Map();
     publicationChains = new Map();
@@ -45,6 +47,7 @@ class ModelsImpl {
         this.credentials = options?.credentials ?? new InMemoryCredentialStore();
         this.modelsStore = options?.modelsStore ?? new InMemoryModelsStore();
         this.authContext = options?.authContext ?? defaultAuthContext();
+        this.identity = options?.identity;
     }
     setProvider(provider) {
         this.supersedeProviderRefresh(provider.id);
@@ -434,13 +437,21 @@ class ModelsImpl {
         const auth = resolution.auth;
         // Explicit request options win per-field; the Models-only transform runs last.
         const apiKey = options?.apiKey ?? auth.apiKey;
-        let headers = mergeHeaders(auth.headers, options?.headers);
+        const requestModel = auth.baseUrl ? { ...model, baseUrl: auth.baseUrl } : model;
+        const sessionId = options && "sessionId" in options && typeof options.sessionId === "string" ? options.sessionId : undefined;
+        let headers = mergeHeaders(mergeHeaders(getOpenCodeSessionHeaders(requestModel, sessionId), auth.headers), options?.headers);
         if (options?.transformHeaders)
             headers = await options.transformHeaders(headers ?? {});
         const env = resolution.env || options?.env ? { ...(resolution.env ?? {}), ...(options?.env ?? {}) } : undefined;
-        const requestModel = auth.baseUrl ? { ...model, baseUrl: auth.baseUrl } : model;
+        const identity = mergeClientIdentity(this.identity, options?.identity);
         const { transformHeaders: _transformHeaders, ...providerOptions } = options ?? {};
-        const requestOptions = { ...providerOptions, apiKey, headers, env };
+        const requestOptions = {
+            ...providerOptions,
+            apiKey,
+            headers,
+            env,
+            ...(identity === undefined ? {} : { identity }),
+        };
         return { requestModel, requestOptions };
     }
     stream(model, context, options) {
