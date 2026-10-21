@@ -1160,7 +1160,7 @@
     },
     {
       "path": "packages/ai/test/identity.test.ts",
-      "upstreamTestHash": null,
+      "upstreamTestHash": "sha256:cf6766b2cb95e805cff3c4fd12afc99eb588a6cce6fa9b8472ded0f06def3293",
       "area": "providers",
       "tags": [
         "hot-path"
@@ -3894,7 +3894,7 @@
     },
     {
       "path": "packages/coding-agent/test/sdk-client-identity.test.ts",
-      "upstreamTestHash": null,
+      "upstreamTestHash": "sha256:8360908a2501aaf1ab1e00a96bf2d4f06f91965af823ecb01442f9ad208ac767",
       "area": "providers",
       "tags": [
         "hot-path"
