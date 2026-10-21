@@ -1,207 +1,23 @@
-pkg:agent/.#Agent	agent	child-gap	agent/agent.go#Agent
-pkg:agent/.#Agent::property:identity	agent	member-missing	agent/agent.go#Agent
-pkg:agent/.#AgentLoopConfig	agent	child-gap	agent/standalone_loop.go#AgentLoopConfig
-pkg:agent/.#AgentLoopConfig::property:identity	agent	member-missing	agent/standalone_loop.go#AgentLoopConfig
-pkg:agent/.#AgentOptions	agent	child-gap	agent/agent.go#AgentOptions
-pkg:agent/.#AgentOptions::property:identity	agent	member-missing	agent/agent.go#AgentOptions
-pkg:agent/.#DEFAULT_AGENT_IDENTITY	agent	no-go-symbol	
-pkg:ai/.#AnthropicOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#AnthropicOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#AzureOpenAIResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#AzureOpenAIResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#BedrockOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#BedrockOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#ClassifierOptions	ai	child-gap	ai/classifier.go#ClassifierOptions
-pkg:ai/.#ClassifierOptions::property:identity	ai	member-missing	ai/classifier.go#ClassifierOptions
-pkg:ai/.#ClientAttribution	ai	no-go-symbol	
-pkg:ai/.#ClientAttribution::property:categories	ai	child-gap	
-pkg:ai/.#ClientAttribution::property:name	ai	child-gap	
-pkg:ai/.#ClientAttribution::property:url	ai	child-gap	
-pkg:ai/.#ClientIdentity	ai	no-go-symbol	
-pkg:ai/.#ClientIdentity::property:attribution	ai	child-gap	
-pkg:ai/.#ClientIdentity::property:userAgent	ai	child-gap	
-pkg:ai/.#ClientIdentity::property:version	ai	child-gap	
-pkg:ai/.#ClientIdentityTarget	ai	undecidable	
-pkg:ai/.#ClientIdentityTarget::property:baseUrl	ai	child-gap	
-pkg:ai/.#ClientIdentityTarget::property:provider	ai	child-gap	
-pkg:ai/.#CreateModelsOptions	ai	child-gap	ai/models_options.go#CreateModelsOptions
-pkg:ai/.#CreateModelsOptions::property:identity	ai	member-missing	ai/models_options.go#CreateModelsOptions
-pkg:ai/.#DeferredFetchOptions	ai	child-gap	ai/models_runtime.go#DeferredFetchOptions
-pkg:ai/.#DeferredFetchOptions::property:identity	ai	member-missing	ai/models_runtime.go#DeferredFetchOptions
-pkg:ai/.#GoogleOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#GoogleOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#GoogleVertexOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#GoogleVertexOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#ImagesOptions	ai	child-gap	ai/images.go#ImagesOptions
-pkg:ai/.#ImagesOptions::property:identity	ai	member-missing	ai/images.go#ImagesOptions
-pkg:ai/.#MistralOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#MistralOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#ModelsClassifierOptions	ai	type-mismatch	ai/classifier.go#ModelsClassifierOptions
-pkg:ai/.#ModelsDeferredFetchOptions	ai	type-mismatch	ai/models_runtime.go#DeferredFetchOptions
-pkg:ai/.#ModelsImagesOptions	ai	type-mismatch	ai/models_runtime_typed.go#ModelsImagesOptions
-pkg:ai/.#ModelsSimpleStreamOptions	ai	type-mismatch	ai/types.go#StreamOptions
-pkg:ai/.#OpenAICodexResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#OpenAICodexResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#OpenAICompletionsOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#OpenAICompletionsOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#OpenAIResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#OpenAIResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
 pkg:ai/.#PI_AI_VERSION	ai	no-go-symbol	
-pkg:ai/.#PI_ATTRIBUTION	ai	no-go-symbol	
-pkg:ai/.#PiMessagesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#PiMessagesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#ProviderRequestOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#ProviderRequestOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#SimpleStreamOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#SimpleStreamOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#StreamOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/.#StreamOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/.#UserAgentMode	ai	no-go-symbol	
-pkg:ai/.#formatUserAgent	ai	no-go-symbol	
-pkg:ai/.#formatUserAgent::call:0	ai	child-gap	
-pkg:ai/.#getAttributionHeaders	ai	no-go-symbol	
-pkg:ai/.#getAttributionHeaders::call:0	ai	child-gap	
-pkg:ai/.#getClientVersion	ai	no-go-symbol	
-pkg:ai/.#getClientVersion::call:0	ai	child-gap	
-pkg:ai/.#getIdentityHeaders	ai	no-go-symbol	
-pkg:ai/.#getIdentityHeaders::call:0	ai	child-gap	
-pkg:ai/.#getOpenCodeSessionHeaders	ai	no-go-symbol	
-pkg:ai/.#getOpenCodeSessionHeaders::call:0	ai	child-gap	
-pkg:ai/.#mergeClientIdentity	ai	no-go-symbol	
-pkg:ai/.#mergeClientIdentity::call:0	ai	child-gap	
-pkg:ai/.#withClientIdentity	ai	no-go-symbol	
-pkg:ai/.#withClientIdentity::call:0	ai	child-gap	
-pkg:ai/.#withClientIdentity::call:1	ai	child-gap	
-pkg:ai/api/anthropic-messages#AnthropicOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/anthropic-messages#AnthropicOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/azure-openai-config#AzureEndpointOptions	ai	child-gap	ai/azure_config.go#AzureEndpointOptions
-pkg:ai/api/azure-openai-config#AzureEndpointOptions::property:identity	ai	member-missing	ai/azure_config.go#AzureEndpointOptions
-pkg:ai/api/azure-openai-responses#AzureOpenAIResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/azure-openai-responses#AzureOpenAIResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/bedrock-converse-stream#BedrockOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/bedrock-converse-stream#BedrockOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/google-generative-ai#GoogleOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/google-generative-ai#GoogleOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/google-vertex#GoogleVertexOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/google-vertex#GoogleVertexOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/mistral-conversations#MistralOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/mistral-conversations#MistralOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/openai-codex-responses#OpenAICodexResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/openai-codex-responses#OpenAICodexResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/openai-completions#OpenAICompletionsOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/openai-completions#OpenAICompletionsOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/openai-responses#OpenAIResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/openai-responses#OpenAIResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/api/pi-messages#PiMessagesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/api/pi-messages#PiMessagesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#AnthropicOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#AnthropicOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#AzureOpenAIResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#AzureOpenAIResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#BedrockOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#BedrockOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#ClassifierOptions	ai	child-gap	ai/classifier.go#ClassifierOptions
-pkg:ai/compat#ClassifierOptions::property:identity	ai	member-missing	ai/classifier.go#ClassifierOptions
-pkg:ai/compat#ClientAttribution	ai	no-go-symbol	
-pkg:ai/compat#ClientAttribution::property:categories	ai	child-gap	
-pkg:ai/compat#ClientAttribution::property:name	ai	child-gap	
-pkg:ai/compat#ClientAttribution::property:url	ai	child-gap	
-pkg:ai/compat#ClientIdentity	ai	no-go-symbol	
-pkg:ai/compat#ClientIdentity::property:attribution	ai	child-gap	
-pkg:ai/compat#ClientIdentity::property:userAgent	ai	child-gap	
-pkg:ai/compat#ClientIdentity::property:version	ai	child-gap	
-pkg:ai/compat#ClientIdentityTarget	ai	undecidable	
-pkg:ai/compat#ClientIdentityTarget::property:baseUrl	ai	child-gap	
-pkg:ai/compat#ClientIdentityTarget::property:provider	ai	child-gap	
-pkg:ai/compat#CreateModelsOptions	ai	child-gap	ai/models_options.go#CreateModelsOptions
-pkg:ai/compat#CreateModelsOptions::property:identity	ai	member-missing	ai/models_options.go#CreateModelsOptions
-pkg:ai/compat#DeferredFetchOptions	ai	child-gap	ai/models_runtime.go#DeferredFetchOptions
-pkg:ai/compat#DeferredFetchOptions::property:identity	ai	member-missing	ai/models_runtime.go#DeferredFetchOptions
-pkg:ai/compat#GoogleOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#GoogleOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#GoogleVertexOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#GoogleVertexOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#ImagesOptions	ai	child-gap	ai/images.go#ImagesOptions
-pkg:ai/compat#ImagesOptions::property:identity	ai	member-missing	ai/images.go#ImagesOptions
-pkg:ai/compat#MistralOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#MistralOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#ModelsClassifierOptions	ai	type-mismatch	ai/classifier.go#ModelsClassifierOptions
-pkg:ai/compat#ModelsDeferredFetchOptions	ai	type-mismatch	ai/models_runtime.go#DeferredFetchOptions
-pkg:ai/compat#ModelsImagesOptions	ai	type-mismatch	ai/models_runtime_typed.go#ModelsImagesOptions
-pkg:ai/compat#ModelsSimpleStreamOptions	ai	type-mismatch	ai/types.go#StreamOptions
-pkg:ai/compat#OpenAICodexResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#OpenAICodexResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#OpenAICompletionsOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#OpenAICompletionsOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#OpenAIResponsesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#OpenAIResponsesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
+pkg:ai/.#UserAgentMode	ai	undecidable	ai/identity.go#UserAgentMode
+pkg:ai/.#withClientIdentity	ai	child-gap	ai/identity_models.go#WithClientIdentity
+pkg:ai/.#withClientIdentity::call:0	ai	undecidable	ai/identity_models.go#WithClientIdentity
+pkg:ai/.#withClientIdentity::call:1	ai	undecidable	ai/identity_models.go#WithClientIdentity
 pkg:ai/compat#PI_AI_VERSION	ai	no-go-symbol	
-pkg:ai/compat#PI_ATTRIBUTION	ai	no-go-symbol	
-pkg:ai/compat#PiMessagesOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#PiMessagesOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#ProviderRequestOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#ProviderRequestOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#SimpleStreamOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#SimpleStreamOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#StreamOptions	ai	child-gap	ai/types.go#StreamOptions
-pkg:ai/compat#StreamOptions::property:identity	ai	member-missing	ai/types.go#StreamOptions
-pkg:ai/compat#UserAgentMode	ai	no-go-symbol	
-pkg:ai/compat#formatUserAgent	ai	no-go-symbol	
-pkg:ai/compat#formatUserAgent::call:0	ai	child-gap	
-pkg:ai/compat#getAttributionHeaders	ai	no-go-symbol	
-pkg:ai/compat#getAttributionHeaders::call:0	ai	child-gap	
-pkg:ai/compat#getClientVersion	ai	no-go-symbol	
-pkg:ai/compat#getClientVersion::call:0	ai	child-gap	
-pkg:ai/compat#getIdentityHeaders	ai	no-go-symbol	
-pkg:ai/compat#getIdentityHeaders::call:0	ai	child-gap	
-pkg:ai/compat#getOpenCodeSessionHeaders	ai	no-go-symbol	
-pkg:ai/compat#getOpenCodeSessionHeaders::call:0	ai	child-gap	
-pkg:ai/compat#mergeClientIdentity	ai	no-go-symbol	
-pkg:ai/compat#mergeClientIdentity::call:0	ai	child-gap	
-pkg:ai/compat#withClientIdentity	ai	no-go-symbol	
-pkg:ai/compat#withClientIdentity::call:0	ai	child-gap	
-pkg:ai/compat#withClientIdentity::call:1	ai	child-gap	
-pkg:ai/models#CreateModelsOptions	ai	child-gap	ai/models_options.go#CreateModelsOptions
-pkg:ai/models#CreateModelsOptions::property:identity	ai	member-missing	ai/models_options.go#CreateModelsOptions
-pkg:ai/models#ModelsClassifierOptions	ai	type-mismatch	ai/classifier.go#ModelsClassifierOptions
-pkg:ai/models#ModelsDeferredFetchOptions	ai	type-mismatch	ai/models_runtime.go#DeferredFetchOptions
-pkg:ai/models#ModelsImagesOptions	ai	type-mismatch	ai/models_runtime_typed.go#ModelsImagesOptions
-pkg:ai/models#ModelsSimpleStreamOptions	ai	type-mismatch	ai/types.go#StreamOptions
-pkg:ai/utils/identity#ClientAttribution	ai	no-go-symbol	
-pkg:ai/utils/identity#ClientAttribution::property:categories	ai	child-gap	
-pkg:ai/utils/identity#ClientAttribution::property:name	ai	child-gap	
-pkg:ai/utils/identity#ClientAttribution::property:url	ai	child-gap	
-pkg:ai/utils/identity#ClientIdentity	ai	no-go-symbol	
-pkg:ai/utils/identity#ClientIdentity::property:attribution	ai	child-gap	
-pkg:ai/utils/identity#ClientIdentity::property:userAgent	ai	child-gap	
-pkg:ai/utils/identity#ClientIdentity::property:version	ai	child-gap	
-pkg:ai/utils/identity#ClientIdentityTarget	ai	undecidable	
-pkg:ai/utils/identity#ClientIdentityTarget::property:baseUrl	ai	child-gap	
-pkg:ai/utils/identity#ClientIdentityTarget::property:provider	ai	child-gap	
-pkg:ai/utils/identity#PI_ATTRIBUTION	ai	no-go-symbol	
-pkg:ai/utils/identity#UserAgentMode	ai	no-go-symbol	
-pkg:ai/utils/identity#formatUserAgent	ai	no-go-symbol	
-pkg:ai/utils/identity#formatUserAgent::call:0	ai	child-gap	
-pkg:ai/utils/identity#getAttributionHeaders	ai	no-go-symbol	
-pkg:ai/utils/identity#getAttributionHeaders::call:0	ai	child-gap	
-pkg:ai/utils/identity#getClientVersion	ai	no-go-symbol	
-pkg:ai/utils/identity#getClientVersion::call:0	ai	child-gap	
-pkg:ai/utils/identity#getIdentityHeaders	ai	no-go-symbol	
-pkg:ai/utils/identity#getIdentityHeaders::call:0	ai	child-gap	
-pkg:ai/utils/identity#getOpenCodeSessionHeaders	ai	no-go-symbol	
-pkg:ai/utils/identity#getOpenCodeSessionHeaders::call:0	ai	child-gap	
-pkg:ai/utils/identity#mergeClientIdentity	ai	no-go-symbol	
-pkg:ai/utils/identity#mergeClientIdentity::call:0	ai	child-gap	
-pkg:ai/utils/identity#withClientIdentity	ai	no-go-symbol	
-pkg:ai/utils/identity#withClientIdentity::call:0	ai	child-gap	
-pkg:ai/utils/identity#withClientIdentity::call:1	ai	child-gap	
+pkg:ai/compat#UserAgentMode	ai	undecidable	ai/identity.go#UserAgentMode
+pkg:ai/compat#withClientIdentity	ai	child-gap	ai/identity_models.go#WithClientIdentity
+pkg:ai/compat#withClientIdentity::call:0	ai	undecidable	ai/identity_models.go#WithClientIdentity
+pkg:ai/compat#withClientIdentity::call:1	ai	undecidable	ai/identity_models.go#WithClientIdentity
+pkg:ai/utils/identity#UserAgentMode	ai	undecidable	ai/identity.go#UserAgentMode
+pkg:ai/utils/identity#withClientIdentity	ai	child-gap	ai/identity_models.go#WithClientIdentity
+pkg:ai/utils/identity#withClientIdentity::call:0	ai	undecidable	ai/identity_models.go#WithClientIdentity
+pkg:ai/utils/identity#withClientIdentity::call:1	ai	undecidable	ai/identity_models.go#WithClientIdentity
 pkg:ai/utils/version#PI_AI_VERSION	ai	no-go-symbol	
 pkg:coding-agent/.#CreateAgentSessionOptions	coding-agent	child-gap	coding/create_agent_session.go#CreateAgentSessionOptions
 pkg:coding-agent/.#CreateAgentSessionOptions::property:resourceLoader	coding-agent	not-exercised	coding/create_agent_session.go#CreateAgentSessionOptions.ResourceLoader
 pkg:coding-agent/.#CreateAgentSessionResult	coding-agent	child-gap	coding/create_agent_session.go#CreateAgentSessionResult
 pkg:coding-agent/.#CreateAgentSessionResult::property:extensionsResult	coding-agent	not-exercised	coding/create_agent_session.go#CreateAgentSessionResult.ExtensionsResult
-pkg:durable/.#DEFAULT_HARNESS_IDENTITY	durable	no-go-symbol	
-pkg:durable/.#HarnessOptions	durable	type-mismatch	durable/harness/types.go#HarnessOptions
+pkg:durable/.#HarnessOptions	durable	undecidable	durable/harness/types.go#HarnessOptions
 pkg:durable/storage/indexeddb#IndexedDbStorage	durable	no-go-symbol	
 pkg:durable/storage/indexeddb#IndexedDbStorage::property:close	durable	child-gap	
 pkg:durable/storage/indexeddb#IndexedDbStorage::property:close::call:0	durable	child-gap	
