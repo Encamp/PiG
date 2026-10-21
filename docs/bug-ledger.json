@@ -31735,6 +31735,26 @@
         "coding/extension/host/subprocess/builder_node_embed_test.go::TestNodeRuntimeEmbedsVendoredPiDistAndDependencies",
         "coding/extension/host/subprocess/runtime_node_vendored_test.go::TestVendoredPiDistMatchesThePinnedPackage"
       ]
+    },
+    {
+      "id": "BF-725e104",
+      "title": "The upstream test inventory records Pi's `shell-path-exists.test.ts` as ported instead of partial: Pi mocks…",
+      "symptom": "The upstream test inventory records Pi's `shell-path-exists.test.ts` as ported instead of partial: Pi mocks `accessSync` and `spawnSync`, PiG's Windows alias and Unix cases match them case for case, and the native Windows check ran and passed on the Windows runner.",
+      "rootCause": "",
+      "rootCauseSource": "",
+      "userImpact": "Wrong output or ordering",
+      "platform": "Windows",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "The upstream test inventory records Pi's `shell-path-exists.test.ts` as ported instead of partial: Pi mocks `accessSync` and `spawnSync`, PiG's Windows alias and Unix cases match them case for case, and the native Windows check ran and passed on the Windows runner. The release gate no longer reports it as an open hot-path gap.",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "725e104b55",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": []
     }
   ],
   "divergences": [
