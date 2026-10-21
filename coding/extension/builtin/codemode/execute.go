@@ -163,6 +163,10 @@ func (a *workerAdmission) release() {
 	a.mu.Unlock()
 }
 
+// workersStarted counts the reservations handed to a worker, one per script whose VM was admitted. The worker admission tests read it to tell a
+// script that started a VM from one that did not.
+var workersStarted atomic.Int64
+
 // workerReservation is the one slot a script reserved. It covers the one worker the script starts: acquireWorker hands the slot to the
 // worker, which gives it back when it exits, and releaseUnused gives it back when no worker took it. A launch that resumes after
 // the script's result settled finds it released and starts no worker.
@@ -184,6 +188,7 @@ func (r *workerReservation) acquireWorker() (func(), error) {
 	if !r.reserved.CompareAndSwap(true, false) {
 		return nil, errors.New("The script already settled")
 	}
+	workersStarted.Add(1)
 	var once sync.Once
 	return func() { once.Do(r.release) }, nil
 }

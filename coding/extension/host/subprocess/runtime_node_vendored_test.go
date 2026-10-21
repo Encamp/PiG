@@ -876,7 +876,7 @@ func TestPiCodemodeRunsFromTheVendoredSDK(t *testing.T) {
 import assert from "node:assert/strict";
 import { Worker } from "node:worker_threads";
 // A worker keeps its slot of the two executeCodemode admits until it has exited, which is after executeCodemode has returned (execute.ts acquireWorker), and a script that
-// finds both slots taken fails at once ("Retry after they exit."). Each script therefore starts once the workers of the earlier ones have exited. The exit listeners are
+// finds both slots taken waits for one, and that wait counts toward its timeout_ms (#11184). Each script therefore starts once the workers of the earlier ones have exited, so none waits. The exit listeners are
 // added after executeCodemode's own, which give the slot back. executeCodemode unrefs a worker it has asked to terminate, so the wait refs it again.
 const workers = [];
 const once = Worker.prototype.once;

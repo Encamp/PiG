@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"regexp"
+	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -43,6 +45,14 @@ func resultText(result agent.AgentToolResult) string {
 		}
 	}
 	return b.String()
+}
+
+// hasTextItem reports whether the result has a text item that is exactly want, as Pi's `toContainEqual({ type: "text", text })`.
+func hasTextItem(result agent.AgentToolResult, want string) bool {
+	return slices.ContainsFunc(result.Content, func(item ai.ToolResultMessageContent) bool {
+		text, ok := item.(ai.TextContent)
+		return ok && text.Text == want
+	})
 }
 
 func activeWorkers() int {
@@ -155,8 +165,8 @@ func TestCodemodeWorkerAdmissionBoundsSurvivingWorkers(t *testing.T) {
 	if admitted.IsError {
 		t.Fatalf("admitted script failed: %s", resultText(admitted))
 	}
-	if got := resultText(admitted); !strings.HasSuffix(got, "3") {
-		t.Fatalf("admitted text = %q, want a trailing 3", got)
+	if !hasTextItem(admitted, "3") {
+		t.Fatalf("admitted result = %q, want a text item \"3\"", resultText(admitted))
 	}
 	waitForActiveWorkers(t, 1)
 }
@@ -175,17 +185,37 @@ func TestCodemodeWorkerSlotIsReturnedAfterSuccessAndTimeout(t *testing.T) {
 	waitForActiveWorkers(t, 0)
 }
 
-// A cancelled VM keeps its slot until it exits, and gives it back when it does.
+// A running VM holds its slot after the script's own reservation was handed to it, and gives the slot back only when it exits: the script's
+// release after Execute's return must not free it early.
 func TestCodemodeWorkerHoldsItsSlotWhileRunning(t *testing.T) {
 	waitForActiveWorkers(t, 0)
+	startedBefore := workersStarted.Load()
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 	done := make(chan agent.AgentToolResult, 1)
 	go func() { done <- runCode(ctx, t, "while (true) {}") }()
-	waitForActiveWorkers(t, 1)
+	// The slot is counted from the reservation; wait for the handoff to the VM before judging who holds it.
+	deadline := time.Now().Add(10 * time.Second)
+	for workersStarted.Load() == startedBefore {
+		if time.Now().After(deadline) {
+			t.Fatal("the VM never started")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	if got := activeWorkers(); got != 1 {
+		t.Fatalf("%d slots held by the running VM, want 1", got)
+	}
+	// With the limit at one slot, a second script cannot start while the VM runs: the slot is the VM's, not an unused reservation.
+	t.Setenv("PI_CODEMODE_MAX_WORKERS", "1")
+	second := startRun(t.Context(), t, "return 2")
+	assertPending(t, second, "a second script while the first VM runs")
 	cancel()
 	if result := <-done; !result.IsError || !strings.Contains(resultText(result), "Script aborted:") {
 		t.Fatalf("result = %q", resultText(result))
+	}
+	// The exit of the first VM admits the second script.
+	if admitted := receiveWithin(t, second, 10*time.Second, "the second script"); admitted.IsError || !hasTextItem(admitted, "2") {
+		t.Fatalf("second script = %q (error %v)", resultText(admitted), admitted.IsError)
 	}
 	waitForActiveWorkers(t, 0)
 }
@@ -265,38 +295,88 @@ func TestCodemodeWorkerAdmissionQueuesABurstInArrivalOrder(t *testing.T) {
 	waitForActiveWorkers(t, 0)
 }
 
-// #11184: in-process hosts with many sessions can raise the limit with PI_CODEMODE_MAX_WORKERS.
-func TestCodemodeWorkerAdmissionReadsTheLimitFromPICodemodeMaxWorkers(t *testing.T) {
-	t.Setenv("PI_CODEMODE_MAX_WORKERS", "3")
-	releases := holdWorkers(t, 3)
-	fourth := make(chan func(), 1)
-	go func() {
-		release, outcome := codemodeWorkers.reserve(t.Context(), 30*time.Second)
-		if outcome == workerReserved {
-			fourth <- release
+// assertAllSucceed checks that every queued script completed without an error and returned its own value.
+func assertAllSucceed(t *testing.T, queued []<-chan agent.AgentToolResult, values []string) {
+	t.Helper()
+	for i, ch := range queued {
+		result := receiveWithin(t, ch, 30*time.Second, "a queued script")
+		if result.IsError || !hasTextItem(result, values[i]) {
+			t.Errorf("queued script %d = %q (error %v), want the text item %q", i, resultText(result), result.IsError, values[i])
 		}
-	}()
-	assertPending(t, fourth, "the fourth reservation")
-	if got := activeWorkers(); got != 3 {
-		t.Fatalf("%d workers held, want 3", got)
 	}
-	releases[0]()
-	receiveWithin(t, fourth, 5*time.Second, "the fourth reservation")()
 }
 
+// #10748, #11184: a burst of real scripts behind two held workers queues, and every script completes without an error once workers exit.
+func TestCodemodeWorkerAdmissionQueuesARealScriptBurstBehindTwoWorkers(t *testing.T) {
+	releases := holdWorkers(t, 2)
+	var queued []<-chan agent.AgentToolResult
+	var values []string
+	for i := range 6 {
+		queued = append(queued, startRun(t.Context(), t, "return "+strconv.Itoa(i)))
+		values = append(values, strconv.Itoa(i))
+	}
+	for i, ch := range queued {
+		assertPending(t, ch, "queued script "+strconv.Itoa(i))
+	}
+	if got := activeWorkers(); got != 2 {
+		t.Fatalf("%d workers held, want 2", got)
+	}
+	releases[0]()
+	releases[1]()
+	assertAllSucceed(t, queued, values)
+	waitForActiveWorkers(t, 0)
+}
+
+// #11184: in-process hosts with many sessions can raise the limit with PI_CODEMODE_MAX_WORKERS: with two slots held a script still runs.
+func TestCodemodeWorkerAdmissionReadsTheLimitFromPICodemodeMaxWorkers(t *testing.T) {
+	t.Setenv("PI_CODEMODE_MAX_WORKERS", "3")
+	releases := holdWorkers(t, 2)
+	if result := receiveWithin(t, startRun(t.Context(), t, "return 7"), 10*time.Second, "a script under a limit of three"); result.IsError || !hasTextItem(result, "7") {
+		t.Fatalf("script = %q (error %v)", resultText(result), result.IsError)
+	}
+	// Three held slots fill the raised limit: further scripts queue and complete once a slot is free.
+	releases = append(releases, holdWorkers3(t))
+	var queued []<-chan agent.AgentToolResult
+	for i := range 4 {
+		queued = append(queued, startRun(t.Context(), t, "return "+strconv.Itoa(i)))
+	}
+	for i, ch := range queued {
+		assertPending(t, ch, "queued script "+strconv.Itoa(i))
+	}
+	releases[0]()
+	assertAllSucceed(t, queued, []string{"0", "1", "2", "3"})
+	releases[1]()
+	releases[2]()
+	waitForActiveWorkers(t, 0)
+}
+
+// holdWorkers3 reserves one more slot beyond those already held, returning its idempotent release.
+func holdWorkers3(t *testing.T) func() {
+	t.Helper()
+	release, outcome := codemodeWorkers.reserve(t.Context(), time.Second)
+	if outcome != workerReserved {
+		t.Fatalf("reserve = %v, want reserved", outcome)
+	}
+	var once sync.Once
+	t.Cleanup(func() { once.Do(release) })
+	return func() { once.Do(release) }
+}
+
+// An invalid value keeps the limit of two: with two slots held a script waits, and runs once one is released.
 func TestCodemodeWorkerAdmissionIgnoresAnInvalidPICodemodeMaxWorkers(t *testing.T) {
 	t.Setenv("PI_CODEMODE_MAX_WORKERS", "0")
 	releases := holdWorkers(t, 2)
-	third := make(chan func(), 1)
-	go func() {
-		release, outcome := codemodeWorkers.reserve(t.Context(), 30*time.Second)
-		if outcome == workerReserved {
-			third <- release
-		}
-	}()
-	assertPending(t, third, "the third reservation")
+	var queued []<-chan agent.AgentToolResult
+	for i := range 3 {
+		queued = append(queued, startRun(t.Context(), t, "return "+strconv.Itoa(i)))
+	}
+	for i, ch := range queued {
+		assertPending(t, ch, "queued script "+strconv.Itoa(i))
+	}
 	releases[0]()
-	receiveWithin(t, third, 5*time.Second, "the third reservation")()
+	assertAllSucceed(t, queued, []string{"0", "1", "2"})
+	releases[1]()
+	waitForActiveWorkers(t, 0)
 }
 
 // `Number.isInteger(Number(value)) && value > 0`: JavaScript's number syntax picks the limit and anything else keeps the default 2.
@@ -407,4 +487,70 @@ func TestWorkerReservationReleasesExactlyOnce(t *testing.T) {
 	}
 	exit()
 	waitForActiveWorkers(t, 0)
+}
+
+// Ports codemode-worker-admission.test.ts "starts no worker for a launch that resumes after its result timed out" (#10748) through Execute. Pi holds
+// the module load by replacing loadQuickJSWasm; the built-in tool must not choose another module (TestCodemodeEmbedsItsOnlyModuleSource), so the load
+// is slow instead: a cache directory no sandbox has used makes the first script compile the module (seconds), and the others wait on it. Three
+// scripts are aborted during it instead of timed out (PiG's deadline starts once the module is loaded, so only an abort settles a script during the
+// load). The two admitted scripts and the queued third fail, none starts a VM, and the next script starts exactly one.
+func TestExecuteStartsNoWorkerForALaunchThatResumesAfterItsResultSettled(t *testing.T) {
+	waitForActiveWorkers(t, 0)
+	startedBefore := workersStarted.Load()
+	options := Options{CacheDir: t.TempDir()}
+	params, _ := json.Marshal(map[string]string{"code": "while (true) {}"})
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	var scripts []<-chan agent.AgentToolResult
+	for range 3 {
+		done := make(chan agent.AgentToolResult, 1)
+		go func() {
+			result, err := Execute(ctx, "worker-admission", params, nil, options)
+			if err != nil {
+				t.Error(err)
+			}
+			done <- result
+		}()
+		scripts = append(scripts, done)
+	}
+	// The limit admits two scripts, which launch and wait on the module compile; the third queues for a slot.
+	waitForActiveWorkers(t, 2)
+	time.Sleep(50 * time.Millisecond)
+	if got := workersStarted.Load() - startedBefore; got != 0 {
+		t.Fatalf("%d VMs started before the module compiled; the load was not held", got)
+	}
+	cancel()
+	var failed []agent.AgentToolResult
+	for i, ch := range scripts {
+		failed = append(failed, receiveWithin(t, ch, 60*time.Second, "script "+strconv.Itoa(i)))
+	}
+	queued := 0
+	for i, result := range failed {
+		text := resultText(result)
+		if !result.IsError || !strings.Contains(text, "Script aborted:") {
+			t.Errorf("script %d = %q (error %v), want an abort", i, text, result.IsError)
+		}
+		if strings.Contains(text, "The script did not start.") {
+			queued++
+		}
+	}
+	if queued != 1 {
+		t.Errorf("%d scripts report that they did not start, want the one that queued", queued)
+	}
+	waitForActiveWorkers(t, 0)
+	if got := workersStarted.Load() - startedBefore; got != 0 {
+		t.Fatalf("%d VMs started for scripts that had settled, want 0", got)
+	}
+	// Only the next script's worker starts.
+	next, err := Execute(t.Context(), "worker-admission", json.RawMessage(`{"code":"return 1"}`), nil, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if next.IsError || !hasTextItem(next, "1") {
+		t.Fatalf("next script = %q (error %v)", resultText(next), next.IsError)
+	}
+	waitForActiveWorkers(t, 0)
+	if got := workersStarted.Load() - startedBefore; got != 1 {
+		t.Fatalf("%d VMs started after the next script, want 1", got)
+	}
 }
