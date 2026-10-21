@@ -739,5 +739,12 @@
    "old": "CodeVersion: report.CodeVersion, Previous: report.Previous, Changed: report.Changed, Removed: report.Removed, Prepared: report.Prepared, Gated: report.Gated}\n}\n\nfunc reportToWire",
    "new": "CodeVersion: report.CodeVersion, Previous: report.Previous, Removed: report.Removed, Prepared: report.Prepared, Gated: report.Gated}\n}\n\nfunc reportToWire"
   }
+ ],
+ "packages/coding-agent/src/core/client-identity.ts": [
+  {
+   "file": "coding/client_identity.go",
+   "old": "\tif settings.IsInstallTelemetryEnabled() {",
+   "new": "\tif !settings.IsInstallTelemetryEnabled() {"
+  }
  ]
 }

@@ -183,10 +183,24 @@ func (b *exitRestoreBuffer) String() string {
 	return b.data.String()
 }
 
+// isolateExitRestoreRegistry gives a test that calls RestoreTerminalOnExit in-process the fresh registry Pi's per-process 'exit'
+// handlers have: renderers other tests started without stopping stay out of its output, and its own entries do not leak out.
+func isolateExitRestoreRegistry(t *testing.T) {
+	t.Helper()
+	reset := func() {
+		exitRestoreRegistry.mu.Lock()
+		exitRestoreRegistry.terminals, exitRestoreRegistry.altScreens = nil, nil
+		exitRestoreRegistry.mu.Unlock()
+	}
+	reset()
+	t.Cleanup(reset)
+}
+
 // The main-screen renderer has no alternate screen: Pi's TuiBase prefix is the color-scheme report reset and the cursor
 // show, then the terminal's progress clear, bracketed-paste reset and Kitty pop. A second call writes nothing, the terminal is
 // cooked again, and the restore that a normal stop runs afterwards finds nothing registered.
 func TestRestoreTerminalOnExitMainScreenWritesOnceAndRestoresCookedMode(t *testing.T) {
+	isolateExitRestoreRegistry(t)
 	t.Setenv("PI_PROGRAM_STATUS", "0")
 	master, slave := openTestPTY(t)
 	_ = master
@@ -223,6 +237,7 @@ func TestRestoreTerminalOnExitMainScreenWritesOnceAndRestoresCookedMode(t *testi
 // report reset leads the base prefix; modifyOtherKeys (no Kitty reply) follows the Kitty pop (terminal.ts restoreOnExit). A frame
 // a renderer still draws after the handler ran writes nothing: it must not repaint over a crash report or hide the cursor again.
 func TestRestoreTerminalOnExitAltScreenWithColorSchemeReportsAndModifyOtherKeys(t *testing.T) {
+	isolateExitRestoreRegistry(t)
 	t.Setenv("PI_PROGRAM_STATUS", "0")
 	master, slave := openTestPTY(t)
 	_ = master
