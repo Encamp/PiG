@@ -17,8 +17,6 @@ func (connection *failingConnection) Prepare(string) (*StatementSync, error) {
 	return nil, errors.New("unexpected prepare")
 }
 
-func (*failingConnection) IsTransaction() (bool, error) { return false, nil }
-
 func (connection *failingConnection) Close() error {
 	connection.closed = true
 	return connection.closeErr

@@ -137,27 +137,6 @@ func (database *DatabaseSync) Close() error {
 	return errors.Join(conn.Close(), database.db.Close())
 }
 
-// IsTransaction reports whether a transaction is open on the connection (node:sqlite's DatabaseSync.isTransaction,
-// sqlite3_get_autocommit() == 0). The driver exposes no autocommit query, so it probes with BEGIN, which SQLite refuses
-// inside a transaction (a transaction begun by BEGIN or SAVEPOINT alike), and rolls the probe back.
-func (database *DatabaseSync) IsTransaction() (bool, error) {
-	conn, err := database.connection()
-	if err != nil {
-		return false, err
-	}
-	//portlint:allow ctxbackground node:sqlite's isTransaction is a synchronous getter with no signal to forward
-	if _, err := conn.ExecContext(context.Background(), "BEGIN"); err != nil {
-		//portlint:allow erroridentity the driver reports the refused BEGIN as a generic SQLITE_ERROR whose message alone names the cause; it has no sentinel or distinct code
-		if strings.Contains(err.Error(), "within a transaction") {
-			return true, nil
-		}
-		return false, err
-	}
-	//portlint:allow ctxbackground rolls back the probe begun above, which has no signal to forward
-	_, err = conn.ExecContext(context.Background(), "ROLLBACK")
-	return false, err
-}
-
 // StatementSync is one prepared statement of a DatabaseSync.
 type StatementSync struct {
 	database  *DatabaseSync
@@ -252,7 +231,6 @@ func (statement *StatementSync) close() error { return statement.statement.Close
 type connection interface {
 	Exec(sql string) error
 	Prepare(sql string) (*StatementSync, error)
-	IsTransaction() (bool, error)
 	Close() error
 }
 
@@ -414,29 +392,6 @@ func (adapter *NodeSqliteDatabase) run(operation func() error) error {
 	return operation()
 }
 
-// scopedExecutor is the handle passed to a transaction or exclusive operation: it runs SQL directly and answers inactive
-// once its scope ends (NodeSqliteScopedExecutor). The handle's closure captures the active flag alone, so a handle costs what it
-// did before exclusive operations existed; inactive is the package error of the scope's kind, never captured.
-func (adapter *NodeSqliteDatabase) scopedExecutor(active *atomic.Bool, exclusive bool) *nodeSqliteExecutor {
-	executor := &nodeSqliteExecutor{database: adapter.database, statements: adapter.statements}
-	if exclusive {
-		executor.runOperation = func(operation func() error) error {
-			if !active.Load() {
-				return errExclusiveInactive
-			}
-			return operation()
-		}
-		return executor
-	}
-	executor.runOperation = func(operation func() error) error {
-		if !active.Load() {
-			return errTransactionInactive
-		}
-		return operation()
-	}
-	return executor
-}
-
 // Transaction runs callback inside BEGIN IMMEDIATE ... COMMIT and rolls back when it fails or panics.
 func (adapter *NodeSqliteDatabase) Transaction(
 	callback func(transaction chordsqlite.SqliteExecutor) error,
@@ -448,7 +403,16 @@ func (adapter *NodeSqliteDatabase) Transaction(
 	}
 	var active atomic.Bool
 	active.Store(true)
-	handle := adapter.scopedExecutor(&active, false)
+	handle := &nodeSqliteExecutor{
+		database:   adapter.database,
+		statements: adapter.statements,
+		runOperation: func(operation func() error) error {
+			if !active.Load() {
+				return errTransactionInactive
+			}
+			return operation()
+		},
+	}
 	settled := false
 	defer func() {
 		if settled {
@@ -474,64 +438,6 @@ func (adapter *NodeSqliteDatabase) Transaction(
 		}
 	}
 	return err
-}
-
-var errExclusiveInactive = errors.New("SQLite exclusive handle is no longer active")
-
-// exclusiveLeftTransactionOpen reports an exclusive operation that ended with a transaction still open. cause is the
-// operation's own error when it failed.
-type exclusiveLeftTransactionOpen struct{ cause error }
-
-func (exclusiveLeftTransactionOpen) Error() string {
-	return "SQLite exclusive operation left a transaction open; it was rolled back"
-}
-
-func (err exclusiveLeftTransactionOpen) Unwrap() error { return err.cause }
-
-// Exclusive runs operation alone on the connection, outside a transaction: it starts after every earlier operation and
-// transaction has settled, and later calls wait until it settles. The handle runs SQL immediately and is invalid
-// afterwards. Use it for work that must not interleave with commits but cannot run inside a transaction, such as
-// `PRAGMA wal_checkpoint`, or to hold back all later operations while doing something else. As with Transaction, calling
-// the database itself from inside the operation waits for the operation and never returns.
-//
-// An operation that begins a transaction must end it. Otherwise later statements would silently join it and never
-// commit, so a transaction still open when the operation settles (or panics) is rolled back and the call fails, with the
-// operation's own error as the cause if it failed.
-// Ports packages/chord/src/sqlite/node.ts NodeSqliteDatabase.exclusive.
-func (adapter *NodeSqliteDatabase) Exclusive(operation func(executor chordsqlite.SqliteExecutor) error) error {
-	release := adapter.access.acquire()
-	defer release()
-	var active atomic.Bool
-	active.Store(true)
-	settled := false
-	defer func() {
-		if settled {
-			return
-		}
-		// The operation panicked: end its scope and roll back a transaction it left open before the panic continues.
-		active.Store(false)
-		if open, _ := adapter.database.IsTransaction(); open {
-			_ = adapter.database.Exec("ROLLBACK")
-		}
-	}()
-	operationErr := operation(adapter.scopedExecutor(&active, true))
-	active.Store(false)
-	settled = true
-	open, err := adapter.database.IsTransaction()
-	if err != nil {
-		return err
-	}
-	if !open {
-		return operationErr
-	}
-	leftOpen := exclusiveLeftTransactionOpen{cause: operationErr}
-	if rollbackErr := adapter.database.Exec("ROLLBACK"); rollbackErr != nil {
-		return &AggregateError{
-			Errors:  []error{leftOpen, rollbackErr},
-			Message: "SQLite exclusive operation left a transaction open and rollback failed",
-		}
-	}
-	return leftOpen
 }
 
 // Close truncates the WAL and closes the connection. Repeated calls do nothing.

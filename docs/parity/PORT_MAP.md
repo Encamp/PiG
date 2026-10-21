@@ -660,8 +660,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/chord/src/sqlite/database.ts` | `chord/sqlite/database.go` | ✅ |
 | `packages/chord/src/sqlite/index.ts` | `(re-export barrel: the exports are the Go package surface)` | n/a |
 | `packages/chord/src/sqlite/migrations.ts` | `chord/sqlite/migrations.go` | ✅ |
-| `packages/chord/src/sqlite/node.ts` | `chord/sqlite/node/node.go (NodeSqliteDatabase.Exclusive, Pi 48c8f322; DatabaseSync.IsTransaction probes with BEGIN because the pure-Go driver exposes no autocommit query)` | ✅ |
-| `packages/chord/src/sqlite/replication/node.ts` | `chord/sqlite/replication/node.go OpenReplicatedNodeSqliteDatabase, ReplicatedNodeSqliteDatabase, ReplicationHooks (Pi 48c8f322; the module is not exported from the package in Pi either; the "can only be created by opening a file" case is TestReplicatedNodeSqliteCanOnlyBeCreatedByOpeningAFile)` | ✅ |
+| `packages/chord/src/sqlite/node.ts` | `chord/sqlite/node/node.go` | ✅ |
 | `packages/chord/src/sqlite/schema.ts` | `chord/sqlite/schema.go` | ✅ |
 | `packages/chord/src/cell.ts` | `chord/host/cell.go NewCell, Cell, Source, Derived, IsSource, NotReady` | ✅ |
 | `packages/chord/src/publish.ts` | `chord/host/publish.go enqueue, holdPublications` | ✅ |
@@ -744,6 +743,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/durable/src/session/observation.ts` | `durable/session/observation.go` | ✅ |
 | `packages/durable/src/session/session.ts` | `durable/session/session.go` | ✅ |
 | `packages/durable/src/session/transaction.ts` | `durable/session/transaction.go` | ✅ |
+| `packages/durable/src/storage/indexeddb.ts` | `(browser-only Storage backed by window IndexedDB: the file opens with /// <reference lib="dom" /> and every method drives IDBDatabase/IDBTransaction, which exist only in a browser; PiG is a Go process with no browser or WebAssembly build, so no caller can reach it. The Storage contract it implements is the one durable/storage/memory.go, jsonl, sqlite and the Cloudflare SQLite driver already satisfy; Pi 16f5f0af4d)` | n/a |
 | `packages/durable/src/storage/jsonl/index.ts` | `(re-export barrel: the exports are the Go package surface)` | n/a |
 | `packages/durable/src/storage/jsonl/node.ts` | `durable/storage/jsonl/node/node.go` | ✅ |
 | `packages/durable/src/storage/jsonl/storage.ts` | `durable/storage/jsonl/storage.go` | ✅ |
