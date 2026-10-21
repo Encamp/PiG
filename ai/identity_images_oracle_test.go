@@ -33,16 +33,16 @@ func TestOpenRouterImagesHeadersMatchPi(t *testing.T) {
 		{Identity: json.RawMessage(acme), Provider: "opencode"},
 		{Identity: json.RawMessage(`{"userAgent":{"custom":"acme/1.0"},"attribution":null}`)},
 		// Pi's own default attribution values.
-		{Identity: json.RawMessage(`{"userAgent":"short","attribution":{"name":"pi","url":"https://pi.dev","categories":["cli-agent"]}}`)},
-		{Identity: json.RawMessage(`{"userAgent":"short","attribution":{"name":"pi","url":"https://pi.dev","categories":["cli-agent"]}}`), Provider: "nvidia"},
-		{Identity: json.RawMessage(`{"userAgent":"short","attribution":{"name":"pi","url":"https://pi.dev","categories":["cli-agent"]}}`), Provider: "opencode"},
+		{Identity: json.RawMessage(`{"userAgent":{"custom":"acme/1.0"},"attribution":{"name":"pi","url":"https://pi.dev","categories":["cli-agent"]}}`)},
+		{Identity: json.RawMessage(`{"userAgent":{"custom":"acme/1.0"},"attribution":{"name":"pi","url":"https://pi.dev","categories":["cli-agent"]}}`), Provider: "nvidia"},
+		{Identity: json.RawMessage(`{"userAgent":{"custom":"acme/1.0"},"attribution":{"name":"pi","url":"https://pi.dev","categories":["cli-agent"]}}`), Provider: "opencode"},
 		// A null request header removes a header an earlier source set, whatever its letter case.
 		{Identity: json.RawMessage(acme), Headers: map[string]any{"User-Agent": nil}},
 		{Identity: json.RawMessage(acme), Headers: map[string]any{"user-agent": nil, "http-referer": nil}},
 		{Identity: json.RawMessage(acme), Headers: map[string]any{"X-OpenRouter-Title": nil, "X-OpenRouter-Categories": "x"}},
 		{Identity: json.RawMessage(acme), ModelHeaders: map[string]string{"User-Agent": "model-ua", "HTTP-Referer": "model-ref"}},
 		{Identity: json.RawMessage(acme), ModelHeaders: map[string]string{"User-Agent": "model-ua"}, Headers: map[string]any{"user-agent": "request-ua"}},
-		{ModelHeaders: map[string]string{"X-Removed": "remove-me", "X-Kept": "keep-me", "X-Shared": "model"}, Headers: map[string]any{"X-Removed": nil, "x-kept": nil, "X-Shared": "request"}},
+		{Identity: json.RawMessage(`{"userAgent":{"custom":"acme/1.0"}}`), ModelHeaders: map[string]string{"X-Removed": "remove-me", "X-Kept": "keep-me", "X-Shared": "model"}, Headers: map[string]any{"X-Removed": nil, "x-kept": nil, "X-Shared": "request"}},
 		{Identity: json.RawMessage(`{"userAgent":{"custom":"acme/1.0"}}`), ModelHeaders: map[string]string{"x-kept": "keep-me"}, Headers: map[string]any{"X-Kept": nil}},
 	}
 	input, err := json.Marshal(probes)
@@ -103,8 +103,19 @@ func TestOpenRouterImagesHeadersMatchPi(t *testing.T) {
 				wantWatched[name] = value
 			}
 		}
+		// A removed User-Agent leaves each HTTP client's own (Go's, the OpenAI SDK's): neither may be the identity's.
+		for name, value := range p.Headers {
+			if strings.EqualFold(name, "user-agent") && value == nil {
+				if gotWatched["user-agent"] == "acme/1.0" || wantWatched["user-agent"] == "acme/1.0" {
+					t.Errorf("probe %d: a null User-Agent kept the identity's (PiG %q, Pi %q)", i, gotWatched["user-agent"], wantWatched["user-agent"])
+				}
+				delete(gotWatched, "user-agent")
+				delete(wantWatched, "user-agent")
+			}
+		}
 		if !reflect.DeepEqual(gotWatched, wantWatched) {
-			t.Errorf("probe %d %s: PiG sent %v, Pi sent %v", i, input, gotWatched, wantWatched)
+			one, _ := json.Marshal(p)
+			t.Errorf("probe %d %s: PiG sent %v, Pi sent %v", i, one, gotWatched, wantWatched)
 		}
 	}
 }
