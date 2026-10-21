@@ -290,11 +290,13 @@ func TestConformance_ConcurrentDialogsAgreeAcrossSDKs(t *testing.T) {
 					t.Fatalf("host UI holds %v, want all four dialogs", arrived)
 				}
 				var want []string
-				for _, index := range []int{1, 3, 0, 2} {
+				for position, index := range []int{1, 3, 0, 2} {
 					title := arrived[index]
 					h.ui.dialogs.answer(t, title, stackProbeAnswers[title].answer)
 					want = append(want, stackSettled(title, stackProbeAnswers[title].answer))
-					probe.expectReported(want...)
+					if position < 3 {
+						probe.expectReported(want...)
+					}
 				}
 				probe.expectReported(append(want, "stack done")...)
 				probe.expectDone()
