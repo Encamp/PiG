@@ -309,7 +309,9 @@ func TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity(t *testin
 	wrapped.StreamSimple(t.Context(), nil, Context{})
 	wrapped.CompleteSimple(t.Context(), nil, Context{}, StreamOptions{Identity: &ClientIdentity{AttributionNull: true}, SessionID: "kept"})
 	wrapped.FetchDeferred(t.Context(), nil, DeferredHandle{}, DeferredFetchOptions{StreamOptions: StreamOptions{Identity: &ClientIdentity{Version: new("2")}}})
-	wrapped.CancelDeferred(t.Context(), nil, DeferredHandle{})
+	if err := wrapped.CancelDeferred(t.Context(), nil, DeferredHandle{}); err != nil {
+		t.Fatal(err)
+	}
 	if len(capture.streams) != 3 || len(capture.deferred) != 1 {
 		t.Fatalf("captured %d stream and %d deferred options", len(capture.streams), len(capture.deferred))
 	}

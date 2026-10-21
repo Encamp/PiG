@@ -137,3 +137,39 @@ func TestUserBashOperationsExecAbortsWithTheContext(t *testing.T) {
 		t.Fatalf("chunks after the abort = %q, want the exec's output until it settled", chunks)
 	}
 }
+
+// The consumer drops the operations object once it has called Exec, and the host releases the extension's handle when the object is collected.
+// An exec in flight keeps the object alive: a collection mid-exec released the handle while the extension's exec still ran.
+func TestUserBashOperationsStayAliveWhileTheirExecRuns(t *testing.T) {
+	conn, peer := userBashOperationsRig(t)
+	typed, ok := userBashOperationsResult(conn, json.RawMessage(`{"operations":{"handle":"bash-9"}}`))
+	if !ok {
+		t.Fatal("no operations result")
+	}
+	finished := make(chan error, 1)
+	func() {
+		operations := typed.Operations
+		typed = nil
+		go func() {
+			_, err := operations.Exec(t.Context(), "sleep", "/work", extension.BashOperationsExecOptions{})
+			finished <- err
+		}()
+	}()
+	request, err := tryReadFramed(peer)
+	if err != nil || request.Request == nil || request.Request.Method != RequestUserBashExec {
+		t.Fatalf("request = %+v, %v, want user_bash_exec", request, err)
+	}
+	for range 3 {
+		runtime.GC()
+		time.Sleep(20 * time.Millisecond)
+	}
+	_ = peer.SetReadDeadline(time.Now().Add(200 * time.Millisecond))
+	var prefix [4]byte
+	if n, err := peer.Read(prefix[:]); err == nil {
+		t.Fatalf("a frame (%d bytes) arrived while the exec ran; the handle was released under it", n)
+	}
+	writeFramed(t, peer, Envelope{Type: MsgResponse, ID: request.ID, Response: &ResponsePayload{Result: json.RawMessage(`{"exitCode":0}`)}})
+	if err := <-finished; err != nil {
+		t.Fatalf("Exec = %v", err)
+	}
+}

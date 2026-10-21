@@ -10,7 +10,7 @@ import (
 )
 
 // piUserAgent matches the Pi user agents: a bare "pi" or pi/<version> (...).
-var piUserAgent = regexp.MustCompile(`(?i)^pi([ /(]|$)`)
+var piUserAgent = regexp.MustCompile(`^[Pp][Ii]([ /(]|$)`)
 
 // A Node extension's request names its client identity (core/sdk.ts passes getClientIdentity for a Session from createAgentSession). The host must hand it to the provider:
 // dropping it sends no attribution, and replacing it with a default would send Pi's.

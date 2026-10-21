@@ -30,12 +30,14 @@ func captureIdentityOptions(t *testing.T, tc identityCaptureCase) ai.StreamOptio
 	}
 	var captured ai.StreamOptions
 	modelID := tc.provider + "-test-model"
-	services.Registry().RegisterExtensionProvider(tc.provider, extension.ProviderConfig{API: ai.APIOpenAICompletions, APIKey: "test-api-key", BaseURL: tc.baseURL, Headers: tc.providerHeaders, StreamSimple: func(_ extension.Model, _ extension.AIContext, raw extension.SimpleStreamOptions) extension.AssistantMessageEventStream {
+	if err := services.Registry().RegisterExtensionProvider(tc.provider, extension.ProviderConfig{API: ai.APIOpenAICompletions, APIKey: "test-api-key", BaseURL: tc.baseURL, Headers: tc.providerHeaders, StreamSimple: func(_ extension.Model, _ extension.AIContext, raw extension.SimpleStreamOptions) extension.AssistantMessageEventStream {
 		captured = raw
 		stream := ai.NewAssistantMessageEventStream()
 		stream.End(&ai.AssistantMessage{API: ai.APIOpenAICompletions, Provider: tc.provider, Model: modelID, Content: []ai.AssistantContentBlock{ai.TextContent{Text: "ok"}}, StopReason: ai.StopReasonStop})
 		return stream
-	}, Models: []extension.ProviderModelConfig{{ID: modelID, Name: tc.provider + " Test Model", API: ai.APIOpenAICompletions, Input: []string{"text"}, ContextWindow: 128000, MaxTokens: 4096}}})
+	}, Models: []extension.ProviderModelConfig{{ID: modelID, Name: tc.provider + " Test Model", API: ai.APIOpenAICompletions, Input: []string{"text"}, ContextWindow: 128000, MaxTokens: 4096}}}); err != nil {
+		t.Fatal(err)
+	}
 	model, err := BuildModel(tc.provider+"/"+modelID, services)
 	if err != nil {
 		t.Fatal(err)
