@@ -1,18 +1,18 @@
-version = "1.3.0+bdd9f039"
+version = "1.3.0+bd3c9b82"
 
 [[files]]
 path = "packages/agent/src/agent-loop.ts"
-disposition = "deferred"
-contracts = ["concurrent-joined", "microtask-ordering"]
-evidence = ["test:test/extension-conformance/tool_dispatch_test.go", "test:coding/extension/host/subprocess/tool_dispatch_wire_test.go", "test:coding/cli/audit_992_subprocess_tool_dispatch_test.go", "test:extensions/sdk/tool_prepare_arguments_test.go", "test:extensions/sdk-py/tests/test_tool_dispatch.py", "test:extensions/sdk-rs/tests/tool_dispatch_wire.rs", "test:agent/settle_order_test.go", "test:coding/extension/host/subprocess/dialog_reply_order_test.go", "test:coding/cli/parallel_tool_end_order_test.go", "scenario:test/parity/scenarios/rpc/62-rpc-parallel-tool-dialog-order.toml"]
-rationale = "Extension tool dispatch: prepareToolCall (:707-716) runs the tool's prepareArguments, then validates the result, so a subprocess tool is asked for its prepared arguments (tool_prepare_arguments, awaited by the source-order loop) before the host validates. executeToolCallsParallel (:619-647, 820-837) invokes every prepared call through Promise.all(map) in source order and each reaches tool.execute synchronously: the host writes a batch's tool_call requests in source order (one call lane per connection, each call releasing its place once its request is written) and every SDK runtime starts handlers in arrival order. Completion is joined. A call's tool_execution_end follows its own execute promise: calls whose answers arrive back to back from the runtime (a timer, or a dialog answered on one stdin chunk) end in the order the answers arrived, because the one JS thread runs their continuations in settle order, while the results keep source order. The host records the order where the answers are read (the connection read loop for a tool_call response, the RPC stdin line for a dialog answer) and keeps it where the calls continue (agent.SettleGate: the batch's ends, and the replies to a connection's dialog calls); goroutines that wait for the answers wake in no order, so without it the ends came out in a different order on most runs. Existing full-file async obligations outside extension tool dispatch remain deferred."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/agent/src/agent.ts"
-disposition = "deferred"
-contracts = ["awaited", "cancellable", "microtask-ordering"]
-evidence = ["test:agent/prompt_run_test.go", "test:coding/session_preflight_cancellation_test.go", "test:coding/session_preflight_test.go", "test:coding/cli/rpc_preflight_admission_test.go", "test:coding/cli/rpc_prompt_admission_test.go", "scenario:test/parity/scenarios/rpc/13-rpc-steering-queue.toml", "probe:docs/findings/rpc-preflight-admission.md", "probe:docs/findings/pr70-steering-admission.md"]
-rationale = "Prompt claim, first-event dispatch, concurrent-run rejection and release are separated so RPC preflight can settle before Agent execution. The claimed run must drain even after Start failure or cancellation. Existing full-file async obligations outside prompt admission remain deferred."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/agent/src/proxy.ts"
@@ -37,10 +37,10 @@ rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/azure-openai-responses.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/azure_openai_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb changes only the tool-support argument of the synchronous resolveTranscriptTools call (getResponsesToolSupport); no async construct is added or changed, so the review above carries over."
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/bedrock-converse-stream.lazy.ts"
@@ -58,10 +58,10 @@ rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/classifier-shared.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source new in Pi 1.1.0; its per-file ordering/cancellation/error contract has not been reviewed. The port of this file is tracked by test/parity/upstream-sync/v1.1.0.toml."
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/cloudflare-ai-binding.ts"
@@ -79,10 +79,10 @@ rationale = "async/Promise source new in 0.99.1; PORT_MAP status n/a ((lazy dyna
 
 [[files]]
 path = "packages/ai/src/api/google-generative-ai.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/google.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/google-shared.ts"
@@ -93,10 +93,10 @@ rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/google-vertex.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/google_vertex.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/lazy.ts"
@@ -114,10 +114,10 @@ rationale = "async/Promise source new in 0.99.1; PORT_MAP status n/a ((lazy dyna
 
 [[files]]
 path = "packages/ai/src/api/llama-cpp-classify.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source new in 0.99.1; PORT_MAP status ⬜ ((not started: llama.cpp classifier API; the Go classifier registry has no dispatch yet)); no per-file ordering, cancellation and error contract has been reviewed yet, and no evidence is claimed. Review with the owning family before marking translated."
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/mistral-conversations.ts"
@@ -128,10 +128,10 @@ rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/openai-codex-responses.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/openai_codex_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb changes only the tool-support argument of the synchronous resolveTranscriptTools call (getResponsesToolSupport); no async construct is added or changed, so the review above carries over."
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/openai-completions.ts"
@@ -177,17 +177,17 @@ rationale = "`(lazy dynamic-import wrapper; Go providers are statically linked)`
 
 [[files]]
 path = "packages/ai/src/api/openrouter-images.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/openrouter_images.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/pi-messages.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "PORT_MAP marks this file ⏸ deferred: `(deferred: requires the PiG-owned hosted transport, authentication, privacy, and operational contract)`"
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/api/system-one-shared.ts"
@@ -380,10 +380,10 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/mode
 
 [[files]]
 path = "packages/ai/src/models.ts"
-disposition = "deferred"
-contracts = ["awaited", "concurrent-joined", "detached-owned", "cancellable"]
-evidence = ["test:ai/models_runtime_refresh_upstream_test.go#TestModelsRuntimeRefreshUpstream", "test:ai/models_runtime_auth_upstream_test.go#TestModelsRuntimeAuthUpstream", "test:ai/models_runtime_available_test.go#TestModelsGetAvailableRejectsBeforeOtherChecksSettle", "test:ai/models_runtime_lifetime_test.go#TestModelsCompletedRefreshSignalFollowsItsCaller", "scenario:test/parity/scenarios/model-runtime-store-catalog/19-models-runtime.toml", "test:ai/telemetry_upstream_test.go#TestAITelemetryObservesWithoutChangingDeliveredEventsOrResultsUpstream"]
-rationale = "Reviewed against 0.87.1 only. packages/ai/src/images-models.ts was removed upstream in 0.99.1 and its image-catalog refresh and generation contract (auth and generation are blocking awaited calls; all-provider refresh joins every operation and swallows individual failures) now lives in models.ts; those image-models tests no longer exist; Pi 0.99.1 adds async members (Models.generateImages, Models.classify, getAvailableOfType, getAllAvailable, the getAuthenticatedProviders helper, login options) whose ordering, cancellation and error contract is not yet reviewed (ai/src/models.ts in packages/ai 0.99.1). Cache restoration precedes network auth. Refresh phases share one concrete provider signal and serialized, generation-checked publication; persistence completes before synchronous update. Replacement cancels the prior refresh. Aborted callers receive immutable result snapshots while owned non-cooperative callbacks settle without late publication. getAvailable starts checks concurrently and rejects on the first failure while retaining ownership of other checks. Auth and login preserve caller contexts; login distinguishes queued from started mutations. Stream setup runs in an owned worker and forwards all terminal events. Completed refresh signals stay non-aborted and follow later caller cancellation; weak parent forwarding releases unused subscriptions without changing retained signals. Pi 2ec55d80 makes stream, streamSimple and streamDeferred install the telemetry observer; its contract is the one of packages/ai/src/telemetry.ts."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/ai/src/providers/amazon-bedrock.ts"
@@ -638,13 +638,6 @@ evidence = []
 rationale = ""
 
 [[files]]
-path = "packages/chord/src/sqlite/replication/node.ts"
-disposition = "translated"
-contracts = ["awaited", "microtask-ordering"]
-evidence = ["test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteReportsEveryOperationIncludingFailedOnesAndStatementsOutsideTransactions", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteRunsTheCloseHookAfterEarlierOperationsWhileTheWALHoldsEveryCommit", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteClosesTheConnectionEvenWhenTheCloseHookFails", "test:chord/sqlite/replication/node_test.go#TestReplicatedNodeSqliteOpensInWALModeAndNeverCheckpointsOnItsOwn"]
-rationale = "Async uses in replication/node.ts. (1) Every operation (exec, run, get, all, transaction, exclusive) returns the promise of the underlying Node connection; observe (:114-123) delegates synchronously, so the operation enters the connection's queue before the call returns, and afterOperation fires when the operation settles, success or failure, because it may have committed. In Go each method blocks until the operation settles, begin admits calls in the order they reach it (the order they enter the connection's queue), and AfterOperation runs after the operation returns, also on error. (2) close (:90-111) is awaited and memoized: it first waits for every operation admitted before it, then runs beforeClose alone through the connection's exclusive queue (:99), then closes the connection, and every call gets the one outcome; a beforeClose failure and a close failure are reported together as an AggregateError. In Go Close sets closing, waits on the in-flight count so earlier operations finish before BeforeClose, runs BeforeClose inside Exclusive, closes the connection even when the hook fails, and sync.Once makes every Close return the first outcome. Operations and exclusive after Close started reject with the closed error (:86, :115); Go returns the same error from begin. (3) openReplicatedNodeSqliteDatabase (:125-) awaits openNodeSqliteDatabase with automatic checkpoints off; Go's OpenReplicatedNodeSqliteDatabase blocks and returns the connection or the error. A zero value, which Go can construct and Pi's type-only export cannot, answers every call with an error instead of panicking. No task is detached, and nothing is cancellable."
-
-[[files]]
 path = "packages/chord/src/state.ts"
 disposition = "translated"
 contracts = ["awaited", "microtask-ordering"]
@@ -828,10 +821,10 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`coding/
 
 [[files]]
 path = "packages/coding-agent/src/core/agent-session.ts"
-disposition = "deferred"
-contracts = ["awaited", "concurrent-joined", "cancellable", "microtask-ordering"]
-evidence = ["test:coding/session_retry_scheduler_test.go", "test:coding/session_model_runtime_request_test.go", "test:coding/cli/rpc_retry_reactions_test.go", "scenario:test/parity/scenarios/rpc/17-rpc-abort-retry.toml", "test:coding/session_model_dispatch_test.go", "test:coding/session_preflight_test.go", "test:coding/cli/rpc_preflight_admission_test.go", "scenario:test/parity/scenarios/rpc/13-rpc-steering-queue.toml", "scenario:test/parity/scenarios/rpc/31-rpc-cycle-await-interleaving.toml", "scenario:test/parity/scenarios/rpc/32-rpc-cycle-prefix-and-completion.toml", "scenario:test/parity/scenarios/rpc/36-rpc-preflight-admission.toml", "probe:docs/findings/rpc-command-dispatch.md", "probe:docs/findings/rpc-preflight-admission.md", "probe:docs/findings/pr70-steering-admission.md"]
-rationale = "Model-cycle prefix/notification and prompt preflight admission are covered. Input and before_agent_start awaits do not reserve the Agent or hold the Session run lock; streaming is sampled after input, normalization follows before_agent_start, and acceptance precedes the Agent claim. Suspended preflight permits another prompt and both queues. Retry cancellation queues its catch before command replies and resolves the awaited retry in a later reaction; the Go host scheduler binding joins both phases. Session abort cancels the Agent signal without turning it into forced caller-context cancellation. The complete Session Promise contract remains deferred for other replacement, retry and compaction obligations. Pi 6f2f164a changes the constructor's tool restore only; no async change."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/coding-agent/src/core/auth-storage.ts"
@@ -954,10 +947,10 @@ rationale = ""
 
 [[files]]
 path = "packages/coding-agent/src/core/model-runtime.ts"
-disposition = "deferred"
-contracts = ["awaited", "concurrent-joined", "cancellable", "detached-owned", "microtask-ordering"]
-evidence = ["test:coding/model_availability_failfast_test.go", "test:coding/model_registration_refresh_test.go", "test:coding/model_registration_snapshot_test.go", "test:internal/codingagent/native_provider_registration_test.go", "test:coding/cli/startup_native_provider_test.go", "test:internal/codingagent/registration_refresh_hold_test.go", "test:coding/services_model_tasks_test.go", "test:internal/codingagent/model_tasks_test.go", "test:internal/codingagent/model_availability_failfast_test.go", "test:coding/cli/model_tasks_exit_test.go", "scenario:test/parity/scenarios/model-runtime-store-catalog/31-availability-failfast.toml", "test:coding/model_availability_upstream_test.go", "test:coding/model_availability_boundaries_test.go", "test:coding/model_availability_native_test.go", "test:coding/model_availability_create_test.go", "test:coding/model_availability_subscription_test.go", "test:coding/model_runtime_native_upstream_test.go", "test:coding/model_runtime_native_async_test.go", "test:coding/model_refresh_metadata_test.go", "test:coding/custom_provider_subprocess_test.go", "test:test/extension-conformance/provider_stream_test.go", "scenario:test/parity/scenarios/providers-faux-streaming/22-extension-provider-stream.toml", "scenario:test/parity/scenarios/providers-faux-streaming/23-metadata-refresh-and-native-result.toml", "scenario:test/parity/scenarios/model-runtime-store-catalog/25-native-provider-compat.toml"]
-rationale = "Native login, deferred fetch/cancel and refresh await their provider-owned operations. Shared ai.Models owns cancelled callbacks and rejects late publication; the coding coordinator joins its refresh waiters. Full and provider-scoped availability passes generation-check snapshot and error publication; stale operations still return their errors without replacing current state. Credential synchronization awaits availability before notifying consumers. Cancellation retains the latest non-cancelled error, and synchronous snapshot/auth-type getters perform no credential I/O. Native compatibility cases and real Session dispatch are reviewed. Availability Promise.all rejects on the first settled error without cancelling its siblings; Services owns and drains their work, and Close stops admission and cancels the shared lifetime. Success still waits for all children, and per-provider error maps retain completion order. Caller values, cancellation causes/deadlines and retained Done observers survive early settlement. Runtime.Close does not close caller-owned Services. Provider registration and removal return after the synchronous snapshot projection, including registerProvider's provisional configured auth: the projection rereads every provider's catalog and publishes the whole catalog of every configured provider, so account-filtered membership widens until the queued refresh recomputes it, as in Pi's updateModelSnapshot, and it invalidates availability passes that read the catalog earlier. Pi's unawaited `void this.refresh({ allowNetwork: false })` is a microtask continuation that cannot pass its first await before the registering caller yields and never runs concurrently with provider callbacks; PiG queues it and runs one pass for the registrations queued before it starts on the Services task group, at the start of the caller's next awaited model-runtime call (Refresh, GetAvailable, CheckAuth, Login, Logout), where only a caller covering every provider waits for it and a provider-scoped caller does not, since Pi launches the refresh unawaited and scoped calls select only their own providers, or when an extension host registration returns after startup, without waiting (startup registrations stay queued until the startup refresh, which runs after every extension factory; an interactive /reload holds the queue until the host has loaded every extension); a registration queued while a pass runs gets its own concurrent pass that supersedes the running one. Startup awaits createAgentSessionServices' local refresh after flushing extension registrations (agent-session-services.ts:182), which yields to that pass before model resolution. No provider request and no free goroutine runs it. The pass has no signal: the yielding caller's cancellation stops only its wait, Services.Close cancels and drains it, its failure reaches GetError only, and listener notification runs on listener-owned goroutines. A full refresh reloads models.json and recomposes every provider, even with an aborted signal (ModelConfig.load takes no signal), so it supersedes in-flight provider refreshes. Legacy facade contracts remain under the model-registry test obligation; this file is not claimed async-closed."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/coding-agent/src/core/models-store.ts"
@@ -984,8 +977,8 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`interna
 path = "packages/coding-agent/src/core/package-manager.ts"
 disposition = "deferred"
 contracts = ["awaited", "concurrent-joined"]
-evidence = ["test:coding/cli/package_cli_parity_test.go", "test:coding/cli/package_git_parity_test.go", "test:coding/cli/package_process_test.go"]
-rationale = "Package mutation commands block until the child exits, stream inherited output before reporting failure, and persist only after success. npm metadata checks precede per-scope batches and Git updates; four-worker pools bound metadata and Git work and join started operations. Git ref reconciliation waits for fetch, compares commits, then resets/cleans/installs or repairs only missing dependencies. Full resolve/temporary-source and startup-update async behavior remains unreviewed, so this file is not async-closed."
+evidence = ["test:coding/cli/package_cli_parity_test.go", "test:coding/cli/package_git_parity_test.go", "test:coding/cli/package_process_test.go", "test:coding/cli/package_update_shared_checkout_test.go", "test:internal/packagemanager/package_update_shared_checkout_test.go"]
+rationale = "Package mutation commands block until the child exits, stream inherited output before reporting failure, and persist only after success. npm metadata checks precede per-scope batches and Git updates; four-worker pools bound metadata and Git work and join started operations. Pi starts a Git update task per source, so two sources of one checkout fetch into one FETCH_HEAD and run `git reset --hard` at once and fail on index.lock; PiG runs the sources of one checkout one at a time in settings order, each source reporting its own start and terminal event, and keeps different checkouts concurrent. Git ref reconciliation waits for fetch, compares commits, then resets/cleans/installs or repairs only missing dependencies. Full resolve/temporary-source and startup-update async behavior remains unreviewed, so this file is not async-closed."
 
 [[files]]
 path = "packages/coding-agent/src/core/project-trust.ts"
@@ -1024,10 +1017,10 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/auth
 
 [[files]]
 path = "packages/coding-agent/src/core/sdk.ts"
-disposition = "deferred"
-contracts = ["awaited", "cancellable"]
-evidence = ["test:coding/sdk_stream_options_upstream_test.go", "test:coding/session_cache_warming_test.go", "test:ai/provider_request_options_test.go", "scenario:test/parity/scenarios/providers-faux-streaming/20-sdk-stream-options.toml"]
-rationale = "Reviewed streamFn/buildRequestOptions: request presence overrides settings, the assembled-header hook completes before provider execution, its errors propagate on the same request, and cache warming receives the prepared options. Header-attempt timers stop at headers; request cancellation owns body/tunnel lifetime. All nine SDK stream-options cases are ported and presence mutations fail. Other SDK construction and resource-loader async obligations remain deferred."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/coding-agent/src/core/session-manager.ts"
@@ -1521,10 +1514,10 @@ rationale = "The Session awaits normalization after tool_result hooks and before
 
 [[files]]
 path = "packages/coding-agent/src/utils/tools-manager.ts"
-disposition = "deferred"
+disposition = "pending"
 contracts = []
 evidence = []
-rationale = "PORT_MAP marks this file 🟡 partial: `internal/codingagent/tools/tools.go + tools_manager.go (asset table, releases/latest redirect version lookup, fetchWithRetry downloads, extraction per D14; tools_manager_test.go, tools_manager_latest_test.go ports the getLatestVersion cases); missing: ensureTool reports through an onStatus ToolStatus callback that interactive mode shows via showManagedToolStatus and grep/find keep silent, where PiG prints to stderr unless silent, and the failure message does not join the error cause chain`; delivery/unresolved.tsv row 'Review the v0.87.1 denominators'"
+rationale = ""
 
 [[files]]
 path = "packages/coding-agent/src/utils/version-check.ts"
@@ -1763,6 +1756,13 @@ disposition = "translated"
 contracts = ["awaited"]
 evidence = ["test:durable/session/task_times_test.go#TestSetTaskStampsLifecycleTimesFromTheSessionClock", "test:durable/harness/harness_tasks_times_test.go#TestTaskTimes", "test:durable/session/transaction_context_release_internal_test.go"]
 rationale = "The change adds only a synchronous clock read (`now()` in setTask) and a field on createTask; the transaction's awaited reads, preparation and settlement are the blocking calls the port already had, and no Promise outlives the commit. Pi 2ec55d80 keeps the caller's span on the transaction and resets the transaction context to the background context once it settles, so no Promise or span reference outlives the commit; durable/session/transaction.go releases the context however settlement ends."
+
+[[files]]
+path = "packages/durable/src/storage/indexeddb.ts"
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/durable/src/storage/jsonl/node.ts"
@@ -2088,10 +2088,10 @@ rationale = "The fixture factory, getSpans, case run and Symbol.asyncDispose ret
 
 [[files]]
 path = "packages/tui/src/autocomplete.ts"
-disposition = "deferred"
-contracts = ["awaited", "cancellable"]
-evidence = ["test:internal/codingagent/command_argument_completions_test.go", "test:test/extension-conformance/autocomplete_test.go", "scenario:test/parity/scenarios/autocomplete/11-extension-wrapper-arguments.toml", "probe:docs/findings/fix-rigidity-b.md"]
-rationale = "Current-provider calls retain their complete result/error. Promise-returning command arguments are awaited before the first wrapper receives an answer. Request cancellation owns filesystem work. The complete file's remaining upstream test obligations stay deferred."
+disposition = "pending"
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/tui/src/components/cancellable-loader.ts"
