@@ -4413,7 +4413,7 @@ function getCreateJiti() {
 __name(getCreateJiti, "getCreateJiti");
 var virtualModulesPromise;
 function getVirtualModules() {
-  virtualModulesPromise ??= import("./chunk-G2FVTWRH.js").then((module) => module.VIRTUAL_MODULES);
+  virtualModulesPromise ??= import("./chunk-PNQCDTTM.js").then((module) => module.VIRTUAL_MODULES);
   return virtualModulesPromise;
 }
 __name(getVirtualModules, "getVirtualModules");
@@ -4438,6 +4438,7 @@ function getAliases() {
   const piAgentCoreEntry = resolveWorkspaceOrImport("agent/dist/index.js", "@earendil-works/pi-agent-core");
   const piTuiEntry = resolveWorkspaceOrImport("tui/dist/index.js", "@earendil-works/pi-tui");
   const piAiCompatEntry = resolveWorkspaceOrImport("ai/dist/compat.js", "@earendil-works/pi-ai/compat");
+  const piAiModelsEntry = resolveWorkspaceOrImport("ai/dist/models.js", "@earendil-works/pi-ai/models");
   const piAiOauthEntry = resolveWorkspaceOrImport("ai/dist/oauth.js", "@earendil-works/pi-ai/oauth");
   const piAiProvidersEntry = resolveWorkspaceOrImport("ai/dist/providers/all.js", "@earendil-works/pi-ai/providers/all");
   _aliases = {
@@ -4446,6 +4447,7 @@ function getAliases() {
     "@earendil-works/pi-tui": piTuiEntry,
     "@earendil-works/pi-ai/providers/all": piAiProvidersEntry,
     "@earendil-works/pi-ai/compat": piAiCompatEntry,
+    "@earendil-works/pi-ai/models": piAiModelsEntry,
     "@earendil-works/pi-ai/oauth": piAiOauthEntry,
     "@earendil-works/pi-ai": piAiCompatEntry,
     "@mariozechner/pi-coding-agent": piCodingAgentEntry,
@@ -4453,6 +4455,7 @@ function getAliases() {
     "@mariozechner/pi-tui": piTuiEntry,
     "@mariozechner/pi-ai/providers/all": piAiProvidersEntry,
     "@mariozechner/pi-ai/compat": piAiCompatEntry,
+    "@mariozechner/pi-ai/models": piAiModelsEntry,
     "@mariozechner/pi-ai/oauth": piAiOauthEntry,
     "@mariozechner/pi-ai": piAiCompatEntry,
     typebox: typeboxEntry,

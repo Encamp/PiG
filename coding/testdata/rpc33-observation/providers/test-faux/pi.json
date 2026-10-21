@@ -1,5 +1,5 @@
 {
- "pi": "1.3.0+fdce48eb",
+ "pi": "1.3.0+bdd9f039",
  "node": "v24.19.0",
  "results": [
   {
@@ -35,7 +35,7 @@
          }
         },
         "stopReason": "pending",
-        "timestamp": 1792508509085
+        "timestamp": 1792547470894
        }
       }
      },
@@ -147,7 +147,7 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508509085,
+        "timestamp": 1792547470894,
         "durationMs": 1,
         "thinkingLevel": "off"
        }
@@ -185,7 +185,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509179
+         "timestamp": 1792547471036
         }
        }
       },
@@ -220,8 +220,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509179,
-         "durationMs": 1
+         "timestamp": 1792547471036,
+         "durationMs": 2
         }
        }
       },
@@ -257,8 +257,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509179,
-         "durationMs": 1
+         "timestamp": 1792547471036,
+         "durationMs": 2
         }
        }
       },
@@ -294,8 +294,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509179,
-         "durationMs": 1
+         "timestamp": 1792547471036,
+         "durationMs": 2
         }
        }
       },
@@ -330,8 +330,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509179,
-         "durationMs": 1
+         "timestamp": 1792547471036,
+         "durationMs": 2
         }
        }
       },
@@ -363,8 +363,8 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508509179,
-        "durationMs": 1
+        "timestamp": 1792547471036,
+        "durationMs": 2
        }
       }
      ]
@@ -398,7 +398,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509190
+         "timestamp": 1792547471052
         }
        }
       },
@@ -435,7 +435,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509190,
+          "timestamp": 1792547471052,
           "durationMs": 1
          }
         },
@@ -465,7 +465,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509190,
+         "timestamp": 1792547471052,
          "durationMs": 1
         }
        }
@@ -504,7 +504,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509190,
+          "timestamp": 1792547471052,
           "durationMs": 1
          }
         },
@@ -534,7 +534,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509190,
+         "timestamp": 1792547471052,
          "durationMs": 1
         }
        }
@@ -573,7 +573,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509190,
+          "timestamp": 1792547471052,
           "durationMs": 1
          }
         },
@@ -603,7 +603,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509190,
+         "timestamp": 1792547471052,
          "durationMs": 1
         }
        }
@@ -638,7 +638,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509190,
+         "timestamp": 1792547471052,
          "durationMs": 1,
          "thinkingLevel": "off"
         }
@@ -675,7 +675,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509197
+         "timestamp": 1792547471062
         }
        }
       },
@@ -710,7 +710,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509197,
+         "timestamp": 1792547471062,
          "durationMs": 1
         }
        }
@@ -747,7 +747,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509197,
+         "timestamp": 1792547471062,
          "durationMs": 1
         }
        }
@@ -784,7 +784,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509197,
+         "timestamp": 1792547471062,
          "durationMs": 1
         }
        }
@@ -820,7 +820,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509197,
+         "timestamp": 1792547471062,
          "durationMs": 1
         }
        }
@@ -853,7 +853,7 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508509197,
+        "timestamp": 1792547471062,
         "durationMs": 1
        }
       }
@@ -888,7 +888,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509204
+         "timestamp": 1792547471074
         }
        }
       },
@@ -925,7 +925,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509204,
+          "timestamp": 1792547471074,
           "durationMs": 1
          }
         },
@@ -955,7 +955,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509204,
+         "timestamp": 1792547471074,
          "durationMs": 1
         }
        }
@@ -994,7 +994,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509204,
+          "timestamp": 1792547471074,
           "durationMs": 1
          }
         },
@@ -1024,7 +1024,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509204,
+         "timestamp": 1792547471074,
          "durationMs": 1
         }
        }
@@ -1063,7 +1063,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509204,
+          "timestamp": 1792547471074,
           "durationMs": 1
          }
         },
@@ -1093,7 +1093,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509204,
+         "timestamp": 1792547471074,
          "durationMs": 1
         }
        }
@@ -1128,7 +1128,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509204,
+         "timestamp": 1792547471074,
          "durationMs": 1,
          "thinkingLevel": "off"
         }
@@ -1165,7 +1165,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509210
+         "timestamp": 1792547471085
         }
        }
       },
@@ -1200,7 +1200,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509210,
+         "timestamp": 1792547471085,
          "durationMs": 1
         }
        }
@@ -1237,7 +1237,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509210,
+         "timestamp": 1792547471085,
          "durationMs": 1
         }
        }
@@ -1274,7 +1274,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509210,
+         "timestamp": 1792547471085,
          "durationMs": 1
         }
        }
@@ -1310,7 +1310,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509210,
+         "timestamp": 1792547471085,
          "durationMs": 1
         }
        }
@@ -1343,7 +1343,7 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508509210,
+        "timestamp": 1792547471085,
         "durationMs": 1
        }
       }
@@ -1378,7 +1378,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509216
+         "timestamp": 1792547471093
         }
        }
       },
@@ -1415,7 +1415,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509216,
+          "timestamp": 1792547471093,
           "durationMs": 1
          }
         },
@@ -1445,7 +1445,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509216,
+         "timestamp": 1792547471093,
          "durationMs": 1
         }
        }
@@ -1484,7 +1484,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509216,
+          "timestamp": 1792547471093,
           "durationMs": 1
          }
         },
@@ -1514,7 +1514,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509216,
+         "timestamp": 1792547471093,
          "durationMs": 1
         }
        }
@@ -1553,7 +1553,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508509216,
+          "timestamp": 1792547471093,
           "durationMs": 1
          }
         },
@@ -1583,7 +1583,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509216,
+         "timestamp": 1792547471093,
          "durationMs": 1
         }
        }
@@ -1618,7 +1618,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508509216,
+         "timestamp": 1792547471093,
          "durationMs": 1,
          "thinkingLevel": "off"
         }
@@ -1707,7 +1707,7 @@
          }
         },
         "stopReason": "pending",
-        "timestamp": 1792508509676
+        "timestamp": 1792547471761
        }
       }
      },
@@ -1832,8 +1832,8 @@
          }
         },
         "stopReason": "toolUse",
-        "timestamp": 1792508509676,
-        "durationMs": 1,
+        "timestamp": 1792547471761,
+        "durationMs": 2,
         "thinkingLevel": "off"
        }
       }
@@ -1864,7 +1864,7 @@
          }
         },
         "stopReason": "pending",
-        "timestamp": 1792508509689
+        "timestamp": 1792547471785
        }
       }
      },
@@ -1976,7 +1976,7 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508509689,
+        "timestamp": 1792547471785,
         "durationMs": 0,
         "thinkingLevel": "off"
        }
@@ -2014,7 +2014,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509703
+         "timestamp": 1792547471807
         }
        }
       },
@@ -2053,7 +2053,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509703,
+         "timestamp": 1792547471807,
          "durationMs": 1
         }
        }
@@ -2094,7 +2094,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509703,
+         "timestamp": 1792547471807,
          "durationMs": 1
         }
        }
@@ -2142,7 +2142,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509703,
+         "timestamp": 1792547471807,
          "durationMs": 1
         }
        }
@@ -2182,7 +2182,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509703,
+         "timestamp": 1792547471807,
          "durationMs": 1
         }
        }
@@ -2219,7 +2219,7 @@
          }
         },
         "stopReason": "toolUse",
-        "timestamp": 1792508509703,
+        "timestamp": 1792547471807,
         "durationMs": 1
        }
       }
@@ -2254,7 +2254,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509712
+         "timestamp": 1792547471817
         }
        }
       },
@@ -2295,8 +2295,8 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508509712,
-          "durationMs": 1
+          "timestamp": 1792547471817,
+          "durationMs": 2
          }
         },
         "message": {
@@ -2329,8 +2329,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509712,
-         "durationMs": 1
+         "timestamp": 1792547471817,
+         "durationMs": 2
         }
        }
       },
@@ -2372,8 +2372,8 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508509712,
-          "durationMs": 1
+          "timestamp": 1792547471817,
+          "durationMs": 2
          }
         },
         "message": {
@@ -2406,8 +2406,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509712,
-         "durationMs": 1
+         "timestamp": 1792547471817,
+         "durationMs": 2
         }
        }
       },
@@ -2456,8 +2456,8 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508509712,
-          "durationMs": 1
+          "timestamp": 1792547471817,
+          "durationMs": 2
          }
         },
         "message": {
@@ -2490,8 +2490,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509712,
-         "durationMs": 1
+         "timestamp": 1792547471817,
+         "durationMs": 2
         }
        }
       },
@@ -2529,8 +2529,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509712,
-         "durationMs": 1,
+         "timestamp": 1792547471817,
+         "durationMs": 2,
          "thinkingLevel": "off"
         }
        }
@@ -2566,7 +2566,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509720
+         "timestamp": 1792547471828
         }
        }
       },
@@ -2605,7 +2605,559 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509720,
+         "timestamp": 1792547471828,
+         "durationMs": 2
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "toolcall_delta",
+        "contentIndex": 0,
+        "delta": "{\"path\":\"parity-read-target.txt\"}",
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471828,
+         "durationMs": 2
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "toolcall_end",
+        "contentIndex": 0,
+        "toolCall": {
+         "type": "toolCall",
+         "id": "call_test_faux_1",
+         "name": "read",
+         "arguments": {
+          "path": "parity-read-target.txt"
+         }
+        },
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471828,
+         "durationMs": 2
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "done",
+        "reason": "toolUse",
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471828,
+         "durationMs": 2
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "result": {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "toolCall",
+          "id": "call_test_faux_1",
+          "name": "read",
+          "arguments": {
+           "path": "parity-read-target.txt"
+          }
+         }
+        ],
+        "api": "test-faux",
+        "provider": "test-faux",
+        "model": "faux-1",
+        "usage": {
+         "input": 0,
+         "output": 0,
+         "cacheRead": 0,
+         "cacheWrite": 0,
+         "totalTokens": 0,
+         "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0
+         }
+        },
+        "stopReason": "toolUse",
+        "timestamp": 1792547471828,
+        "durationMs": 2
+       }
+      }
+     ]
+    },
+    {
+     "layers": 1,
+     "mode": "agent",
+     "records": [
+      {
+       "pushed": 5,
+       "event": {
+        "type": "message_start",
+        "message": {
+         "role": "assistant",
+         "content": [],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "pending",
+         "timestamp": 1792547471839
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_start",
+         "contentIndex": 0,
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547471839,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471839,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_delta",
+         "contentIndex": 0,
+         "delta": "{\"path\":\"parity-read-target.txt\"}",
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547471839,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471839,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_end",
+         "contentIndex": 0,
+         "toolCall": {
+          "type": "toolCall",
+          "id": "call_test_faux_1",
+          "name": "read",
+          "arguments": {
+           "path": "parity-read-target.txt"
+          }
+         },
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547471839,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471839,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "message_end",
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471839,
+         "durationMs": 4,
+         "thinkingLevel": "off"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "layers": 2,
+     "mode": "direct",
+     "records": [
+      {
+       "pushed": 5,
+       "event": {
+        "type": "start",
+        "partial": {
+         "role": "assistant",
+         "content": [],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "pending",
+         "timestamp": 1792547471855
+        }
+       }
+      },
+      {
+       "pushed": 5,
+       "event": {
+        "type": "toolcall_start",
+        "contentIndex": 0,
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547471855,
          "durationMs": 1
         }
        }
@@ -2646,7 +3198,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509720,
+         "timestamp": 1792547471855,
          "durationMs": 1
         }
        }
@@ -2694,7 +3246,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509720,
+         "timestamp": 1792547471855,
          "durationMs": 1
         }
        }
@@ -2734,7 +3286,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509720,
+         "timestamp": 1792547471855,
          "durationMs": 1
         }
        }
@@ -2771,14 +3323,14 @@
          }
         },
         "stopReason": "toolUse",
-        "timestamp": 1792508509720,
+        "timestamp": 1792547471855,
         "durationMs": 1
        }
       }
      ]
     },
     {
-     "layers": 1,
+     "layers": 2,
      "mode": "agent",
      "records": [
       {
@@ -2806,7 +3358,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508509726
+         "timestamp": 1792547471867
         }
        }
       },
@@ -2847,7 +3399,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508509726,
+          "timestamp": 1792547471867,
           "durationMs": 1
          }
         },
@@ -2881,7 +3433,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509726,
+         "timestamp": 1792547471867,
          "durationMs": 1
         }
        }
@@ -2924,7 +3476,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508509726,
+          "timestamp": 1792547471867,
           "durationMs": 1
          }
         },
@@ -2958,7 +3510,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509726,
+         "timestamp": 1792547471867,
          "durationMs": 1
         }
        }
@@ -3008,7 +3560,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508509726,
+          "timestamp": 1792547471867,
           "durationMs": 1
          }
         },
@@ -3042,7 +3594,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509726,
+         "timestamp": 1792547471867,
          "durationMs": 1
         }
        }
@@ -3081,559 +3633,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508509726,
-         "durationMs": 1,
-         "thinkingLevel": "off"
-        }
-       }
-      }
-     ]
-    },
-    {
-     "layers": 2,
-     "mode": "direct",
-     "records": [
-      {
-       "pushed": 5,
-       "event": {
-        "type": "start",
-        "partial": {
-         "role": "assistant",
-         "content": [],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "pending",
-         "timestamp": 1792508509739
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "toolcall_start",
-        "contentIndex": 0,
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509739,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "toolcall_delta",
-        "contentIndex": 0,
-        "delta": "{\"path\":\"parity-read-target.txt\"}",
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509739,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "toolcall_end",
-        "contentIndex": 0,
-        "toolCall": {
-         "type": "toolCall",
-         "id": "call_test_faux_1",
-         "name": "read",
-         "arguments": {
-          "path": "parity-read-target.txt"
-         }
-        },
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509739,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "done",
-        "reason": "toolUse",
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509739,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "result": {
-        "role": "assistant",
-        "content": [
-         {
-          "type": "toolCall",
-          "id": "call_test_faux_1",
-          "name": "read",
-          "arguments": {
-           "path": "parity-read-target.txt"
-          }
-         }
-        ],
-        "api": "test-faux",
-        "provider": "test-faux",
-        "model": "faux-1",
-        "usage": {
-         "input": 0,
-         "output": 0,
-         "cacheRead": 0,
-         "cacheWrite": 0,
-         "totalTokens": 0,
-         "cost": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "total": 0
-         }
-        },
-        "stopReason": "toolUse",
-        "timestamp": 1792508509739,
-        "durationMs": 1
-       }
-      }
-     ]
-    },
-    {
-     "layers": 2,
-     "mode": "agent",
-     "records": [
-      {
-       "pushed": 5,
-       "event": {
-        "type": "message_start",
-        "message": {
-         "role": "assistant",
-         "content": [],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "pending",
-         "timestamp": 1792508509745
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_start",
-         "contentIndex": 0,
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508509745,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509745,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_delta",
-         "contentIndex": 0,
-         "delta": "{\"path\":\"parity-read-target.txt\"}",
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508509745,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509745,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_end",
-         "contentIndex": 0,
-         "toolCall": {
-          "type": "toolCall",
-          "id": "call_test_faux_1",
-          "name": "read",
-          "arguments": {
-           "path": "parity-read-target.txt"
-          }
-         },
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508509745,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509745,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 5,
-       "event": {
-        "type": "message_end",
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508509745,
+         "timestamp": 1792547471867,
          "durationMs": 1,
          "thinkingLevel": "off"
         }
@@ -3722,7 +3722,7 @@
          }
         },
         "stopReason": "pending",
-        "timestamp": 1792508510214
+        "timestamp": 1792547472491
        }
       }
      },
@@ -3943,8 +3943,8 @@
          }
         },
         "stopReason": "toolUse",
-        "timestamp": 1792508510214,
-        "durationMs": 1,
+        "timestamp": 1792547472491,
+        "durationMs": 2,
         "thinkingLevel": "off"
        }
       }
@@ -3975,7 +3975,7 @@
          }
         },
         "stopReason": "pending",
-        "timestamp": 1792508510243
+        "timestamp": 1792547472526
        }
       }
      },
@@ -4087,8 +4087,8 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508510243,
-        "durationMs": 0,
+        "timestamp": 1792547472526,
+        "durationMs": 2,
         "thinkingLevel": "off"
        }
       }
@@ -4125,7 +4125,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510261
+         "timestamp": 1792547472553
         }
        }
       },
@@ -4173,8 +4173,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510261,
-         "durationMs": 1
+         "timestamp": 1792547472553,
+         "durationMs": 2
         }
        }
       },
@@ -4223,8 +4223,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510261,
-         "durationMs": 1
+         "timestamp": 1792547472553,
+         "durationMs": 2
         }
        }
       },
@@ -4280,8 +4280,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510261,
-         "durationMs": 1
+         "timestamp": 1792547472553,
+         "durationMs": 2
         }
        }
       },
@@ -4329,8 +4329,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510261,
-         "durationMs": 1
+         "timestamp": 1792547472553,
+         "durationMs": 2
         }
        }
       },
@@ -4379,8 +4379,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510261,
-         "durationMs": 1
+         "timestamp": 1792547472553,
+         "durationMs": 2
         }
        }
       },
@@ -4437,8 +4437,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510261,
-         "durationMs": 1
+         "timestamp": 1792547472553,
+         "durationMs": 2
         }
        }
       },
@@ -4486,8 +4486,8 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510261,
-         "durationMs": 1
+         "timestamp": 1792547472553,
+         "durationMs": 2
         }
        }
       },
@@ -4532,8 +4532,8 @@
          }
         },
         "stopReason": "toolUse",
-        "timestamp": 1792508510261,
-        "durationMs": 1
+        "timestamp": 1792547472553,
+        "durationMs": 2
        }
       }
      ]
@@ -4567,7 +4567,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510274
+         "timestamp": 1792547472568
         }
        }
       },
@@ -4617,7 +4617,1116 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510274,
+          "timestamp": 1792547472568,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472568,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_delta",
+         "contentIndex": 0,
+         "delta": "{\"path\":\"parity-read-target.txt\"}",
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           },
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_2",
+            "name": "bash",
+            "arguments": {
+             "command": "echo parallel-ok",
+             "timeout": 10
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547472568,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472568,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_end",
+         "contentIndex": 0,
+         "toolCall": {
+          "type": "toolCall",
+          "id": "call_test_faux_1",
+          "name": "read",
+          "arguments": {
+           "path": "parity-read-target.txt"
+          }
+         },
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           },
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_2",
+            "name": "bash",
+            "arguments": {
+             "command": "echo parallel-ok",
+             "timeout": 10
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547472568,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472568,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_start",
+         "contentIndex": 1,
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           },
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_2",
+            "name": "bash",
+            "arguments": {
+             "command": "echo parallel-ok",
+             "timeout": 10
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547472568,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472568,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_delta",
+         "contentIndex": 1,
+         "delta": "{\"command\":\"echo parallel-ok\",\"timeout\":10}",
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           },
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_2",
+            "name": "bash",
+            "arguments": {
+             "command": "echo parallel-ok",
+             "timeout": 10
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547472568,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472568,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_end",
+         "contentIndex": 1,
+         "toolCall": {
+          "type": "toolCall",
+          "id": "call_test_faux_2",
+          "name": "bash",
+          "arguments": {
+           "command": "echo parallel-ok",
+           "timeout": 10
+          }
+         },
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           },
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_2",
+            "name": "bash",
+            "arguments": {
+             "command": "echo parallel-ok",
+             "timeout": 10
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547472568,
+          "durationMs": 4
+         }
+        },
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472568,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_end",
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472568,
+         "durationMs": 4,
+         "thinkingLevel": "off"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "layers": 1,
+     "mode": "direct",
+     "records": [
+      {
+       "pushed": 8,
+       "event": {
+        "type": "start",
+        "partial": {
+         "role": "assistant",
+         "content": [],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "pending",
+         "timestamp": 1792547472585
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "toolcall_start",
+        "contentIndex": 0,
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472585,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "toolcall_delta",
+        "contentIndex": 0,
+        "delta": "{\"path\":\"parity-read-target.txt\"}",
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472585,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "toolcall_end",
+        "contentIndex": 0,
+        "toolCall": {
+         "type": "toolCall",
+         "id": "call_test_faux_1",
+         "name": "read",
+         "arguments": {
+          "path": "parity-read-target.txt"
+         }
+        },
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472585,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "toolcall_start",
+        "contentIndex": 1,
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472585,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "toolcall_delta",
+        "contentIndex": 1,
+        "delta": "{\"command\":\"echo parallel-ok\",\"timeout\":10}",
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472585,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "toolcall_end",
+        "contentIndex": 1,
+        "toolCall": {
+         "type": "toolCall",
+         "id": "call_test_faux_2",
+         "name": "bash",
+         "arguments": {
+          "command": "echo parallel-ok",
+          "timeout": 10
+         }
+        },
+        "partial": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472585,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "done",
+        "reason": "toolUse",
+        "message": {
+         "role": "assistant",
+         "content": [
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_1",
+           "name": "read",
+           "arguments": {
+            "path": "parity-read-target.txt"
+           }
+          },
+          {
+           "type": "toolCall",
+           "id": "call_test_faux_2",
+           "name": "bash",
+           "arguments": {
+            "command": "echo parallel-ok",
+            "timeout": 10
+           }
+          }
+         ],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "toolUse",
+         "timestamp": 1792547472585,
+         "durationMs": 4
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "result": {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "toolCall",
+          "id": "call_test_faux_1",
+          "name": "read",
+          "arguments": {
+           "path": "parity-read-target.txt"
+          }
+         },
+         {
+          "type": "toolCall",
+          "id": "call_test_faux_2",
+          "name": "bash",
+          "arguments": {
+           "command": "echo parallel-ok",
+           "timeout": 10
+          }
+         }
+        ],
+        "api": "test-faux",
+        "provider": "test-faux",
+        "model": "faux-1",
+        "usage": {
+         "input": 0,
+         "output": 0,
+         "cacheRead": 0,
+         "cacheWrite": 0,
+         "totalTokens": 0,
+         "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0
+         }
+        },
+        "stopReason": "toolUse",
+        "timestamp": 1792547472585,
+        "durationMs": 4
+       }
+      }
+     ]
+    },
+    {
+     "layers": 1,
+     "mode": "agent",
+     "records": [
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_start",
+        "message": {
+         "role": "assistant",
+         "content": [],
+         "api": "test-faux",
+         "provider": "test-faux",
+         "model": "faux-1",
+         "usage": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "cost": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "total": 0
+          }
+         },
+         "stopReason": "pending",
+         "timestamp": 1792547472596
+        }
+       }
+      },
+      {
+       "pushed": 8,
+       "event": {
+        "type": "message_update",
+        "assistantMessageEvent": {
+         "type": "toolcall_start",
+         "contentIndex": 0,
+         "partial": {
+          "role": "assistant",
+          "content": [
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_1",
+            "name": "read",
+            "arguments": {
+             "path": "parity-read-target.txt"
+            }
+           },
+           {
+            "type": "toolCall",
+            "id": "call_test_faux_2",
+            "name": "bash",
+            "arguments": {
+             "command": "echo parallel-ok",
+             "timeout": 10
+            }
+           }
+          ],
+          "api": "test-faux",
+          "provider": "test-faux",
+          "model": "faux-1",
+          "usage": {
+           "input": 0,
+           "output": 0,
+           "cacheRead": 0,
+           "cacheWrite": 0,
+           "totalTokens": 0,
+           "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+           }
+          },
+          "stopReason": "toolUse",
+          "timestamp": 1792547472596,
           "durationMs": 1
          }
         },
@@ -4660,7 +5769,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510274,
+         "timestamp": 1792547472596,
          "durationMs": 1
         }
        }
@@ -4712,7 +5821,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510274,
+          "timestamp": 1792547472596,
           "durationMs": 1
          }
         },
@@ -4755,7 +5864,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510274,
+         "timestamp": 1792547472596,
          "durationMs": 1
         }
        }
@@ -4814,7 +5923,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510274,
+          "timestamp": 1792547472596,
           "durationMs": 1
          }
         },
@@ -4857,7 +5966,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510274,
+         "timestamp": 1792547472596,
          "durationMs": 1
         }
        }
@@ -4908,7 +6017,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510274,
+          "timestamp": 1792547472596,
           "durationMs": 1
          }
         },
@@ -4951,7 +6060,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510274,
+         "timestamp": 1792547472596,
          "durationMs": 1
         }
        }
@@ -5003,7 +6112,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510274,
+          "timestamp": 1792547472596,
           "durationMs": 1
          }
         },
@@ -5046,7 +6155,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510274,
+         "timestamp": 1792547472596,
          "durationMs": 1
         }
        }
@@ -5106,7 +6215,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510274,
+          "timestamp": 1792547472596,
           "durationMs": 1
          }
         },
@@ -5149,7 +6258,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510274,
+         "timestamp": 1792547472596,
          "durationMs": 1
         }
        }
@@ -5197,7 +6306,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510274,
+         "timestamp": 1792547472596,
          "durationMs": 1,
          "thinkingLevel": "off"
         }
@@ -5206,7 +6315,7 @@
      ]
     },
     {
-     "layers": 1,
+     "layers": 2,
      "mode": "direct",
      "records": [
       {
@@ -5234,7 +6343,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510281
+         "timestamp": 1792547472604
         }
        }
       },
@@ -5282,7 +6391,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510281,
+         "timestamp": 1792547472604,
          "durationMs": 1
         }
        }
@@ -5332,7 +6441,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510281,
+         "timestamp": 1792547472604,
          "durationMs": 1
         }
        }
@@ -5389,7 +6498,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510281,
+         "timestamp": 1792547472604,
          "durationMs": 1
         }
        }
@@ -5438,7 +6547,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510281,
+         "timestamp": 1792547472604,
          "durationMs": 1
         }
        }
@@ -5488,7 +6597,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510281,
+         "timestamp": 1792547472604,
          "durationMs": 1
         }
        }
@@ -5546,7 +6655,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510281,
+         "timestamp": 1792547472604,
          "durationMs": 1
         }
        }
@@ -5595,7 +6704,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510281,
+         "timestamp": 1792547472604,
          "durationMs": 1
         }
        }
@@ -5641,14 +6750,14 @@
          }
         },
         "stopReason": "toolUse",
-        "timestamp": 1792508510281,
+        "timestamp": 1792547472604,
         "durationMs": 1
        }
       }
      ]
     },
     {
-     "layers": 1,
+     "layers": 2,
      "mode": "agent",
      "records": [
       {
@@ -5676,7 +6785,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510287
+         "timestamp": 1792547472612
         }
        }
       },
@@ -5726,7 +6835,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510287,
+          "timestamp": 1792547472612,
           "durationMs": 1
          }
         },
@@ -5769,7 +6878,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510287,
+         "timestamp": 1792547472612,
          "durationMs": 1
         }
        }
@@ -5821,7 +6930,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510287,
+          "timestamp": 1792547472612,
           "durationMs": 1
          }
         },
@@ -5864,7 +6973,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510287,
+         "timestamp": 1792547472612,
          "durationMs": 1
         }
        }
@@ -5923,7 +7032,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510287,
+          "timestamp": 1792547472612,
           "durationMs": 1
          }
         },
@@ -5966,7 +7075,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510287,
+         "timestamp": 1792547472612,
          "durationMs": 1
         }
        }
@@ -6017,7 +7126,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510287,
+          "timestamp": 1792547472612,
           "durationMs": 1
          }
         },
@@ -6060,7 +7169,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510287,
+         "timestamp": 1792547472612,
          "durationMs": 1
         }
        }
@@ -6112,7 +7221,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510287,
+          "timestamp": 1792547472612,
           "durationMs": 1
          }
         },
@@ -6155,7 +7264,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510287,
+         "timestamp": 1792547472612,
          "durationMs": 1
         }
        }
@@ -6215,7 +7324,7 @@
            }
           },
           "stopReason": "toolUse",
-          "timestamp": 1792508510287,
+          "timestamp": 1792547472612,
           "durationMs": 1
          }
         },
@@ -6258,7 +7367,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510287,
+         "timestamp": 1792547472612,
          "durationMs": 1
         }
        }
@@ -6306,1116 +7415,7 @@
           }
          },
          "stopReason": "toolUse",
-         "timestamp": 1792508510287,
-         "durationMs": 1,
-         "thinkingLevel": "off"
-        }
-       }
-      }
-     ]
-    },
-    {
-     "layers": 2,
-     "mode": "direct",
-     "records": [
-      {
-       "pushed": 8,
-       "event": {
-        "type": "start",
-        "partial": {
-         "role": "assistant",
-         "content": [],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "pending",
-         "timestamp": 1792508510294
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "toolcall_start",
-        "contentIndex": 0,
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510294,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "toolcall_delta",
-        "contentIndex": 0,
-        "delta": "{\"path\":\"parity-read-target.txt\"}",
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510294,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "toolcall_end",
-        "contentIndex": 0,
-        "toolCall": {
-         "type": "toolCall",
-         "id": "call_test_faux_1",
-         "name": "read",
-         "arguments": {
-          "path": "parity-read-target.txt"
-         }
-        },
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510294,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "toolcall_start",
-        "contentIndex": 1,
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510294,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "toolcall_delta",
-        "contentIndex": 1,
-        "delta": "{\"command\":\"echo parallel-ok\",\"timeout\":10}",
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510294,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "toolcall_end",
-        "contentIndex": 1,
-        "toolCall": {
-         "type": "toolCall",
-         "id": "call_test_faux_2",
-         "name": "bash",
-         "arguments": {
-          "command": "echo parallel-ok",
-          "timeout": 10
-         }
-        },
-        "partial": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510294,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "done",
-        "reason": "toolUse",
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510294,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "result": {
-        "role": "assistant",
-        "content": [
-         {
-          "type": "toolCall",
-          "id": "call_test_faux_1",
-          "name": "read",
-          "arguments": {
-           "path": "parity-read-target.txt"
-          }
-         },
-         {
-          "type": "toolCall",
-          "id": "call_test_faux_2",
-          "name": "bash",
-          "arguments": {
-           "command": "echo parallel-ok",
-           "timeout": 10
-          }
-         }
-        ],
-        "api": "test-faux",
-        "provider": "test-faux",
-        "model": "faux-1",
-        "usage": {
-         "input": 0,
-         "output": 0,
-         "cacheRead": 0,
-         "cacheWrite": 0,
-         "totalTokens": 0,
-         "cost": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "total": 0
-         }
-        },
-        "stopReason": "toolUse",
-        "timestamp": 1792508510294,
-        "durationMs": 1
-       }
-      }
-     ]
-    },
-    {
-     "layers": 2,
-     "mode": "agent",
-     "records": [
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_start",
-        "message": {
-         "role": "assistant",
-         "content": [],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "pending",
-         "timestamp": 1792508510300
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_start",
-         "contentIndex": 0,
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           },
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_2",
-            "name": "bash",
-            "arguments": {
-             "command": "echo parallel-ok",
-             "timeout": 10
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508510300,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510300,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_delta",
-         "contentIndex": 0,
-         "delta": "{\"path\":\"parity-read-target.txt\"}",
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           },
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_2",
-            "name": "bash",
-            "arguments": {
-             "command": "echo parallel-ok",
-             "timeout": 10
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508510300,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510300,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_end",
-         "contentIndex": 0,
-         "toolCall": {
-          "type": "toolCall",
-          "id": "call_test_faux_1",
-          "name": "read",
-          "arguments": {
-           "path": "parity-read-target.txt"
-          }
-         },
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           },
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_2",
-            "name": "bash",
-            "arguments": {
-             "command": "echo parallel-ok",
-             "timeout": 10
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508510300,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510300,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_start",
-         "contentIndex": 1,
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           },
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_2",
-            "name": "bash",
-            "arguments": {
-             "command": "echo parallel-ok",
-             "timeout": 10
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508510300,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510300,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_delta",
-         "contentIndex": 1,
-         "delta": "{\"command\":\"echo parallel-ok\",\"timeout\":10}",
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           },
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_2",
-            "name": "bash",
-            "arguments": {
-             "command": "echo parallel-ok",
-             "timeout": 10
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508510300,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510300,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_update",
-        "assistantMessageEvent": {
-         "type": "toolcall_end",
-         "contentIndex": 1,
-         "toolCall": {
-          "type": "toolCall",
-          "id": "call_test_faux_2",
-          "name": "bash",
-          "arguments": {
-           "command": "echo parallel-ok",
-           "timeout": 10
-          }
-         },
-         "partial": {
-          "role": "assistant",
-          "content": [
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_1",
-            "name": "read",
-            "arguments": {
-             "path": "parity-read-target.txt"
-            }
-           },
-           {
-            "type": "toolCall",
-            "id": "call_test_faux_2",
-            "name": "bash",
-            "arguments": {
-             "command": "echo parallel-ok",
-             "timeout": 10
-            }
-           }
-          ],
-          "api": "test-faux",
-          "provider": "test-faux",
-          "model": "faux-1",
-          "usage": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "totalTokens": 0,
-           "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-           }
-          },
-          "stopReason": "toolUse",
-          "timestamp": 1792508510300,
-          "durationMs": 1
-         }
-        },
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510300,
-         "durationMs": 1
-        }
-       }
-      },
-      {
-       "pushed": 8,
-       "event": {
-        "type": "message_end",
-        "message": {
-         "role": "assistant",
-         "content": [
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_1",
-           "name": "read",
-           "arguments": {
-            "path": "parity-read-target.txt"
-           }
-          },
-          {
-           "type": "toolCall",
-           "id": "call_test_faux_2",
-           "name": "bash",
-           "arguments": {
-            "command": "echo parallel-ok",
-            "timeout": 10
-           }
-          }
-         ],
-         "api": "test-faux",
-         "provider": "test-faux",
-         "model": "faux-1",
-         "usage": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "totalTokens": 0,
-          "cost": {
-           "input": 0,
-           "output": 0,
-           "cacheRead": 0,
-           "cacheWrite": 0,
-           "total": 0
-          }
-         },
-         "stopReason": "toolUse",
-         "timestamp": 1792508510300,
+         "timestamp": 1792547472612,
          "durationMs": 1,
          "thinkingLevel": "off"
         }
@@ -7504,7 +7504,7 @@
          }
         },
         "stopReason": "pending",
-        "timestamp": 1792508510720
+        "timestamp": 1792547473313
        }
       }
      },
@@ -7534,7 +7534,7 @@
          }
         },
         "stopReason": "error",
-        "timestamp": 1792508510720,
+        "timestamp": 1792547473313,
         "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
         "durationMs": 1,
         "thinkingLevel": "off"
@@ -7573,7 +7573,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510743
+         "timestamp": 1792547473339
         }
        }
       },
@@ -7603,7 +7603,7 @@
           }
          },
          "stopReason": "error",
-         "timestamp": 1792508510743,
+         "timestamp": 1792547473339,
          "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
          "durationMs": 1
         }
@@ -7632,7 +7632,7 @@
          }
         },
         "stopReason": "error",
-        "timestamp": 1792508510743,
+        "timestamp": 1792547473339,
         "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
         "durationMs": 1
        }
@@ -7668,7 +7668,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510755
+         "timestamp": 1792547473350
         }
        }
       },
@@ -7697,7 +7697,7 @@
           }
          },
          "stopReason": "error",
-         "timestamp": 1792508510755,
+         "timestamp": 1792547473350,
          "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
          "durationMs": 1,
          "thinkingLevel": "off"
@@ -7735,7 +7735,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510761
+         "timestamp": 1792547473357
         }
        }
       },
@@ -7765,7 +7765,7 @@
           }
          },
          "stopReason": "error",
-         "timestamp": 1792508510761,
+         "timestamp": 1792547473357,
          "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
          "durationMs": 1
         }
@@ -7794,7 +7794,7 @@
          }
         },
         "stopReason": "error",
-        "timestamp": 1792508510761,
+        "timestamp": 1792547473357,
         "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
         "durationMs": 1
        }
@@ -7830,7 +7830,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510767
+         "timestamp": 1792547473364
         }
        }
       },
@@ -7859,7 +7859,7 @@
           }
          },
          "stopReason": "error",
-         "timestamp": 1792508510767,
+         "timestamp": 1792547473364,
          "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
          "durationMs": 1,
          "thinkingLevel": "off"
@@ -7897,7 +7897,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510773
+         "timestamp": 1792547473371
         }
        }
       },
@@ -7927,7 +7927,7 @@
           }
          },
          "stopReason": "error",
-         "timestamp": 1792508510773,
+         "timestamp": 1792547473371,
          "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
          "durationMs": 1
         }
@@ -7956,7 +7956,7 @@
          }
         },
         "stopReason": "error",
-        "timestamp": 1792508510773,
+        "timestamp": 1792547473371,
         "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
         "durationMs": 1
        }
@@ -7992,7 +7992,7 @@
           }
          },
          "stopReason": "pending",
-         "timestamp": 1792508510779
+         "timestamp": 1792547473379
         }
        }
       },
@@ -8021,7 +8021,7 @@
           }
          },
          "stopReason": "error",
-         "timestamp": 1792508510779,
+         "timestamp": 1792547473379,
          "errorMessage": "test-faux: unhandled request \"unhandled request for the fixture\"",
          "durationMs": 1,
          "thinkingLevel": "off"
@@ -8116,7 +8116,7 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508511248
+        "timestamp": 1792547473989
        }
       }
      },
@@ -8826,8 +8826,8 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508511248,
-        "durationMs": 965,
+        "timestamp": 1792547473989,
+        "durationMs": 974,
         "thinkingLevel": "off"
        }
       }
@@ -8869,7 +8869,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -8904,7 +8904,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -8940,7 +8940,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -8976,7 +8976,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9012,7 +9012,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9048,7 +9048,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9084,7 +9084,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9120,7 +9120,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9156,7 +9156,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9192,7 +9192,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9228,7 +9228,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9264,7 +9264,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9300,7 +9300,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9336,7 +9336,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9372,7 +9372,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9408,7 +9408,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9444,7 +9444,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9480,7 +9480,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9516,7 +9516,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9552,7 +9552,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9588,7 +9588,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9624,7 +9624,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9660,7 +9660,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9696,7 +9696,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9732,7 +9732,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9768,7 +9768,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231
+         "timestamp": 1792547474981
         }
        }
       },
@@ -9804,8 +9804,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231,
-         "durationMs": 966
+         "timestamp": 1792547474981,
+         "durationMs": 979
         }
        }
       },
@@ -9840,8 +9840,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508512231,
-         "durationMs": 966
+         "timestamp": 1792547474981,
+         "durationMs": 979
         }
        }
       },
@@ -9873,8 +9873,8 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508512231,
-        "durationMs": 966
+        "timestamp": 1792547474981,
+        "durationMs": 979
        }
       }
      ]
@@ -9913,7 +9913,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -9950,7 +9950,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -9979,7 +9979,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10017,7 +10017,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10046,7 +10046,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10084,7 +10084,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10113,7 +10113,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10151,7 +10151,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10180,7 +10180,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10218,7 +10218,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10247,7 +10247,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10285,7 +10285,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10314,7 +10314,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10352,7 +10352,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10381,7 +10381,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10419,7 +10419,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10448,7 +10448,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10486,7 +10486,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10515,7 +10515,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10553,7 +10553,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10582,7 +10582,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10620,7 +10620,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10649,7 +10649,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10687,7 +10687,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10716,7 +10716,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10754,7 +10754,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10783,7 +10783,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10821,7 +10821,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10850,7 +10850,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10888,7 +10888,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10917,7 +10917,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -10955,7 +10955,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -10984,7 +10984,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11022,7 +11022,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11051,7 +11051,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11089,7 +11089,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11118,7 +11118,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11156,7 +11156,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11185,7 +11185,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11223,7 +11223,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11252,7 +11252,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11290,7 +11290,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11319,7 +11319,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11357,7 +11357,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11386,7 +11386,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11424,7 +11424,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11453,7 +11453,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11491,7 +11491,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11520,7 +11520,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11558,7 +11558,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206
+          "timestamp": 1792547475968
          }
         },
         "message": {
@@ -11587,7 +11587,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206
+         "timestamp": 1792547475968
         }
        }
       },
@@ -11625,8 +11625,8 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508513206,
-          "durationMs": 967
+          "timestamp": 1792547475968,
+          "durationMs": 977
          }
         },
         "message": {
@@ -11655,8 +11655,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206,
-         "durationMs": 967
+         "timestamp": 1792547475968,
+         "durationMs": 977
         }
        }
       },
@@ -11690,8 +11690,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508513206,
-         "durationMs": 967,
+         "timestamp": 1792547475968,
+         "durationMs": 977,
          "thinkingLevel": "off"
         }
        }
@@ -11732,7 +11732,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -11767,7 +11767,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -11803,7 +11803,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -11839,7 +11839,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -11875,7 +11875,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -11911,7 +11911,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -11947,7 +11947,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -11983,7 +11983,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12019,7 +12019,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12055,7 +12055,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12091,7 +12091,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12127,7 +12127,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12163,7 +12163,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12199,7 +12199,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12235,7 +12235,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12271,7 +12271,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12307,7 +12307,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12343,7 +12343,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12379,7 +12379,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12415,7 +12415,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12451,7 +12451,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12487,7 +12487,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12523,7 +12523,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12559,7 +12559,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12595,7 +12595,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12631,7 +12631,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180
+         "timestamp": 1792547476958
         }
        }
       },
@@ -12667,8 +12667,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180,
-         "durationMs": 967
+         "timestamp": 1792547476958,
+         "durationMs": 971
         }
        }
       },
@@ -12703,8 +12703,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508514180,
-         "durationMs": 967
+         "timestamp": 1792547476958,
+         "durationMs": 971
         }
        }
       },
@@ -12736,8 +12736,8 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508514180,
-        "durationMs": 967
+        "timestamp": 1792547476958,
+        "durationMs": 971
        }
       }
      ]
@@ -12776,7 +12776,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -12813,7 +12813,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -12842,7 +12842,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -12880,7 +12880,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -12909,7 +12909,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -12947,7 +12947,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -12976,7 +12976,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13014,7 +13014,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13043,7 +13043,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13081,7 +13081,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13110,7 +13110,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13148,7 +13148,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13177,7 +13177,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13215,7 +13215,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13244,7 +13244,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13282,7 +13282,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13311,7 +13311,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13349,7 +13349,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13378,7 +13378,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13416,7 +13416,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13445,7 +13445,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13483,7 +13483,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13512,7 +13512,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13550,7 +13550,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13579,7 +13579,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13617,7 +13617,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13646,7 +13646,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13684,7 +13684,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13713,7 +13713,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13751,7 +13751,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13780,7 +13780,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13818,7 +13818,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13847,7 +13847,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13885,7 +13885,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13914,7 +13914,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -13952,7 +13952,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -13981,7 +13981,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14019,7 +14019,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -14048,7 +14048,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14086,7 +14086,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -14115,7 +14115,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14153,7 +14153,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -14182,7 +14182,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14220,7 +14220,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -14249,7 +14249,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14287,7 +14287,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -14316,7 +14316,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14354,7 +14354,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -14383,7 +14383,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14421,7 +14421,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153
+          "timestamp": 1792547477938
          }
         },
         "message": {
@@ -14450,7 +14450,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153
+         "timestamp": 1792547477938
         }
        }
       },
@@ -14488,8 +14488,8 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508515153,
-          "durationMs": 965
+          "timestamp": 1792547477938,
+          "durationMs": 975
          }
         },
         "message": {
@@ -14518,8 +14518,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153,
-         "durationMs": 965
+         "timestamp": 1792547477938,
+         "durationMs": 975
         }
        }
       },
@@ -14553,8 +14553,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508515153,
-         "durationMs": 965,
+         "timestamp": 1792547477938,
+         "durationMs": 975,
          "thinkingLevel": "off"
         }
        }
@@ -14595,7 +14595,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14630,7 +14630,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14666,7 +14666,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14702,7 +14702,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14738,7 +14738,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14774,7 +14774,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14810,7 +14810,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14846,7 +14846,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14882,7 +14882,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14918,7 +14918,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14954,7 +14954,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -14990,7 +14990,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15026,7 +15026,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15062,7 +15062,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15098,7 +15098,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15134,7 +15134,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15170,7 +15170,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15206,7 +15206,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15242,7 +15242,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15278,7 +15278,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15314,7 +15314,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15350,7 +15350,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15386,7 +15386,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15422,7 +15422,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15458,7 +15458,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15494,7 +15494,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123
+         "timestamp": 1792547478922
         }
        }
       },
@@ -15530,8 +15530,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123,
-         "durationMs": 964
+         "timestamp": 1792547478922,
+         "durationMs": 973
         }
        }
       },
@@ -15566,8 +15566,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508516123,
-         "durationMs": 964
+         "timestamp": 1792547478922,
+         "durationMs": 973
         }
        }
       },
@@ -15599,8 +15599,8 @@
          }
         },
         "stopReason": "stop",
-        "timestamp": 1792508516123,
-        "durationMs": 964
+        "timestamp": 1792547478922,
+        "durationMs": 973
        }
       }
      ]
@@ -15639,7 +15639,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -15676,7 +15676,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -15705,7 +15705,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -15743,7 +15743,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -15772,7 +15772,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -15810,7 +15810,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -15839,7 +15839,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -15877,7 +15877,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -15906,7 +15906,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -15944,7 +15944,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -15973,7 +15973,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16011,7 +16011,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16040,7 +16040,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16078,7 +16078,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16107,7 +16107,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16145,7 +16145,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16174,7 +16174,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16212,7 +16212,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16241,7 +16241,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16279,7 +16279,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16308,7 +16308,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16346,7 +16346,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16375,7 +16375,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16413,7 +16413,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16442,7 +16442,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16480,7 +16480,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16509,7 +16509,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16547,7 +16547,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16576,7 +16576,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16614,7 +16614,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16643,7 +16643,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16681,7 +16681,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16710,7 +16710,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16748,7 +16748,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16777,7 +16777,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16815,7 +16815,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16844,7 +16844,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16882,7 +16882,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16911,7 +16911,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -16949,7 +16949,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -16978,7 +16978,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -17016,7 +17016,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -17045,7 +17045,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -17083,7 +17083,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -17112,7 +17112,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -17150,7 +17150,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -17179,7 +17179,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -17217,7 +17217,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -17246,7 +17246,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -17284,7 +17284,7 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093
+          "timestamp": 1792547479907
          }
         },
         "message": {
@@ -17313,7 +17313,7 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093
+         "timestamp": 1792547479907
         }
        }
       },
@@ -17351,8 +17351,8 @@
            }
           },
           "stopReason": "stop",
-          "timestamp": 1792508517093,
-          "durationMs": 966
+          "timestamp": 1792547479907,
+          "durationMs": 980
          }
         },
         "message": {
@@ -17381,8 +17381,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093,
-         "durationMs": 966
+         "timestamp": 1792547479907,
+         "durationMs": 980
         }
        }
       },
@@ -17416,8 +17416,8 @@
           }
          },
          "stopReason": "stop",
-         "timestamp": 1792508517093,
-         "durationMs": 966,
+         "timestamp": 1792547479907,
+         "durationMs": 980,
          "thinkingLevel": "off"
         }
        }
