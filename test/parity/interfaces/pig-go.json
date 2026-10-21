@@ -40344,17 +40344,6 @@
       "shapeHash": "sha256:68cc36c9f93958a38e7c274c26c509e896e8bbe0f9927ee309e327b6246bbfa4"
     },
     {
-      "id": "go:github.com/MichaelKinsy/PiG/ai#findLastNonAdditiveToolChange",
-      "package": "github.com/MichaelKinsy/PiG/ai",
-      "name": "findLastNonAdditiveToolChange",
-      "kind": "function",
-      "exported": false,
-      "shape": {
-        "type": "func(systemMessages []SystemMessage) int"
-      },
-      "shapeHash": "sha256:095d8af3f1b80f7825dc0d86ea2f96d15ac87ee4914a0809c3f8279316bef99b"
-    },
-    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#findMistralEventBoundary",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "findMistralEventBoundary",
@@ -51790,9 +51779,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(msgs []Message, grammarProps map[string]string, instructionRole string, anchorsToolChanges func(systemIndex int) bool, isReasoning bool) ([]oaiMessage, error)"
+        "type": "func(msgs []Message, grammarProps map[string]string, instructionRole string, anchors toolAnchors, isReasoning bool) ([]oaiMessage, error)"
       },
-      "shapeHash": "sha256:9aed96a7161d224c73e1101bb5f668b23c2c927fd894e2f96837bec2f0483129"
+      "shapeHash": "sha256:7ee894c8c4ec159da46896094291674f7e1bf5815ffdc22ab56cc3917cce910f"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#openAIProvider.convertTools",
@@ -58780,6 +58769,17 @@
       "shapeHash": "sha256:73c28fd53ec4bf8f1cdf964a0722c5cf72dddd195e7e298954f12fe70e28a9f1"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#scanToolChanges",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "scanToolChanges",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func[M RoleMessage](messages TranscriptMessages[M], findChanges bool) toolChangeScan"
+      },
+      "shapeHash": "sha256:b65d83d34e1503aa1e89250093cb713fe8a596d184ed3262aacbc71dbaecc118"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#schemaContainer",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "schemaContainer",
@@ -60419,17 +60419,6 @@
       "shapeHash": "sha256:0af5cf642eacafd17e9ecfff21396929ec0766ee1c025b0d7b9b7fce6e812bd5"
     },
     {
-      "id": "go:github.com/MichaelKinsy/PiG/ai#systemMessagesOf",
-      "package": "github.com/MichaelKinsy/PiG/ai",
-      "name": "systemMessagesOf",
-      "kind": "function",
-      "exported": false,
-      "shape": {
-        "type": "func[M RoleMessage](messages TranscriptMessages[M]) []SystemMessage"
-      },
-      "shapeHash": "sha256:99191a4303837583df2362dda9f31eac62d9360f404dc9437501115478661930"
-    },
-    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#takeScratch",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "takeScratch",
@@ -60881,6 +60870,28 @@
       "shapeHash": "sha256:8f61ca73469f268e6ee85b7e0321edaf4414ab74fb4a0b238c6e0396782b10cd"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#toolAnchors",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "toolAnchors",
+      "kind": "type",
+      "exported": false,
+      "shape": {
+        "type": "toolAnchors"
+      },
+      "shapeHash": "sha256:eab5a9addd5d6a07b363fa50a98cbb133c92cf072d968b7cee9fe1b70c5aabe7"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#toolAnchors.anchored",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "toolAnchors.anchored",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(systemIndex int) bool"
+      },
+      "shapeHash": "sha256:b3d8c560b5c4be7ee18fb7b2389af3c1fa0194d7e7dc881db307bbdb9aaac9b1"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#toolArgumentSchemas",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "toolArgumentSchemas",
@@ -60956,6 +60967,17 @@
         "type": "toolCallWire"
       },
       "shapeHash": "sha256:25ad34bbcba79034ca50ce452776937fc99bbe432020497a6836b350587a07a6"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#toolChangeScan",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "toolChangeScan",
+      "kind": "type",
+      "exported": false,
+      "shape": {
+        "type": "toolChangeScan"
+      },
+      "shapeHash": "sha256:cfa4bbd653f7a49005927956dbb749ae66bbece64db5e43af7e53be022656780"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#toolChoiceName",
