@@ -7758,7 +7758,7 @@
         "tui/autocomplete_shared_roots_test.go",
         "tui/autocomplete_wrappers_upstream_test.go#TestUpstreamAutocompleteAtAfterOpeningWrappers",
         "tui/autocomplete_wrappers_upstream_test.go#TestUpstreamAutocompletePathsAfterOpeningWrappers",
-        "tui/autocomplete_upstream_test.go#TestUpstreamAutocompleteFD (matches regex metacharacters rows)",
+        "tui/autocomplete_upstream_test.go#TestUpstreamAutocompleteFD",
         "tui/file_autocomplete_test.go#TestBuildFdPathQuery",
         "test/parity/scenarios/autocomplete/13-at-regex-metacharacters.toml"
       ],
