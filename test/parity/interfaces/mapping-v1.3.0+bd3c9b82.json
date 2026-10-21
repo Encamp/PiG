@@ -2031,8 +2031,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -6157,8 +6157,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -8968,8 +8968,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -9808,8 +9808,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -12129,8 +12129,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_images_oracle_test.go#TestOpenRouterImagesHeadersMatchPi",
-        "test:ai/identity_test.go#TestClientIdentityJSON"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_images_oracle_test.go#TestOpenRouterImagesHeadersMatchPi"
       ]
     },
     {
@@ -12173,8 +12173,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestClientIdentityJSON",
-        "test:ai/identity_test.go#TestCodexWebSocketHandshakeCarriesTheIdentity"
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity",
+        "test:ai/identity_pi_messages_test.go#TestPiMessagesSendsTheIdentityUserAgentBelowRequestHeaders"
       ]
     },
     {
@@ -12194,9 +12194,9 @@
         "call:ai/identity.go#GetClientVersion"
       ],
       "evidence": [
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity",
         "test:ai/identity_test.go#TestClientIdentityJSON",
-        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
-        "test:ai/identity_test.go#TestFormatUserAgentForms"
+        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion"
       ]
     },
     {
@@ -13620,8 +13620,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -16169,9 +16169,9 @@
         "call:ai/model_utils.go#GetSupportedThinkingLevels"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/fireworks_models_upstream_test.go#TestFireworksModels",
-        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream"
+        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream",
+        "test:ai/providers_upstream_test.go#TestBuiltinProvidersUpstream"
       ]
     },
     {
@@ -16191,9 +16191,9 @@
         "call:ai/model_utils.go#GetSupportedThinkingLevels"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/fireworks_models_upstream_test.go#TestFireworksModels",
-        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream"
+        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream",
+        "test:ai/providers_upstream_test.go#TestBuiltinProvidersUpstream"
       ]
     },
     {
@@ -16456,8 +16456,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -16990,8 +16990,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -19688,8 +19688,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -25572,8 +25572,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -26392,9 +26392,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:coding/model_registry_custom_upstream_test.go#TestModelRegistryCustomModelsUpstream",
-        "test:ai/model_compat_clone_test.go#TestCloneCompatPreservesSerializedCopy"
+        "test:ai/model_compat_clone_test.go#TestCloneCompatPreservesSerializedCopy",
+        "test:ai/openai_completions_chat_template_values_test.go#TestOpenAICompletionsChatTemplateEffortFollowsTheThinkingLevelMap"
       ]
     },
     {
@@ -26742,9 +26742,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/catalog_options_upstream_test.go#TestTogetherModels",
-        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream"
+        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream",
+        "test:ai/openai_tool_choice_payload_upstream_test.go#TestOpenAICompletionsToolChoiceCatalogUpstream"
       ]
     },
     {
@@ -26852,9 +26852,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/catalog_options_upstream_test.go#TestTogetherModels",
-        "test:ai/openai_thinking_budget_field_upstream_test.go#TestOpenAICompletionsThinkingBudgetFieldSelectsTheWireKeyLikePi"
+        "test:ai/openai_thinking_budget_field_upstream_test.go#TestOpenAICompletionsThinkingBudgetFieldSelectsTheWireKeyLikePi",
+        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream"
       ]
     },
     {
@@ -27097,8 +27097,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -27915,8 +27915,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -28768,9 +28768,9 @@
         "call:ai/identity.go#GetClientVersion"
       ],
       "evidence": [
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
         "test:internal/codingagent/remote_catalog_provider_upstream_test.go#TestRemoteCatalogProviderUpstream",
-        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
-        "test:ai/identity_test.go#TestFormatUserAgentForms"
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -28989,8 +28989,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -30262,8 +30262,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -31796,8 +31796,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -32425,8 +32425,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -34931,8 +34931,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -35729,8 +35729,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -36481,8 +36481,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -37207,8 +37207,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -39279,8 +39279,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -40651,8 +40651,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -41965,8 +41965,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -42735,8 +42735,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -43906,8 +43906,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -45308,8 +45308,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -46150,8 +46150,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -48560,8 +48560,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -51615,8 +51615,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -52499,8 +52499,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -54849,8 +54849,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_images_oracle_test.go#TestOpenRouterImagesHeadersMatchPi",
-        "test:ai/identity_test.go#TestClientIdentityJSON"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_images_oracle_test.go#TestOpenRouterImagesHeadersMatchPi"
       ]
     },
     {
@@ -54893,8 +54893,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestClientIdentityJSON",
-        "test:ai/identity_test.go#TestCodexWebSocketHandshakeCarriesTheIdentity"
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity",
+        "test:ai/identity_pi_messages_test.go#TestPiMessagesSendsTheIdentityUserAgentBelowRequestHeaders"
       ]
     },
     {
@@ -54914,9 +54914,9 @@
         "call:ai/identity.go#GetClientVersion"
       ],
       "evidence": [
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity",
         "test:ai/identity_test.go#TestClientIdentityJSON",
-        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
-        "test:ai/identity_test.go#TestFormatUserAgentForms"
+        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion"
       ]
     },
     {
@@ -56430,8 +56430,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -59583,9 +59583,9 @@
         "call:ai/model_utils.go#GetSupportedThinkingLevels"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/fireworks_models_upstream_test.go#TestFireworksModels",
-        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream"
+        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream",
+        "test:ai/providers_upstream_test.go#TestBuiltinProvidersUpstream"
       ]
     },
     {
@@ -59605,9 +59605,9 @@
         "call:ai/model_utils.go#GetSupportedThinkingLevels"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/fireworks_models_upstream_test.go#TestFireworksModels",
-        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream"
+        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream",
+        "test:ai/providers_upstream_test.go#TestBuiltinProvidersUpstream"
       ]
     },
     {
@@ -59914,8 +59914,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -60492,8 +60492,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -63371,8 +63371,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -69335,8 +69335,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -70199,9 +70199,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:coding/model_registry_custom_upstream_test.go#TestModelRegistryCustomModelsUpstream",
-        "test:ai/model_compat_clone_test.go#TestCloneCompatPreservesSerializedCopy"
+        "test:ai/model_compat_clone_test.go#TestCloneCompatPreservesSerializedCopy",
+        "test:ai/openai_completions_chat_template_values_test.go#TestOpenAICompletionsChatTemplateEffortFollowsTheThinkingLevelMap"
       ]
     },
     {
@@ -70549,9 +70549,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/catalog_options_upstream_test.go#TestTogetherModels",
-        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream"
+        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream",
+        "test:ai/openai_tool_choice_payload_upstream_test.go#TestOpenAICompletionsToolChoiceCatalogUpstream"
       ]
     },
     {
@@ -70659,9 +70659,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/catalog_options_upstream_test.go#TestTogetherModels",
-        "test:ai/openai_thinking_budget_field_upstream_test.go#TestOpenAICompletionsThinkingBudgetFieldSelectsTheWireKeyLikePi"
+        "test:ai/openai_thinking_budget_field_upstream_test.go#TestOpenAICompletionsThinkingBudgetFieldSelectsTheWireKeyLikePi",
+        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream"
       ]
     },
     {
@@ -70904,8 +70904,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -71766,8 +71766,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -72619,9 +72619,9 @@
         "call:ai/identity.go#GetClientVersion"
       ],
       "evidence": [
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
         "test:internal/codingagent/remote_catalog_provider_upstream_test.go#TestRemoteCatalogProviderUpstream",
-        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
-        "test:ai/identity_test.go#TestFormatUserAgentForms"
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -72884,8 +72884,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -74157,8 +74157,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -75963,8 +75963,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -76988,8 +76988,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
-        "test:ai/identity_test.go#TestIdentityKeepsImpersonatingModelHeadersOverTheIdentityUserAgent"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -80302,9 +80302,9 @@
         "call:ai/model_utils.go#GetSupportedThinkingLevels"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/fireworks_models_upstream_test.go#TestFireworksModels",
-        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream"
+        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream",
+        "test:ai/providers_upstream_test.go#TestBuiltinProvidersUpstream"
       ]
     },
     {
@@ -80324,9 +80324,9 @@
         "call:ai/model_utils.go#GetSupportedThinkingLevels"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/fireworks_models_upstream_test.go#TestFireworksModels",
-        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream"
+        "test:ai/max_thinking_upstream_test.go#TestMaxThinkingUpstream",
+        "test:ai/providers_upstream_test.go#TestBuiltinProvidersUpstream"
       ]
     },
     {
@@ -86955,9 +86955,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:coding/model_registry_custom_upstream_test.go#TestModelRegistryCustomModelsUpstream",
-        "test:ai/model_compat_clone_test.go#TestCloneCompatPreservesSerializedCopy"
+        "test:ai/model_compat_clone_test.go#TestCloneCompatPreservesSerializedCopy",
+        "test:ai/openai_completions_chat_template_values_test.go#TestOpenAICompletionsChatTemplateEffortFollowsTheThinkingLevelMap"
       ]
     },
     {
@@ -87305,9 +87305,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/catalog_options_upstream_test.go#TestTogetherModels",
-        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream"
+        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream",
+        "test:ai/openai_tool_choice_payload_upstream_test.go#TestOpenAICompletionsToolChoiceCatalogUpstream"
       ]
     },
     {
@@ -87415,9 +87415,9 @@
         "call:ai/openai.go#openAIProvider.Stream"
       ],
       "evidence": [
-        "test:ai/catalog_options_upstream_test.go#TestBasetenModels",
         "test:ai/catalog_options_upstream_test.go#TestTogetherModels",
-        "test:ai/openai_thinking_budget_field_upstream_test.go#TestOpenAICompletionsThinkingBudgetFieldSelectsTheWireKeyLikePi"
+        "test:ai/openai_thinking_budget_field_upstream_test.go#TestOpenAICompletionsThinkingBudgetFieldSelectsTheWireKeyLikePi",
+        "test:ai/openai_tool_choice_formats_upstream_test.go#TestOpenAICompletionsToolChoiceReplayAndFormatsUpstream"
       ]
     },
     {
@@ -96701,8 +96701,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_images_oracle_test.go#TestOpenRouterImagesHeadersMatchPi",
-        "test:ai/identity_test.go#TestClientIdentityJSON"
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
+        "test:ai/identity_images_oracle_test.go#TestOpenRouterImagesHeadersMatchPi"
       ]
     },
     {
@@ -96745,8 +96745,8 @@
       ],
       "evidence": [
         "test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt",
-        "test:ai/identity_test.go#TestClientIdentityJSON",
-        "test:ai/identity_test.go#TestCodexWebSocketHandshakeCarriesTheIdentity"
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity",
+        "test:ai/identity_pi_messages_test.go#TestPiMessagesSendsTheIdentityUserAgentBelowRequestHeaders"
       ]
     },
     {
@@ -96766,9 +96766,9 @@
         "call:ai/identity.go#GetClientVersion"
       ],
       "evidence": [
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity",
         "test:ai/identity_test.go#TestClientIdentityJSON",
-        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
-        "test:ai/identity_test.go#TestFormatUserAgentForms"
+        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion"
       ]
     },
     {
@@ -99840,9 +99840,9 @@
         "call:ai/identity.go#GetClientVersion"
       ],
       "evidence": [
+        "test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi",
         "test:internal/codingagent/remote_catalog_provider_upstream_test.go#TestRemoteCatalogProviderUpstream",
-        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
-        "test:ai/identity_test.go#TestFormatUserAgentForms"
+        "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"
       ]
     },
     {
@@ -140011,8 +140011,25 @@
     },
     {
       "id": "pkg:coding-agent/.#CreateAgentSessionOptions",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:c2f0edea2e9927f872e2fed3dd0365f9a89f87c58bba3250a5200898fe45b462"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:c2f0edea2e9927f872e2fed3dd0365f9a89f87c58bba3250a5200898fe45b462",
+      "rationale": "Derived by the interface gap detector: CreateAgentSessionOptions is Go coding/create_agent_session.go#CreateAgentSessionOptions (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "coding/create_agent_session.go#CreateAgentSessionOptions"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:coding/create_agent_session.go#CreateAgentSessionOptions"
+      ],
+      "evidence": [
+        "test:coding/session_export_html_oracle_test.go#TestSessionExportToHTMLMatchesPi",
+        "test:coding/create_agent_session_test.go#TestCreateAgentSessionBuildsItsServicesFromTheOptions",
+        "test:coding/create_agent_session_test.go#TestCreateAgentSessionForwardsTheSessionOptions"
+      ]
     },
     {
       "id": "pkg:coding-agent/.#CreateAgentSessionOptions::property:agentDir",
@@ -140156,8 +140173,23 @@
     },
     {
       "id": "pkg:coding-agent/.#CreateAgentSessionOptions::property:resourceLoader",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:acf1f4526e112684296b064e82955cf6cab8d7e05275eb7f9029f817f1cbf023"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:acf1f4526e112684296b064e82955cf6cab8d7e05275eb7f9029f817f1cbf023",
+      "rationale": "Derived by the interface gap detector: CreateAgentSessionOptions::property:resourceLoader is Go coding/create_agent_session.go#CreateAgentSessionOptions.ResourceLoader (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "coding/create_agent_session.go#CreateAgentSessionOptions.ResourceLoader"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:coding/create_agent_session.go#CreateAgentSessionOptions.ResourceLoader"
+      ],
+      "evidence": [
+        "test:coding/create_agent_session_test.go#TestCreateAgentSessionBuildsItsServicesFromTheOptions"
+      ]
     },
     {
       "id": "pkg:coding-agent/.#CreateAgentSessionOptions::property:scopedModels",
@@ -140281,13 +140313,45 @@
     },
     {
       "id": "pkg:coding-agent/.#CreateAgentSessionResult",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:4a162c684f5682ef541717ea396d19f7e692f8bcb28ea332a59323372bc09301"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:4a162c684f5682ef541717ea396d19f7e692f8bcb28ea332a59323372bc09301",
+      "rationale": "Derived by the interface gap detector: CreateAgentSessionResult is Go coding/create_agent_session.go#CreateAgentSessionResult (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "coding/create_agent_session.go#CreateAgentSessionResult"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:coding/create_agent_session.go#CreateAgentSessionResult"
+      ],
+      "evidence": [
+        "test:coding/session_export_html_oracle_test.go#TestSessionExportToHTMLMatchesPi",
+        "test:coding/create_agent_session_extensions_result_test.go#TestCreateAgentSessionFromServicesReturnsTheLoadedExtensions",
+        "test:coding/create_agent_session_model_test.go#TestCreateAgentSessionFromServicesReportsASavedModelChangeThatNamesNoCatalogModel"
+      ]
     },
     {
       "id": "pkg:coding-agent/.#CreateAgentSessionResult::property:extensionsResult",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:569cafab374b9d0d7ece0902350d877c74b7115d68a8f5b143e595d6a9c977a0"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:569cafab374b9d0d7ece0902350d877c74b7115d68a8f5b143e595d6a9c977a0",
+      "rationale": "Derived by the interface gap detector: CreateAgentSessionResult::property:extensionsResult is Go coding/create_agent_session.go#CreateAgentSessionResult.ExtensionsResult (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "coding/create_agent_session.go#CreateAgentSessionResult.ExtensionsResult"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:coding/create_agent_session.go#CreateAgentSessionResult.ExtensionsResult"
+      ],
+      "evidence": [
+        "test:coding/create_agent_session_extensions_result_test.go#TestCreateAgentSessionFromServicesReturnsTheLoadedExtensions"
+      ]
     },
     {
       "id": "pkg:coding-agent/.#CreateAgentSessionResult::property:modelFallbackMessage",
@@ -185236,7 +185300,7 @@
         "shape": "complete"
       },
       "production": [
-        "call:coding/session.go#replayedTranscript"
+        "call:coding/session_boundaries.go#Session.projectBoundaryContext"
       ],
       "evidence": [
         "test:coding/session_boundaries_drafts_upstream_test.go#TestUpstreamSessionBoundariesDrafts",

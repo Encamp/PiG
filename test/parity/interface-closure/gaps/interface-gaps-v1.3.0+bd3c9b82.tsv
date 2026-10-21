@@ -1,4 +1,0 @@
-pkg:coding-agent/.#CreateAgentSessionOptions	coding-agent	child-gap	coding/create_agent_session.go#CreateAgentSessionOptions
-pkg:coding-agent/.#CreateAgentSessionOptions::property:resourceLoader	coding-agent	not-exercised	coding/create_agent_session.go#CreateAgentSessionOptions.ResourceLoader
-pkg:coding-agent/.#CreateAgentSessionResult	coding-agent	child-gap	coding/create_agent_session.go#CreateAgentSessionResult
-pkg:coding-agent/.#CreateAgentSessionResult::property:extensionsResult	coding-agent	not-exercised	coding/create_agent_session.go#CreateAgentSessionResult.ExtensionsResult

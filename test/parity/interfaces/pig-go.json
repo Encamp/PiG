@@ -28486,6 +28486,17 @@
       "shapeHash": "sha256:53d1c5d3c2f25ff1b55426493c275c793b06c8a034e2b8d71fa3da9719c465af"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#appendBedrockUserAgent",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "appendBedrockUserAgent",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(value string) func(*github.com/aws/smithy-go/middleware.Stack) error"
+      },
+      "shapeHash": "sha256:74449ba8b630c57cd55f561853861da922232e39f0b6c5f35d546c587cb53bba"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/ai#appendContent",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "appendContent",
@@ -33439,6 +33450,17 @@
       "id": "go:github.com/MichaelKinsy/PiG/ai#chatGPTUsageURL",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "chatGPTUsageURL",
+      "kind": "constant",
+      "exported": false,
+      "shape": {
+        "type": "untyped string"
+      },
+      "shapeHash": "sha256:7eabd192b9f1c379102c8dc793881875f1f949f6b752e15a20b93080cb0b311d"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#chatGPTWorkspaceLimitHint",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "chatGPTWorkspaceLimitHint",
       "kind": "constant",
       "exported": false,
       "shape": {
@@ -40116,6 +40138,17 @@
       "id": "go:github.com/MichaelKinsy/PiG/ai#escapeArgumentPointer",
       "package": "github.com/MichaelKinsy/PiG/ai",
       "name": "escapeArgumentPointer",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(value string) string"
+      },
+      "shapeHash": "sha256:f626edcbe0f29a2966d57b2a9cd75b432b6461dc4d207531d4bc74bdcce089b7"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/ai#escapeBedrockUserAgent",
+      "package": "github.com/MichaelKinsy/PiG/ai",
+      "name": "escapeBedrockUserAgent",
       "kind": "function",
       "exported": false,
       "shape": {
