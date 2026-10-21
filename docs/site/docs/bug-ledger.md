@@ -15,7 +15,7 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 ## Summary
 
-938 bugs. 888 own defects, 29 fixed ahead of Pi, 21 Pi fixes ported. 139 bugs have no recorded test.
+938 bugs. 888 own defects, 29 fixed ahead of Pi, 21 Pi fixes ported. 140 bugs have no recorded test.
 
 | ID | Bug | Source | Platform | Fixed in |
 |---|---|---|---|---|
@@ -13788,12 +13788,12 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 - **Source:** PiG's own defect
 - **Symptom:** On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under `%ProgramFiles%\PowerShell\7` after `PATH`, and Windows PowerShell under `%SystemRoot%\System32\WindowsPowerShell\v1.0` as the last fallback, on any drive (Pi 61060ddf, #9490).
-- **Root cause:** The vendored runtime now carries @earendil-works/pi-telemetry because pi-ai imports it. The telemetry commits and are recorded as deferred in the upstream-sync ledger.
+- **Root cause:** PowerShell 7 is looked for under ProgramFiles after PATH and Windows PowerShell under SystemRoot as the last fallback. The legacy WSL launcher is matched under the actual SystemRoot (System32 and Sysnative). taskkill takes C:\Windows for an empty SystemRoot (|| not ??). Shell paths are checked with access(F_OK) semantics (nodefs.Access) so runnable Store aliases pass. Windows-native behavior is not run in this change.
 - **User impact:** Behavior differed from Pi
 - **Platform:** Windows
 - **Fixed in:** Unreleased
-- **Fix commits:** `2e0f88f794` (2026-10-06, #160), `a4753ec61e` (2026-10-06, #170), `ba9c37b247` (2026-10-06, #171), `c019ea9155` (2026-10-06, #163), `165cf5884d` (2026-10-07, #180), `3094ee00ca` (2026-10-07, #185), `9b63b2bc4e` (2026-10-07, #176), `013e9a25af` (2026-10-19), `4fd80d1cb2` (2026-10-19), `6af0806f7a` (2026-10-19, #213)
-- **Tests:** `agent/abort_before_first_request_test.go::TestAbortBeforeTheFirstRequestSendsNoProviderRequest`, `agent/agent_class_pi_oracle_test.go::TestAgentClassMatchesPi`, `agent/agent_event_stream_test.go::TestAgentEventStream_EndResolvesTheResultAndStopsDelivery`, `agent/agent_event_stream_test.go::TestAgentEventStream_PushedAgentEndCompletesTheStream`, `agent/agent_events_quiet_test.go::TestMessageUpdateObserverAppearingMidStreamSeesEveryLaterUpdate`, `agent/agent_events_quiet_test.go::TestStreamingMessageAfterAnUnobservedUpdate`, `agent/agent_events_quiet_test.go::TestUnobservedMessageUpdatesAreNotDelivered`, `agent/agent_loop_pi_oracle_test.go::TestAgentLoopMatchesPi` and 11162 more in docs/bug-ledger.json
+- **Fix commits:** `4fd80d1cb2` (2026-10-19)
+- **Tests:** `durable/env/node/shell_test.go::TestShellUsesStdinCommandTransportForLegacyWSLBashPaths`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestPowerShellInstallationCandidatesUseWindowsPathRules`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestUpstreamPowerShellConfig`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolutionOrder`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolvesPwshBeforeWindowsPowerShellOnWindowsOnly`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamUnixShellExistenceChecks`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamWindowsStoreShellAliases`, `internal/codingagent/tools/taskkill_port_test.go::TestTaskkillSpawnFailurePort` and 6 more in docs/bug-ledger.json
 - **Release note:** On Windows, PiG finds PowerShell in its installation directories when it is not on `PATH`: PowerShell 7 under `%ProgramFiles%\PowerShell\7` after `PATH`, and Windows PowerShell under `%SystemRoot%\System32\WindowsPowerShell\v1.0` as the last fallback, on any drive (Pi 61060ddf, #9490).
 
 ### BF-4fd80d1-2
@@ -13802,12 +13802,12 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 - **Source:** PiG's own defect
 - **Symptom:** On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in `SystemRoot` (`System32` and `Sysnative`), not only under `C:\Windows`, so its command goes over stdin (Pi 61060ddf, #9490).
-- **Root cause:** The vendored runtime now carries @earendil-works/pi-telemetry because pi-ai imports it. The telemetry commits and are recorded as deferred in the upstream-sync ledger.
+- **Root cause:** PowerShell 7 is looked for under ProgramFiles after PATH and Windows PowerShell under SystemRoot as the last fallback. The legacy WSL launcher is matched under the actual SystemRoot (System32 and Sysnative). taskkill takes C:\Windows for an empty SystemRoot (|| not ??). Shell paths are checked with access(F_OK) semantics (nodefs.Access) so runnable Store aliases pass. Windows-native behavior is not run in this change.
 - **User impact:** Behavior differed from Pi
 - **Platform:** Windows, WSL
 - **Fixed in:** Unreleased
-- **Fix commits:** `2e0f88f794` (2026-10-06, #160), `a4753ec61e` (2026-10-06, #170), `ba9c37b247` (2026-10-06, #171), `c019ea9155` (2026-10-06, #163), `e2db9318fa` (2026-10-06, #173), `165cf5884d` (2026-10-07, #180), `3094ee00ca` (2026-10-07, #185), `9b63b2bc4e` (2026-10-07, #176), `ce8587ef40` (2026-10-07, #179), `c80500f022` (2026-10-08, #199), `013e9a25af` (2026-10-19), `4fd80d1cb2` (2026-10-19), `6af0806f7a` (2026-10-19, #213)
-- **Tests:** `agent/abort_before_first_request_test.go::TestAbortBeforeTheFirstRequestSendsNoProviderRequest`, `agent/agent_class_pi_oracle_test.go::TestAgentClassMatchesPi`, `agent/agent_event_stream_test.go::TestAgentEventStream_EndResolvesTheResultAndStopsDelivery`, `agent/agent_event_stream_test.go::TestAgentEventStream_PushedAgentEndCompletesTheStream`, `agent/agent_events_quiet_test.go::TestMessageUpdateObserverAppearingMidStreamSeesEveryLaterUpdate`, `agent/agent_events_quiet_test.go::TestStreamingMessageAfterAnUnobservedUpdate`, `agent/agent_events_quiet_test.go::TestUnobservedMessageUpdatesAreNotDelivered`, `agent/agent_loop_pi_oracle_test.go::TestAgentLoopMatchesPi` and 11171 more in docs/bug-ledger.json
+- **Fix commits:** `4fd80d1cb2` (2026-10-19)
+- **Tests:** `durable/env/node/shell_test.go::TestShellUsesStdinCommandTransportForLegacyWSLBashPaths`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestPowerShellInstallationCandidatesUseWindowsPathRules`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestUpstreamPowerShellConfig`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolutionOrder`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolvesPwshBeforeWindowsPowerShellOnWindowsOnly`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamUnixShellExistenceChecks`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamWindowsStoreShellAliases`, `internal/codingagent/tools/taskkill_port_test.go::TestTaskkillSpawnFailurePort` and 6 more in docs/bug-ledger.json
 - **Release note:** On Windows, the legacy WSL `bash.exe` launcher is recognized under the actual Windows directory in `SystemRoot` (`System32` and `Sysnative`), not only under `C:\Windows`, so its command goes over stdin (Pi 61060ddf, #9490).
 
 ### BF-4fd80d1-3
@@ -13816,12 +13816,12 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 - **Source:** PiG's own defect
 - **Symptom:** On Windows, an empty `SystemRoot` takes `C:\Windows` for `taskkill.exe`, as an unset one already did, in the shell tools and the Durable node environment (Pi 61060ddf, #9490).
-- **Root cause:** The vendored runtime now carries @earendil-works/pi-telemetry because pi-ai imports it. The telemetry commits and are recorded as deferred in the upstream-sync ledger.
+- **Root cause:** PowerShell 7 is looked for under ProgramFiles after PATH and Windows PowerShell under SystemRoot as the last fallback. The legacy WSL launcher is matched under the actual SystemRoot (System32 and Sysnative). taskkill takes C:\Windows for an empty SystemRoot (|| not ??). Shell paths are checked with access(F_OK) semantics (nodefs.Access) so runnable Store aliases pass. Windows-native behavior is not run in this change.
 - **User impact:** Behavior differed from Pi
 - **Platform:** Windows
 - **Fixed in:** Unreleased
-- **Fix commits:** `2e0f88f794` (2026-10-06, #160), `a4753ec61e` (2026-10-06, #170), `ba9c37b247` (2026-10-06, #171), `c019ea9155` (2026-10-06, #163), `e2db9318fa` (2026-10-06, #173), `165cf5884d` (2026-10-07, #180), `3094ee00ca` (2026-10-07, #185), `9b63b2bc4e` (2026-10-07, #176), `ce8587ef40` (2026-10-07, #179), `c80500f022` (2026-10-08, #199), `013e9a25af` (2026-10-19), `4fd80d1cb2` (2026-10-19), `6af0806f7a` (2026-10-19, #213)
-- **Tests:** `agent/abort_before_first_request_test.go::TestAbortBeforeTheFirstRequestSendsNoProviderRequest`, `agent/agent_class_pi_oracle_test.go::TestAgentClassMatchesPi`, `agent/agent_event_stream_test.go::TestAgentEventStream_EndResolvesTheResultAndStopsDelivery`, `agent/agent_event_stream_test.go::TestAgentEventStream_PushedAgentEndCompletesTheStream`, `agent/agent_events_quiet_test.go::TestMessageUpdateObserverAppearingMidStreamSeesEveryLaterUpdate`, `agent/agent_events_quiet_test.go::TestStreamingMessageAfterAnUnobservedUpdate`, `agent/agent_events_quiet_test.go::TestUnobservedMessageUpdatesAreNotDelivered`, `agent/agent_loop_pi_oracle_test.go::TestAgentLoopMatchesPi` and 11171 more in docs/bug-ledger.json
+- **Fix commits:** `4fd80d1cb2` (2026-10-19)
+- **Tests:** `durable/env/node/shell_test.go::TestShellUsesStdinCommandTransportForLegacyWSLBashPaths`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestPowerShellInstallationCandidatesUseWindowsPathRules`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestUpstreamPowerShellConfig`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolutionOrder`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolvesPwshBeforeWindowsPowerShellOnWindowsOnly`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamUnixShellExistenceChecks`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamWindowsStoreShellAliases`, `internal/codingagent/tools/taskkill_port_test.go::TestTaskkillSpawnFailurePort` and 6 more in docs/bug-ledger.json
 - **Release note:** On Windows, an empty `SystemRoot` takes `C:\Windows` for `taskkill.exe`, as an unset one already did, in the shell tools and the Durable node environment (Pi 61060ddf, #9490).
 
 ### BF-4fd80d1-4
@@ -13830,12 +13830,12 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 - **Source:** PiG's own defect
 - **Symptom:** On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path, `bash.exe` and `pwsh.exe` found by `where`, and the Git Bash locations are checked with an attribute check (`access(F_OK)`) instead of a stat that follows the alias (Pi 28bea006, nodejs/node#36790).
-- **Root cause:** TestTaskAbort's abort-again case let the caller join before the run phase started, so under load the caller's cancel raced the task settling and the waiter returned nil instead of the cancel cause. Pi's scheduler joins only a run invocation already on the line (scheduler.ts:274-296); the test now waits for the run phase first.
+- **Root cause:** PowerShell 7 is looked for under ProgramFiles after PATH and Windows PowerShell under SystemRoot as the last fallback. The legacy WSL launcher is matched under the actual SystemRoot (System32 and Sysnative). taskkill takes C:\Windows for an empty SystemRoot (|| not ??). Shell paths are checked with access(F_OK) semantics (nodefs.Access) so runnable Store aliases pass. Windows-native behavior is not run in this change.
 - **User impact:** Wrong output or ordering
 - **Platform:** Windows
 - **Fixed in:** Unreleased
-- **Fix commits:** `2e0f88f794` (2026-10-06, #160), `ba9c37b247` (2026-10-06, #171), `165cf5884d` (2026-10-07, #180), `3499c2bea7` (2026-10-07, #181), `9b63b2bc4e` (2026-10-07, #176), `ce8587ef40` (2026-10-07, #179), `4fd80d1cb2` (2026-10-19), `6af0806f7a` (2026-10-19, #213)
-- **Tests:** `agent/abort_before_first_request_test.go::TestAbortBeforeTheFirstRequestSendsNoProviderRequest`, `agent/agent_class_pi_oracle_test.go::TestAgentClassMatchesPi`, `agent/agent_event_stream_test.go::TestAgentEventStream_EndResolvesTheResultAndStopsDelivery`, `agent/agent_event_stream_test.go::TestAgentEventStream_PushedAgentEndCompletesTheStream`, `agent/agent_events_quiet_test.go::TestMessageUpdateObserverAppearingMidStreamSeesEveryLaterUpdate`, `agent/agent_events_quiet_test.go::TestStreamingMessageAfterAnUnobservedUpdate`, `agent/agent_events_quiet_test.go::TestUnobservedMessageUpdatesAreNotDelivered`, `agent/agent_loop_pi_oracle_test.go::TestAgentLoopMatchesPi` and 11141 more in docs/bug-ledger.json
+- **Fix commits:** `4fd80d1cb2` (2026-10-19)
+- **Tests:** `durable/env/node/shell_test.go::TestShellUsesStdinCommandTransportForLegacyWSLBashPaths`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestPowerShellInstallationCandidatesUseWindowsPathRules`, `internal/codingagent/tools/powershell_config_upstream_test.go::TestUpstreamPowerShellConfig`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolutionOrder`, `internal/codingagent/tools/powershell_test.go::TestPowerShellConfigResolvesPwshBeforeWindowsPowerShellOnWindowsOnly`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamUnixShellExistenceChecks`, `internal/codingagent/tools/shell_path_exists_upstream_test.go::TestUpstreamWindowsStoreShellAliases`, `internal/codingagent/tools/taskkill_port_test.go::TestTaskkillSpawnFailurePort` and 6 more in docs/bug-ledger.json
 - **Release note:** On Windows, shells that are runnable Microsoft Store aliases are accepted: a configured shell path, `bash.exe` and `pwsh.exe` found by `where`, and the Git Bash locations are checked with an attribute check (`access(F_OK)`) instead of a stat that follows the alias (Pi 28bea006, nodejs/node#36790). Not yet run on a Windows host.
 
 ### BF-c1d1a4c
@@ -13956,12 +13956,12 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 - **Source:** PiG's own defect
 - **Symptom:** An HTTP 413 from any provider is treated as request-size overflow, so the agent compacts and retries instead of showing a raw API error.
-- **Root cause:** The vendored runtime now carries @earendil-works/pi-telemetry because pi-ai imports it. The telemetry commits and are recorded as deferred in the upstream-sync ledger.
+- **Root cause:** Adds Pi's provider-independent 413 pattern to ai.IsContextOverflow and to Durable's own classifier (generated patterns.go), and teaches Durable's regexp subset the $ anchor and \w, which the pattern needs. Ports the overflow, Copilot request-size and session-path recovery tests.
 - **User impact:** An operation failed or was rejected
 - **Platform:** All platforms
 - **Fixed in:** Unreleased
-- **Fix commits:** `2e0f88f794` (2026-10-06, #160), `9a95b36b11` (2026-10-06, #162), `e2db9318fa` (2026-10-06, #173), `3094ee00ca` (2026-10-07, #185), `c80500f022` (2026-10-08, #199), `013e9a25af` (2026-10-19), `333229c85a` (2026-10-19), `6af0806f7a` (2026-10-19, #213), `71b4b1e3b6` (2026-10-19), `a4f45b032b` (2026-10-19)
-- **Tests:** `agent/abort_before_first_request_test.go::TestAbortBeforeTheFirstRequestSendsNoProviderRequest`, `agent/agent_class_pi_oracle_test.go::TestAgentClassMatchesPi`, `agent/agent_event_stream_test.go::TestAgentEventStream_EndResolvesTheResultAndStopsDelivery`, `agent/agent_event_stream_test.go::TestAgentEventStream_PushedAgentEndCompletesTheStream`, `agent/agent_events_quiet_test.go::TestMessageUpdateObserverAppearingMidStreamSeesEveryLaterUpdate`, `agent/agent_events_quiet_test.go::TestStreamingMessageAfterAnUnobservedUpdate`, `agent/agent_events_quiet_test.go::TestUnobservedMessageUpdatesAreNotDelivered`, `agent/agent_loop_pi_oracle_test.go::TestAgentLoopMatchesPi` and 11123 more in docs/bug-ledger.json
+- **Fix commits:** `333229c85a` (2026-10-19)
+- **Tests:** `ai/github_copilot_request_size_overflow_upstream_test.go::TestGitHubCopilotRequestSizeErrors`, `ai/overflow_test.go::TestIsContextOverflowUpstreamCases`, `ai/overflow_upstream_test.go::TestOverflowRequestSizeUpstream`, `ai/overflow_upstream_test.go::TestOverflowUpstream`, `coding/copilot_request_size_overflow_upstream_test.go::TestCopilotRequestSizeOverflowRecoveryUpstream`, `durable/core/turn/classify_test.go::TestHTTP413IsContextOverflowForEveryProvider`, `internal/codingagent/classifier_parity_test.go::TestClassifiersMatchPiAI`
 - **Release note:** An HTTP 413 from any provider is treated as request-size overflow, so the agent compacts and retries instead of showing a raw API error. GitHub Copilot answers a request over its byte-size limit (for example a history of many images) with a 413 and a generic `failed to parse request` body that the token-count patterns never matched (Pi 73f8de80, #11016).
 
 ### BF-668b3fa
@@ -13983,12 +13983,12 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 - **Source:** PiG's own defect
 - **Symptom:** Durable with telemetry off (no telemetry or the no-op span) no longer builds span attributes, events or metric attribute bags, and `ai.Models.Stream` without a parent span captures nothing for the telemetry observer, so both allocate as before the telemetry integration; Durable's reflective restore also caches each struct type's field list.
-- **Root cause:** The vendored runtime now carries @earendil-works/pi-telemetry because pi-ai imports it. The telemetry commits and are recorded as deferred in the upstream-sync ledger.
+- **Root cause:** With the no-op parent (or no telemetry) the phase and submit spans, entry and submission events, tool attributes, checkpoint and replay events, report events and metric attribute bags are not built; recording output is unchanged. The reflect field list of a struct type is cached for Durable's ordered restore. Adds BenchmarkDurableGeneration.
 - **User impact:** Wrong output or ordering
 - **Platform:** All platforms
 - **Fixed in:** Unreleased
-- **Fix commits:** `2ab79ce358` (2026-10-06, #166), `a4753ec61e` (2026-10-06, #170), `ba9c37b247` (2026-10-06, #171), `9b63b2bc4e` (2026-10-07, #176), `ce8587ef40` (2026-10-07, #179), `af1fe1a8fe` (2026-10-08, #175), `013e9a25af` (2026-10-19), `3468e4413b` (2026-10-19), `6af0806f7a` (2026-10-19, #213), `71b4b1e3b6` (2026-10-19), `a4f45b032b` (2026-10-19), `5cc365638f` (2026-10-20), `692bdf76eb` (2026-10-20), `a0bd47b607` (2026-10-20), `a42cadc777` (2026-10-20)
-- **Tests:** `agent/abort_before_first_request_test.go::TestAbortBeforeTheFirstRequestSendsNoProviderRequest`, `agent/agent_class_pi_oracle_test.go::TestAgentClassMatchesPi`, `agent/agent_event_stream_test.go::TestAgentEventStream_EndResolvesTheResultAndStopsDelivery`, `agent/agent_event_stream_test.go::TestAgentEventStream_PushedAgentEndCompletesTheStream`, `agent/agent_events_quiet_test.go::TestMessageUpdateObserverAppearingMidStreamSeesEveryLaterUpdate`, `agent/agent_events_quiet_test.go::TestStreamingMessageAfterAnUnobservedUpdate`, `agent/agent_events_quiet_test.go::TestUnobservedMessageUpdatesAreNotDelivered`, `agent/agent_loop_pi_oracle_test.go::TestAgentLoopMatchesPi` and 11104 more in docs/bug-ledger.json
+- **Fix commits:** `692bdf76eb` (2026-10-20)
+- **Tests:** None recorded.
 - **Release note:** Durable with telemetry off (no telemetry or the no-op span) no longer builds span attributes, events or metric attribute bags, and `ai.Models.Stream` without a parent span captures nothing for the telemetry observer, so both allocate as before the telemetry integration; Durable's reflective restore also caches each struct type's field list. The AI telemetry schema is built on first use instead of at process start, and non-numeric attribute names no longer allocate in `jsstring.ArrayIndex`, which cuts the allocations of a recorded `ai` stream.
 
 ### BF-9076cd5
