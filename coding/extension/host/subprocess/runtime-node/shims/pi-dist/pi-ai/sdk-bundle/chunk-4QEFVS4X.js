@@ -516,6 +516,134 @@ function observeModelRequest(requestedModel, options, poll) {
 }
 __name(observeModelRequest, "observeModelRequest");
 
+// pi-dist/pi-ai/utils/version.js
+var PI_AI_VERSION = "1.3.0";
+
+// pi-dist/pi-ai/utils/identity.js
+import { pigUserAgent } from "../../../pig-identity.mjs";
+var PI_ATTRIBUTION = { name: "PiG", url: "https://github.com/MichaelKinsy/PiG", categories: ["cli-agent"] };
+var NVIDIA_NIM_HOST = "integrate.api.nvidia.com";
+var OPENCODE_HOST = "opencode.ai";
+function mergeClientIdentity(...sources) {
+  let merged;
+  for (const source of sources) {
+    if (!source)
+      continue;
+    merged = { ...merged };
+    if (source.userAgent !== void 0)
+      merged.userAgent = source.userAgent;
+    if (source.attribution !== void 0)
+      merged.attribution = source.attribution;
+    if (source.version !== void 0)
+      merged.version = source.version;
+  }
+  return merged;
+}
+__name(mergeClientIdentity, "mergeClientIdentity");
+function getClientVersion(identity) {
+  return identity?.version ?? PI_AI_VERSION;
+}
+__name(getClientVersion, "getClientVersion");
+function formatUserAgent(identity) {
+  const mode = identity?.userAgent ?? "detailed";
+  if (typeof mode === "object")
+    return mode.custom;
+  if (mode === "short")
+    return "pig";
+  return pigUserAgent("pig", identity?.version);
+}
+__name(formatUserAgent, "formatUserAgent");
+function matchesHost(baseUrl, expectedHost) {
+  try {
+    return new URL(baseUrl).hostname === expectedHost;
+  } catch {
+    return false;
+  }
+}
+__name(matchesHost, "matchesHost");
+function isOpenRouter(target) {
+  return target.provider === "openrouter" || target.baseUrl.includes("openrouter.ai");
+}
+__name(isOpenRouter, "isOpenRouter");
+function isNvidiaNim(target) {
+  return target.provider === "nvidia" || matchesHost(target.baseUrl, NVIDIA_NIM_HOST);
+}
+__name(isNvidiaNim, "isNvidiaNim");
+function isOpenCode(target) {
+  return target.provider === "opencode" || target.provider === "opencode-go" || matchesHost(target.baseUrl, OPENCODE_HOST);
+}
+__name(isOpenCode, "isOpenCode");
+function getAttributionHeaders(target, identity) {
+  const attribution = identity?.attribution;
+  if (!attribution)
+    return {};
+  const { name, url, categories } = attribution;
+  if (isOpenRouter(target)) {
+    return {
+      "HTTP-Referer": url,
+      "X-OpenRouter-Title": name,
+      ...categories === void 0 || categories.length === 0 ? {} : { "X-OpenRouter-Categories": categories.join(",") }
+    };
+  }
+  if (isNvidiaNim(target))
+    return { "X-BILLING-INVOKE-ORIGIN": name.charAt(0).toUpperCase() + name.slice(1) };
+  if (isOpenCode(target))
+    return { "x-opencode-client": name };
+  return {};
+}
+__name(getAttributionHeaders, "getAttributionHeaders");
+function getOpenCodeSessionHeaders(target, sessionId) {
+  return sessionId && isOpenCode(target) ? { "x-opencode-session": sessionId } : void 0;
+}
+__name(getOpenCodeSessionHeaders, "getOpenCodeSessionHeaders");
+function getIdentityHeaders(target, identity) {
+  return { "User-Agent": formatUserAgent(identity), ...getAttributionHeaders(target, identity) };
+}
+__name(getIdentityHeaders, "getIdentityHeaders");
+function isMutableModels(models) {
+  return "setProvider" in models && "deleteProvider" in models && "clearProviders" in models;
+}
+__name(isMutableModels, "isMutableModels");
+function withClientIdentity(models, identity) {
+  const withIdentity = /* @__PURE__ */ __name((options) => ({ ...options, identity: mergeClientIdentity(identity, options?.identity) }), "withIdentity");
+  const wrapped = {
+    getProviders: /* @__PURE__ */ __name(() => models.getProviders(), "getProviders"),
+    getProvider: /* @__PURE__ */ __name((id) => models.getProvider(id), "getProvider"),
+    getModels: /* @__PURE__ */ __name((provider2) => models.getModels(provider2), "getModels"),
+    getModel: /* @__PURE__ */ __name((provider2, id) => models.getModel(provider2, id), "getModel"),
+    getModelsOfType: /* @__PURE__ */ __name((type, provider2) => models.getModelsOfType(type, provider2), "getModelsOfType"),
+    getModelOfType: /* @__PURE__ */ __name((type, provider2, id) => models.getModelOfType(type, provider2, id), "getModelOfType"),
+    getAllModels: /* @__PURE__ */ __name((provider2) => models.getAllModels(provider2), "getAllModels"),
+    refresh: /* @__PURE__ */ __name((options) => models.refresh(options), "refresh"),
+    checkAuth: /* @__PURE__ */ __name((providerId, options) => models.checkAuth(providerId, options), "checkAuth"),
+    getAvailable: /* @__PURE__ */ __name((providerId, options) => models.getAvailable(providerId, options), "getAvailable"),
+    getAvailableOfType: /* @__PURE__ */ __name((type, providerId, options) => models.getAvailableOfType(type, providerId, options), "getAvailableOfType"),
+    getAllAvailable: /* @__PURE__ */ __name((providerId, options) => models.getAllAvailable(providerId, options), "getAllAvailable"),
+    getAuth: models.getAuth.bind(models),
+    login: /* @__PURE__ */ __name((providerId, type, interaction, options) => models.login(providerId, type, interaction, options), "login"),
+    logout: /* @__PURE__ */ __name((providerId, options) => models.logout(providerId, options), "logout"),
+    stream: /* @__PURE__ */ __name((model2, context, options) => models.stream(model2, context, withIdentity(options)), "stream"),
+    complete: /* @__PURE__ */ __name((model2, context, options) => models.complete(model2, context, withIdentity(options)), "complete"),
+    streamSimple: /* @__PURE__ */ __name((model2, context, options) => models.streamSimple(model2, context, withIdentity(options)), "streamSimple"),
+    completeSimple: /* @__PURE__ */ __name((model2, context, options) => models.completeSimple(model2, context, withIdentity(options)), "completeSimple"),
+    streamDeferred: /* @__PURE__ */ __name((model2, handle, options) => models.streamDeferred(model2, handle, withIdentity(options)), "streamDeferred"),
+    fetchDeferred: /* @__PURE__ */ __name((model2, handle, options) => models.fetchDeferred(model2, handle, withIdentity(options)), "fetchDeferred"),
+    cancelDeferred: /* @__PURE__ */ __name((model2, handle, options) => models.cancelDeferred(model2, handle, withIdentity(options)), "cancelDeferred"),
+    generateImages: /* @__PURE__ */ __name((model2, context, options) => models.generateImages(model2, context, withIdentity(options)), "generateImages"),
+    classify: /* @__PURE__ */ __name((model2, context, options) => models.classify(model2, context, withIdentity(options)), "classify")
+  };
+  if (!isMutableModels(models))
+    return wrapped;
+  const mutable = {
+    ...wrapped,
+    setProvider: /* @__PURE__ */ __name((provider2) => models.setProvider(provider2), "setProvider"),
+    deleteProvider: /* @__PURE__ */ __name((id) => models.deleteProvider(id), "deleteProvider"),
+    clearProviders: /* @__PURE__ */ __name(() => models.clearProviders(), "clearProviders")
+  };
+  return mutable;
+}
+__name(withClientIdentity, "withClientIdentity");
+
 // pi-dist/pi-ai/utils/model-operations.js
 function getModelType(model2) {
   return model2.type ?? "chat";
@@ -814,6 +942,7 @@ var ModelsImpl = class {
   credentials;
   modelsStore;
   authContext;
+  identity;
   refreshGenerations = /* @__PURE__ */ new Map();
   refreshControllers = /* @__PURE__ */ new Map();
   publicationChains = /* @__PURE__ */ new Map();
@@ -821,6 +950,7 @@ var ModelsImpl = class {
     this.credentials = options?.credentials ?? new InMemoryCredentialStore();
     this.modelsStore = options?.modelsStore ?? new InMemoryModelsStore();
     this.authContext = options?.authContext ?? defaultProviderAuthContext();
+    this.identity = options?.identity;
   }
   setProvider(provider2) {
     this.supersedeProviderRefresh(provider2.id);
@@ -1190,13 +1320,21 @@ var ModelsImpl = class {
     }
     const auth = resolution.auth;
     const apiKey = options?.apiKey ?? auth.apiKey;
-    let headers = mergeHeaders(auth.headers, options?.headers);
+    const requestModel = auth.baseUrl ? { ...model2, baseUrl: auth.baseUrl } : model2;
+    const sessionId = options && "sessionId" in options && typeof options.sessionId === "string" ? options.sessionId : void 0;
+    let headers = mergeHeaders(mergeHeaders(getOpenCodeSessionHeaders(requestModel, sessionId), auth.headers), options?.headers);
     if (options?.transformHeaders)
       headers = await options.transformHeaders(headers ?? {});
     const env = resolution.env || options?.env ? { ...resolution.env ?? {}, ...options?.env ?? {} } : void 0;
-    const requestModel = auth.baseUrl ? { ...model2, baseUrl: auth.baseUrl } : model2;
+    const identity = mergeClientIdentity(this.identity, options?.identity);
     const { transformHeaders: _transformHeaders, ...providerOptions } = options ?? {};
-    const requestOptions = { ...providerOptions, apiKey, headers, env };
+    const requestOptions = {
+      ...providerOptions,
+      apiKey,
+      headers,
+      env,
+      ...identity === void 0 ? {} : { identity }
+    };
     return { requestModel, requestOptions };
   }
   stream(model2, context, options) {
@@ -1460,6 +1598,15 @@ export {
   ModelsError,
   InMemoryModelsStore,
   AI_TELEMETRY_SCHEMA,
+  PI_AI_VERSION,
+  PI_ATTRIBUTION,
+  mergeClientIdentity,
+  getClientVersion,
+  formatUserAgent,
+  getAttributionHeaders,
+  getOpenCodeSessionHeaders,
+  getIdentityHeaders,
+  withClientIdentity,
   getModelType,
   isModelType,
   contentText,

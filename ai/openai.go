@@ -1732,7 +1732,8 @@ func (p *openAIProvider) Stream(ctx context.Context, transcript TranscriptContex
 	httpReq.Header.Set("Content-Type", "application/json")
 	// The OpenAI SDK's default `accept` header.
 	httpReq.Header.Set("Accept", "application/json")
-	httpReq.Header.Set("User-Agent", PiUserAgent())
+	// The identity headers are the lowest layer: model, provider and request headers override them (utils/identity.ts getIdentityHeaders).
+	applyIdentityHeaders(httpReq.Header, ClientIdentityTarget{Provider: p.cfg.ProviderID, BaseURL: p.cfg.BaseURL}, opts.Identity)
 	if apiKey != "" {
 		if p.cfg.ProviderID == "cloudflare-ai-gateway" {
 			httpReq.Header.Set("cf-aig-authorization", "Bearer "+apiKey)

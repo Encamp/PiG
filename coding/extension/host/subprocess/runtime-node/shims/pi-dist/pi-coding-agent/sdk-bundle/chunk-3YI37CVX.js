@@ -2,8 +2,9 @@ import {
   createAllToolDefinitions,
   createLocalBashOperations,
   fetchWithRetry,
+  getPiUserAgent,
   processImage
-} from "./chunk-6HW2EHDY.js";
+} from "./chunk-5EKWCXVB.js";
 import {
   SETTINGS_DEFAULTS,
   addUsageToTotals,
@@ -3958,7 +3959,7 @@ async function compact(preparation, model, apiKey, headers, customInstructions, 
       historyText = historyResult.text;
       historyUsage = historyResult.usage;
     }
-    const turnPrefixResult = await generateTurnPrefixSummary(turnPrefixMessages, model, apiKey, headers, env, signal, thinkingLevel, streamFn, retry, callbacks, sessionId);
+    const turnPrefixResult = await generateTurnPrefixSummary(turnPrefixMessages, model, apiKey, headers, env, signal, thinkingLevel, streamFn, retry, callbacks, sessionId, customInstructions);
     summary = `${historyText}
 
 ---
@@ -3986,14 +3987,19 @@ ${turnPrefixResult.text}`;
   };
 }
 __name(compact, "compact");
-async function generateTurnPrefixSummary(messages, model, apiKey, headers, env, signal, thinkingLevel, streamFn, retry, callbacks, sessionId) {
+async function generateTurnPrefixSummary(messages, model, apiKey, headers, env, signal, thinkingLevel, streamFn, retry, callbacks, sessionId, customInstructions) {
   const llmMessages = convertToLlm(messages);
   const conversationText = serializeConversation(llmMessages);
-  const promptText = `# Conversation
+  let promptText = `# Conversation
 ${conversationText}
 
 # Instructions
 ${TURN_PREFIX_SUMMARIZATION_PROMPT}`;
+  if (customInstructions) {
+    promptText = `${promptText}
+
+Additional focus: ${customInstructions}`;
+  }
   const response = await completeSummarization(model, buildSummarizationContext(promptText), createSummarizationOptions(model, apiKey, headers, env, signal, thinkingLevel, sessionId), streamFn, retry, callbacks);
   const failure = getSummarizationFailure(response, "Turn prefix summarization");
   if (failure) {
@@ -7492,7 +7498,7 @@ __name(withVirtualModels, "withVirtualModels");
 import { readFileSync as readFileSync6 } from "node:fs";
 import { basename as basename5, dirname as dirname6 } from "node:path";
 import { runToolCall } from "../../pi-agent-core/index.js";
-import { contentText as contentText5, getCurrentSystemMessage as getCurrentSystemMessage4, retryDelayMs } from "../../pi-ai/sdk-bundle/index.js";
+import { contentText as contentText5, getCurrentSystemMessage as getCurrentSystemMessage4, getCurrentTools, retryDelayMs } from "../../pi-ai/sdk-bundle/index.js";
 import { clampThinkingLevel, cleanupSessionResources, getSupportedThinkingLevels, isContextOverflow, isRecoverableLength, isRetryableAssistantError, modelsAreEqual, resetApiProviders, streamSimple } from "../../pi-ai/sdk-bundle/compat.js";
 
 // pi-dist/pi-coding-agent/utils/sleep.js
@@ -7627,13 +7633,6 @@ __name(executeBashWithOperations, "executeBashWithOperations");
 // pi-dist/pi-coding-agent/core/bug-report.js
 import * as os from "node:os";
 import { contentText as contentText4, normalizeContext as normalizeContext3, uuidv7 as uuidv73 } from "../../pi-ai/sdk-bundle/index.js";
-
-// pi-dist/pi-coding-agent/utils/pi-user-agent.js
-import { pigUserAgent } from "../../../pig-identity.mjs";
-function getPiUserAgent(version2) {
-  return pigUserAgent("pig");
-}
-__name(getPiUserAgent, "getPiUserAgent");
 
 // pi-dist/pi-coding-agent/utils/zip.js
 import { writeFile } from "node:fs/promises";
@@ -10115,10 +10114,12 @@ var AgentSession = class {
    */
   _restoreToolsFromTranscript(modifiers = []) {
     this._pendingToolNames.clear();
-    const current = getCurrentSystemMessage4(this.sessionManager.buildSessionContext().messages);
-    if (!current)
+    const systemMessages = this.sessionManager.getBranch().flatMap((entry) => entry.type === "message" && entry.message.role === "system" ? [entry.message] : []);
+    if (systemMessages.length === 0)
       return;
-    const names = applyToolModifiers((current.toolsAdded ?? []).map((tool) => tool.name), modifiers);
+    const mentioned = new Set(systemMessages.flatMap((message) => [...message.toolsAdded ?? [], ...message.toolsRemoved ?? []]).map((tool) => tool.name));
+    const newTools = [...this._toolRegistry.keys()].filter((name) => !mentioned.has(name) && !this._baseToolDefinitions.has(name) && this._isActivatedOnRegistration(name));
+    const names = applyToolModifiers([...getCurrentTools(systemMessages).map((tool) => tool.name), ...newTools], modifiers);
     this._pendingToolNames = new Set(names.filter((name) => this._isAllowedTool(name)));
     this._setActiveTools(names);
   }
@@ -12162,7 +12163,7 @@ var defaultModelPerProvider = {
   deepseek: "deepseek-v4-pro",
   google: "gemini-3.1-pro-preview",
   "google-vertex": "gemini-3.1-pro-preview",
-  "github-copilot": "gpt-5.4",
+  "github-copilot": "gpt-6.1-sol",
   openrouter: "moonshotai/kimi-k2.6",
   "vercel-ai-gateway": "zai/glm-5.1",
   xai: "grok-4.7",
@@ -12518,7 +12519,7 @@ __name(findInitialModel, "findInitialModel");
 
 // pi-dist/pi-coding-agent/core/model-runtime.js
 import { dirname as dirname7, join as join9 } from "node:path";
-import { clampThinkingLevel as clampThinkingLevel2, createModels, lazyStream as lazyStream3, ModelsError, normalizeContext as normalizeContext4 } from "../../pi-ai/sdk-bundle/index.js";
+import { clampThinkingLevel as clampThinkingLevel2, createModels, getOpenCodeSessionHeaders, lazyStream as lazyStream3, ModelsError, normalizeContext as normalizeContext4 } from "../../pi-ai/sdk-bundle/index.js";
 import * as builtinProviderCatalog from "../../pi-ai/sdk-bundle/providers.js";
 import { personalizeOpenRouterCatalog } from "../../pi-ai/sdk-bundle/openrouter.js";
 import { assertChatModel, assertClassifierInputSupported, assertClassifierModel, assertImageModel, classifierErrorResult as classifierErrorResult2, imageErrorResult as imageErrorResult2 } from "../../pi-ai/utils/model-operations.js";
@@ -13446,11 +13447,12 @@ var ModelRuntime = class _ModelRuntime {
       throw new ModelsError("auth", `Provider is not configured: ${model.provider}`);
     const { transformHeaders, ...rawProviderOptions } = options ?? {};
     const providerOptions = rawProviderOptions;
-    let headers = mergeHeaders(resolution.auth.headers, providerOptions.headers);
+    const requestModel = resolution.auth.baseUrl ? { ...model, baseUrl: resolution.auth.baseUrl } : model;
+    const sessionId = "sessionId" in providerOptions && typeof providerOptions.sessionId === "string" ? providerOptions.sessionId : void 0;
+    let headers = mergeHeaders(mergeHeaders(getOpenCodeSessionHeaders(requestModel, sessionId), resolution.auth.headers), providerOptions.headers);
     if (transformHeaders)
       headers = await transformHeaders(headers ?? {});
     const env = resolution.env || providerOptions.env ? { ...resolution.env ?? {}, ...providerOptions.env ?? {} } : void 0;
-    const requestModel = resolution.auth.baseUrl ? { ...model, baseUrl: resolution.auth.baseUrl } : model;
     return {
       provider,
       model: requestModel,
@@ -18164,7 +18166,6 @@ export {
   parseFrontmatter,
   stripFrontmatter,
   formatNoModelsAvailableMessage,
-  getPiUserAgent,
   createCompactionSummaryMessage,
   createCustomMessage,
   convertToLlm,

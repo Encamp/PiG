@@ -143,7 +143,9 @@ type HarnessOptions struct {
 	// replace its model configuration without reopening the Harness (HarnessOptions.models as a function, Pi 7ec1f648).
 	Models     durable.Models
 	ModelsFunc func() durable.Models
-	Registry   RegistryReader
+	// Identity is how model requests identify the app to providers, merged field by field over DefaultHarnessIdentity (attribution to PiG). It applies to every request through the Harness's models, including hooks and tools, and overrides the identity the models were created with; a request's own Identity overrides it. Pass an identity with AttributionNull to send no attribution headers (HarnessOptions.identity).
+	Identity *ai.ClientIdentity
+	Registry RegistryReader
 	// Settings returns the current settings at every resolution; nil uses the defaults. Upstream reads a settings object whose fields may be getters.
 	// It is called from the Harness's own goroutines (the Session line, the scheduler, task runtimes, graph views), concurrently with the host and
 	// with itself, and the returned value is read after the call returns. It must be safe for concurrent use and the value must not be written once
@@ -298,10 +300,18 @@ type Harness interface {
 	WatchTaskGraph(ctx context.Context) (TaskGraphWatch, error)
 }
 
-// CurrentModels is HarnessOptions.models at this use: ModelsFunc's answer when set, else Models.
+// DefaultHarnessIdentity is the request identity of a Harness's model requests: the ai package's defaults with provider attribution to PiG.
+var DefaultHarnessIdentity = ai.ClientIdentity{Attribution: new(ai.PiAttribution)}
+
+// CurrentModels is HarnessOptions.models at this use, with Identity applied over DefaultHarnessIdentity: ModelsFunc's answer when set, else Models (harness.ts currentModels). Nil models stay nil.
 func (options HarnessOptions) CurrentModels() durable.Models {
+	models := options.Models
 	if options.ModelsFunc != nil {
-		return options.ModelsFunc()
+		models = options.ModelsFunc()
 	}
-	return options.Models
+	if models == nil {
+		return nil
+	}
+	merged := ai.MergeClientIdentity(&DefaultHarnessIdentity, options.Identity)
+	return ai.WithClientIdentity(models, *merged)
 }

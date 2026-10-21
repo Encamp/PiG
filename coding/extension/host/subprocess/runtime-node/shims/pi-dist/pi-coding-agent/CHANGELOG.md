@@ -8,7 +8,9 @@
 
 ### Changed
 
+- Provider attribution headers now come from pi-ai's client identity. Extensions' `before_provider_headers` handlers no longer see the OpenRouter, NVIDIA NIM, and OpenCode attribution headers; returning `null` for one still removes it. Cloudflare requests send pi's detailed `User-Agent` instead of `pi-coding-agent`, as do GitHub release checks for tool downloads, and OpenCode requests send `x-opencode-client` whenever attribution is enabled, not only with a session.
 - `generateSummary()` and `generateSummaryWithUsage()` now ignore their `reserveTokens` parameter. Summary requests use the model's output limit instead.
+- Changed the default GitHub Copilot model from `gpt-5.4`, which Copilot retired, to `gpt-6.1-sol`.
 
 ### Fixed
 
@@ -22,6 +24,8 @@
 - Fixed codemode scripts failing immediately when both codemode workers are busy, for example with parallel codemode calls or in-process subagents. Scripts now wait up to 60 seconds for a free worker, and `PI_CODEMODE_MAX_WORKERS` raises the limit of two workers ([#11184](https://github.com/earendil-works/pi/issues/11184))
 - Fixed extensions failing to load when importing `@earendil-works/pi-ai/models` (e.g. for `clampThinkingLevel`) by exposing the subpath through the extension loader aliases and virtual modules ([#11156](https://github.com/earendil-works/pi/issues/11156))
 - Fixed `mcp.json` files that start with a UTF-8 BOM failing to parse, which skipped all their MCP servers and made `pi mcp add`/`pi mcp remove` fail ([#11191](https://github.com/earendil-works/pi/issues/11191))
+- Fixed `/compact <instructions>` ignoring the instructions when summarizing the start of a turn that compaction splits. When the split turn was the only new content since the last compaction, the instructions were ignored entirely ([#11058](https://github.com/earendil-works/pi/issues/11058))
+- Fixed resumed sessions and `/tree` navigation leaving extension tools inactive when the branch recorded its tools before they were registered, such as tools from extensions installed after the session started. Extension tools the branch never added or removed are now active unless they are registered with `defaultActive: false` ([#11062](https://github.com/earendil-works/pi/issues/11062), [#11075](https://github.com/earendil-works/pi/issues/11075))
 
 ## [1.3.0] - 2026-10-15
 

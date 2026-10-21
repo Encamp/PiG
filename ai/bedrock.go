@@ -20,6 +20,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/MichaelKinsy/PiG/internal/coding/pigidentity"
 	"github.com/MichaelKinsy/PiG/internal/jsstring"
 	"github.com/MichaelKinsy/PiG/internal/lazyregexp"
 	"github.com/MichaelKinsy/PiG/internal/nodeurl"
@@ -236,7 +237,7 @@ func (p *BedrockProvider) streamResponse(ctx, requestContext context.Context, co
 				}), smithymiddleware.Before)
 			})
 		}
-		options.APIOptions = append(options.APIOptions, withBedrockHeaders(opts.Headers), withBedrockConverseBody(opts.RequestMetadataOrder))
+		options.APIOptions = append(options.APIOptions, bedrockUserAgent(opts.Identity), withBedrockHeaders(opts.Headers), withBedrockConverseBody(opts.RequestMetadataOrder))
 	})
 	if err != nil {
 		failBedrockResponse(ctx, builder, tap.piError(bedrockSendError(ctx, err, p.baseURL, opts.Env)), "", false)
@@ -1586,4 +1587,21 @@ func init() {
 	builtInProviders[APIBedrockConverseStream] = func(_, model, baseURL string) Provider {
 		return NewBedrockProvider(model, baseURL)
 	}
+}
+
+// bedrockUserAgent is the client identity as AWS SDK user agent pairs (bedrock-converse-stream.ts bedrockUserAgent): the SDK appends them to its own User-Agent, so the detailed form is reduced to name and version.
+//
+// pig divergence (D65): the name is PiG's product name, and the AWS SDK for Go writes the pairs into its own User-Agent.
+func bedrockUserAgent(identity *ClientIdentity) func(*smithymiddleware.Stack) error {
+	mode := UserAgentDetailed
+	if identity != nil && identity.UserAgent != nil {
+		mode = *identity.UserAgent
+	}
+	if custom, ok := mode.Custom(); ok {
+		return awsmiddleware.AddUserAgentKey(custom)
+	}
+	if mode == UserAgentShort {
+		return awsmiddleware.AddUserAgentKey(pigidentity.UserAgentProduct)
+	}
+	return awsmiddleware.AddUserAgentKeyValue(pigidentity.UserAgentProduct, GetClientVersion(identity))
 }

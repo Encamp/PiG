@@ -89,6 +89,8 @@ type openChatOptions struct {
 	telemetry telemetry.TelemetryContext
 	// setTimer is HarnessOptions.SetTimer.
 	setTimer durable.SetTimer
+	// identity is HarnessOptions.Identity.
+	identity *ai.ClientIdentity
 }
 
 // openChat opens a Harness over storage and returns its root, configured with the faux model on first creation.
@@ -116,6 +118,7 @@ func openChat(t *testing.T, storage durable.Storage, setup *chatState, options .
 		OnReport:  setup.Reports.add,
 		Telemetry: option.telemetry,
 		SetTimer:  option.setTimer,
+		Identity:  option.identity,
 	}
 	switch {
 	case option.envFunc != nil:
