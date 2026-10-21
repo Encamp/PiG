@@ -576,6 +576,7 @@ func joinNames(names []string) string {
 }
 
 func newHarness(ctx context.Context, storage durable.Storage, options HarnessOptions) *harnessImpl {
+	options = options.WithModelsView() // a plain Models is wrapped once (harness.ts currentModels)
 	harness := &harnessImpl{storage: storage, options: options, report: telemetryReport(SafeReport(options.OnReport), rootTelemetry(options.Telemetry))}
 	// A clock failure reports without a phase context.
 	now := SafeNow(options.Now, func(err error, info durable.ReportInfo) { harness.report(context.Background(), err, info) })
