@@ -286,7 +286,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/ai/src/utils/models-error.ts` | `ai/auth_resolve.go (ModelsErrorCode, ModelsError, NewModelsError)` | ✅ |
 | `packages/ai/src/utils/oauth-page.ts` | `ai/oauth_page.go (upstream 0.99.1 moved the file unchanged from auth/oauth/oauth-page.ts)` | ✅ |
 | `packages/ai/src/providers/openrouter-api.ts` | `ai/openrouter_api.go (OpenRouterModel, OpenRouterCost and the rest of the row's exported members), cmd/gen-models/` | ✅ |
-| `packages/ai/src/telemetry.ts` | `ai/telemetry.go` | 🟡 |
+| `packages/ai/src/telemetry.ts` | `ai/telemetry.go` | ✅ |
 
 ## `packages/coding-agent/src/`
 
@@ -648,7 +648,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/chord/src/index.ts` | `(re-export barrel: every runtime export has its Go counterpart in chord/host, chord/delta, chord/context and chord/json.go; each is mapped by its own source row)` | n/a |
 | `packages/chord/src/types.ts` | `chord/host/types.go (Context is context.Context; JsonRepresentation, RemoteServiceContract, IsAny are compile-time TypeScript machinery with no Go form, replaced by reflection classification at provide time)` | ✅ |
 | `packages/chord/src/json.ts` | `internal/chord/chordjson/chordjson.go:70 Copy, Stored, IsValue; chord/json.go:12`, `chord/delta/delta.go` | ✅ |
-| `packages/chord/src/context/index.ts` | `chord/context/chordctx.go Background, TODO, NewKey, WithValue, WithAbortSignal, WithoutAbortSignal, WithCancel, Await, Telemetry, WithTelemetry, TraceIn` | 🟡 |
+| `packages/chord/src/context/index.ts` | `chord/context/chordctx.go Background, TODO, NewKey, WithValue, WithAbortSignal, WithoutAbortSignal, WithCancel, Await, Telemetry, WithTelemetry, TraceIn` | ✅ |
 | `packages/chord/src/delta/index.ts` | `chord/delta/delta.go:317 AssertValidOpValue, apply.go:227 Apply, ApplyImmutable, apply.go:255 ApplyImmutableBatchesSeq, codec.go:17 Encoder/Decoder, overlap.go:17` | ✅ |
 | `packages/chord/src/delta/diff.ts` | `chord/delta/diff.go:611 DiffRevisions` | ✅ |
 | `packages/chord/src/delta/tracker.ts` | `chord/delta/tracker.go (overlay with Object/Array draft handles, the Proxy draft; array roots through TrackArray, Change.Elements, Tracker.Root, Prepared.ValueRoot, PrepareReplaceRoot)` | ✅ |
@@ -682,8 +682,8 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/chord/src/state.ts` | `chord/state.go` | ✅ |
 | `packages/chord/src/websocket.ts` | `chord/host/websocket.go (link protocol 4)` | ✅ |
 | `packages/chord/src/wire.ts` | `chord/host/wire.go (link protocol 4)` | ✅ |
-| `packages/chord/src/telemetry-sqlite/index.ts` | `chord/telemetrysqlite/index.go` | 🟡 |
-| `packages/chord/src/telemetry-sqlite/store.ts` | `chord/telemetrysqlite/store.go` | 🟡 |
+| `packages/chord/src/telemetry-sqlite/index.ts` | `chord/telemetrysqlite/index.go` | ✅ |
+| `packages/chord/src/telemetry-sqlite/store.ts` | `chord/telemetrysqlite/store.go` | ✅ |
 
 ## `packages/protocol/src/`
 
@@ -729,7 +729,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/durable/src/harness/submissions.ts` | `durable/harness/submissions.go` | ✅ |
 | `packages/durable/src/harness/task-graph.ts` | `durable/harness/task_graph.go` | ✅ |
 | `packages/durable/src/harness/tool.ts` | `durable/harness/tool.go`, `durable/harness/tool_nested.go` | ✅ |
-| `packages/durable/src/harness/types.ts` | `durable/harness/types.go`, `durable/harness_types.go`, `durable/harness/agent.go`, `durable/tasks.go`, `durable/harness/registry.go` | 🟡 |
+| `packages/durable/src/harness/types.ts` | `durable/harness/types.go`, `durable/harness_types.go`, `durable/harness/agent.go`, `durable/tasks.go`, `durable/harness/registry.go` | ✅ |
 | `packages/durable/src/harness/usage.ts` | `durable/harness/usage.go` | ✅ |
 | `packages/durable/src/harness/util.ts` | `durable/harness/util.go` | ✅ |
 | `packages/durable/src/harness/view.ts` | `durable/harness/view.go` | ✅ |
@@ -782,13 +782,13 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/durable/src/codemode/codemode.ts` | `durable/codemode/tool.go (createCodemodeTool, createCodemodeExtension); durable/codemode/docs.go (the documents and stored shapes); durable/codemode/call.go (CodemodeCall)` | ✅ |
 | `packages/durable/src/codemode/describe.ts` | `durable/codemode/describe.go` | ✅ |
 | `packages/durable/src/codemode/index.ts` | `(barrel re-exports; Go has no barrel exports)` | n/a |
-| `packages/durable/src/codemode/models.ts` | `durable/codemode/models.go` | 🟡 |
+| `packages/durable/src/codemode/models.ts` | `durable/codemode/models.go` | ✅ |
 | `packages/durable/src/codemode/output.ts` | `durable/codemode/output.go` | ✅ |
 | `packages/durable/src/images/node-worker.ts` | `durable/images/node/node.go` (the worker goroutine; tests in durable/images/node/worker_test.go) | ✅ |
 | `packages/durable/src/search.ts` | `durable/internal/search/search.go` (tests in durable/internal/search/search_test.go) | ✅ |
 | `packages/durable/src/tool-search/index.ts` | `(barrel re-exports; Go has no barrel exports)` | n/a |
 | `packages/durable/src/tool-search/tool-search.ts` | `durable/toolsearch/` | ✅ |
-| `packages/durable/src/harness/telemetry.ts` | `durable/harness/telemetry.go` | 🟡 |
+| `packages/durable/src/harness/telemetry.ts` | `durable/harness/telemetry.go` | ✅ |
 
 ## `packages/env/src/`
 
@@ -839,11 +839,11 @@ The daemon is a Go program with Pi's command line and wire protocol (D96); the R
 
 | Upstream | PiG | Status |
 |---|---|---|
-| `packages/telemetry/src/index.ts` | `telemetry/context.go + telemetry/schema.go + telemetry/store.go` | 🟡 |
-| `packages/telemetry/src/memory.ts` | `telemetry/memory.go` | 🟡 |
-| `packages/telemetry/src/metrics.ts` | `telemetry/metrics.go` | 🟡 |
-| `packages/telemetry/src/noop.ts` | `telemetry/context.go` | 🟡 |
-| `packages/telemetry/src/testing/conformance.ts` | `telemetry/telemetrytest/conformance.go` | 🟡 |
+| `packages/telemetry/src/index.ts` | `telemetry/context.go + telemetry/schema.go + telemetry/store.go` | ✅ |
+| `packages/telemetry/src/memory.ts` | `telemetry/memory.go` | ✅ |
+| `packages/telemetry/src/metrics.ts` | `telemetry/metrics.go` | ✅ |
+| `packages/telemetry/src/noop.ts` | `telemetry/context.go` | ✅ |
+| `packages/telemetry/src/testing/conformance.ts` | `telemetry/telemetrytest/conformance.go` | ✅ |
 | `packages/telemetry/src/testing/index.ts` | `(re-export barrel: the exports are the Go package surface)` | n/a |
 | `packages/telemetry/src/testing/types.ts` | `telemetry/telemetrytest/types.go` | ✅ |
-| `packages/telemetry/src/render.ts` | `telemetry/render.go` | 🟡 |
+| `packages/telemetry/src/render.ts` | `telemetry/render.go` | ✅ |
