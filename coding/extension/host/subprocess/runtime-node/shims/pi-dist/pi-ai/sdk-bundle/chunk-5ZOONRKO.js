@@ -2,6 +2,9 @@ import {
   __name
 } from "./chunk-SHUYVCID.js";
 
+// pi-dist/pi-ai/models.js
+import { lazyStream } from "../api/lazy.js";
+
 // pi-dist/pi-ai/auth/context.js
 var __rewriteRelativeImportExtension = function(path, preserveJsx) {
   if (typeof path === "string" && /^\.\.?\//.test(path)) {
@@ -779,7 +782,6 @@ function resolveTranscriptTools(messages, support) {
 __name(resolveTranscriptTools, "resolveTranscriptTools");
 
 // pi-dist/pi-ai/models.js
-import { lazyStream } from "../api/lazy.js";
 var KNOWN_MODEL_TYPES = { chat: true, image: true, classifier: true };
 function hasKnownModelType(model2) {
   return Object.hasOwn(KNOWN_MODEL_TYPES, getModelType(model2));

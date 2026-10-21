@@ -151,7 +151,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/core/extensions/loader.js",
-      "sha256": "44a356da552c9cf2ea619c61944cfb28f81b45f09b325f152c91a914bfce1bc0"
+      "sha256": "c63226a56ab2f4f9e4e6c8ea97e4bcb9c71d723b38eba1ee3569559bba21a666"
     },
     {
       "path": "pi-dist/pi-coding-agent/core/extensions/runner.js",
@@ -163,7 +163,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/core/extensions/virtual-modules.js",
-      "sha256": "10f426da60d1ff7073b7ae00ba78e1994e2b3fed74a65d76460497944ee96547"
+      "sha256": "39a40ca44768f168e44a2cf30143497db82797df191db7a0fd4715f42ef7af4f"
     },
     {
       "path": "pi-dist/pi-coding-agent/core/extensions/wrapper.js",
@@ -427,7 +427,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/extensions/codemode/execute.js",
-      "sha256": "edbe85073994e3747bb954944296dd71af07051ab8d3d05304af76fc981870a6"
+      "sha256": "3e1b26a0df6f457e9e374c484eb94126d5ec98f8ea46bdb4844721de2fa44a4d"
     },
     {
       "path": "pi-dist/pi-coding-agent/extensions/codemode/execute.lazy.js",
@@ -479,7 +479,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/extensions/mcp/config.js",
-      "sha256": "2038090b7dff854065467f40d32680f43b8b2e14ad9017e2ad44dc59bd2aadb7"
+      "sha256": "9cf28bcb84556828c8ae2b24c769df293fe3dc37ca8057920b28e91273657332"
     },
     {
       "path": "pi-dist/pi-coding-agent/extensions/mcp/index.js",
@@ -743,7 +743,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/modes/interactive/interactive-mode.js",
-      "sha256": "751e359715ecdccf30c30bc47c78b82639e562ebbfda1afcc255c8c48dbd3ea4"
+      "sha256": "2cb5362a21a6c887659dd9f3e252dd6bd25d509e2e7a8dbe2c8200c278c92965"
     },
     {
       "path": "pi-dist/pi-coding-agent/modes/interactive/model-catalog-refresh.js",
@@ -827,7 +827,7 @@
     },
     {
       "path": "pi-dist/pi-coding-agent/utils/clipboard-command.js",
-      "sha256": "d9933ef767ba69f2ff26017081b81094c86b827961f758055c7a44cdd2d876b2"
+      "sha256": "10e41ba8b85eab8b19a162e8255ee214eb359af2c06645fbae53d0493a4e6e51"
     },
     {
       "path": "pi-dist/pi-coding-agent/utils/clipboard-image.js",

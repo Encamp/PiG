@@ -1,4 +1,4 @@
-version = "1.3.0+fdce48eb"
+version = "1.3.0+bdd9f039"
 
 [[files]]
 path = "packages/agent/src/agent-loop.ts"
@@ -40,7 +40,7 @@ path = "packages/ai/src/api/azure-openai-responses.ts"
 disposition = "deferred"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file \u2705 ported (`ai/azure_openai_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb changes only the tool-support argument of the synchronous resolveTranscriptTools call (getResponsesToolSupport); no async construct is added or changed, so the review above carries over."
+rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/azure_openai_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb changes only the tool-support argument of the synchronous resolveTranscriptTools call (getResponsesToolSupport); no async construct is added or changed, so the review above carries over."
 
 [[files]]
 path = "packages/ai/src/api/bedrock-converse-stream.lazy.ts"
@@ -131,7 +131,7 @@ path = "packages/ai/src/api/openai-codex-responses.ts"
 disposition = "deferred"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file \u2705 ported (`ai/openai_codex_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb changes only the tool-support argument of the synchronous resolveTranscriptTools call (getResponsesToolSupport); no async construct is added or changed, so the review above carries over."
+rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ai/openai_codex_responses.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb changes only the tool-support argument of the synchronous resolveTranscriptTools call (getResponsesToolSupport); no async construct is added or changed, so the review above carries over."
 
 [[files]]
 path = "packages/ai/src/api/openai-completions.ts"
@@ -901,7 +901,7 @@ path = "packages/coding-agent/src/core/export-html/index.ts"
 disposition = "deferred"
 contracts = []
 evidence = []
-rationale = "async/Promise source; PORT_MAP marks this file \u2705 ported (`internal/codingagent/export/export.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb adds one synchronous readFileSync of the vendored marked-cjk-friendly asset and one template replace; no async construct is added or changed, so the review above carries over."
+rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`internal/codingagent/export/export.go`), but a per-file cross-language ordering/cancellation/error contract has not yet been reviewed for 0.87.1; delivery/unresolved.tsv row 'Review the v0.87.1 denominators' Pi fdce48eb adds one synchronous readFileSync of the vendored marked-cjk-friendly asset and one template replace; no async construct is added or changed, so the review above carries over."
 
 [[files]]
 path = "packages/coding-agent/src/core/extensions/loader.ts"
@@ -1150,10 +1150,10 @@ rationale = "async/Promise source new in 0.99.1; PORT_MAP status 🟡 (coding/ex
 
 [[files]]
 path = "packages/coding-agent/src/extensions/codemode/execute.ts"
-disposition = "deferred"
-contracts = []
-evidence = []
-rationale = "async/Promise source new in 0.99.1; PORT_MAP status ⬜ ((not started: codemode runs Pi's own extension code in the Node extension runtime, D-B)); no per-file ordering, cancellation and error contract has been reviewed yet, and no evidence is claimed. Review with the owning family before marking translated. Pi 3daa2028: worker admission is a synchronous slot count released when the worker exits."
+disposition = "translated"
+contracts = ["awaited", "cancellable"]
+evidence = ["test:coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionQueuesABurstInArrivalOrder", "test:coding/extension/builtin/codemode/worker_admission_test.go#TestCodemodeWorkerAdmissionDropsAbortedAndTimedOutWaiters", "test:coding/extension/builtin/codemode/worker_admission_test.go#TestWorkerReservationReleasesExactlyOnce", "test:codemode/worker_settled_launch_test.go#TestLaunchResumingAfterTheResultSettledTakesNoWorker", "test:coding/extension/builtin/codemode/worker_admission_test.go#TestExecuteStartsNoWorkerForALaunchThatResumesAfterItsResultSettled"]
+rationale = "Pi 885a564b (#11184): executeCodemode awaits reserveCodemodeWorker before it builds the sandbox. A script that finds every worker taken joins a FIFO of waiters (admitCodemodeWorkers grants free slots in arrival order whenever a slot is released or the limit is read), waits at most min(timeout_ms, 60 s), and settles as aborted (the signal's reason), timed out (while waiting for a free codemode worker) or no-worker-in-60-s without starting; the wait is subtracted from the script's own deadline. The reservation covers the one worker the script starts: acquireWorker hands it to the sandbox, which releases it when the worker actually exits, and a launch that resumes after the result settled finds it released and starts nothing; a script that never reached the sandbox releases it in finally, exactly once. PI_CODEMODE_MAX_WORKERS is read on every grant. Go keeps this in coding/extension/builtin/codemode/execute.go (reserve, admit, release, workerReserved) and codemode/workerlauncher.go (settled launches skip AcquireWorker)."
 
 [[files]]
 path = "packages/coding-agent/src/extensions/codemode/tool.ts"
@@ -1339,10 +1339,10 @@ rationale = "async/Promise source; PORT_MAP marks this file ✅ ported (`ported+
 
 [[files]]
 path = "packages/coding-agent/src/modes/interactive/interactive-mode.ts"
-disposition = "pending"
+disposition = "deferred"
 contracts = []
-evidence = []
-rationale = ""
+evidence = ["test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsShowTheEarlierConfirmAgainAfterTheLaterIsAnswered", "test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsRemoveAHiddenDialogWhenItsSignalAborts", "test:internal/codingagent/ext_ui_dialog_stack_test.go#TestExtensionDialogsStackConcurrentInlineCustomComponents", "test:test/extension-conformance/ui_concurrent_dialogs_test.go#TestConformance_ConcurrentDialogsAgreeAcrossSDKs"]
+rationale = "Only the extension-dialog ordering is reviewed (Pi 38847563): showExtensionSelector, showExtensionInput, showExtensionEditor and inline showExtensionCustom resolve their own promise when their dialog is answered, aborted or timed out, in any order, because the dialogs form a stack on the UI loop (pushExtensionDialog, removeExtensionDialog of the one answered, showTopExtensionDialog); no promise is left pending by a later dialog, and a hidden dialog's abort removes only itself. internal/codingagent/ext_ui_dialog_stack.go owns the stack and the cross-SDK conformance row covers every realization. The rest of interactive-mode.ts is not reviewed for async contracts in this pin."
 
 [[files]]
 path = "packages/coding-agent/src/modes/interactive/model-catalog-refresh.ts"
@@ -1662,9 +1662,9 @@ rationale = "Added to the accounting when every monorepo package was listed: the
 [[files]]
 path = "packages/durable/src/harness/scheduler.ts"
 disposition = "pending"
-contracts = ["awaited"]
-evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryRecordsCheckpointsOnlyWhenTheRunningPhaseChanges", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryKeepsAPublicWriteAdmissionOpenThroughCommitAsAChildOfItsCaller", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryKeepsBothInterruptedRunsAndExplicitAbortHandlersAtStatusOk"]
-rationale = "Pi 2ec55d80 telemetry contracts, translated: the pi.durable.phase span is awaited and covers the handler plus its decision commit, and it settles before the next phase starts; a wait, restart or close ends it with outcome aborted, waiting or sleeping; a handler panic becomes a fault as before; the checkpoint event is added after the runtime commit returns. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/durable/src/harness/submissions.ts"
@@ -1683,9 +1683,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/tool.ts"
 disposition = "pending"
-contracts = ["awaited"]
-evidence = ["test:durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool"]
-rationale = "Pi 2ec55d80 telemetry contract, translated: a nested call's replay event is added after its commit returns, and the phase span is passed through the nested call. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/durable/src/harness/types.ts"
@@ -1753,9 +1753,9 @@ rationale = "A watch drains its frames serially: one delivery at a time, in comm
 [[files]]
 path = "packages/durable/src/session/session.ts"
 disposition = "pending"
-contracts = ["awaited"]
-evidence = ["test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryMirrorsRuntimeReportsAsFixedFieldPhaseEventsAndTypeOnlyCounters", "test:durable/harness/harness_telemetry_events_test.go#TestDurableTelemetryReportsHookFailuresOnThePhaseAndClockFailuresWithoutAPhaseContext"]
-rationale = "Pi 2ec55d80 telemetry contract, translated: the report is synchronous (the host callback runs first, then the counter, then the span event) and runs with the context that carries the active span; entry events are published after the commit returns. The rest of the file's async contracts are not yet reviewed, so the row stays pending."
+contracts = []
+evidence = []
+rationale = ""
 
 [[files]]
 path = "packages/durable/src/session/transaction.ts"

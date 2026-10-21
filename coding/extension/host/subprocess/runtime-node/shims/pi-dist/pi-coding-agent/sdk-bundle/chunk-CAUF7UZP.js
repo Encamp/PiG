@@ -4,7 +4,7 @@ import {
   loadMcpConfig,
   openBrowser,
   removeMcpServerConfig
-} from "./chunk-LHJGQZZX.js";
+} from "./chunk-7NLBDVYL.js";
 import {
   McpOAuthCredentialStore,
   McpServerConnection,
