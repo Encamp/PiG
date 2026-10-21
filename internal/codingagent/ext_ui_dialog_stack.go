@@ -1,8 +1,10 @@
 package codingagent
 
 import (
+	"context"
 	"slices"
 
+	"github.com/MichaelKinsy/PiG/coding/extension"
 	"github.com/MichaelKinsy/PiG/tui"
 )
 
@@ -18,6 +20,62 @@ func (m *InteractiveMode) pushExtensionDialog(dialog *extensionDialog) {
 	m.disposeActiveSelector()
 	m.extensionDialogs = append(m.extensionDialogs, dialog)
 	m.showTopExtensionDialog()
+}
+
+// awaitedDialog is the wait of one owner-loop caller on a dialog.
+type awaitedDialog struct {
+	dismiss context.CancelFunc
+}
+
+// awaitOwnerDialog is Pi's `await this.showExtensionSelector(...)`, showExtensionConfirm or showExtensionEditor for a caller
+// that runs on the owner loop: the /tree summary prompts, the import confirmation and the missing-cwd confirmation
+// (interactive-mode.ts:5565, 5580, 6547 and promptForMissingSessionCwd). Pi's callers are async, so the dialog joins the
+// stack like an extension's and the event loop keeps dispatching to whichever dialog the stack shows. The Go caller waits
+// through awaitExtensionUI, which keeps that same loop running while ask opens the dialog on a worker.
+//
+// ok is false when the dialog was dismissed (Esc, or a timeout) or the TUI is unavailable. A Session replacement or /reload
+// disposes the dialog too (resetExtensionUI); Pi leaves the awaiting promise pending then and its continuation never runs,
+// but the owner loop cannot park for good in a nested loop that ignores submissions, so the wait ends as a dismissal.
+func awaitOwnerDialog[T any](m *InteractiveMode, ctx context.Context, ask func(context.Context, *ExtUIContext) (T, error)) (T, bool) {
+	var value T
+	dialogCtx, dismiss := context.WithCancel(ctx)
+	defer dismiss()
+	wait := &awaitedDialog{dismiss: dismiss}
+	if m.awaitedDialogs == nil {
+		m.awaitedDialogs = map[*awaitedDialog]struct{}{}
+	}
+	m.awaitedDialogs[wait] = struct{}{}
+	defer delete(m.awaitedDialogs, wait)
+	err := m.awaitExtensionUI(ctx, func(workCtx context.Context) error {
+		stop := context.AfterFunc(workCtx, dismiss)
+		defer stop()
+		var err error
+		value, err = ask(dialogCtx, &ExtUIContext{m: m})
+		return err
+	})
+	return value, err == nil
+}
+
+// askSelector is `await showExtensionSelector(title, options)`: the chosen option, or ok false when the selector was dismissed.
+func (m *InteractiveMode) askSelector(ctx context.Context, title string, options []string) (string, bool) {
+	return awaitOwnerDialog(m, ctx, func(ctx context.Context, ui *ExtUIContext) (string, error) {
+		return ui.Select(ctx, title, options, extension.ExtensionUIDialogOptions{})
+	})
+}
+
+// askConfirm is `await showExtensionConfirm(title, message)`: whether Yes was chosen. Dismissing it answers No.
+func (m *InteractiveMode) askConfirm(ctx context.Context, title, message string) bool {
+	confirmed, ok := awaitOwnerDialog(m, ctx, func(ctx context.Context, ui *ExtUIContext) (bool, error) {
+		return ui.Confirm(ctx, title, message, extension.ExtensionUIDialogOptions{})
+	})
+	return ok && confirmed
+}
+
+// askEditor is `await showExtensionEditor(title, prefill)`: the text, or ok false when the editor was dismissed.
+func (m *InteractiveMode) askEditor(ctx context.Context, title, prefill string) (string, bool) {
+	return awaitOwnerDialog(m, ctx, func(ctx context.Context, ui *ExtUIContext) (string, error) {
+		return ui.Editor(ctx, title, prefill)
+	})
 }
 
 // removeExtensionDialog removes dialog from the stack. When it was the visible one, the previous dialog or the editor shows.
@@ -79,7 +137,7 @@ func (m *InteractiveMode) shownExtensionDialog() *extensionDialog {
 }
 
 // resetExtensionDialogs disposes every open dialog and shows the editor. The calls behind the dialogs end with their own
-// contexts.
+// contexts, and an owner-loop caller waiting on one (awaitOwnerDialog) stops waiting.
 func (m *InteractiveMode) resetExtensionDialogs() {
 	if len(m.extensionDialogs) == 0 {
 		return
@@ -90,5 +148,8 @@ func (m *InteractiveMode) resetExtensionDialogs() {
 		}
 	}
 	m.extensionDialogs = nil
+	for wait := range m.awaitedDialogs {
+		wait.dismiss()
+	}
 	m.showTopExtensionDialog()
 }

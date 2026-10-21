@@ -541,6 +541,9 @@ type InteractiveMode struct {
 	// extensionDialogs is the stack of dialogs shown in the editor slot (select, confirm, input, editor and an editor-slot
 	// custom component); the last entry is visible. Only the owner loop touches it (interactive-mode.ts extensionDialogs).
 	extensionDialogs []*extensionDialog
+	// awaitedDialogs are the dialogs an owner-loop caller waits on (awaitOwnerDialog), by the cancel that dismisses each one.
+	// Only the owner loop touches it.
+	awaitedDialogs map[*awaitedDialog]struct{}
 
 	// Inference timing for the spinner. workStart is the wall-clock
 	// time the current LLM call began; zero when idle.

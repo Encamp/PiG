@@ -266559,8 +266559,8 @@
       ],
       "evidence": [
         "test:internal/codingagent/interactive_frontend_program_status_test.go#TestFrontendProgramStatusChild",
-        "test:internal/codingagent/program_status_confirm_test.go#TestEditorSlotConfirmationReportsPermissionStatus",
-        "test:internal/codingagent/program_status_reporter_test.go#TestExtensionDialogsReportBlockedWhileTheyAreOpen"
+        "test:internal/codingagent/program_status_reporter_test.go#TestExtensionDialogsReportBlockedWhileTheyAreOpen",
+        "test:internal/codingagent/program_status_reporter_test.go#TestLoginReportsBlockedOnAuthUntilItEnds"
       ]
     },
     {
@@ -266582,7 +266582,7 @@
       "evidence": [
         "test:internal/codingagent/interactive_frontend_program_status_test.go#TestFrontendProgramStatusChild",
         "test:internal/codingagent/interactive_program_status_test.go#TestInteractiveRunsSettleTheProgramStatus",
-        "test:internal/codingagent/program_status_confirm_test.go#TestEditorSlotConfirmationReportsPermissionStatus"
+        "test:internal/codingagent/program_status_reporter_test.go#TestExtensionDialogsReportBlockedWhileTheyAreOpen"
       ]
     },
     {
