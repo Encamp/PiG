@@ -2,6 +2,8 @@ package telemetrysqlite
 
 // Ports packages/chord/test/telemetry-sqlite-store.test.ts "SQLite telemetry reads".
 
+// pi: packages/chord/src/telemetry-sqlite/store.ts
+
 import (
 	"context"
 	"errors"

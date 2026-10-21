@@ -839,7 +839,7 @@ The daemon is a Go program with Pi's command line and wire protocol (D96); the R
 
 | Upstream | PiG | Status |
 |---|---|---|
-| `packages/telemetry/src/index.ts` | `telemetry/context.go + telemetry/schema.go + telemetry/store.go` | ✅ |
+| `packages/telemetry/src/index.ts` | `telemetry/context.go + telemetry/schema.go + telemetry/store.go + chord/telemetrysqlite/index.go (SqliteTelemetry, the TelemetryStore the package implements)` | ✅ |
 | `packages/telemetry/src/memory.ts` | `telemetry/memory.go` | ✅ |
 | `packages/telemetry/src/metrics.ts` | `telemetry/metrics.go` | ✅ |
 | `packages/telemetry/src/noop.ts` | `telemetry/context.go` | ✅ |
