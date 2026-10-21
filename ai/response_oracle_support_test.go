@@ -20,6 +20,7 @@ import (
 
 	"github.com/MichaelKinsy/PiG/ai"
 	"github.com/MichaelKinsy/PiG/internal/bodyreadhook/readbarrier"
+	"github.com/MichaelKinsy/PiG/internal/coding/pigidentity"
 	"github.com/MichaelKinsy/PiG/internal/coding/pigversion"
 	"github.com/MichaelKinsy/PiG/internal/requestvalidity"
 )
@@ -341,6 +342,10 @@ func comparableRequest(request map[string]any, keepUserAgent bool) map[string]an
 		default:
 			kept[name] = value
 		}
+	}
+	// pig divergence (D26): PiG names itself as the Codex originator where Pi sends `pi`.
+	if keepUserAgent && kept["originator"] == "pi" {
+		kept["originator"] = pigidentity.CodexOriginator
 	}
 	return map[string]any{"path": request["path"], "method": request["method"], "headers": kept}
 }
