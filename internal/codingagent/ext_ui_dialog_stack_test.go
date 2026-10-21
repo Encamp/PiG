@@ -469,3 +469,82 @@ func TestRemoteEditorSlotComponentsStackAndHandFocusBack(t *testing.T) {
 	back.close(t, r, "back")
 	requireEditorShown(t, r.m, "after both components")
 }
+
+// A custom call that fails to mount (its factory errors, or calls done before it returns) while another dialog is shown must not clear that
+// dialog: Pi's restoreEditor with no component mounted only puts the editor text back (interactive-mode.ts showExtensionCustom).
+func TestExtensionCustomThatNeverMountsLeavesTheShownDialog(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		factory extension.CustomFactory
+		want    func(t *testing.T, got customOutcome)
+	}{
+		{"factory error", func(extension.TUI, *tui.Theme, extension.KeybindingsManager, func(any)) (extension.DisposableComponent, error) {
+			return nil, errors.New("boom")
+		}, func(t *testing.T, got customOutcome) {
+			if got.err == nil {
+				t.Fatal("a factory error did not reject the call")
+			}
+		}},
+		{"done before the factory returns", func(_ extension.TUI, _ *tui.Theme, _ extension.KeybindingsManager, done func(any)) (extension.DisposableComponent, error) {
+			done("early")
+			return &customProbe{label: "NEVER"}, nil
+		}, func(t *testing.T, got customOutcome) {
+			if got.err != nil || got.value != "early" {
+				t.Fatalf("custom = %v, %v; want early", got.value, got.err)
+			}
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := newCustomRig(t)
+			r.m.editor.SetText("draft")
+			selected := r.callDialog(t, r.selectCall(r.m.runCtx, "Pick", "one"))
+			requireVisible(t, r.m, "Pick")
+			r.m.editor.SetText("typed while the dialog is open")
+			out := r.start(t.Context(), tc.factory, nil)
+			tc.want(t, r.finish(t, out))
+			requireVisible(t, r.m, "Pick")
+			if n := openExtensionDialogs(r.m); n != 1 {
+				t.Fatalf("%d dialogs are open, want the select alone", n)
+			}
+			if err := r.m.dispatchKey(t.Context(), "\r"); err != nil {
+				t.Fatal(err)
+			}
+			if got := requireResult(t, selected, "the select"); got.value != "one" || got.err != nil {
+				t.Fatalf("the select = %q, %v; want one", got.value, got.err)
+			}
+			requireEditorShown(t, r.m, "after the select")
+		})
+	}
+}
+
+// Pi's handleReloadCommand calls resetExtensionUI before the reload box shows, which disposes every stacked dialog; a dialog the reload left
+// in the stack would come back over the editor later.
+func TestReloadDisposesEveryExtensionDialog(t *testing.T) {
+	r := newCustomRig(t)
+	ctx, abort := context.WithCancel(t.Context())
+	defer abort()
+	r.callDialog(t, r.selectCall(ctx, "Old", "one"))
+	component, _, _ := r.startCustom(t, "custom")
+	requireVisible(t, r.m, "custom")
+
+	if err := r.m.buildSlashContext(t.Context()).Reload(); err != nil {
+		t.Fatal(err)
+	}
+	requireEditorShown(t, r.m, "after /reload")
+	if got := component.disposed.Load(); got != 1 {
+		t.Fatalf("custom component disposed %d times by the reload, want once", got)
+	}
+}
+
+// A subprocess component in the editor slot restores the editor text saved when it opened, as the in-process one does (restoreEditor
+// setText(savedText)).
+func TestRemoteEditorSlotComponentRestoresTheEditorText(t *testing.T) {
+	r := newCustomRig(t)
+	r.m.editor.SetText("draft")
+	slot := r.openRemote(t, "SLOT", false)
+	r.m.editor.SetText("changed while the component was open")
+	slot.close(t, r, "done")
+	if got := r.m.editor.Text(); got != "draft" {
+		t.Fatalf("editor text after the component closed = %q, want the text saved at open", got)
+	}
+}

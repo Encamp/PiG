@@ -711,9 +711,14 @@ func (u *ExtUIContext) RunRemoteOverlay(opts extension.RemoteOverlayOptions, hos
 		} else {
 			// Match upstream ctx.ui.custom(): the component joins the editor-slot dialog stack directly
 			// rather than being wrapped in a second modal shell (interactive-mode.ts pushExtensionDialog).
+			// upstream: showExtensionCustom restoreEditor puts back the editor text saved when the component opened.
+			savedText := u.m.editor.Text()
 			entry := &extensionDialog{component: overlay}
 			u.m.pushExtensionDialog(entry)
-			cleanup = func() { u.m.removeExtensionDialog(entry) }
+			cleanup = func() {
+				u.m.removeExtensionDialog(entry)
+				u.m.editor.SetText(savedText)
+			}
 		}
 		route, _ := overlay.inputRoute()
 		mountedFocused = route != nil

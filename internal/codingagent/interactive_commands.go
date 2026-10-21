@@ -733,6 +733,8 @@ func (m *InteractiveMode) buildSlashContext(ctx context.Context) *SlashContext {
 			if err := m.settleUserBash(); err != nil {
 				return err
 			}
+			// upstream: handleReloadCommand calls resetExtensionUI before it shows the reload box, which disposes every stacked extension dialog.
+			m.resetExtensionDialogs()
 			m.setRemoteEditor(nil)
 			m.resetAutocompleteWrappers()
 			dismiss := m.beginReloadBlocker()
