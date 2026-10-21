@@ -729,31 +729,29 @@ replace = "Took Ns"
 	}
 }
 
-// TestDecodeScenarioAcceptsPrebuiltGoPackageKeys: the runner reads pig_go_tests, pi_go_tests, pig_go_programs and pi_go_programs from [env]
-// (runner.EnvSpec), so the lint must treat each as a known key.
-func TestDecodeScenarioAcceptsPrebuiltGoPackageKeys(t *testing.T) {
+// The runner prebuilds the Go test binaries and programs a script lists in env.pig_go_tests, env.pi_go_tests, env.pig_go_programs and
+// env.pi_go_programs (test/parity/runner/schema.go). The lint decodes the same scenarios, so it must know every key the runner does.
+func TestDecodeScenarioAcceptsTheGoPrebuildEnvKeys(t *testing.T) {
 	source := `
-name = "prebuilt"
-description = "prebuilt"
+name = "prebuild"
+description = "prebuild"
 covers = ["packages/tui/src/autocomplete.ts"]
 tags = ["hermetic"]
-driver = "cli"
+driver = "interactive-tmux"
 
 [env]
-pig_go_tests = ["./internal/codingagent"]
-pi_go_tests = ["./internal/codingagent"]
-pig_go_programs = ["./cmd/x"]
-pi_go_programs = ["./cmd/x"]
+pig_go_tests = ["./tui"]
+pi_go_tests = ["./tui"]
+pig_go_programs = ["./cmd/probe"]
+pi_go_programs = ["./cmd/probe"]
 `
 	var sc scenario
 	var violations []violation
-	if err := decodeScenarioWithUnknownKeyLint("prebuilt.toml", source, &sc, &violations); err != nil {
+	if err := decodeScenarioWithUnknownKeyLint("prebuild.toml", source, &sc, &violations); err != nil {
 		t.Fatalf("decodeScenarioWithUnknownKeyLint returned parse error: %v", err)
 	}
-	for _, v := range violations {
-		if v.Rule == "unknown-key" {
-			t.Errorf("unexpected unknown-key violation: %s", v.Message)
-		}
+	if len(violations) != 0 {
+		t.Fatalf("the lint rejects env keys the runner accepts: %+v", violations)
 	}
 }
 
