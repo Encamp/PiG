@@ -252,6 +252,7 @@ The tmux scenario harness cannot drive a Windows `.exe`. Windows verification re
 | `packages/ai/src/utils/sanitize-unicode.ts` | `ai/sanitize_unicode.go` | ✅ |
 | `packages/ai/src/utils/typebox-helpers.ts` | `ai/typebox_helpers.go (StringEnum only, as a JSON-schema map; the TypeBox runtime and type-level helpers stay designed out; production caller internal/evals/evalsuites/audit.go)` | ✅ |
 | `packages/ai/src/utils/validation.ts` | `ai/validate.go + ai/validate_arguments.go + ai/validate_convert.go + ai/validate_errors.go + internal/typebox/compiler.go + ai/validate_json.go` | ✅ |
+| `packages/ai/src/utils/version.ts` | `ai/user_agent.go (ProductVersion: PiG's composite release version stands for PI_AI_VERSION as the default version of a detailed User-Agent, D65; TestClientIdentityVersionDefaultsToTheProductVersion)` | ✅ |
 | `packages/ai/src/providers/baseten.models.ts` | `(not ported: Baseten provider declined)` | n/a |
 | `packages/ai/src/providers/baseten.ts` | `(not ported: Baseten provider declined)` | n/a |
 | `packages/ai/src/utils/abort.ts` | `(AbortSignal/Promise racing: raceWithAbortSignal/operationSignal; pig uses context.Context cancellation + select (D3): runtime mechanics, designed out)` | n/a |

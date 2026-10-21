@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/MichaelKinsy/PiG/internal/coding/pigidentity"
+	"github.com/MichaelKinsy/PiG/internal/jsstring"
 	"github.com/MichaelKinsy/PiG/internal/nodeurl"
 )
 
@@ -53,7 +54,7 @@ func (mode UserAgentMode) MarshalJSON() ([]byte, error) {
 	case userAgentKindShort:
 		return []byte(`"short"`), nil
 	case userAgentKindCustom:
-		return json.Marshal(struct {
+		return json.Marshal(struct { //perf:ok a persisted identity is encoded once per save, not per request
 			Custom string `json:"custom"`
 		}{mode.custom})
 	}
@@ -91,7 +92,7 @@ type ClientAttribution struct {
 	// URL is the app URL: OpenRouter `HTTP-Referer`, the app's identity in OpenRouter's rankings, grouped by origin.
 	URL string `json:"url"`
 	// Categories are the app categories, e.g. `["cli-agent"]`: OpenRouter `X-OpenRouter-Categories`, comma-separated.
-	Categories []string `json:"categories,omitempty"`
+	Categories []string `json:"categories,omitzero"`
 }
 
 // PiAttribution is the attribution used by the agent loop, durable Harness and coding agent (upstream PI_ATTRIBUTION).
@@ -115,9 +116,9 @@ type ClientIdentity struct {
 func (identity ClientIdentity) MarshalJSON() ([]byte, error) {
 	type plain ClientIdentity
 	if !identity.AttributionNull {
-		return json.Marshal(plain(identity))
+		return json.Marshal(plain(identity)) //perf:ok a persisted identity is encoded once per save, not per request
 	}
-	return json.Marshal(struct {
+	return json.Marshal(struct { //perf:ok a persisted identity is encoded once per save, not per request
 		plain
 		Attribution *ClientAttribution `json:"attribution"`
 	}{plain: plain(identity)})
@@ -229,15 +230,15 @@ func matchesHost(baseURL, expectedHost string) bool {
 
 // isOpenRouter matches the base URL by substring, not host.
 func isOpenRouter(target ClientIdentityTarget) bool {
-	return target.Provider == "openrouter" || strings.Contains(target.BaseURL, "openrouter.ai")
+	return target.Provider == "openrouter" || strings.Contains(target.BaseURL, "openrouter.ai") //portlint:allow providerliteral identity.ts isOpenRouter matches the provider id and the base URL as Pi does
 }
 
 func isNvidiaNIM(target ClientIdentityTarget) bool {
-	return target.Provider == "nvidia" || matchesHost(target.BaseURL, nvidiaNIMHost)
+	return target.Provider == "nvidia" || matchesHost(target.BaseURL, nvidiaNIMHost) //portlint:allow providerliteral identity.ts isNvidiaNim matches the provider id and the host as Pi does
 }
 
 func isOpenCode(target ClientIdentityTarget) bool {
-	return target.Provider == "opencode" || target.Provider == "opencode-go" || matchesHost(target.BaseURL, openCodeHost)
+	return target.Provider == "opencode" || target.Provider == "opencode-go" || matchesHost(target.BaseURL, openCodeHost) //portlint:allow providerliteral identity.ts isOpenCode matches the provider ids and the host as Pi does
 }
 
 // GetAttributionHeaders are the provider attribution headers of an identity for a request target. Empty when attribution is off.
@@ -305,7 +306,7 @@ func upperFirstUnit(name string) string {
 	if size == 0 || first > 0xFFFF || first == utf8.RuneError {
 		return name
 	}
-	return strings.ToUpper(string(first)) + name[size:]
+	return jsstring.ToUpper(string(first)) + name[size:] //portlint:allow utf16units size is the byte length of the first whole rune, which is a BMP character (one UTF-16 unit), so the slice starts at the unit after it
 }
 
 // identityProviderHeaders are an identity's default headers as the lowest source of a ProviderHeaders merge.

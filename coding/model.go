@@ -568,9 +568,7 @@ func (provider *requestOptionsProvider) SimpleStreamOptions(model *ai.Model, tra
 // Stream merges the configured headers under the request's and runs the request's header transform (before_provider_headers) on the result, as ModelRuntime applyAuth does for a registry-built provider. The built-in OpenCode providers add the session header below both, as providers/opencode.ts withOpenCodeSessionHeader does; a direct pi-ai call that the extension bridge streams through BuildModel carries no attribution, as under Pi.
 func (provider *requestOptionsProvider) Stream(ctx context.Context, transcript ai.TranscriptContext, options ai.StreamOptions) (*ai.AssistantMessageEventStream, error) {
 	configured := ai.ProviderHeadersFromStrings(provider.configured)
-	if provider.providerID == "opencode" || provider.providerID == "opencode-go" {
-		configured = ai.MergeProviderHeaders(ai.GetOpenCodeSessionHeaders(ai.ClientIdentityTarget{Provider: provider.providerID}, options.SessionID), configured)
-	}
+	configured = ai.MergeProviderHeaders(ai.GetOpenCodeSessionHeaders(ai.ClientIdentityTarget{Provider: provider.providerID}, options.SessionID), configured)
 	options.Headers = ai.MergeProviderHeaders(configured, options.Headers)
 	// The request's header transform (before_provider_headers) runs on the merged headers.
 	if options.TransformHeaders != nil {
