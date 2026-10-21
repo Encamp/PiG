@@ -2,7 +2,7 @@
 
 # Extension SDK surface matrix
 
-Every extension-facing surface of Pi 1.3.0+fdce48eb's extension API, and how each PiG extension runtime realizes it. The rows come from Pi's `packages/coding-agent/src/core/extensions/types.ts` and the declarations it re-exports or exposes through its members (`EventBus`, `ExecOptions`/`ExecResult`, `CacheWarmingDecisionEvent`, `ReadonlySessionManager`, `ModelRegistry`, `Theme`, `AgentToolResult`), read from `.upstream/v1.3.0+fdce48eb`.
+Every extension-facing surface of Pi 1.3.0+bdd9f039's extension API, and how each PiG extension runtime realizes it. The rows come from Pi's `packages/coding-agent/src/core/extensions/types.ts` and the declarations it re-exports or exposes through its members (`EventBus`, `ExecOptions`/`ExecResult`, `CacheWarmingDecisionEvent`, `ReadonlySessionManager`, `ModelRegistry`, `Theme`, `AgentToolResult`), read from `.upstream/v1.3.0+bdd9f039`.
 
 A cell's status comes from the runtime itself: the Go SDK's exported identifiers, the Rust SDK's `pub` items and the Python SDK's classes, members and parameters, read from their source, and the Node runtime's objects, read by instantiating the runtime in Node (`test/parity/cmd/sdksurface/probe.mjs`), plus the properties it reads from an extension's definitions. [`test/parity/sdk-surface.toml`](../test/parity/sdk-surface.toml) names the symbol where a language's naming differs from the default rule and says why a realization is a stand-in; a named symbol that does not exist is `missing`. Payload, result and option fields that cross the subprocess wire are also checked against the host's Go decoding type, so a field an SDK sends but the host drops is `missing`. The PiG additive sections list surfaces PiG adds where Pi has none, such as the component kit (D107); the map names each one's symbols, and its cells are classified the same way.
 
@@ -10,7 +10,7 @@ A cell's status comes from the runtime itself: the Go SDK's exported identifiers
 - `stand-in/partial`: the symbol exists; the note says what differs and why.
 - `missing`: no symbol. Each missing cell is listed in [`test/parity/sdk-surface-exceptions.toml`](../test/parity/sdk-surface-exceptions.toml) with its reviewed reason, and `go test ./test/parity/cmd/sdksurface` fails on any other.
 
-The package sections list every runtime export of the modules Pi serves to extensions (`pi-coding-agent`, `pi-tui`, `pi-ai`, `pi-ai/compat`, `pi-ai/providers/all`, `pi-agent-core`), from the compiler-derived inventory of Pi's `.d.ts` files (`test/parity/interfaces/upstream-v1.3.0+fdce48eb.json`), and every public instance member of each exported class represented by that inventory. Static factories and overload-specific reachability are outside this probe. Only the Node runtime imports these modules. The probe loads each module the runtime serves and classifies every value by where its code lives, using the V8 inspector's function locations:
+The package sections list every runtime export of the modules Pi serves to extensions (`pi-coding-agent`, `pi-tui`, `pi-ai`, `pi-ai/compat`, `pi-ai/models`, `pi-ai/providers/all`, `pi-agent-core`), from the compiler-derived inventory of Pi's `.d.ts` files (`test/parity/interfaces/upstream-v1.3.0+bdd9f039.json`), and every public instance member of each exported class represented by that inventory. Static factories and overload-specific reachability are outside this probe. Only the Node runtime imports these modules. The probe loads each module the runtime serves and classifies every value by where its code lives, using the V8 inspector's function locations:
 
 - `Pi's own code`: the function originates in the vendored pinned modules or their dependencies; host import rewrites can still affect behavior (D73).
 - `bridged`: PiG's implementation in the extension runtime, a line-for-line port or a host bridge, locked by the D73 tests (`TestNodeRuntimeShimsExportEveryPinnedPiValue`, `TestPiTuiComponentsMatchThePinnedPackage`, `TestPiAiUtilitiesMatchThePinnedPackage`, `TestPiThemeHelpersMatchThePinnedPackage`).
@@ -39,14 +39,15 @@ Regenerate with `go run ./test/parity/cmd/sdksurface`; `make sdk-surface-drift` 
 | Rust | 31 | 0 | 0 |
 | Python | 31 | 0 | 0 |
 
-1571 package exports and class members, Node runtime:
+1588 package exports and class members, Node runtime:
 
 | Module | Pi's own code | bridged | stand-in | missing (all with a reviewed exception) |
 |---|---|---|---|---|
 | `pi-coding-agent` | 901 | 9 | 0 | 10 |
-| `pi-tui` | 361 | 1 | 0 | 1 |
+| `pi-tui` | 362 | 1 | 0 | 1 |
 | `pi-ai` | 86 | 1 | 0 | 0 |
 | `pi-ai/compat` | 137 | 9 | 0 | 0 |
+| `pi-ai/models` | 16 | 0 | 0 | 0 |
 | `pi-ai/providers/all` | 12 | 0 | 0 | 0 |
 | `pi-agent-core` | 43 | 0 | 0 | 0 |
 
@@ -2459,6 +2460,7 @@ Regenerate with `go run ./test/parity/cmd/sdksurface`; `make sdk-surface-drift` 
 | `pi-tui: ProcessTerminal.kittyProtocolActive` | `ProcessTerminal.kittyProtocolActive` | Pi's own code |
 | `pi-tui: ProcessTerminal.modifyOtherKeysActive` | `ProcessTerminal.modifyOtherKeysActive` | Pi's own code |
 | `pi-tui: ProcessTerminal.moveBy` | `ProcessTerminal.moveBy` | Pi's own code |
+| `pi-tui: ProcessTerminal.restoreOnExit` | `ProcessTerminal.restoreOnExit` | Pi's own code |
 | `pi-tui: ProcessTerminal.rows` | `ProcessTerminal.rows` | Pi's own code |
 | `pi-tui: ProcessTerminal.setProgramStatus` | `ProcessTerminal.setProgramStatus` | Pi's own code |
 | `pi-tui: ProcessTerminal.setProgress` | `ProcessTerminal.setProgress` | Pi's own code |
@@ -2944,6 +2946,27 @@ Regenerate with `go run ./test/parity/cmd/sdksurface`; `make sdk-surface-drift` 
 | `pi-ai/compat: validateToolArguments` | `function validateToolArguments` | Pi's own code |
 | `pi-ai/compat: validateToolCall` | `function validateToolCall` | Pi's own code |
 | `pi-ai/compat: withoutInitialSystemMessage` | `function withoutInitialSystemMessage` | Pi's own code |
+
+## Package exports: pi-ai/models
+
+| Export | Pi declaration | Node runtime |
+|---|---|---|
+| `pi-ai/models: AI_TELEMETRY_SCHEMA` | `variable AI_TELEMETRY_SCHEMA` | Pi's own code |
+| `pi-ai/models: ModelsError` | `class ModelsError` | Pi's own code |
+| `pi-ai/models: ModelsError.cause` | `ModelsError.cause` | Pi's own code |
+| `pi-ai/models: ModelsError.code` | `ModelsError.code` | Pi's own code |
+| `pi-ai/models: ModelsError.message` | `ModelsError.message` | Pi's own code |
+| `pi-ai/models: ModelsError.name` | `ModelsError.name` | Pi's own code |
+| `pi-ai/models: ModelsError.stack` | `ModelsError.stack` | Pi's own code |
+| `pi-ai/models: calculateCost` | `function calculateCost` | Pi's own code |
+| `pi-ai/models: clampThinkingLevel` | `function clampThinkingLevel` | Pi's own code |
+| `pi-ai/models: createModels` | `function createModels` | Pi's own code |
+| `pi-ai/models: createProvider` | `function createProvider` | Pi's own code |
+| `pi-ai/models: getModelType` | `function getModelType` | Pi's own code |
+| `pi-ai/models: getSupportedThinkingLevels` | `function getSupportedThinkingLevels` | Pi's own code |
+| `pi-ai/models: hasApi` | `function hasApi` | Pi's own code |
+| `pi-ai/models: isModelType` | `function isModelType` | Pi's own code |
+| `pi-ai/models: modelsAreEqual` | `function modelsAreEqual` | Pi's own code |
 
 ## Package exports: pi-ai/providers/all
 
