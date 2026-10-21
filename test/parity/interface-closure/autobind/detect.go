@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/MichaelKinsy/PiG/internal/coding/pigversion"
 	"github.com/MichaelKinsy/PiG/test/parity/interface-closure/autobind/rules"
@@ -1503,7 +1504,12 @@ func decodeTSString(body string) string {
 				b.WriteRune(rs[i])
 				continue
 			}
-			b.WriteRune(rune(code))
+			// A code point above U+10FFFF is not a rune; strings.Builder.WriteRune writes U+FFFD for it, so write that.
+			decoded := unicode.ReplacementChar
+			if code <= unicode.MaxRune {
+				decoded = rune(code)
+			}
+			b.WriteRune(decoded)
 			i = end - 1
 			if rs[start-1] == '{' {
 				i = end

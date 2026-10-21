@@ -5733,6 +5733,13 @@
       "rationale": "New with the Durable 1.1.0 line; area and tags follow the sibling tests under packages/durable/test/ until the production-path review."
     },
     {
+      "path": "packages/durable/test/indexeddb-storage.test.ts",
+      "upstreamTestHash": "sha256:d3da0450f73d1759c0ba663661e6956b0f7af6a60428adb85e970fdbb9a2a538",
+      "area": "sessions",
+      "tags": [],
+      "rationale": "Production-path review at Pi 1.3.0+bd3c9b82: runs IndexedDbStorage over fake-indexeddb. The storage drives a browser's IDBDatabase, which no Stock PiG production package runs in (PORT_MAP records packages/durable/src/storage/indexeddb.ts n/a); the Storage contract its cases check is tested on the ported memory, JSONL, SQLite and Cloudflare backends."
+    },
+    {
       "path": "packages/durable/test/jsonl-storage.test.ts",
       "upstreamTestHash": "sha256:14ce2bf1766b914fc44d9903ae461979d7698e78d07059f8ab385fdaa55c344a",
       "area": "cli",
