@@ -319,7 +319,7 @@ func TestAbortedExtensionDialogClearsItsBlockedStatus(t *testing.T) {
 	if len(terminal.reports) != 2 || terminal.reports[0].State != tui.ProgramStateBlocked || terminal.reports[1].State != tui.ProgramStateIdle {
 		t.Fatalf("reports %+v, want blocked then idle", terminal.reports)
 	}
-	if m.extensionDialog != nil {
+	if m.shownExtensionDialog() != nil {
 		t.Fatal("the dialog stays installed after its signal aborted it")
 	}
 }
