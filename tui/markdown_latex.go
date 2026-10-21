@@ -162,6 +162,15 @@ func mdPendingBody(source, opener string) (string, bool) {
 // Display math never spans a table (2ed3118b, #11159): without the containsTableStart guards an unclosed "$$" or
 // "\[" pairs with a later opener or stays pending, swallowing the table.
 func tokenizeBlockLatex(source string) (latexToken, bool) {
+	// Every form below starts with up to three spaces and then "$$" or "\[". Most blocks start with neither, and each
+	// regexp attempt on a long remaining document pays for its length before it fails.
+	spaces := 0
+	for spaces < len(source) && spaces <= 3 && source[spaces] == ' ' {
+		spaces++
+	}
+	if spaces > 3 || !strings.HasPrefix(source[spaces:], "$$") && !strings.HasPrefix(source[spaces:], `\[`) {
+		return latexToken{}, false
+	}
 	if m := reMdBlockDollar.FindStringSubmatch(source); m != nil && m[1] != "" && !containsTableStart(m[1]) {
 		return latexToken{raw: m[0], text: widthx.JSTrim(m[1])}, true
 	}

@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/MichaelKinsy/PiG/tui/widthx"
 )
 
 // The pending-math fallbacks of tokenizeBlockLatex read the rest of the document once per display-math opener, so they
@@ -46,6 +48,40 @@ func TestMarkdownPendingMathScansMatchTheirRegexpForms(t *testing.T) {
 		}
 		if got, want := containsTableStart(source), containsTableStartOracle(source); got != want {
 			t.Fatalf("containsTableStart(%q) = %t, split form %t", source, got, want)
+		}
+	}
+}
+
+// tokenizeBlockLatexOracle is tokenizeBlockLatex as markdown.ts writes it: the four regexp forms in order, no opener guard.
+func tokenizeBlockLatexOracle(source string) (latexToken, bool) {
+	if m := reMdBlockDollar.FindStringSubmatch(source); m != nil && m[1] != "" && !containsTableStartOracle(m[1]) {
+		return latexToken{raw: m[0], text: widthx.JSTrim(m[1])}, true
+	}
+	if m := reMdBlockBracket.FindStringSubmatch(source); m != nil && m[1] != "" && !containsTableStartOracle(m[1]) {
+		return latexToken{raw: m[0], text: widthx.JSTrim(m[1])}, true
+	}
+	if m := pendingBracketOracle.FindStringSubmatch(source); m != nil && m[1] != "" && !containsTableStartOracle(m[1]) {
+		return latexToken{raw: m[0], text: m[1], pending: true}, true
+	}
+	if m := pendingDollarOracle.FindStringSubmatch(source); m != nil && m[1] != "" && looksLikePendingDollarMath(m[1]) && !containsTableStartOracle(m[1]) {
+		return latexToken{raw: m[0], text: m[1], pending: true}, true
+	}
+	return latexToken{}, false
+}
+
+func TestTokenizeBlockLatexOpenerGuardMatchesTheFourRegexpForms(t *testing.T) {
+	pieces := []string{" ", "   ", "    ", "\n", "\n\n", "$$", "$", "\\[", "\\]", "\\", "|", "---", " | ", "a", "x_1", "=", "+", "\t"}
+	rng := rand.New(rand.NewSource(11160))
+	for range 30000 {
+		var sb strings.Builder
+		for range rng.Intn(16) {
+			sb.WriteString(pieces[rng.Intn(len(pieces))])
+		}
+		source := sb.String()
+		got, gotOK := tokenizeBlockLatex(source)
+		want, wantOK := tokenizeBlockLatexOracle(source)
+		if gotOK != wantOK || got != want {
+			t.Fatalf("tokenizeBlockLatex(%q) = %+v, %t; the regexp forms give %+v, %t", source, got, gotOK, want, wantOK)
 		}
 	}
 }

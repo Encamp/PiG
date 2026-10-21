@@ -3507,7 +3507,7 @@ id = "tui/terminal-image/detect-capabilities"
 upstream_id = "input:packages/tui/src/terminal-image.ts#<module>.detectCapabilities"
 family = "tui-components"
 kind = "boundary-transition"
-claim = "the image protocol, truecolor and hyperlink capabilities follow Pi's environment order: tmux (hyperlinks from the probe) and screen first, then herdr, Rex, kitty, ghostty, wezterm, Warp, iTerm, Windows Terminal, alacritty, vscode, zed, JetBrains JediTerm and the Windows console, with the COLORTERM and -direct truecolor hint, and the PI_IMAGE_PROTOCOL (case-insensitive kitty, iterm2, none, 0), PI_HYPERLINKS and PI_TRUE_COLOR (exactly 1 or 0) overrides, over 2072 environments"
+claim = "the image protocol, truecolor and hyperlink capabilities follow Pi's environment order: tmux (hyperlinks from the probe) and screen first, then herdr, Rex, kitty, ghostty, wezterm, Warp, iTerm, Windows Terminal, alacritty, vscode, zed, JetBrains JediTerm and the Windows console, with Rex reporting Kitty images, with the COLORTERM and -direct truecolor hint, and the PI_IMAGE_PROTOCOL (case-insensitive kitty, iterm2, none, 0), PI_HYPERLINKS and PI_TRUE_COLOR (exactly 1 or 0) overrides, over 2072 environments"
 status = "ported"
 pig_targets = [
   "tui/terminal_image.go#DetectCapabilities",
@@ -3524,7 +3524,7 @@ evidence = [
 path = "packages/tui/src/terminal-image.ts"
 start = "function detectCapabilitiesFromEnvironment(tmuxForwardsHyperlink: () => boolean): TerminalCapabilities {"
 end = "export function getCapabilities(): TerminalCapabilities {"
-sha256 = "a9f4b97e08d01fbe77cdd0da1df0550efceb0f4270ca957cb80eef070d39cf34"
+sha256 = "445dd2fc98cc7c75af16202b44e0b1182ccf5bffabea103cc6a97ca95c3f614c"
 keybindings = []
 
 [[contract]]
