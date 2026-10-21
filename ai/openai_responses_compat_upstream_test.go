@@ -110,9 +110,9 @@ func TestOpenAIResponsesCompatHeadersUpstream(t *testing.T) {
 
 func TestOpenAIResponsesCompatDefaultsUpstream(t *testing.T) {
 	request := Context{SystemPrompt: "sys", Messages: []Message{UserMessage{Content: UserText("hi")}}}
-	// .upstream/v0.87.1/packages/ai/test/openai-responses-compat.test.ts:75
+	// .upstream/v0.87.1/packages/ai/test/openai-responses-compat.test.ts:75 (Pi e5fe9777: #2567, Copilot rejected reasoning.effort "none"; gpt-6-sol has off: "none", so this exercises the Copilot exception)
 	t.Run("omits reasoning when no reasoning is requested", func(t *testing.T) {
-		payload, _, _ := captureResponsesCompat(t, responsesCompatConfig(t, "github-copilot", "gpt-5-mini"), request, StreamOptions{}, "data: [DONE]\n\n")
+		payload, _, _ := captureResponsesCompat(t, responsesCompatConfig(t, "github-copilot", "gpt-6-sol"), request, StreamOptions{}, "data: [DONE]\n\n")
 		if _, ok := payload["reasoning"]; ok {
 			t.Fatalf("reasoning=%s", payload["reasoning"])
 		}

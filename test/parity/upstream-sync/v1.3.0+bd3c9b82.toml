@@ -277,9 +277,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/openai-responses.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/openai_responses_chatgpt_upstream_test.go#TestOpenAIResponsesChatGPTUsageLimitUpstream"]
+rationale = "Pi cedefc53: a Sign in with ChatGPT workspace usage-limit error (subscription_sharing_workplace_individual_usage_limit_exceeded) gets the CHATGPT_WORKSPACE_LIMIT_HINT line telling the user to ask the workspace admin to raise the limit, where the shared-limit error keeps the usage-page link. ai/openai_responses.go withChatGPTUsageLink; the new subtest in TestOpenAIResponsesChatGPTUsageLimitUpstream drives a 429 response and checks the hint and the absence of the usage link."
 
 [[files]]
 path = "packages/ai/src/api/openrouter-images.lazy.ts"
@@ -1390,9 +1390,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/utils/retry.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/assistant_retry_test.go#TestIsRetryableAssistantErrorClassification", "test:ai/assistant_retry_classifier_oracle_test.go#TestIsRetryableAssistantErrorMatchesPiOracle"]
+rationale = "Pi cedefc53 adds subscription_sharing_workplace_individual_usage_limit_exceeded to the non-retryable limit patterns; Pi 29057ece (#11057) adds 'stream disconnected before completion' to the retryable patterns; Pi 6e491cfa (#11057) matches 429, 500, 502, 503, 504, 520 and 524 only as standalone numbers. ai/assistant_retry.go carries all three; RE2 has no lookaround, so the status-code alternative is (?:^|[^a-z0-9])(?:429|...|524)(?:[^a-z0-9]|$) under the JavaScript case folding, checked against Pi's lookaround pattern on 20000 random strings (0 differences). TestIsRetryableAssistantErrorClassification carries Pi's retry.test.ts cases (workspace limit stays non-retryable, request id and byte count are not status codes) and the disconnect message; reverting any of the three fails it."
 
 [[files]]
 path = "packages/ai/src/utils/sanitize-unicode.ts"
@@ -2272,9 +2272,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/model-resolver.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/cli/model_test.go#TestDefaultModelPerProviderMatchesPinnedUpstream"]
+rationale = "Pi e5fe9777: the default GitHub Copilot model is gpt-6.1-sol, which replaces the retired gpt-5.4. internal/codingagent/default_models.go carries it; the default-table test compares the whole table with the pinned model-resolver.ts."
 
 [[files]]
 path = "packages/coding-agent/src/core/model-runtime.ts"
