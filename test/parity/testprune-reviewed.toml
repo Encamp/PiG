@@ -64,25 +64,35 @@ cite = "packages/coding-agent/src/utils/shell.ts:15"
 reason = "Pi 28bea006 recognizes the legacy WSL bash launcher under the actual Windows directory taken from SystemRoot (shell.ts:15-26); the helper now takes the SystemRoot value, and the existing path cases pass it empty so they assert the conventional-path fallback unchanged."
 
 [[entry]]
-path = "internal/codingagent/compaction/compaction_test.go"
-commit = "ad3567de30"
+path = "ai/cache_affinity_e2e_upstream_test.go"
+commit = "4fe586eeb8"
 class = "NOBEHAVIOR"
-reason = "call-site rename only: CompactUsing(..., completer, ...) -> Compact(..., CompleterStreamFn(completer), ...); expected summaries and errors unchanged (Pi has one compact(), agent-session.ts:2633-2661)"
+reason = "restores the gpt-5.4 cache-affinity request body that an earlier bulk edit had altered; the expected value returns to the one Pi's oracle produced"
 
 [[entry]]
-path = "internal/codingagent/compaction/over_window_review_test.go"
-commit = "ad3567de30"
-class = "NOBEHAVIOR"
-reason = "call-site rename only: CompactUsing -> Compact with CompleterStreamFn; expected values unchanged"
+path = "ai/cache_affinity_e2e_upstream_test.go"
+commit = "ae40b2b820"
+class = "CITE"
+cite = "packages/ai/src/providers/openai-codex.models.ts:9"
+reason = "Pi fdce48eb (#11173) drops gpt-5.5 and gpt-5.3-codex-spark from the openai-codex catalog (OPENAI_CODEX_MODELS, flattened from data/openai-codex.json); the Codex cases take Pi's replacement model gpt-6.1-sol, and the remaining gpt-5.4 body is the request-tools resolution of openai-responses.ts:344."
 
 [[entry]]
-path = "test/parity/runner/go_prebuild_test.go"
-commit = "538e10357f"
-class = "NOBEHAVIOR"
-reason = "PiG's own parity-runner tooling (prebuilding Go programs for scenario scripts); no Pi behavior, expectations follow the new prebuild helper's contract"
+path = "ai/registry_test.go"
+commit = "ae40b2b820"
+class = "CITE"
+cite = "packages/ai/src/providers/openai-codex.models.ts:9"
+reason = "The Codex registry case takes Pi's replacement model gpt-5.6-sol with the context window and prices of Pi's regenerated openai-codex catalog (data/openai-codex.json), after Pi fdce48eb (#11173) removed gpt-5.3-codex-spark."
 
 [[entry]]
-path = "extensions/sdk/upgrade/rules_test.go"
-commit = "96edeab595"
-class = "NOBEHAVIOR"
-reason = "PiG-only pig extension upgrade rewriter (no Pi counterpart); expectations change because one run now rewrites every changed API and may add a helper file"
+path = "ai/usage_cost_test.go"
+commit = "ae40b2b820"
+class = "CITE"
+cite = "packages/ai/src/providers/openai-codex.models.ts:9"
+reason = "The Codex priority usage-cost case takes Pi's replacement model gpt-5.6-sol; the expected cost is recomputed from that model's prices in the regenerated catalog."
+
+[[entry]]
+path = "ai/transcript_tool_changes_test.go"
+commit = "c371a134cc"
+class = "CITE"
+cite = "packages/ai/src/api/openai-responses-shared.ts:159"
+reason = "Pi caa6967b and 530015d9 (#11142) declare every tool in additional_tools items from the head of the input, precede each later item with the incremental-tools notice and announce removals as text (openai-responses-shared.ts:159-176), so the expected request shape and instructions of the tool-change cases change with them."
