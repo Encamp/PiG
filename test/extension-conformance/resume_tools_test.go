@@ -86,8 +86,8 @@ func TestResumeActivatesExtensionToolsTheBranchNeverMentionedAcrossSDKs(t *testi
 						t.Fatal(err)
 					}
 				}
-				// The branch recorded stable and retired, then removed retired; it never saw fresh or quiet. A later branch leaf swaps them.
-				record([]string{"stable", "retired"}, nil)
+				// The branch recorded read, stable and retired, then removed retired; it never saw fresh or quiet. A later branch leaf swaps them.
+				record([]string{"read", "stable", "retired"}, nil)
 				record(nil, []string{"retired"})
 				target, err := manager.AppendMessage(agent.AgentMessage{User: &agent.UserMessage{Role: agent.RoleUser, Content: ai.UserContentBlocks{ai.TextContent{Text: "first"}}, Timestamp: 1}})
 				if err != nil {
@@ -98,7 +98,7 @@ func TestResumeActivatesExtensionToolsTheBranchNeverMentionedAcrossSDKs(t *testi
 				if err != nil {
 					t.Fatal(err)
 				}
-				session, err := coding.NewSession(services, coding.SessionOptions{Runner: runner, SessionManager: manager, SkipBuiltinTools: true})
+				session, err := coding.NewSession(services, coding.SessionOptions{Runner: runner, SessionManager: manager})
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -114,12 +114,12 @@ func TestResumeActivatesExtensionToolsTheBranchNeverMentionedAcrossSDKs(t *testi
 					}
 				}
 				// retired is active again on the leaf's branch, fresh was never mentioned, quiet is registered with defaultActive false, stable was removed.
-				check("resume", "fresh,retired")
+				check("resume", "fresh,read,retired")
 				if _, err := session.NavigateTree(t.Context(), target, coding.NavigateTreeOptions{}); err != nil {
 					t.Fatal(err)
 				}
 				// On the target branch retired was removed and stable recorded.
-				check("navigate", "fresh,stable")
+				check("navigate", "fresh,read,stable")
 			})
 		}
 	}
