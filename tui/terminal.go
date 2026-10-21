@@ -120,6 +120,8 @@ type ProcessTerminal struct {
 	programStatusElsewhere bool
 	// colorSchemeReports is whether the terminal's light/dark reports (mode 2031) are on, which the exit restore turns off (tui.ts getExitRestorePrefix).
 	colorSchemeReports atomic.Bool
+	// exitRestored is set once the exit restore has written: every later write is dropped, so a frame still in flight cannot repaint over a crash report or hide the cursor again. Entering raw mode again clears it.
+	exitRestored atomic.Bool
 	// sizeCache is the window size kept between SIGWINCHs while the interactive resize handler holds it.
 	sizeCache terminalSizeCache
 }
@@ -367,6 +369,7 @@ func (t *ProcessTerminal) enterRawMode(drainOnRestore bool) (restore func(), err
 		return nil, err
 	}
 	rememberSignalRestore(fd, state)
+	t.exitRestored.Store(false)
 	// On Windows, enable VT output processing so pig's ANSI renderer displays;
 	// term.MakeRaw only configures raw input. No-op on unix.
 	vtRestore := t.enableVTProcessing()
@@ -721,7 +724,7 @@ func (t *ProcessTerminal) writeUnlogged(data string) {
 }
 
 func (t *ProcessTerminal) write(data string) {
-	if t.out == nil {
+	if t.out == nil || t.exitRestored.Load() {
 		return
 	}
 	_, _ = io.WriteString(t.out, data)

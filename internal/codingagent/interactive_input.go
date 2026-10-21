@@ -45,7 +45,9 @@ func (m *InteractiveMode) exitIfDeadTerminal(err error) {
 	}
 }
 
-// emergencyTerminalExit exits without terminal restoration: the terminal is gone, and restore writes would fail again.
+// emergencyTerminalExit exits without the normal teardown: the terminal is gone, so TUI and extension cleanup would write
+// restore sequences and fail again. Pi's process.exit(129) still runs the TUI's exit handler, which writes the mode resets
+// synchronously and swallows the write errors (9df819de, #11170); tui.RestoreTerminalOnExit does the same here.
 // It kills the tracked detached children first, as upstream does, so a running shell command does not outlive the exit
 // in its own process group. Pi's extensions run inside the exiting process and die with it; pig's run as child
 // processes in their own process groups, so it kills them too, or they would keep writing into the session's

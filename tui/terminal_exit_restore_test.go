@@ -24,7 +24,7 @@ const (
 // runExitRestoreFixture re-executes the test binary as packages/tui/test/fixtures/exit-without-stop.ts does with node: a
 // process that starts a TUI on a pseudo-terminal (alternate screen, mouse, raw mode, bracketed paste, Kitty keyboard
 // protocol) and exits with os.Exit, with or without stopping first. It returns what the process wrote after startup.
-func runExitRestoreFixture(t *testing.T, mode string) string {
+func runExitRestoreFixture(t *testing.T, mode string, wantStatus int) string {
 	t.Helper()
 	master, slave := openTestPTY(t)
 	helper := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestExitRestoreFixture$", "-test.count=1")
@@ -52,8 +52,8 @@ func runExitRestoreFixture(t *testing.T, mode string) string {
 	go func() { waited <- helper.Wait() }()
 	select {
 	case err := <-waited:
-		if err != nil {
-			t.Fatalf("fixture: %v\n%s", err, &stderr)
+		if status := helper.ProcessState.ExitCode(); status != wantStatus {
+			t.Fatalf("fixture exited %d (%v), want %d\n%s", status, err, wantStatus, &stderr)
 		}
 	case <-time.After(30 * time.Second):
 		_ = helper.Process.Kill()
@@ -83,6 +83,18 @@ func TestExitRestoreFixture(t *testing.T) {
 	alt := NewTuiAltScreen(nil, nil, "", TuiAltScreenOptions{Mouse: &mouse})
 	alt.Start() // paints the first frame before the marker; StartRequestingRender would leave it to a later turn
 	_, _ = os.Stdout.WriteString(exitRestoreReady)
+	switch mode {
+	case "return":
+		// Main returning: the deferred handler runs, as Pi's 'exit' event fires when the event loop drains.
+		func() { defer RestoreTerminalOnExit() }()
+		os.Exit(0)
+	case "panic":
+		// A panic that unwinds through the deferred handler, as an uncaught exception reaches Pi's 'exit' event. The runtime exits 2 after it.
+		func() {
+			defer RestoreTerminalOnExit()
+			panic("exit-restore fixture panic")
+		}()
+	}
 	if mode == "stop" {
 		// A normal stop, in the driver's order: drain (which pops the keyboard protocol), the renderer, then raw-mode restore.
 		_ = drain()
@@ -100,7 +112,30 @@ func countOf(haystack, needle string) int { return strings.Count(haystack, needl
 // stop()"): exit paths that skip stop() left mouse tracking, focus reporting, the Kitty keyboard protocol, bracketed paste,
 // and the alternate screen enabled.
 func TestTerminalRestoreOnProcessExit(t *testing.T) {
-	output := runExitRestoreFixture(t, "exit")
+	assertExitRestoreOutput(t, runExitRestoreFixture(t, "exit", 0))
+}
+
+// Pi's 'exit' event also fires when the event loop drains and when an uncaught exception ends the process; the Go handler is
+// deferred in coding/cli.Main, so it runs on a return and on a panic unwinding through it, with the restore before the
+// runtime's panic report.
+func TestTerminalRestoreOnReturnAndOnPanicUnwinding(t *testing.T) {
+	assertExitRestoreOutput(t, runExitRestoreFixture(t, "return", 0))
+	// The testing package reports the panic on the terminal too; that report must come after the restore, not before it.
+	output := runExitRestoreFixture(t, "panic", 2)
+	const suffix = "\x1b[?1049l\x1b[?25h"
+	end := strings.Index(output, suffix)
+	if end < 0 {
+		t.Fatalf("panic run never restored: %q", output)
+	}
+	end += len(suffix)
+	if report := output[end:]; !strings.Contains(report, "TestExitRestoreFixture") {
+		t.Errorf("the panic report did not follow the restore: %q", output)
+	}
+	assertExitRestoreOutput(t, output[:end])
+}
+
+func assertExitRestoreOutput(t *testing.T, output string) {
+	t.Helper()
 	for _, sequence := range []string{"\x1b[?1006l", "\x1b[?1004l", "\x1b[?1003l", "\x1b[?1000l", "\x1b[<u", "\x1b[?2004l"} {
 		if got := countOf(output, sequence); got != 1 {
 			t.Errorf("%q written %d times, want 1; output %q", sequence, got, output)
@@ -122,7 +157,7 @@ func TestTerminalRestoreOnProcessExit(t *testing.T) {
 // packages/tui/test/exit-restore.test.ts "does not restore twice after a normal stop()": the exit handler is a no-op after
 // a stop, so each reset appears exactly once.
 func TestTerminalRestoreOnProcessExitDoesNotRepeatAfterStop(t *testing.T) {
-	output := runExitRestoreFixture(t, "stop")
+	output := runExitRestoreFixture(t, "stop", 0)
 	for _, sequence := range []string{"\x1b[?1006l", "\x1b[?1004l", "\x1b[<u", "\x1b[?2004l", "\x1b[?1049l"} {
 		if got := countOf(output, sequence); got != 1 {
 			t.Errorf("%q written %d times after a normal stop, want 1; output %q", sequence, got, output)
@@ -181,4 +216,42 @@ func TestRestoreTerminalOnExitMainScreenWritesOnceAndRestoresCookedMode(t *testi
 	}
 	terminal.SetProgress(false)
 	restore()
+}
+
+// The alternate screen's prefix and suffix wrap the base prefix (tui-alt-screen.ts getExitRestorePrefix/Suffix) and the color-scheme
+// report reset leads the base prefix; modifyOtherKeys (no Kitty reply) follows the Kitty pop (terminal.ts restoreOnExit). A frame
+// a renderer still draws after the handler ran writes nothing: it must not repaint over a crash report or hide the cursor again.
+func TestRestoreTerminalOnExitAltScreenWithColorSchemeReportsAndModifyOtherKeys(t *testing.T) {
+	t.Setenv("PI_PROGRAM_STATUS", "0")
+	master, slave := openTestPTY(t)
+	_ = master
+	var out exitRestoreBuffer
+	terminal := NewProcessTerminalWithOutput(slave, slave, &out)
+	restore, err := terminal.enterRawMode(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer restore()
+	modifyOtherKeysActive.Store(true)
+	mouse := true
+	alt := NewTuiAltScreen(terminal, nil, "", TuiAltScreenOptions{Mouse: &mouse})
+	alt.SetTerminalColorSchemeNotifications(true)
+	alt.Start()
+	defer alt.StopWithOptions(StopOptions{PreserveScreen: true})
+	started := len(out.String())
+
+	RestoreTerminalOnExit()
+	want := "\x1b[?2026l" + altDisableMouse + "\x1b[?7h" + "\x1b[?2031l\x1b[?25h" + "\x1b[?2004l" + keyboardProtocolPop + modifyOtherKeysDisable + "\x1b[?1049l\x1b[?25h"
+	if got := out.String()[started:]; got != want {
+		t.Errorf("exit restore wrote %q, want %q", got, want)
+	}
+	afterExit := len(out.String())
+	alt.Render()
+	alt.RequestImmediateRender()
+	alt.RepaintAll()
+	terminal.HideCursor()
+	terminal.Write("late frame")
+	if got := out.String()[afterExit:]; got != "" {
+		t.Errorf("writes after the exit restore reached the terminal: %q", got)
+	}
 }

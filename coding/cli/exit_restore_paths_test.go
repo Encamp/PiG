@@ -85,3 +85,30 @@ func TestEveryExitPathReachableWhileATUIRunsRestoresTheTerminal(t *testing.T) {
 		t.Fatal("found no os.Exit call: the scan is broken")
 	}
 }
+
+// Pi's 'exit' event also fires when the event loop drains and on an uncaught exception, so Main defers the handler: it runs on a
+// return and on a panic unwinding through Main, and last, so it must be the first deferred call.
+func TestMainDefersTheTerminalExitRestoreFirst(t *testing.T) {
+	fset := token.NewFileSet()
+	parsed, err := parser.ParseFile(fset, "main.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, decl := range parsed.Decls {
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Name.Name != "Main" || fn.Body == nil {
+			continue
+		}
+		for _, statement := range fn.Body.List {
+			deferred, ok := statement.(*ast.DeferStmt)
+			if !ok {
+				continue
+			}
+			if sel, ok := deferred.Call.Fun.(*ast.SelectorExpr); ok && sel.Sel.Name == "RestoreTerminalOnExit" {
+				return
+			}
+			t.Fatalf("Main's first deferred call is not tui.RestoreTerminalOnExit (at %s): it would run before that cleanup, not after it", fset.Position(deferred.Pos()))
+		}
+	}
+	t.Fatal("Main defers no tui.RestoreTerminalOnExit")
+}

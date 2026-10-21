@@ -12,8 +12,15 @@ package tui
 //   - internal/codingagent InteractiveMode.emergencyTerminalExit (exit 129), handleInterruptSignal (exit 130) and
 //     uncaughtOffLoop (exit 1), which call os.Exit themselves.
 //
-// TestExitPathsRestoreTerminal pins that list. Hard kills, runtime aborts and a Go panic outside the recovered owner
-// loop run no Go code and stay out of scope, as Pi says of kills and native aborts.
+// Pi's 'exit' event also fires when Node exits on an uncaught exception and when the event loop drains. The Go counterparts
+// are an unrecovered panic that unwinds through coding/cli.Main and Main returning: Main defers RestoreTerminalOnExit as its
+// first deferred call, so it runs last, after the other deferred cleanups and before the runtime prints the panic.
+// TestEveryExitPathReachableWhileATUIRunsRestoresTheTerminal pins the os.Exit list and that deferred call. Hard kills, runtime
+// aborts, signals without a handler and a panic in a goroutine that Main's deferred calls do not unwind run no restore and
+// stay out of scope, as Pi says of kills and native aborts.
+//
+// After the handler has run, the terminal drops every later write (ProcessTerminal.write): a frame that a renderer goroutine
+// still draws must not repaint over a crash report or hide the cursor again.
 
 import (
 	"sync"
@@ -39,13 +46,10 @@ func registerExitRestoreTerminal(t *ProcessTerminal, cooked func()) {
 	exitRestoreRegistry.terminals[t] = cooked
 }
 
-// unregisterExitRestoreTerminal reports whether t was still registered, that is, whether the exit handler had not run.
-func unregisterExitRestoreTerminal(t *ProcessTerminal) bool {
+func unregisterExitRestoreTerminal(t *ProcessTerminal) {
 	exitRestoreRegistry.mu.Lock()
 	defer exitRestoreRegistry.mu.Unlock()
-	_, ok := exitRestoreRegistry.terminals[t]
 	delete(exitRestoreRegistry.terminals, t)
-	return ok
 }
 
 func registerExitRestoreAltScreen(t *TuiAltScreen) {
@@ -137,6 +141,7 @@ func (t *ProcessTerminal) restoreOnExit(before, after string) {
 		defer t.outMu.Unlock()
 	}
 	t.write(sequence) // The terminal may already be gone.
+	t.exitRestored.Store(true)
 }
 
 // progressActiveForExit reports whether the OSC 9;4 keepalive runs. When the progress lock is held the answer is unknown and
