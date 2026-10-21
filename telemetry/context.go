@@ -80,15 +80,11 @@ func (attributes SpanAttributes) MarshalJSON() ([]byte, error) {
 		if index > 0 {
 			encoded = append(encoded, ',')
 		}
-		name, err := jsstring.MarshalJSON(attribute.Name)
-		if err != nil {
+		encoded = append(jsstring.AppendString(encoded, attribute.Name), ':')
+		var err error
+		if encoded, err = jsstring.AppendMarshalJSON(encoded, attribute.Value); err != nil {
 			return nil, err
 		}
-		value, err := jsstring.MarshalJSON(attribute.Value)
-		if err != nil {
-			return nil, err
-		}
-		encoded = append(append(append(encoded, name...), ':'), value...)
 	}
 	return append(encoded, '}'), nil
 }
