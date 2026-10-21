@@ -62,3 +62,27 @@ commit = "4fd80d1cb2cd846ac6b4c6842f357121ff8aba0f"
 class = "CITE"
 cite = "packages/coding-agent/src/utils/shell.ts:15"
 reason = "Pi 28bea006 recognizes the legacy WSL bash launcher under the actual Windows directory taken from SystemRoot (shell.ts:15-26); the helper now takes the SystemRoot value, and the existing path cases pass it empty so they assert the conventional-path fallback unchanged."
+
+[[entry]]
+path = "internal/codingagent/compaction/compaction_test.go"
+commit = "ad3567de30"
+class = "NOBEHAVIOR"
+reason = "call-site rename only: CompactUsing(..., completer, ...) -> Compact(..., CompleterStreamFn(completer), ...); expected summaries and errors unchanged (Pi has one compact(), agent-session.ts:2633-2661)"
+
+[[entry]]
+path = "internal/codingagent/compaction/over_window_review_test.go"
+commit = "ad3567de30"
+class = "NOBEHAVIOR"
+reason = "call-site rename only: CompactUsing -> Compact with CompleterStreamFn; expected values unchanged"
+
+[[entry]]
+path = "test/parity/runner/go_prebuild_test.go"
+commit = "538e10357f"
+class = "NOBEHAVIOR"
+reason = "PiG's own parity-runner tooling (prebuilding Go programs for scenario scripts); no Pi behavior, expectations follow the new prebuild helper's contract"
+
+[[entry]]
+path = "extensions/sdk/upgrade/rules_test.go"
+commit = "96edeab595"
+class = "NOBEHAVIOR"
+reason = "PiG-only pig extension upgrade rewriter (no Pi counterpart); expectations change because one run now rewrites every changed API and may add a helper file"

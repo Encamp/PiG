@@ -57,7 +57,12 @@ type attributeDefinitionRaw struct {
 	Examples      json.RawMessage        `json:"examples"`
 }
 
-func decodeMember[T any](raw json.RawMessage, into *[]T) error {
+// attributeMember is every element type of an attribute definition's value and example members.
+type attributeMember interface {
+	string | float64 | bool | []string | []float64 | []bool
+}
+
+func decodeMember[T attributeMember](raw json.RawMessage, into *[]T) error {
 	if len(raw) == 0 {
 		return nil
 	}
@@ -98,7 +103,7 @@ func firstError(errs ...error) error {
 
 // MarshalJSON writes the definition as upstream's attribute object.
 func (definition TelemetryAttributeDefinition) MarshalJSON() ([]byte, error) {
-	return json.Marshal(definition.wire())
+	return json.Marshal(definition.wire()) //perf:ok the schema definition is written when a catalogue is described, not per span or per turn
 }
 
 // UnmarshalJSON reads upstream's attribute object, decoding the value members as the element type of its type.
@@ -128,7 +133,7 @@ type startAttributeDefinitionRaw struct {
 
 // MarshalJSON writes the definition as upstream's start-attribute object.
 func (definition TelemetryStartAttributeDefinition) MarshalJSON() ([]byte, error) {
-	return json.Marshal(startAttributeDefinitionWire{attributeDefinitionWire: definition.wire(), Required: definition.Required})
+	return json.Marshal(startAttributeDefinitionWire{attributeDefinitionWire: definition.wire(), Required: definition.Required}) //perf:ok the schema definition is written when a catalogue is described, not per span or per turn
 }
 
 // UnmarshalJSON reads upstream's start-attribute object.

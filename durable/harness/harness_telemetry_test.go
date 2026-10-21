@@ -15,7 +15,8 @@ import (
 	"github.com/MichaelKinsy/PiG/telemetry"
 )
 
-func str(value string) *string { return &value }
+//go:fix inline
+func str(value string) *string { return new(value) }
 
 func TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans(t *testing.T) {
 	// harness-telemetry.test.ts: "records content-free submit and phase spans, nested parents, checkpoints, entry events, and metrics"
@@ -33,14 +34,14 @@ func TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans(t *testing.T) {
 	}))
 	setup.Faux.SetResponses([]ai.FauxResponseStep{toolReply("outer", nil), fauxAnswer("private-answer")})
 	harness, root := openTracked(t, storage.NewMemoryStorage(), setup, recorder)
-	submitted := must(root.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("private-input"), RequestId: str("dedupe")}))
+	submitted := must(root.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("private-input"), RequestId: new("dedupe")}))
 	must(submitted.Wait(testContext))
 	if err := harness.WaitForIdle(testContext); err != nil {
 		t.Fatal(err)
 	}
 	waitFor(t, func() bool { return allSettled(recorder) })
 	record := must(submitted.Status(testContext))
-	again := must(root.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("another-private-input"), RequestId: str("dedupe")}))
+	again := must(root.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("another-private-input"), RequestId: new("dedupe")}))
 	if againRecord := must(again.Status(testContext)); !reflect.DeepEqual(againRecord, record) {
 		t.Fatalf("duplicate record %+v, want %+v", againRecord, record)
 	}

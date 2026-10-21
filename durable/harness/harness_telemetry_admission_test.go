@@ -234,8 +234,8 @@ func TestDurableTelemetryReturnsAdmissionResultsWithoutRereadingRecordsOrProbing
 	if err := reached.wait(testContext); err != nil {
 		t.Fatal(err)
 	}
-	second := must(conversation.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("second"), RequestId: str("queued")}))
-	duplicate := must(conversation.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("ignored"), RequestId: str("queued")}))
+	second := must(conversation.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("second"), RequestId: new("queued")}))
+	duplicate := must(conversation.Submit(testContext, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("ignored"), RequestId: new("queued")}))
 	if duplicate.Id() != second.Id() {
 		t.Fatalf("duplicate id %d, want %d", duplicate.Id(), second.Id())
 	}

@@ -156,8 +156,8 @@ func RenderTrace(spans []StoredSpan) string {
 			lines = append(lines, indent+"  → link trace "+link.TraceID+" span "+link.SpanID+formatAttributes(link.Attributes))
 		}
 		descendants := children[span.ID]
-		for index := len(descendants) - 1; index >= 0; index-- {
-			pending = append(pending, pendingSpan{descendants[index], current.depth + 1})
+		for _, descendant := range slices.Backward(descendants) {
+			pending = append(pending, pendingSpan{descendant, current.depth + 1})
 		}
 	}
 	return strings.Join(lines, "\n")

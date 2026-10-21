@@ -145,12 +145,15 @@ func (database *DatabaseSync) IsTransaction() (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	//portlint:allow ctxbackground node:sqlite's isTransaction is a synchronous getter with no signal to forward
 	if _, err := conn.ExecContext(context.Background(), "BEGIN"); err != nil {
+		//portlint:allow erroridentity the driver reports the refused BEGIN as a generic SQLITE_ERROR whose message alone names the cause; it has no sentinel or distinct code
 		if strings.Contains(err.Error(), "within a transaction") {
 			return true, nil
 		}
 		return false, err
 	}
+	//portlint:allow ctxbackground rolls back the probe begun above, which has no signal to forward
 	_, err = conn.ExecContext(context.Background(), "ROLLBACK")
 	return false, err
 }
