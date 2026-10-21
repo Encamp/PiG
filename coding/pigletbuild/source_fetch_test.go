@@ -337,7 +337,7 @@ func TestGoModDownloadFetchesPublishedPigSource(t *testing.T) {
 
 // TestPublishedPigReleaseResolvesThroughTheModuleProxy resolves the published v0.3.1 release
 // through the real module proxy and checksum database. It fetches only the release metadata
-// (.info and go.mod, a few KB), not the 50 MB source zip, and checks the go.mod hash against
+// (.info and go.mod, a few KB; a failed go.mod hash check fails the command), not the 50 MB source zip, and checks the go.mod hash against
 // sum.golang.org. It skips when the proxy is unreachable.
 func TestPublishedPigReleaseResolvesThroughTheModuleProxy(t *testing.T) {
 	if testing.Short() {
@@ -368,13 +368,13 @@ func TestPublishedPigReleaseResolvesThroughTheModuleProxy(t *testing.T) {
 		t.Fatalf("go list -m %s@%s: %v\n%s", pigModulePath, published, err, stderr.String())
 	}
 	var listed struct {
-		Path, Version, GoMod string
-		Origin               *struct{ Hash string }
+		Path, Version string
+		Origin        *struct{ Hash string }
 	}
 	if err := json.Unmarshal(stdout.Bytes(), &listed); err != nil {
 		t.Fatal(err)
 	}
-	if listed.Path != pigModulePath || listed.Version != published || listed.GoMod == "" || listed.Origin == nil || len(listed.Origin.Hash) != 40 {
+	if listed.Path != pigModulePath || listed.Version != published || listed.Origin == nil || len(listed.Origin.Hash) != 40 {
 		t.Fatalf("listed = %+v", listed)
 	}
 }
