@@ -4,16 +4,16 @@ to = "1.3.0+bd3c9b82"
 [[files]]
 path = "packages/agent/src/agent-loop.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt"]
+rationale = "Pi adc5fa9f adds DEFAULT_AGENT_IDENTITY ({ attribution: true }) and AgentLoopConfig.identity, merged field by field into every stream call; 04a93bad follows up. Ported as agent.DefaultAgentIdentity and the loop's stream options identity (agent/agent_loop.go); the Agent test drives a request through the default and a configured identity and checks the attribution fields reach StreamOptions.Identity."
 
 [[files]]
 path = "packages/agent/src/agent.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt"]
+rationale = "Pi adc5fa9f adds AgentOptions.identity and Agent.identity, forwarded to the loop and merged over DEFAULT_AGENT_IDENTITY; 04a93bad follows up. Ported in agent/agent.go with the same default and merge; the same test covers an Agent with no identity and one with a configured identity."
 
 [[files]]
 path = "packages/agent/src/index.ts"
@@ -53,9 +53,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/anthropic-messages.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/identity_oracle_test.go#TestAnthropicUserAgentHeaderReplacesTheClaudeCodeIdentityLikePi", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Anthropic sends the identity headers for API keys and Authorization, and keeps the Claude Code identity for OAuth tokens instead of the client identity; the oracle test compares the request headers with the pinned Pi for API-key and OAuth tokens across anthropic, openrouter, opencode and github-copilot, with and without a request User-Agent."
 
 [[files]]
 path = "packages/ai/src/api/azure-openai-config.ts"
@@ -74,9 +74,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/azure-openai-responses.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestProviderIdentityUserAgents", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Azure OpenAI Responses builds its client headers from getIdentityHeaders below model.headers; the azure-openai-responses case of TestProviderIdentityUserAgents asserts the identity User-Agent and the override precedence."
 
 [[files]]
 path = "packages/ai/src/api/bedrock-converse-stream.lazy.ts"
@@ -88,9 +88,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/bedrock-converse-stream.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_bedrock_oracle_test.go#TestBedrockUserAgentMatchesPi", "test:ai/identity_bedrock_test.go#TestBedrockUserAgentCarriesTheClientIdentity"]
+rationale = "Pi adc5fa9f adds bedrockUserAgent: the client identity becomes AWS SDK customUserAgent pairs (name and version, the short name alone, or the custom string). ai/bedrock.go bedrockUserAgent does the same over the Go SDK; TestBedrockUserAgentMatchesPi drives the pinned Pi stream against a local server for the default, version, short and four custom identities (slash kept, unsafe characters replaced by a dash, empty) and compares the application tokens after the SDK's api/ pair, with PiG's product name for Pi's (D65). The comparison caught the Go SDK's own key helper replacing the slash of a custom string, so the custom form is appended after the SDK's User-Agent with the JavaScript escaping."
 
 [[files]]
 path = "packages/ai/src/api/classifier-shared.ts"
@@ -151,9 +151,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/google-generative-ai.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Google Generative AI merges the identity headers below model.headers; the oracle test compares the google and openrouter requests with the pinned Pi."
 
 [[files]]
 path = "packages/ai/src/api/google-shared.ts"
@@ -172,9 +172,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/google-vertex.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/identity_test.go#TestProviderIdentityUserAgents"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Google Vertex builds its headers with providerHeadersToRecord(getIdentityHeaders, model.headers, options headers); the oracle test compares the google-vertex request headers with the pinned Pi."
 
 [[files]]
 path = "packages/ai/src/api/lazy.ts"
@@ -207,9 +207,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/mistral-conversations.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Mistral merges the identity headers below model.headers; the oracle test compares the mistral and openrouter requests with the pinned Pi."
 
 [[files]]
 path = "packages/ai/src/api/openai-codex-responses.lazy.ts"
@@ -221,9 +221,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/openai-codex-responses.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/identity_test.go#TestCodexWebSocketHandshakeCarriesTheIdentity", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). The Codex client takes the identity headers (SSE) and its WebSocket handshake carries them too; 04a93bad keeps originator out of the identity. The oracle test compares the openai-codex SSE request, TestCodexWebSocketHandshakeCarriesTheIdentity asserts the handshake User-Agent and originator, and the override test keeps request headers above the identity."
 
 [[files]]
 path = "packages/ai/src/api/openai-completions.lazy.ts"
@@ -235,9 +235,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/openai-completions.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/identity_test.go#TestProviderIdentityUserAgents", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Chat Completions merges the identity headers below model.headers, including the OpenRouter, NVIDIA and OpenCode attribution headers; the oracle test compares the custom, openrouter, nvidia, opencode, opencode-go and github-copilot requests with the pinned Pi."
 
 [[files]]
 path = "packages/ai/src/api/openai-decisions.lazy.ts"
@@ -305,9 +305,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/pi-messages.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_pi_messages_test.go#TestPiMessagesSendsTheIdentityUserAgentBelowRequestHeaders"]
+rationale = "Pi adc5fa9f builds the pi-messages headers as providerHeadersToRecord(getIdentityHeaders, { authorization, accept, content-type }, options.headers). ai/pi_messages.go applies the identity headers first, then the fixed headers, then the request headers; the new test asserts the default detailed User-Agent with the fixed headers kept, a custom identity, and that a request User-Agent replaces the identity."
 
 [[files]]
 path = "packages/ai/src/api/simple-options.ts"
@@ -536,9 +536,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/index.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion", "test:ai/identity_test.go#TestFormatUserAgentForms"]
+rationale = "Pi adc5fa9f re-exports utils/identity.ts and PI_AI_VERSION from the barrel. The Go package surface is the export list: ai.ClientIdentity, ClientAttribution, UserAgentMode, MergeClientIdentity, FormatUserAgent, GetClientVersion, GetAttributionHeaders, GetOpenCodeSessionHeaders, WithClientIdentity and ProductVersion (the PI_AI_VERSION counterpart, D65) in ai/identity.go and ai/identity_models.go; the interface ledger records each declaration."
 
 [[files]]
 path = "packages/ai/src/legacy-api-aliases.ts"
@@ -571,9 +571,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/models.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestModelsMergeRequestIdentityOverTheModelsIdentity", "test:ai/identity_test.go#TestModelsSendTheOpenCodeSessionHeaderToCustomProvidersPointingAtOpenCode", "test:ai/login_agent_name_oracle_test.go#TestLoginAgentNameMatchesPi"]
+rationale = "Pi adc5fa9f and 04a93bad add CreateModelsOptions.identity: every request merges the request identity over it field by field, and its attribution name is the default LoginOptions.agentName. Ported in ai/models_runtime*.go; the tests assert the request-over-Models merge, the OpenCode session header and the default login agent name against the pinned Pi."
 
 [[files]]
 path = "packages/ai/src/oauth.ts"
@@ -1264,9 +1264,9 @@ rationale = "Pi 2ec55d80 adds the pi.ai.request and pi.ai.poll span schema and o
 [[files]]
 path = "packages/ai/src/types.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestClientIdentityJSON", "test:ai/identity_test.go#TestMergeClientIdentityFieldByField"]
+rationale = "Pi adc5fa9f adds StreamOptions.identity (ClientIdentity: userAgent detailed, short or custom; version; attribution). ai.StreamOptions.Identity carries it, with ClientIdentity JSON and the field-by-field merge locked by the two tests; the optional surfaces of Models and wrappers stay (TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave)."
 
 [[files]]
 path = "packages/ai/src/utils/abort-signals.ts"
@@ -1670,9 +1670,9 @@ rationale = ""
 [[files]]
 path = "packages/chord/src/sqlite/node.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver", "test:chord/sqlite/node/database_contract_test.go#TestSqliteDatabaseContractRollsBackAFailedTransactionAndClosesIdempotently"]
+rationale = "Pi 89e30958 reverts the WAL replication work and with it deletes NodeSqliteDatabase.exclusive(), added earlier by 48c8f322. chord/sqlite/node/node.go drops Exclusive and IsTransaction and chord/sqlite/replication with their tests; the driver and contract tests that remain cover the Pi cases left in chord/test/sqlite/node.test.ts."
 
 [[files]]
 path = "packages/chord/src/sqlite/schema.ts"
@@ -1992,9 +1992,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/agent-session.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:test/extension-conformance/resume_tools_test.go#TestResumeActivatesExtensionToolsTheBranchNeverMentionedAcrossSDKs", "test:coding/cli/rpc_resume_tools_test.go#TestRPCResumeKeepsDynamicallyActivatedTools", "scenario:test/parity/scenarios/extensions-runtime/36-resume-activates-extension-tools.toml"]
+rationale = "Pi bd3c9b82: resuming a session restores the branch's recorded tool loadout and then activates every extension tool the branch never mentioned, where before only the recorded names stayed active. Ported in coding/session.go and coding/session_tools.go; TestResumeRestoresTheRecordedLoadoutPort asserts the restored loadout, the extension conformance row runs the resume in every SDK realization, the RPC test resumes a dynamically activated tool, and the parity scenario compares the resumed tool list with the pinned Pi."
 
 [[files]]
 path = "packages/coding-agent/src/core/auth-guidance.ts"
@@ -2062,9 +2062,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/compaction/compaction.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:internal/codingagent/compaction/context_edit_test.go#TestCompactAppliesCustomInstructionsToTheTurnPrefixSummaryOfASplitTurn", "scenario:test/parity/scenarios/compaction/16-split-turn-custom-instructions.toml"]
+rationale = "Pi adfc1446 (#11058): /compact instructions also reach the split-turn prefix summary request, which dropped them before. internal/codingagent/compaction/compaction.go passes the custom instructions to the prefix summary; the unit test and the scenario compare the request with the pinned Pi."
 
 [[files]]
 path = "packages/coding-agent/src/core/compaction/index.ts"
@@ -2279,9 +2279,9 @@ rationale = "Pi e5fe9777: the default GitHub Copilot model is gpt-6.1-sol, which
 [[files]]
 path = "packages/coding-agent/src/core/model-runtime.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/client_identity_test.go#TestSDKAddsOpenCodeSessionHeadersForCustomOpenCodeProviders", "test:coding/client_identity_test.go#TestSDKLetsConfiguredOpenCodeHeadersOverrideTheSessionHeader"]
+rationale = "Pi 04a93bad: the model runtime builds request headers as OpenCode session headers below the auth headers and the provider options headers, with the request model resolved first so a custom provider pointing at OpenCode gets the session header. Ported in coding/model.go (withOpenCodeSessionHeaders); the two SDK tests assert the header and that a configured header overrides it."
 
 [[files]]
 path = "packages/coding-agent/src/core/models-store.ts"
@@ -2377,9 +2377,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/sdk.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/client_identity_test.go#TestSDKIdentifiesPiGWithADetailedUserAgentAndAttributionAsACLIAgent", "test:coding/client_identity_test.go#TestSDKTurnsAttributionOffWhenTelemetryIsDisabled", "test:coding/client_identity_test.go#TestSDKTurnsAttributionOffWithPITelemetryZero"]
+rationale = "Pi adc5fa9f and 04a93bad: the SDK sets identity: getClientIdentity(settingsManager) on the agent, read per request so a telemetry change applies at once, and drops mergeProviderAttributionHeaders for withOpenCodeSessionHeader. coding/session_cache_warming.go buildRequestOptions sets the identity; the tests assert the detailed User-Agent with CLI-agent attribution, and attribution off for the telemetry setting and PI_TELEMETRY=0."
 
 [[files]]
 path = "packages/coding-agent/src/core/session-cwd.ts"
@@ -3588,9 +3588,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/utils/tools-manager.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:internal/codingagent/tools/tools_manager_latest_test.go#TestGetLatestVersionSendsTheDetailedIdentityUserAgent"]
+rationale = "Pi adc5fa9f: getLatestVersion sends getPiUserAgent(VERSION), the detailed identity User-Agent, in place of `${APP_NAME}-coding-agent`. internal/codingagent/tools/tools_manager.go sends ai.FormatUserAgent(nil) (D65); the new test asserts the header."
 
 [[files]]
 path = "packages/coding-agent/src/utils/version-check.ts"
@@ -3756,9 +3756,9 @@ rationale = "Pi 2ec55d80 passes the phase span as the Telemetry option of genera
 [[files]]
 path = "packages/durable/src/harness/harness.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_generation_test.go#TestGeneration"]
+rationale = "Pi adc5fa9f and 04a93bad: DEFAULT_HARNESS_IDENTITY ({ attribution: true }) and currentModels wrap the Models once (a function's results once per Models) with withClientIdentity, so hooks and tools share one identity view. durable/harness/harness.go does the same; the TestGeneration subtest \"attributes model requests by default and merges the Harness identity over it\" asserts the default, a short-form identity with a custom attribution and that the identity reaches every request through the wrapped Models."
 
 [[files]]
 path = "packages/durable/src/harness/inbox.ts"
@@ -3840,9 +3840,9 @@ rationale = "Pi 2ec55d80 passes the phase span through tool and nested tool call
 [[files]]
 path = "packages/durable/src/harness/types.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_generation_test.go#TestGeneration"]
+rationale = "Pi adc5fa9f and 04a93bad add HarnessOptions.identity, merged over DEFAULT_HARNESS_IDENTITY and overridden by a request's own identity. durable/harness/types.go carries HarnessOptions.Identity; the same TestGeneration subtest drives it."
 
 [[files]]
 path = "packages/durable/src/harness/usage.ts"
@@ -3917,9 +3917,9 @@ rationale = "Declares Photon's WebAssembly import for TypeScript. The Go process
 [[files]]
 path = "packages/durable/src/index.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_generation_test.go#TestGeneration"]
+rationale = "Pi adc5fa9f exports DEFAULT_HARNESS_IDENTITY from the barrel; 4c25119f and cae9fd28 add and revert the commit-log exports, a net change of zero (git diff 4c25119f^ cae9fd28 is empty). The Go package surface is the export list: durable/harness.DefaultHarnessIdentity."
 
 [[files]]
 path = "packages/durable/src/search.ts"
@@ -3980,16 +3980,16 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/storage/jsonl/storage.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "unchanged-observable"
+evidence = ["test:durable/storage/jsonl/jsonl_storage_reads_test.go#TestJsonlStorageReadsCommittedRecordsRecoversThemAndFailsAfterClose"]
+rationale = "Pi 4c25119f (replicate storages as a commit log) changes this file and cae9fd28 reverts it; the file is byte-identical across the pair (git diff 4c25119f^ cae9fd28 is empty), so the jsonl storage behavior is the one the existing Go port and its conformance evidence already cover."
 
 [[files]]
 path = "packages/durable/src/storage/memory.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "unchanged-observable"
+evidence = ["test:durable/storage/memory_storage_test.go#TestMemoryStorageConformance"]
+rationale = "Pi 4c25119f (replicate storages as a commit log) changes this file and cae9fd28 reverts it; the file is byte-identical across the pair (git diff 4c25119f^ cae9fd28 is empty), so the memory storage behavior is the one the existing Go port and its conformance evidence already cover."
 
 [[files]]
 path = "packages/durable/src/storage/scan.ts"
@@ -4022,9 +4022,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/storage/sqlite/migrations.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "unchanged-observable"
+evidence = ["test:durable/storage/sqlite/sqlite_migrations_test.go#TestDurableSQLiteMigrations"]
+rationale = "Pi 4c25119f (replicate storages as a commit log) changes this file and cae9fd28 reverts it; the file is byte-identical across the pair (git diff 4c25119f^ cae9fd28 is empty), so the sqlite migrations storage behavior is the one the existing Go port and its conformance evidence already cover."
 
 [[files]]
 path = "packages/durable/src/storage/sqlite/node.ts"
@@ -4036,16 +4036,16 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/storage/sqlite/schema.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "unchanged-observable"
+evidence = ["test:durable/storage/sqlite/schema_test.go#TestSqliteSchemaNamesAreUpstreamsImmutableIdentifiers"]
+rationale = "Pi 4c25119f (replicate storages as a commit log) changes this file and cae9fd28 reverts it; the file is byte-identical across the pair (git diff 4c25119f^ cae9fd28 is empty), so the sqlite schema storage behavior is the one the existing Go port and its conformance evidence already cover."
 
 [[files]]
 path = "packages/durable/src/storage/sqlite/storage.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "unchanged-observable"
+evidence = ["test:durable/storage/sqlite/sqlite_storage_test.go#TestSqliteStorageConformance"]
+rationale = "Pi 4c25119f (replicate storages as a commit log) changes this file and cae9fd28 reverts it; the file is byte-identical across the pair (git diff 4c25119f^ cae9fd28 is empty), so the sqlite storage storage behavior is the one the existing Go port and its conformance evidence already cover."
 
 [[files]]
 path = "packages/durable/src/tasks.ts"
@@ -4498,9 +4498,9 @@ rationale = ""
 [[files]]
 path = "packages/tui/src/autocomplete.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:tui/autocomplete_upstream_test.go#TestUpstreamAutocompleteFD", "test:tui/file_autocomplete_test.go#TestBuildFdPathQuery", "scenario:test/parity/scenarios/autocomplete/13-at-regex-metacharacters.toml"]
+rationale = "Pi 612a172e (#11212): a single-segment fd query escapes its regex metacharacters, so @(group) and @[id] find pages/(group).ts and pages/[id].tsx instead of building an invalid fd pattern. tui/file_autocomplete.go escapes the query the same way; the unit test and the parity scenario compare the suggestions with the pinned Pi."
 
 [[files]]
 path = "packages/tui/src/colors.ts"
