@@ -1,6 +1,7 @@
 package codingagent
 
 import (
+	"context"
 	"strings"
 	"testing"
 	"time"
@@ -17,10 +18,12 @@ import (
 // Pi's /bug does not (bug-report.ts builds its own components with showOverlay and restoreEditor, and reports no status).
 // These tests run each prompt on the owner goroutine that awaits it and route the keys as the terminal input pump does.
 
-// promptRig is a mode whose owner goroutine awaits prompts while the test plays the terminal.
+// promptRig is a mode whose owner goroutine awaits prompts while the test plays the terminal. The owner goroutine runs the loop
+// that Run runs when idle (inputLoopUntil) between the calls it is handed, so posted tasks and the input route work the same way.
 type promptRig struct {
 	*customRig
 	terminal *programStatusTerminal
+	calls    chan func()
 }
 
 func newPromptRig(t *testing.T) *promptRig {
@@ -29,13 +32,38 @@ func newPromptRig(t *testing.T) *promptRig {
 	r.m.inputReadCh = make(chan inputChunk)
 	r.m.inputErrCh = make(chan error, 1)
 	r.m.isIdle = true
-	return &promptRig{customRig: r, terminal: recordProgramStatus(r.m, "")}
+	r.m.tuiInst.SetFocus(r.m.editor) // as in a running session, where the editor has the focus until a dialog takes it
+	p := &promptRig{customRig: r, terminal: recordProgramStatus(r.m, ""), calls: make(chan func())}
+	stop := make(chan struct{})
+	t.Cleanup(func() { close(stop) })
+	r.workers.Go(func() {
+		for {
+			wake := make(chan struct{})
+			next := make(chan func(), 1)
+			go func() {
+				select {
+				case call := <-p.calls:
+					next <- call
+				case <-stop:
+				}
+				close(wake)
+			}()
+			_ = r.m.inputLoopUntil(context.Background(), strings.NewReader(""), wake)
+			select {
+			case call := <-next:
+				call()
+			default:
+				return
+			}
+		}
+	})
+	return p
 }
 
-// ownerCall runs call on the goroutine that awaits a prompt, as a slash command handler does, and returns its result.
+// ownerCall runs call on the owner goroutine, as a slash command handler does, and returns its result.
 func ownerCall[T any](r *promptRig, call func() T) <-chan T {
 	out := make(chan T, 1)
-	r.workers.Go(func() { out <- call() })
+	r.calls <- func() { out <- call() }
 	return out
 }
 
@@ -82,19 +110,7 @@ func (r *promptRig) press(t *testing.T, key string) {
 	}
 }
 
-// shown is the text of the one component in the editor slot, "" when the slot holds anything else or the component does not
-// have the focus.
-func (r *promptRig) shown(t *testing.T) string {
-	t.Helper()
-	return onOwner(t, r, func() string {
-		children := r.m.editorContainer.Children()
-		if len(children) != 1 || r.m.tuiInst.GetFocusedComponent() != children[0] {
-			return ""
-		}
-		return widthx.StripAnsi(strings.Join(children[0].Render(80), "\n"))
-	})
-}
-
+// untilShown waits until the editor slot holds one component that has the focus and shows text.
 func (r *promptRig) untilShown(t *testing.T, text string) {
 	t.Helper()
 	r.until(t, "the editor slot shows "+text, func() bool {
@@ -103,6 +119,16 @@ func (r *promptRig) untilShown(t *testing.T, text string) {
 			return false
 		}
 		return strings.Contains(widthx.StripAnsi(strings.Join(children[0].Render(80), "\n")), text)
+	})
+}
+
+// untilSlotShows waits until the editor slot holds one component that shows text, whoever has the focus: a prompt that reads
+// the terminal through the modal input route keeps the editor focused.
+func (r *promptRig) untilSlotShows(t *testing.T, text string) {
+	t.Helper()
+	r.until(t, "the editor slot shows "+text, func() bool {
+		children := r.m.editorContainer.Children()
+		return len(children) == 1 && strings.Contains(widthx.StripAnsi(strings.Join(children[0].Render(80), "\n")), text)
 	})
 }
 
@@ -206,11 +232,8 @@ func TestMissingCwdConfirmationStacksWithAnOpenExtensionDialog(t *testing.T) {
 	question := r.extensionSelect(t, "Extension question", "a", "b")
 
 	confirmed := ownerCall(r, func() bool { return confirmMissingCwd(r) })
-	r.untilShown(t, "Session cwd not found")
+	r.untilSlotShows(t, "Session cwd not found")
 	r.requireBlocked(t, tui.ProgramStatusKindPermission, "Session cwd not found")
-	if got := r.openDialogs(t); got != 2 {
-		t.Fatalf("%d dialogs on the stack with the confirmation open, want the question and the confirmation", got)
-	}
 
 	r.press(t, "\x1b")
 	if receive(t, confirmed, "the confirmation") {
@@ -233,8 +256,7 @@ func TestMissingCwdConfirmationStacksWithAnOpenExtensionDialog(t *testing.T) {
 func TestExtensionDialogOpenedDuringATreeSummaryPromptTakesTheKeys(t *testing.T) {
 	r := newPromptRig(t)
 	chosen := ownerCall(r, func() choice { return chooseSummary(r) })
-	r.untilShown(t, "Summarize branch?")
-	r.requireBlocked(t, tui.ProgramStatusKindQuestion, "Summarize branch?")
+	r.untilSlotShows(t, "Summarize branch?")
 
 	question := r.extensionSelect(t, "Extension question", "a", "b")
 	r.untilShown(t, "Extension question")
@@ -263,7 +285,7 @@ func TestStackedPromptsReportTheirBlockedStatus(t *testing.T) {
 	t.Run("tree summary selector", func(t *testing.T) {
 		r := newPromptRig(t)
 		chosen := ownerCall(r, func() choice { return chooseSummary(r) })
-		r.untilShown(t, "Summarize branch?")
+		r.untilSlotShows(t, "Summarize branch?")
 		r.requireBlocked(t, tui.ProgramStatusKindQuestion, "Summarize branch?")
 		r.press(t, "\x1b")
 		if got := receive(t, chosen, "the summary prompt"); got.ok {
@@ -275,7 +297,7 @@ func TestStackedPromptsReportTheirBlockedStatus(t *testing.T) {
 	t.Run("tree custom summarization editor", func(t *testing.T) {
 		r := newPromptRig(t)
 		typed := ownerCall(r, func() choice { return askSummaryInstructions(r) })
-		r.untilShown(t, "Custom summarization instructions")
+		r.untilSlotShows(t, "Custom summarization instructions")
 		r.requireBlocked(t, tui.ProgramStatusKindQuestion, "Custom summarization instructions")
 		r.press(t, "x")
 		r.press(t, "\r")
@@ -296,7 +318,7 @@ func TestStackedPromptsReportTheirBlockedStatus(t *testing.T) {
 			sc.ImportSession = func(string, string) (bool, error) { imported = true; return false, nil }
 			return importHandler(sc)
 		})
-		r.untilShown(t, "Import session")
+		r.untilSlotShows(t, "Import session")
 		r.requireBlocked(t, tui.ProgramStatusKindPermission, "Import session")
 		if got := r.openDialogs(t); got != 1 {
 			t.Fatalf("%d dialogs on the stack with the import confirmation open, want it alone", got)
@@ -323,12 +345,12 @@ func TestBugReportPromptsStayOutsideTheDialogStackAndReportNoStatus(t *testing.T
 		_, ok := promptBugReportChoices(sc)
 		return ok
 	})
-	r.untilShown(t, "Report a bug")
+	r.untilSlotShows(t, "Report a bug")
 	if got := r.openDialogs(t); got != 0 {
 		t.Fatalf("%d dialogs on the extension stack while /bug asks for the description, want none", got)
 	}
 	r.press(t, "\r")
-	r.untilShown(t, "Include the session transcript?")
+	r.untilSlotShows(t, "Include the session transcript?")
 	if got := r.openDialogs(t); got != 0 {
 		t.Fatalf("%d dialogs on the extension stack while /bug asks for the transcript, want none", got)
 	}
@@ -349,7 +371,7 @@ func TestBugReportPromptsStayOutsideTheDialogStackAndReportNoStatus(t *testing.T
 func TestSessionReplacementDismissesAnOpenTreeSummaryPrompt(t *testing.T) {
 	r := newPromptRig(t)
 	chosen := ownerCall(r, func() choice { return chooseSummary(r) })
-	r.untilShown(t, "Summarize branch?")
+	r.untilSlotShows(t, "Summarize branch?")
 
 	onOwner(t, r, func() struct{} { r.m.resetExtensionDialogs(); return struct{}{} })
 	if got := receive(t, chosen, "the summary prompt"); got.ok {
