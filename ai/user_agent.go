@@ -1,12 +1,14 @@
 package ai
 
+// Ports packages/ai/src/utils/version.ts (PI_AI_VERSION as ProductVersion).
+
 import (
 	"sync"
 
 	"github.com/MichaelKinsy/PiG/internal/coding/pigversion"
 )
 
-// ProductVersion is PiG's composite release version for outbound identifiers.
+// ProductVersion is PiG's composite release version for outbound identifiers: the default version of a detailed User-Agent (PI_AI_VERSION upstream).
 // It defaults to pigversion.Version because importing coding would create a cycle.
 var ProductVersion = pigversion.Version
 

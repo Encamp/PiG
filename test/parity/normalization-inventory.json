@@ -2362,10 +2362,10 @@
         {
           "kind": "terminal_crop",
           "configuration": {
-            "capture_start": "displacing-result:",
-            "capture_end": "displacing-result:Ada"
+            "capture_start": "dialog-stack-result:",
+            "capture_end": "displaced=one"
           },
-          "reason": "Owned visible surface: An extension input opened while a selector is shown displaces it and receives the keys",
+          "reason": "Owned visible surface: An extension input opened while a selector is shown stacks over it and receives the keys; the selector is shown again after the input is answered",
           "limitations": "No claim about output outside this crop or transient terminal bytes."
         },
         {

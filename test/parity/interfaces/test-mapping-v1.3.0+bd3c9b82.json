@@ -14,8 +14,18 @@
     },
     {
       "path": "packages/agent/test/agent.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:405ae25913af9c8629a96ff441d1e363b613ed8a01d71f9367bfc3cc66fd3f49"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:405ae25913af9c8629a96ff441d1e363b613ed8a01d71f9367bfc3cc66fd3f49",
+      "evidence": [
+        "agent/agent_upstream_test.go",
+        "agent/agent_transcript_upstream_test.go",
+        "agent/agent_public_properties_test.go",
+        "agent/new_agent_stream_error_test.go",
+        "agent/lifecycle_upstream_test.go",
+        "agent/system_state_test.go",
+        "agent/agent_upstream_test.go#TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt"
+      ],
+      "rationale": "All 35 cases (including the it.each rows) are ported; the cited test comments carry the upstream line numbers of the 0.99.1 file, whose only change at 1.1.0 is that the cases build their stream with createAssistantMessageEventStream instead of a local EventStream subclass, which has no Go form (scriptedProvider streams are ai.AssistantMessageEventStream already). Verified case by case against the 1.1.0 file. The one case Pi bd3c9b82 adds ('attributes requests to pi by default and merges a configured identity over it') is TestAgent_AttributesRequestsByDefaultAndMergesAConfiguredIdentityOverIt; its default attribution is PiG's (D26)."
     },
     {
       "path": "packages/agent/test/e2e.test.ts",
@@ -63,8 +73,14 @@
     },
     {
       "path": "packages/ai/test/anthropic-auth-token.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:b16adb67cf7c385cf7304103d036bd0feab7cfdff7f42c0f505fd3863441d1d0"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:b16adb67cf7c385cf7304103d036bd0feab7cfdff7f42c0f505fd3863441d1d0",
+      "evidence": [
+        "ai/anthropic_oauth_test.go#anthropic-auth-token.test.ts",
+        "ai/identity_test.go#TestFormatUserAgentForms",
+        "ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"
+      ],
+      "rationale": "Pi bd3c9b82 (adc5fa9f, 04a93bad) replaces the file's local `pi (\u003cplatform\u003e \u003crelease\u003e; \u003carch\u003e)` expression with `formatUserAgent()`; the matching Go cases assert `ai.FormatUserAgent(nil)`, which carries PiG's D65 value, and ai/identity_test.go#TestFormatUserAgentForms locks the format. The Anthropic OAuth cases, where the Claude Code identity replaces the client identity, are compared with the pinned Pi in TestProviderIdentityHeadersMatchPi."
     },
     {
       "path": "packages/ai/test/anthropic-cache-write-1h-cost.test.ts",
@@ -270,8 +286,18 @@
     },
     {
       "path": "packages/ai/test/azure-openai-base-url.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:96aaa0281fb4407d580ee76943930ec7cdcefbd29692c7ab1e0eda8c85b1d349"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:96aaa0281fb4407d580ee76943930ec7cdcefbd29692c7ab1e0eda8c85b1d349",
+      "evidence": [
+        "ai/azure_openai_responses_test.go#TestResolveAzureBaseURL",
+        "ai/azure_openai_responses_test.go#TestResolveAzureBaseURL_ScopedResourceName",
+        "ai/azure_upstream_test.go#TestAzureUpstreamBaseURL",
+        "ai/azure_upstream_test.go#TestAzureUpstreamPayload",
+        "ai/azure_upstream_test.go#TestAzureUpstreamUserAgent",
+        "ai/provider_stream_events_upstream_test.go#TestProviderStreamEventsUpstream",
+        "ai/identity_test.go#TestFormatUserAgentForms"
+      ],
+      "rationale": "All 17 cases; the 0.99.1 provider stream events case (:233) is TestProviderStreamEventsUpstream/azure-openai-responses_forwards_parsed_events_in_order_before_normalizing_the_response. The other 16 stay in TestAzureUpstreamBaseURL/Payload/ToolChoice/UserAgent. Pi 1.0.3 renames the Azure provider ID to azure; the Go cases use the azure provider. Pi bd3c9b82 (adc5fa9f, 04a93bad) replaces the file's local `pi (\u003cplatform\u003e \u003crelease\u003e; \u003carch\u003e)` expression with `formatUserAgent()`; the matching Go cases assert `ai.FormatUserAgent(nil)`, which carries PiG's D65 value, and ai/identity_test.go#TestFormatUserAgentForms locks the format."
     },
     {
       "path": "packages/ai/test/azure-openai-completions.test.ts",
@@ -673,8 +699,15 @@
     },
     {
       "path": "packages/ai/test/google-raw-stop-reason.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:ceacff5073e435d5c5beeffa4748c1663a9b03154772ca136906d0795e63a59e"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:ceacff5073e435d5c5beeffa4748c1663a9b03154772ca136906d0795e63a59e",
+      "evidence": [
+        "ai/google_stream_upstream_test.go#TestGoogleRawStopReasonUpstream",
+        "ai/provider_stream_events_upstream_test.go#TestProviderStreamEventsUpstream",
+        "ai/identity_test.go#TestFormatUserAgentForms",
+        "ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"
+      ],
+      "rationale": "All 7 cases: raw finish reasons for Generative AI and Vertex errors, MAX_TOKENS with a tool call, STOP with a tool call (TestGoogleRawStopReasonUpstream, per adapter), User-Agent default/override, and the 0.99.1 'forwards each SDK chunk in order' case for both adapters (:220, TestProviderStreamEventsUpstream/google_forwards_each_SDK_chunk_in_order_before_normalizing_it_for_*). Pi bd3c9b82 (adc5fa9f, 04a93bad) replaces the file's local `pi (\u003cplatform\u003e \u003crelease\u003e; \u003carch\u003e)` expression with `formatUserAgent()`; the matching Go cases assert `ai.FormatUserAgent(nil)`, which carries PiG's D65 value, and ai/identity_test.go#TestFormatUserAgentForms locks the format."
     },
     {
       "path": "packages/ai/test/google-shared-convert-tools.test.ts",
@@ -757,13 +790,35 @@
     },
     {
       "path": "packages/ai/test/google-vertex-api-key-resolution.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:ec2bfb9015483d4986b859f8f1ddb96d487fad909b0b934237ef8330086cef59"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:ec2bfb9015483d4986b859f8f1ddb96d487fad909b0b934237ef8330086cef59",
+      "evidence": [
+        "ai/google_vertex_api_key_upstream_test.go#TestGoogleVertexAPIKeyResolutionUpstream",
+        "ai/google_vertex_adc_test.go#TestGoogleVertexADCAuthenticatesModelRequest",
+        "ai/google_vertex_adc_test.go#TestGoogleVertexADCFailurePreventsModelRequest",
+        "ai/google_vertex_adc_test.go#TestGoogleVertexADCRequestCancellation",
+        "test/parity/scenarios/providers-faux-streaming/20-vertex-auth-routing.toml",
+        "ai/identity_test.go#TestFormatUserAgentForms",
+        "ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"
+      ],
+      "rationale": "All nine cases ported through captured Vertex requests: placeholder markers select ADC, real keys select express mode, generated URL placeholders are ignored, custom collection URLs gain only needed version/publisher segments, and explicit User-Agent wins. Red tests catch marker leakage and wrong URLs. Additional hermetic official-ADC-library tests prove scoped credentials, bearer auth, failure-before-model-request and cancellation. Exact Pi SDK URL/auth probes and compiling marker/URL mutations prove behavior. Pi bd3c9b82 (adc5fa9f, 04a93bad) replaces the file's local `pi (\u003cplatform\u003e \u003crelease\u003e; \u003carch\u003e)` expression with `formatUserAgent()`; the matching Go cases assert `ai.FormatUserAgent(nil)`, which carries PiG's D65 value, and ai/identity_test.go#TestFormatUserAgentForms locks the format."
     },
     {
       "path": "packages/ai/test/identity.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:cf6766b2cb95e805cff3c4fd12afc99eb588a6cce6fa9b8472ded0f06def3293"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:cf6766b2cb95e805cff3c4fd12afc99eb588a6cce6fa9b8472ded0f06def3293",
+      "evidence": [
+        "ai/identity_test.go#TestFormatUserAgentForms",
+        "ai/identity_test.go#TestMergeClientIdentityFieldByField",
+        "ai/identity_test.go#TestIdentityAttributesOpenRouterRequests",
+        "ai/identity_test.go#TestIdentityAttributesNVIDIAWithACapitalizedNameAndOpenCodeWithTheName",
+        "ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
+        "ai/identity_test.go#TestModelsMergeRequestIdentityOverTheModelsIdentity",
+        "ai/identity_test.go#TestModelsSendTheOpenCodeSessionHeaderToCustomProvidersPointingAtOpenCode",
+        "ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity",
+        "ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"
+      ],
+      "rationale": "Every case of identity.test.ts is ported in ai/identity_test.go (the PI_AI_VERSION/package.json sync case is the ProductVersion default; formatUserAgent values follow D65, attribution values D26). The Pi oracle compares the request headers each API module sends for a custom identity (TestProviderIdentityHeadersMatchPi). This file and sdk-client-identity.test.ts replace the deleted coding-agent sdk-openrouter-attribution.test.ts (Pi adc5fa9f)."
     },
     {
       "path": "packages/ai/test/image-model-data.test.ts",
@@ -895,8 +950,17 @@
     },
     {
       "path": "packages/ai/test/mistral-http-transport.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:0e7bfc501808fd1c72ce14dfa3854c7ac35d9af2d6beb21d3ede452b36ef63d0"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:0e7bfc501808fd1c72ce14dfa3854c7ac35d9af2d6beb21d3ede452b36ef63d0",
+      "evidence": [
+        "ai/mistral_provider_options_wire_test.go#TestMistralAppliesPreparedHeadersAndRequestSessionID",
+        "ai/mistral_http_transport_upstream_test.go#TestMistralHTTPTransportUpstream",
+        "ai/mistral_http_transport_upstream_test.go#TestMistralInterleavedToolFragmentsKeepFirstIdentityUpstream",
+        "ai/provider_stream_events_upstream_test.go#TestProviderStreamEventsUpstream",
+        "ai/identity_test.go#TestFormatUserAgentForms",
+        "ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"
+      ],
+      "rationale": "Reviewed against the 1.1.0 -\u003e 42a3497d delta: 42a3497d replaces the SSE-chunk timeout case with 'applies the request timeout while waiting for response headers' and adds the #10609 'does not abort an active stream that lasts longer than the request timeout' case; both are ported in TestMistralHTTPTransportUpstream (red before the change in ai/mistral.go), the abort case is kept, and the removed body-timeout mode of TestMistralRequestLifetimeClosesBodyOnce follows. Earlier evidence is retained. Pi bd3c9b82 (adc5fa9f, 04a93bad) replaces the file's local `pi (\u003cplatform\u003e \u003crelease\u003e; \u003carch\u003e)` expression with `formatUserAgent()`; the matching Go cases assert `ai.FormatUserAgent(nil)`, which carries PiG's D65 value, and ai/identity_test.go#TestFormatUserAgentForms locks the format."
     },
     {
       "path": "packages/ai/test/mistral-raw-stop-reason.test.ts",
@@ -1072,8 +1136,23 @@
     },
     {
       "path": "packages/ai/test/openai-codex-stream.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:608ccccebafbb0358fde117e8a03e41e06c6d91900ec0acc6ea0f7a5bd2a58e1"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:608ccccebafbb0358fde117e8a03e41e06c6d91900ec0acc6ea0f7a5bd2a58e1",
+      "evidence": [
+        "ai/openai_codex_sse_upstream_test.go#TestCodexSSEAndPayloadUpstream",
+        "ai/openai_codex_sse_upstream_test.go#TestCodexSSELifetimeUpstream",
+        "ai/openai_codex_retry_upstream_test.go#TestCodexSSERetriesUpstream",
+        "ai/openai_codex_ws_upstream_test.go#TestCodexWebSocketUpstream",
+        "ai/openai_codex_ws_upstream_test.go#TestCodexWebSocketTimeoutsUpstream",
+        "coding/codex_stream_upstream_test.go#TestModelRuntimeCodexSimpleThinkingAndAutoTransport",
+        "test/parity/scenarios/providers-faux-streaming/24-codex-payload-lifetime.toml",
+        "test/parity/scenarios/providers-faux-streaming/25-codex-continuation-recovery.toml",
+        "ai/user_agent_test.go",
+        "coding/codex_model_headers_test.go#TestCodexModelsJSONHeadersOverrideIdentityDefaults",
+        "ai/identity_test.go#TestFormatUserAgentForms",
+        "ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"
+      ],
+      "rationale": "All 30 upstream case sites and 39 expanded rows are ported, including SSE framing/cancellation/timeouts, retry timing, cache affinity, selected reasoning maps, tool choice/strictness, tier pricing, account isolation, WebSocket reuse/age/idle/reconnect and both missing-continuation recovery paths. Model Runtime drives simple thinking and auto transport. D65 retains the existing product User-Agent identity difference. Compiling mutations and exact Pi payload/lifecycle and continuation scenarios guard the fixes. 1.1.0 renames and extends three cases: raw provider events with the model for each (TestCodexSSEAndPayloadUpstream 'streams SSE responses and forwards raw provider events', TestCodexWebSocketUpstream 'forwards auto transport and raw provider events from streamSimple') and 'lets model and caller headers override originator and User-Agent' (user_agent_test.go TestCodexModelAndCallerHeadersOverrideOriginatorAndUserAgent through StreamSimple with the model's headers; coding TestCodexModelsJSONHeadersOverrideIdentityDefaults through a models.json entry). Pi bd3c9b82 (adc5fa9f, 04a93bad) replaces the file's local `pi (\u003cplatform\u003e \u003crelease\u003e; \u003carch\u003e)` expression with `formatUserAgent()`; the matching Go cases assert `ai.FormatUserAgent(nil)`, which carries PiG's D65 value, and ai/identity_test.go#TestFormatUserAgentForms locks the format. Codex keeps its own `originator` (D26)."
     },
     {
       "path": "packages/ai/test/openai-completions-cache-control-format.test.ts",
@@ -1806,8 +1885,14 @@
     },
     {
       "path": "packages/ai/test/xai-responses.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:9391bf6206c1cfb49517c554e153528573f055b0c000dec64834f41eb49d97e2"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:9391bf6206c1cfb49517c554e153528573f055b0c000dec64834f41eb49d97e2",
+      "evidence": [
+        "ai/xai_responses_upstream_test.go",
+        "test/parity/scenarios/providers-faux-streaming/11-xai-omitted-reasoning.toml",
+        "ai/identity_test.go#TestFormatUserAgentForms"
+      ],
+      "rationale": "All 11 cases are ported: retired/all-model routing, exact thinking levels, Grok 4.7 metadata, authenticated Responses payloads, absent and xhigh effort, and default/overridden User-Agent on both APIs. Existing approved D65 substitutes PiG's product identity for Pi's default User-Agent; all header precedence assertions remain. The omitted-effort test exposed unwanted clamping to low; restoring the former condition compiles and fails the unit test and the real-Pi exact-output scenario through Services.ModelRuntime.Stream. Pi fbc456d8 expects xhigh for grok-4.5 and grok-4.3; TestXAIResponsesRoutesEveryBuiltInModelThroughResponses already expected the catalog's levels, so only its citation changed. Pi bd3c9b82 (adc5fa9f, 04a93bad) replaces the file's local `pi (\u003cplatform\u003e \u003crelease\u003e; \u003carch\u003e)` expression with `formatUserAgent()`; the matching Go cases assert `ai.FormatUserAgent(nil)`, which carries PiG's D65 value, and ai/identity_test.go#TestFormatUserAgentForms locks the format."
     },
     {
       "path": "packages/ai/test/xhigh.test.ts",
@@ -4674,8 +4759,16 @@
     },
     {
       "path": "packages/coding-agent/test/sdk-client-identity.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:8360908a2501aaf1ab1e00a96bf2d4f06f91965af823ecb01442f9ad208ac767"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:8360908a2501aaf1ab1e00a96bf2d4f06f91965af823ecb01442f9ad208ac767",
+      "evidence": [
+        "coding/client_identity_test.go#TestSDKIdentifiesPiGWithADetailedUserAgentAndAttributionAsACLIAgent",
+        "coding/client_identity_test.go#TestSDKTurnsAttributionOffWhenTelemetryIsDisabled",
+        "coding/client_identity_test.go#TestSDKTurnsAttributionOffWithPITelemetryZero",
+        "coding/client_identity_test.go#TestSDKAddsOpenCodeSessionHeadersForCustomOpenCodeProviders",
+        "coding/client_identity_test.go#TestSDKLetsConfiguredOpenCodeHeadersOverrideTheSessionHeader"
+      ],
+      "rationale": "Ported in coding/client_identity_test.go: the Session's stream function hands providers the identity of getClientIdentity (telemetry setting and PI_TELEMETRY) and the OpenCode session header. Replaces the deleted sdk-openrouter-attribution.test.ts (Pi adc5fa9f); the header assertions moved to ai identity.test.ts."
     },
     {
       "path": "packages/coding-agent/test/sdk-session-manager.test.ts",
@@ -6741,13 +6834,23 @@
     },
     {
       "path": "packages/durable/test/harness-generation.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:d4377ee349a3141c940bf58bba38ff9d10209fe6505451280d781ddc24bec37a"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:d4377ee349a3141c940bf58bba38ff9d10209fe6505451280d781ddc24bec37a",
+      "evidence": [
+        "durable/harness/harness_generation_test.go#TestGeneration",
+        "durable/harness/harness_generation_test.go#resolves settings over the built-in defaults",
+        "durable/harness/harness_generation_test.go#attributes model requests by default and merges the Harness identity over it"
+      ],
+      "rationale": "24 cases, all in TestGeneration under Pi's names. 1.0.4 to 1.1.0 adds contextRetentionMs: 600_000 to the resolveSettings defaults of :487; 1.1.0 to 1.2.0 adds documentRetentionMs: expect.any(Number). The Go subtest 'resolves settings over the built-in defaults' asserts ContextRetentionMs 600_000 and DocumentRetentionMs 600_000 (the built-in value, a number as Pi requires). Pi 482c1381 adds afterFailedRun 'keep' and restartLimit 5 to those defaults and a restartLimit that is not 1 or more means the default, Infinity kept (:498); the subtest asserts both. All 24 pass (go test -run '^TestGeneration$' ./durable/harness). 0.5.2 (Pi 5c1736f8): the file gains `checkpointWhen: () =\u003e false` on every definition (checkpointWhen is required); the Go ports gained CheckpointWhen on every definition the same way (a never-checkpoint default in the shared test helpers), with no case added or removed. durable.DefineDoc now rejects a definition with no policy, tested in durable/session/codemode_checkpoints_upstream_test.go (TestDefinitionsRequireACheckpointPolicy; not in Pi). Pi bd3c9b82 adds 'attributes model requests to pi by default and merges the Harness identity over it', ported as the subtest of the same meaning in TestGeneration (default attribution PiG's, D26)."
     },
     {
       "path": "packages/durable/test/harness-host-inputs.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:f6b046f5c9ee9e53a7421330e6ebe9cda26db57b534156da18f311a8e01afefe"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:f6b046f5c9ee9e53a7421330e6ebe9cda26db57b534156da18f311a8e01afefe",
+      "evidence": [
+        "durable/core/driver/host_inputs_core_test.go#TestCoreHostInputsAreReadAtEachUse"
+      ],
+      "rationale": "New in Pi 7ec1f648: all 4 cases ported, each over the core and the reference Harness (eachEngine): a models function read at each request, a plain Models, api.models read at each access, a settings function read at each request. Pi bd3c9b82 changes the models case: tools see a view of the host's Models that adds the Harness identity, so the Go test marks the second Models with a provider and asserts through the view (TestCoreHostInputsAreReadAtEachUse)."
     },
     {
       "path": "packages/durable/test/harness-inbox.test.ts",
@@ -7148,8 +7251,21 @@
     },
     {
       "path": "packages/durable/test/harness-tools.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:fb5e0ebdb9c5d3ba167a2c8ad35fc67b1539d1d00be096f843b76094813103d7"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:fb5e0ebdb9c5d3ba167a2c8ad35fc67b1539d1d00be096f843b76094813103d7",
+      "evidence": [
+        "durable/harness/agent_regression_test.go#TestAddToolsEditsTheStoredToolFilter",
+        "durable/harness/agent_regression_test.go#TestResolveAgentDropsTargetOfWrapperReturningNil",
+        "durable/harness/harness_coding_tools_test.go#TestCodingTools",
+        "durable/harness/harness_tools_models_test.go#TestToolResultRecordsHowLongExecuteTook",
+        "durable/harness/harness_tools_models_test.go#TestToolsAndHooksSeeTheHarnessModels",
+        "durable/harness/harness_tools_progress_test.go#TestToolProgressAndLifetime",
+        "durable/harness/harness_tools_test.go#TestGenerationHooks",
+        "durable/harness/harness_tools_test.go#TestToolExecutionApi",
+        "durable/harness/harness_tools_test.go#TestToolResults",
+        "durable/harness/harness_tools_test.go#TestToolRound"
+      ],
+      "rationale": "38/38 cases ported. :263 is ported with Pi's inputs under D177 (the calls of a parallel round start in unspecified order): TestToolRound checks that both calls start before either ends and that the next request carries the results in call order (c1, c2) instead of Pi's exact [\"start a\",\"start b\"]; the sequential and per-tool-sequential parts are Pi's exact assertions. :1019 settle order fixed in output.go settleInOrder (49/50 red, 0/50 green). Pi 6085986e (#10858) adds \"does not terminate on terminate: false\" (:677), ported as TestToolResults/does_not_terminate_on_terminate:_false. Pi bd3c9b82 changes the models cases: tools and hooks share one view of the host's Models that adds the Harness identity (a plain Models is wrapped once, HarnessOptions.WithModelsView); TestToolsAndHooksSeeTheHarnessModels and TestToolRound assert the shared view."
     },
     {
       "path": "packages/durable/test/harness-view.test.ts",

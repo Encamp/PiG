@@ -20,6 +20,8 @@ func TestProviderIdentityHeadersMatchPi(t *testing.T) {
 		{"userAgent": map[string]any{"custom": "acme/1.0"}, "attribution": map[string]any{"name": "acme", "url": "https://acme.example", "categories": []string{"cli-agent", "cloud-agent"}}},
 		{"userAgent": map[string]any{"custom": "acme/1.0"}, "attribution": map[string]any{"name": "acme", "url": "https://acme.example", "categories": []string{}}},
 		{"userAgent": map[string]any{"custom": "acme/1.0"}, "attribution": nil},
+		// Pi's own attribution values, which PiG's default attribution replaces (D26): the headers they map to are the same code on both sides.
+		{"userAgent": map[string]any{"custom": "acme/1.0"}, "attribution": map[string]any{"name": "pi", "url": "https://pi.dev", "categories": []string{"cli-agent"}}},
 	}
 	type target struct {
 		module, name string
@@ -56,4 +58,22 @@ func TestProviderIdentityHeadersMatchPi(t *testing.T) {
 			checkResponsesAllowEmpty(t, target.module, target.name, target.api, target.stream, probes)
 		})
 	}
+}
+
+// An Anthropic OAuth token sends the Claude Code identity instead of the client identity, and a User-Agent header of the request replaces it: an exact-case
+// "User-Agent" and a lower-case "user-agent" both, and on an API-key request too.
+func TestAnthropicUserAgentHeaderReplacesTheClaudeCodeIdentityLikePi(t *testing.T) {
+	var probes []responseProbe
+	for _, key := range []string{"sk-ant-oat01-x", "sk-ant-api03-x"} {
+		for _, headers := range []map[string]string{nil, {"User-Agent": "explicit/1.0"}, {"user-agent": "lower/1.0"}, {"User-Agent": "explicit/1.0", "x-app": "mine"}} {
+			for _, identity := range []map[string]any{nil, {"userAgent": map[string]any{"custom": "acme/1.0"}}} {
+				options := map[string]any{}
+				if identity != nil {
+					options["identity"] = identity
+				}
+				probes = append(probes, responseProbe{Provider: "anthropic", APIKey: key, Status: 400, CheckRequest: true, KeepUserAgent: identity != nil || headers != nil || key == "sk-ant-oat01-x", Options: options, Headers: headers})
+			}
+		}
+	}
+	checkResponsesAllowEmpty(t, "anthropic-messages.js", "anthropic-messages", ai.APIAnthropicMessages, ai.StreamAnthropic, probes)
 }

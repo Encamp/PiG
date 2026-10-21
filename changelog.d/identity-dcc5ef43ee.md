@@ -7,6 +7,7 @@
 
 - The coding agent sets its identity from the install-telemetry setting instead of adding attribution headers to every provider request. Direct pi-ai calls from the extension bridge carry no attribution, as under Pi. Attribution reads `PiG` for OpenRouter, NVIDIA and OpenCode alike (the OpenCode client header was `pig`).
 - Classifier, llama.cpp, OpenRouter image and pi-messages requests send the identity's `User-Agent`, and Bedrock appends the identity to the AWS SDK user agent.
+- A `User-Agent` request header replaces the Claude Code identity of an Anthropic OAuth request, and a `null` request header removes a model header of the OpenRouter image API whatever its letter case, as under Pi. A durable Harness wraps a plain `Models` once, so tools and hooks share one view of it.
 
 ### Removed
 
