@@ -3197,8 +3197,15 @@
     },
     {
       "path": "packages/coding-agent/test/compaction-summary-reasoning.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:35045d6584d5375042f9b405ece64547e818e3f3110e04c4314573a56ecc658f"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:35045d6584d5375042f9b405ece64547e818e3f3110e04c4314573a56ecc658f",
+      "evidence": [
+        "internal/codingagent/compaction/compaction_summary_reasoning_test.go",
+        "coding/session_summarization_test.go",
+        "internal/codingagent/compaction/context_edit_test.go#TestCompactAppliesCustomInstructionsToTheTurnPrefixSummaryOfASplitTurn",
+        "test/parity/scenarios/compaction/16-split-turn-custom-instructions.toml"
+      ],
+      "rationale": "The reasoning suite names the upstream file and covers all ten successful request-shape/result cases; TestSummarizationRejectsIncompleteResponses covers the four history/split-turn tool-call and length-stop rejection cases. Pi 6fcb4867 passes undefined for reserveTokens; summaries set no maxTokens (internal/codingagent/compaction/compaction_summary_reasoning_test.go#TestCompactSummariesSetNoMaxTokens). Pi adfc1446 (#11058): the split-turn prefix summary request carries the custom instructions; ported as TestCompactAppliesCustomInstructionsToTheTurnPrefixSummaryOfASplitTurn and compared with Pi's compact() by scenario 16-split-turn-custom-instructions."
     },
     {
       "path": "packages/coding-agent/test/compaction.test.ts",
@@ -3298,8 +3305,21 @@
     },
     {
       "path": "packages/coding-agent/test/default-tools-setting.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:e950d8a263c03bc5f21877562323e7efd3059dd1ce41d46f7827940ca6bab2d6"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:e950d8a263c03bc5f21877562323e7efd3059dd1ce41d46f7827940ca6bab2d6",
+      "evidence": [
+        "coding/session_tool_registry_port_test.go#TestDefaultToolsInitialSelectionPort",
+        "coding/session_tool_registry_port_test.go#TestDefaultToolsReloadPort",
+        "coding/session_tool_modifiers_port_test.go#TestToolModifierOptionsChangeTheDefaultSelectionPort",
+        "coding/session_tool_modifiers_port_test.go#TestInvalidToolModifierOptionsPort",
+        "coding/session_tool_modifiers_port_test.go#TestToolModifierOptionsSurviveReloadPort",
+        "coding/session_resume_default_tools_port_test.go#TestResumeRestoresTheRecordedLoadoutPort",
+        "coding/cli/rpc_resume_tools_test.go#TestRPCResumeKeepsDynamicallyActivatedTools",
+        "test/extension-conformance/resume_tools_test.go#TestResumeActivatesExtensionToolsTheBranchNeverMentionedAcrossSDKs",
+        "test/parity/scenarios/extensions-runtime/36-resume-activates-extension-tools.toml",
+        "agent/tool_replay_error_test.go#TestToolReplayErrorMatchesPi"
+      ],
+      "rationale": "The three v1.1.0 cases (:159 applies +name and -name tool options, :194 rejects invalid options with the two Invalid tools option messages, :258 keeps -name removals on reload) are ported with the same registered tools and settings; mutating the reload, the noTools base, the validation or the initial-names case each fails one of them. Earlier cases: All 8 cases: the six initial-selection cases (:58,:73,:82,:100,:144 and the service-based creation case :237; the +name case registers its tool with defaultActive false as upstream does) are TestDefaultToolsInitialSelectionPort subtests, and the two reload cases (:197, :214; #10245) are TestDefaultToolsReloadPort subtests, which also carries one extra CLI-defaults subtest. Mutating the +name entry to a plain name fails the +name case. Pi 6f2f164a adds describe(\"resume\") with five cases, ported as subtests of TestResumeRestoresTheRecordedLoadoutPort; --tools +bash,-grep over a resumed session is TestRPCResumeKeepsDynamicallyActivatedTools. Pi bd3c9b82 (#11062, #11075): the resume cases use Pi's recordLoadoutChange/createChangedSession helpers and add the never-mentioned-extension-tool, removed-before-compaction, tree-navigation and allowlist-MCP cases; the whole-branch restore's TypeError is compared with Pi's own replay by TestToolReplayErrorMatchesPi."
     },
     {
       "path": "packages/coding-agent/test/documentation.test.ts",
@@ -7732,8 +7752,23 @@
     },
     {
       "path": "packages/tui/test/autocomplete.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:2d75518eecbc52808eb028d0df5d903394e6af560831a95d9774636ee133467d"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:2d75518eecbc52808eb028d0df5d903394e6af560831a95d9774636ee133467d",
+      "evidence": [
+        "tui/file_autocomplete_test.go#TestReaddirFileSuggestions",
+        "tui/autocomplete_test.go#TestFuzzyFilter_TokensAndedAcrossWords",
+        "tui/file_autocomplete_test.go#TestExtractPathPrefix",
+        "tui/autocomplete_upstream_test.go#TestUpstreamAutocompletePathPrefix",
+        "tui/autocomplete_upstream_test.go#TestUpstreamAutocompleteFD",
+        "tui/autocomplete_upstream_test.go#TestUpstreamAutocompleteDirectPaths",
+        "tui/autocomplete_upstream_test.go#TestEditorDirectPathCompletionCaller",
+        "tui/autocomplete_shared_roots_test.go",
+        "tui/autocomplete_wrappers_upstream_test.go#TestUpstreamAutocompleteAtAfterOpeningWrappers",
+        "tui/autocomplete_wrappers_upstream_test.go#TestUpstreamAutocompletePathsAfterOpeningWrappers",
+        "tui/file_autocomplete_test.go#TestBuildFdPathQuery",
+        "test/parity/scenarios/autocomplete/13-at-regex-metacharacters.toml"
+      ],
+      "rationale": "All 40 upstream cases are covered. The 36 cases that exist unchanged since 0.87.1 keep the reviewed evidence above (the Go tests still pass). The 4 cases added in 0.99 are ported with the upstream inputs: 'recognizes @ after opening wrappers like ( and backticks' (autocomplete.test.ts:170, the ( / see ( / [ / ` / \u003c / { rows plus the foo(@REA negative) in TestUpstreamAutocompleteAtAfterOpeningWrappers, and 'completes paths after opening wrappers ...' (:647), 'completes quoted paths after opening wrappers' (:668) and 'keeps wrappers that are closed inside the path' (:681) as subtests of TestUpstreamAutocompletePathsAfterOpeningWrappers. Table: test/parity/unit-evidence/gate-992-misc-audit.md. Pi 612a172e (#10972): 'matches regex metacharacters in queries literally' is three TestUpstreamAutocompleteFD rows."
     },
     {
       "path": "packages/tui/test/bug-regression-isimageline-startswith-bug.test.ts",

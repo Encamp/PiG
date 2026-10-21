@@ -4088,6 +4088,17 @@
       "shapeHash": "sha256:fef0cde9385bca18a20b6c4fa0c5dafb2e35de69e2d84f1cb753bf80e148f005"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/agent#ToolReplayError",
+      "package": "github.com/MichaelKinsy/PiG/agent",
+      "name": "ToolReplayError",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func(messages []AgentMessage) error"
+      },
+      "shapeHash": "sha256:7094d342bd025c3eff23f86255b3aa581cf580e549b4c5528fa2aa4ac8e0b511"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/agent#ToolResultMessage",
       "package": "github.com/MichaelKinsy/PiG/agent",
       "name": "ToolResultMessage",
@@ -255246,9 +255257,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(ctx context.Context, messages []github.com/MichaelKinsy/PiG/agent.AgentMessage, model *github.com/MichaelKinsy/PiG/ai.Model, reserveTokens int, apiKey string, headers map[string]string, env map[string]string, thinkingLevel github.com/MichaelKinsy/PiG/ai.ModelThinkingLevel, completer SimpleCompleter, streamFn StreamFn, retry *github.com/MichaelKinsy/PiG/ai.RetryPolicy, callbacks github.com/MichaelKinsy/PiG/ai.RetryCallbacks, sessionID string) (string, *github.com/MichaelKinsy/PiG/ai.Usage, error)"
+        "type": "func(ctx context.Context, messages []github.com/MichaelKinsy/PiG/agent.AgentMessage, model *github.com/MichaelKinsy/PiG/ai.Model, reserveTokens int, apiKey string, headers map[string]string, env map[string]string, thinkingLevel github.com/MichaelKinsy/PiG/ai.ModelThinkingLevel, completer SimpleCompleter, streamFn StreamFn, retry *github.com/MichaelKinsy/PiG/ai.RetryPolicy, callbacks github.com/MichaelKinsy/PiG/ai.RetryCallbacks, sessionID string, customInstructions string) (string, *github.com/MichaelKinsy/PiG/ai.Usage, error)"
       },
-      "shapeHash": "sha256:382d92f8bf127efd9dd86f11f82bff8023846dccfa5577c8c465796e6ceeaf10"
+      "shapeHash": "sha256:9f9e0fb8102de031b0b792d07baff471b5ea447f42944de3aded06bec2ddf51b"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/internal/codingagent/compaction#getAssistantUsage",
