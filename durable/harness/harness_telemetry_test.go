@@ -15,9 +15,6 @@ import (
 	"github.com/MichaelKinsy/PiG/telemetry"
 )
 
-//go:fix inline
-func str(value string) *string { return new(value) }
-
 func TestDurableTelemetryRecordsContentFreeSubmitAndPhaseSpans(t *testing.T) {
 	// harness-telemetry.test.ts: "records content-free submit and phase spans, nested parents, checkpoints, entry events, and metrics"
 	setup := chatSetup(t)
