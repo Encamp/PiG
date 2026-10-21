@@ -729,6 +729,34 @@ replace = "Took Ns"
 	}
 }
 
+// TestDecodeScenarioAcceptsPrebuiltGoPackageKeys: the runner reads pig_go_tests, pi_go_tests, pig_go_programs and pi_go_programs from [env]
+// (runner.EnvSpec), so the lint must treat each as a known key.
+func TestDecodeScenarioAcceptsPrebuiltGoPackageKeys(t *testing.T) {
+	source := `
+name = "prebuilt"
+description = "prebuilt"
+covers = ["packages/tui/src/autocomplete.ts"]
+tags = ["hermetic"]
+driver = "cli"
+
+[env]
+pig_go_tests = ["./internal/codingagent"]
+pi_go_tests = ["./internal/codingagent"]
+pig_go_programs = ["./cmd/x"]
+pi_go_programs = ["./cmd/x"]
+`
+	var sc scenario
+	var violations []violation
+	if err := decodeScenarioWithUnknownKeyLint("prebuilt.toml", source, &sc, &violations); err != nil {
+		t.Fatalf("decodeScenarioWithUnknownKeyLint returned parse error: %v", err)
+	}
+	for _, v := range violations {
+		if v.Rule == "unknown-key" {
+			t.Errorf("unexpected unknown-key violation: %s", v.Message)
+		}
+	}
+}
+
 func TestLintOAuthProviderCoverage(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "providers.toml"), []byte(`
