@@ -35,7 +35,8 @@ func runExitRestoreFixture(t *testing.T, mode string, wantStatus int) string {
 			env = append(env, entry)
 		}
 	}
-	helper.Env = append(env, "TERM=xterm-256color", "PI_PROGRAM_STATUS=0", exitRestoreModeEnv+"="+mode)
+	env = append(env, "TERM=xterm-256color", "PI_PROGRAM_STATUS=0", exitRestoreModeEnv+"="+mode)
+	helper.Env = env
 	helper.Stdin, helper.Stdout = slave, slave
 	var stderr bytes.Buffer
 	helper.Stderr = &stderr

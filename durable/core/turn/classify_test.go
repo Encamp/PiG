@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TestClassifyOracle replays pi-ai utils/retry.ts and utils/overflow.ts (pi-durable main da866ada, oracle/gen_classify.mjs):
+// TestClassifyOracle replays pi-ai utils/retry.ts and utils/overflow.ts (Pi bd3c9b82, oracle/gen_classify.mjs):
 // isRetryableAssistantError, isContextOverflow and retryDelayMs over messages built from the providers' error texts.
 func TestClassifyOracle(t *testing.T) {
 	var retries, overflows, delays int

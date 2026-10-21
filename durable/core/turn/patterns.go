@@ -15,6 +15,7 @@ var nonRetryablePatterns = []string{
 	`quota exceeded`,
 	`billing`,
 	`subscription_sharing_usage_limit_exceeded`,
+	`subscription_sharing_workplace_individual_usage_limit_exceeded`,
 }
 
 // Read-only: assigned once at initialization.
@@ -26,13 +27,7 @@ var retryablePatterns = []string{
 	`model is at capacity`,
 	`rate.?limit`,
 	`too many requests`,
-	`429`,
-	`500`,
-	`502`,
-	`503`,
-	`504`,
-	`520`,
-	`524`,
+	`(?<![a-z0-9])(?:429|500|502|503|504|520|524)(?![a-z0-9])`,
 	`service.?(?:is.?)?(?:temporarily.?)?unavailable`,
 	`server.?error`,
 	`internal.?error`,
@@ -66,6 +61,7 @@ var retryablePatterns = []string{
 	`stream ended before message_stop`,
 	`stream ended before a terminal response event`,
 	`http2 request did not get a response`,
+	`stream disconnected before completion`,
 	`pending stream has been canceled`,
 	`retry delay`,
 	`you can retry your request`,

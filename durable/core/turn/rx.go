@@ -5,8 +5,8 @@ package turn
 
 // A small backtracking matcher for the case-insensitive JavaScript patterns of pi-ai's overflow and retry classifiers
 // (utils/overflow.ts, utils/retry.ts). The core cannot import regexp (it uses sync), so the subset those patterns use is
-// implemented here: literals, `.`, `\d`, `\s`, character classes of ranges, `\d` and `\w`, groups `(?:…)`, alternation, the
-// quantifiers `*`, `+` and `?`, and the `^` and `$` anchors. Matching is unanchored search over code points, folding ASCII letters
+// implemented here: literals, `.`, `\d`, `\s`, character classes of ranges, `\d` and `\w`, groups `(?:…)`, the negative
+// lookbehind `(?<!…)` and lookahead `(?!…)`, alternation, the quantifiers `*`, `+` and `?`, and the `^` and `$` anchors. Matching is unanchored search over code points, folding ASCII letters
 // only, as the non-Unicode `i` flag does for a pattern of ASCII letters.
 
 type rxKind uint8
@@ -20,6 +20,8 @@ const (
 	rxGroup
 	rxStart
 	rxEnd
+	rxNotBehind // (?<!…): no match of alts ends at the position
+	rxNotAhead  // (?!…): no match of alts starts at the position
 )
 
 type rxNode struct {
@@ -30,6 +32,7 @@ type rxNode struct {
 	word     bool   // rxClass includes \w
 	alts     [][]rxNode
 	min, max int // max < 0: unbounded
+	width    int // rxNotBehind: the most code points a match of alts spans; < 0: unbounded
 }
 
 type rxProgram struct{ alts [][]rxNode }
@@ -47,6 +50,19 @@ func compileRx(pattern string) *rxProgram {
 type rxParser struct {
 	s []rune
 	i int
+}
+
+func (p *rxParser) hasPrefix(prefix string) bool {
+	rest := p.s[p.i:]
+	if len(rest) < len(prefix) {
+		return false
+	}
+	for i, r := range prefix {
+		if rest[i] != r {
+			return false
+		}
+	}
+	return true
 }
 
 func (p *rxParser) alternation() [][]rxNode {
@@ -95,12 +111,20 @@ func (p *rxParser) atom() rxNode {
 	case '.':
 		return rxNode{kind: rxAny}
 	case '(':
-		if p.i+1 < len(p.s) && p.s[p.i] == '?' && p.s[p.i+1] == ':' {
+		kind := rxGroup
+		switch {
+		case p.hasPrefix("?:"):
 			p.i += 2
+		case p.hasPrefix("?<!"):
+			p.i += 3
+			kind = rxNotBehind
+		case p.hasPrefix("?!"):
+			p.i += 2
+			kind = rxNotAhead
 		}
 		alts := p.alternation()
 		p.i++ // ')'
-		return rxNode{kind: rxGroup, alts: alts}
+		return rxNode{kind: kind, alts: alts, width: altsWidth(alts)}
 	case '[':
 		n := rxNode{kind: rxClass}
 		for p.s[p.i] != ']' {
@@ -218,6 +242,12 @@ func matchSeq(seq []rxNode, text []rune, pos int, k func(int) bool) bool {
 	if n.kind == rxEnd {
 		return pos == len(text) && matchSeq(rest, text, pos, k)
 	}
+	if n.kind == rxNotAhead {
+		return !matchAlts(n.alts, text, pos, func(int) bool { return true }) && matchSeq(rest, text, pos, k)
+	}
+	if n.kind == rxNotBehind {
+		return !matchesEndingAt(n.alts, text, pos, n.width) && matchSeq(rest, text, pos, k)
+	}
 	var try func(count, pos int) bool
 	try = func(count, pos int) bool {
 		// Greedy: take another repetition first, then continue with the rest.
@@ -235,4 +265,42 @@ func matchSeq(seq []rxNode, text []rune, pos int, k func(int) bool) bool {
 		return count >= n.min && matchSeq(rest, text, pos, k)
 	}
 	return try(0, pos)
+}
+
+// matchesEndingAt reports whether some match of alts ends at pos. Without captures or backreferences, a match found right to left
+// exists exactly when one found left to right does, so the start is tried from pos back over the widest span a match can have.
+func matchesEndingAt(alts [][]rxNode, text []rune, pos, width int) bool {
+	for start := pos; start >= 0 && (width < 0 || pos-start <= width); start-- {
+		if matchAlts(alts, text, start, func(end int) bool { return end == pos }) {
+			return true
+		}
+	}
+	return false
+}
+
+// altsWidth is the most code points a match of alts spans, or -1 when a repetition is unbounded.
+func altsWidth(alts [][]rxNode) int {
+	widest := 0
+	for _, seq := range alts {
+		total := 0
+		for i := range seq {
+			n := &seq[i]
+			w := 0
+			switch n.kind {
+			case rxGroup:
+				if w = altsWidth(n.alts); w < 0 {
+					return -1
+				}
+			case rxStart, rxEnd, rxNotBehind, rxNotAhead:
+			default:
+				w = 1
+			}
+			if n.max < 0 && w > 0 {
+				return -1
+			}
+			total += w * n.max
+		}
+		widest = max(widest, total)
+	}
+	return widest
 }
