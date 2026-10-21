@@ -95,9 +95,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/classifier-shared.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestModelsMergeRequestIdentityOverTheModelsIdentity"]
+rationale = "the classifier request sends the identity headers (ai/classifier_http.go)."
 
 [[files]]
 path = "packages/ai/src/api/cloudflare-ai-binding.ts"
@@ -193,9 +193,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/llama-cpp-classify.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestModelsMergeRequestIdentityOverTheModelsIdentity"]
+rationale = "the llama.cpp classifier sends the identity headers (ai/llama_cpp_classify.go)."
 
 [[files]]
 path = "packages/ai/src/api/mistral-conversations.lazy.ts"
@@ -291,9 +291,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/openrouter-images.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/images_models_wire_test.go#TestOpenRouterImagesHeaderUndefinedOverride"]
+rationale = "the image request sends the identity headers below model and request headers (ai/openrouter_images.go)."
 
 [[files]]
 path = "packages/ai/src/api/pi-messages.lazy.ts"
@@ -312,9 +312,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/simple-options.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestModelsMergeRequestIdentityOverTheModelsIdentity"]
+rationale = "BuildBaseOptions keeps StreamOptions.Identity (ai/simple_options.go)."
 
 [[files]]
 path = "packages/ai/src/api/system-one-shared.ts"
@@ -1327,9 +1327,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/utils/identity.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestFormatUserAgentForms", "test:ai/identity_test.go#TestMergeClientIdentityFieldByField", "test:ai/identity_test.go#TestIdentityAttributesOpenRouterRequests", "test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"]
+rationale = "ported as ai/identity.go and ai/identity_models.go (ai.ClientIdentity, MergeClientIdentity, FormatUserAgent, GetAttributionHeaders, GetOpenCodeSessionHeaders, WithClientIdentity over ClientIdentityModels because Go has no Proxy). Divergences: PiAttribution and the user agent carry PiG's values (D26, D65). Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai; the deleted coding-agent sdk-openrouter-attribution.test.ts is replaced by ai identity.test.ts and coding-agent sdk-client-identity.test.ts (ported in ai/identity_test.go and coding/client_identity_test.go)."
 
 [[files]]
 path = "packages/ai/src/utils/json-parse.ts"
@@ -1446,9 +1446,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/utils/version.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion"]
+rationale = "PI_AI_VERSION is ai.ProductVersion, PiG's composite version (D65), the default version of the detailed User-Agent."
 
 [[files]]
 path = "packages/chord/src/cell.ts"
@@ -2048,9 +2048,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/client-identity.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:coding/client_identity_test.go#TestSDKIdentifiesPiGWithADetailedUserAgentAndAttributionAsACLIAgent", "test:coding/client_identity_test.go#TestSDKTurnsAttributionOffWhenTelemetryIsDisabled", "test:coding/client_identity_test.go#TestSDKTurnsAttributionOffWithPITelemetryZero"]
+rationale = "ported as coding/client_identity.go (getClientIdentity), set per request in Session.buildRequestOptions. Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai; the deleted coding-agent sdk-openrouter-attribution.test.ts is replaced by ai identity.test.ts and coding-agent sdk-client-identity.test.ts (ported in ai/identity_test.go and coding/client_identity_test.go). Pi's deleted core/provider-attribution.ts maps to ai GetAttributionHeaders plus this identity; its Cloudflare User-Agent attribution no longer exists."
 
 [[files]]
 path = "packages/coding-agent/src/core/compaction/branch-summarization.ts"
@@ -3546,9 +3546,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/utils/pi-user-agent.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestFormatUserAgentForms"]
+rationale = "getPiUserAgent(version) is ai.FormatUserAgent with the detailed mode; bug_report.go keeps D65's report shape."
 
 [[files]]
 path = "packages/coding-agent/src/utils/shell.ts"

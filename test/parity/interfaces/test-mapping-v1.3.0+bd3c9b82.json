@@ -762,8 +762,20 @@
     },
     {
       "path": "packages/ai/test/identity.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:cf6766b2cb95e805cff3c4fd12afc99eb588a6cce6fa9b8472ded0f06def3293"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:cf6766b2cb95e805cff3c4fd12afc99eb588a6cce6fa9b8472ded0f06def3293",
+      "evidence": [
+        "ai/identity_test.go#TestFormatUserAgentForms",
+        "ai/identity_test.go#TestMergeClientIdentityFieldByField",
+        "ai/identity_test.go#TestIdentityAttributesOpenRouterRequests",
+        "ai/identity_test.go#TestIdentityAttributesNVIDIAWithACapitalizedNameAndOpenCodeWithTheName",
+        "ai/identity_test.go#TestIdentityAppliesBelowModelAndRequestHeaders",
+        "ai/identity_test.go#TestModelsMergeRequestIdentityOverTheModelsIdentity",
+        "ai/identity_test.go#TestModelsSendTheOpenCodeSessionHeaderToCustomProvidersPointingAtOpenCode",
+        "ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity",
+        "ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi"
+      ],
+      "rationale": "Every case of identity.test.ts is ported in ai/identity_test.go (the PI_AI_VERSION/package.json sync case is the ProductVersion default; formatUserAgent values follow D65, attribution values D26). The Pi oracle compares the request headers each API module sends for a custom identity (TestProviderIdentityHeadersMatchPi). This file and sdk-client-identity.test.ts replace the deleted coding-agent sdk-openrouter-attribution.test.ts (Pi adc5fa9f)."
     },
     {
       "path": "packages/ai/test/image-model-data.test.ts",
@@ -4654,8 +4666,16 @@
     },
     {
       "path": "packages/coding-agent/test/sdk-client-identity.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:8360908a2501aaf1ab1e00a96bf2d4f06f91965af823ecb01442f9ad208ac767"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:8360908a2501aaf1ab1e00a96bf2d4f06f91965af823ecb01442f9ad208ac767",
+      "evidence": [
+        "coding/client_identity_test.go#TestSDKIdentifiesPiGWithADetailedUserAgentAndAttributionAsACLIAgent",
+        "coding/client_identity_test.go#TestSDKTurnsAttributionOffWhenTelemetryIsDisabled",
+        "coding/client_identity_test.go#TestSDKTurnsAttributionOffWithPITelemetryZero",
+        "coding/client_identity_test.go#TestSDKAddsOpenCodeSessionHeadersForCustomOpenCodeProviders",
+        "coding/client_identity_test.go#TestSDKLetsConfiguredOpenCodeHeadersOverrideTheSessionHeader"
+      ],
+      "rationale": "Ported in coding/client_identity_test.go: the Session's stream function hands providers the identity of getClientIdentity (telemetry setting and PI_TELEMETRY) and the OpenCode session header. Replaces the deleted sdk-openrouter-attribution.test.ts (Pi adc5fa9f); the header assertions moved to ai identity.test.ts."
     },
     {
       "path": "packages/coding-agent/test/sdk-session-manager.test.ts",
