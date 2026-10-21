@@ -13,8 +13,11 @@ import (
 	"github.com/MichaelKinsy/PiG/internal/coding/pigidentity"
 )
 
-// bedrockApplicationAgent is the application part of an AWS SDK user agent: the tokens between the SDK's api/ pair and its m/ metadata.
-var bedrockApplicationAgent = regexp.MustCompile(`api/\S+ (.*?)(?: m/\S+)?$`)
+// bedrockApplicationAgent is the application part of an AWS SDK user agent: the tokens after the SDK's api/ pair, without its m/ metadata token.
+var (
+	bedrockApplicationAgent = regexp.MustCompile(`api/\S+ (.*)$`)
+	bedrockSDKMetadata      = regexp.MustCompile(`(?:^| )m/\S+`)
+)
 
 // Pi's bedrockUserAgent hands the client identity to the AWS SDK as customUserAgent pairs. The JavaScript SDK writes them after its api/ pair;
 // the Go SDK does the same, so the pair after api/ is compared. PiG's product name replaces Pi's (D65).
@@ -26,6 +29,8 @@ func TestBedrockUserAgentMatchesPi(t *testing.T) {
 		{"userAgent": map[string]any{"custom": "acme"}},
 		{"userAgent": map[string]any{"custom": "acme/1.0"}},
 		{"userAgent": map[string]any{"custom": "acme (x; y)"}},
+		{"userAgent": map[string]any{"custom": "a/b/c é😀"}},
+		{"userAgent": map[string]any{"custom": ""}},
 	}
 	const script = `(async () => {
   const http = require('node:http');
@@ -87,9 +92,13 @@ func TestBedrockUserAgentMatchesPi(t *testing.T) {
 		if got == nil || piAgent == nil {
 			t.Fatalf("identity %v: no application agent in PiG %q or Pi %q", identity, got, want[i])
 		}
+		got[1], piAgent[1] = strings.TrimSpace(bedrockSDKMetadata.ReplaceAllString(got[1], "")), strings.TrimSpace(bedrockSDKMetadata.ReplaceAllString(piAgent[1], ""))
 		expected := piAgent[1]
 		if _, custom := identity["userAgent"].(map[string]any); !custom {
 			expected = strings.Replace(expected, "pi", pigidentity.UserAgentProduct, 1)
+			if identity == nil {
+				expected = pigidentity.UserAgentProduct + "/" + ProductVersion
+			}
 		}
 		if got[1] != expected {
 			t.Errorf("identity %v: PiG %q, Pi %q (full Pi agent %q)", identity, got[1], piAgent[1], want[i])

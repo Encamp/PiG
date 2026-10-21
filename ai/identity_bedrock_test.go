@@ -21,8 +21,7 @@ func TestBedrockUserAgentCarriesTheClientIdentity(t *testing.T) {
 		{"default is the detailed form", nil, pigidentity.UserAgentProduct + "/" + ProductVersion, ""},
 		{"version override", &ClientIdentity{Version: new("9.9.9")}, pigidentity.UserAgentProduct + "/9.9.9", ProductVersion},
 		{"short form carries the name alone", &ClientIdentity{UserAgent: new(UserAgentShort), Version: new("9.9.9")}, pigidentity.UserAgentProduct, "9.9.9"},
-		// The SDK escapes characters that are not valid in a user agent token (here the slash), as the JavaScript SDK does.
-		{"custom string", &ClientIdentity{UserAgent: new(UserAgentCustom("acme/1.0"))}, "acme-1.0", pigidentity.UserAgentProduct + "/"},
+		{"custom string", &ClientIdentity{UserAgent: new(UserAgentCustom("acme/1.0"))}, "acme/1.0", pigidentity.UserAgentProduct + "/"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
