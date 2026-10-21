@@ -255,3 +255,27 @@ func TestRestoreTerminalOnExitAltScreenWithColorSchemeReportsAndModifyOtherKeys(
 		t.Errorf("writes after the exit restore reached the terminal: %q", got)
 	}
 }
+
+// packages/tui/src/terminal.ts:89 restoreOnExit(before, after): the Terminal member writes before, then its own resets, then after, in
+// one write, so a caller holding a Terminal gets the same bytes the registry's exit handler writes. The surface terminal has no
+// process modes of its own and writes nothing.
+func TestTerminalInterfaceRestoreOnExitWritesBeforeOwnResetsAfter(t *testing.T) {
+	t.Setenv("PI_PROGRAM_STATUS", "0")
+	master, slave := openTestPTY(t)
+	_ = master
+	var out exitRestoreBuffer
+	process := NewProcessTerminalWithOutput(slave, slave, &out)
+	restore, err := process.enterRawMode(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var terminal Terminal = process
+	started := len(out.String())
+	terminal.RestoreOnExit("<before>", "<after>")
+	want := "<before>" + "\x1b[?2004l" + keyboardProtocolPop + "<after>"
+	if got := out.String()[started:]; got != want {
+		t.Errorf("Terminal.RestoreOnExit wrote %q, want %q", got, want)
+	}
+	restore()
+	(&surfaceTerminal{}).RestoreOnExit("<before>", "<after>") // writes nothing and must not panic
+}

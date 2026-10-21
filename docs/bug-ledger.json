@@ -2984,7 +2984,6 @@
           "pr": "170"
         }
       ],
-      "commitsFrom": "release note",
       "tests": [
         "coding/cli/rpc_initial_tools_test.go::TestRPCFreshPromptDeclaresStructuredSystemOnce",
         "internal/codingagent/exit_record_test.go::TestBackgroundGroupPanicReachesTheHandlerWithItsStack",
@@ -19953,7 +19952,6 @@
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlayStacksOverHostOverlay",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlayStacksOverRemoteEditorSlotComponent",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlaysStackAndHandFocusBack",
-        "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogDisplacesFocusedEditorSlotCustom",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesFocusFromFocusedCustomOverlay",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesTerminalFromFocusedRemoteOverlay",
         "internal/codingagent/extension_ui_phase_shutdown_test.go::TestAwaitedExtensionPhaseWithoutShutdownReturnsItsResult",
@@ -20025,7 +20023,6 @@
         "coding/extension/host/subprocess/ui_prompt_test.go::TestUIBridgePromptScopeDialogOverCustomAndNoUI",
         "coding/extension/host/subprocess/view_terminal_parity_test.go::TestViewsLeaveTheTerminalBytesUnchanged",
         "coding/extension/host/subprocess/widget_key_namespace_test.go::TestTwoExtensionsSettingOneWidgetKeyShareIt",
-        "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogDisplacesFocusedEditorSlotCustom",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesFocusFromFocusedCustomOverlay",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesTerminalFromFocusedRemoteOverlay",
         "internal/codingagent/extension_ui_phase_shutdown_test.go::TestAwaitedExtensionPhaseWithoutShutdownReturnsItsResult",
@@ -22333,7 +22330,6 @@
         "extensions/sdk-py/tests/test_system_prompt_render.py",
         "extensions/sdk/system_prompt_render_test.go::TestBeforeAgentStartSystemPromptRenderErrorIsTheReadersError",
         "extensions/sdk/system_prompt_render_test.go::TestBeforeAgentStartSystemPromptRendersTheCurrentOptions",
-        "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogDisplacesFocusedEditorSlotCustom",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesFocusFromFocusedCustomOverlay",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesTerminalFromFocusedRemoteOverlay",
         "internal/codingagent/extension_ui_phase_shutdown_test.go::TestAwaitedExtensionPhaseWithoutShutdownReturnsItsResult",
@@ -24556,7 +24552,6 @@
         "codemode/worker_admission_test.go::TestDeniedAdmissionStartsNoWorker",
         "codemode/worker_admission_test.go::TestReportsTheActualExitOfExecuteAndStartWorkers",
         "codemode/worker_lifetime_test.go::TestCancellationSettlesWithoutWaitingForTheVMToExit",
-        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionAdmitsOnlyTheLimitFromABurst",
         "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionBoundsSurvivingWorkers",
         "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerHoldsItsSlotWhileRunning"
       ]
@@ -24632,7 +24627,6 @@
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlayStacksOverHostOverlay",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlayStacksOverRemoteEditorSlotComponent",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlaysStackAndHandFocusBack",
-        "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogDisplacesFocusedEditorSlotCustom",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesFocusFromFocusedCustomOverlay",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesTerminalFromFocusedRemoteOverlay",
         "internal/codingagent/widget_key_namespace_test.go::TestHostAndProcessExtensionsShareOneWidgetKeyNamespace",
@@ -24668,8 +24662,6 @@
       ],
       "tests": [
         "coding/extension/host/subprocess/ui_bridge_test.go::TestInteractiveDialogsDoNotWaitForEachOther",
-        "internal/codingagent/ext_ui_dialog_displace_test.go::TestAbortingADisplacedDialogHidesTheShownDialog",
-        "internal/codingagent/ext_ui_dialog_displace_test.go::TestExtensionDialogDisplacesTheOpenDialog",
         "test/parity/scenarios/extensions-runtime/83-extension-dialog-displacement.toml"
       ]
     },
@@ -24785,7 +24777,6 @@
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlaysStackAndHandFocusBack",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteRawOverlayCloseRemovesOnlyItsEntry",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteRawOverlaysFollowPiShowOverlay",
-        "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogDisplacesFocusedEditorSlotCustom",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesFocusFromFocusedCustomOverlay",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesTerminalFromFocusedRemoteOverlay",
         "internal/codingagent/widget_key_namespace_test.go::TestHostAndProcessExtensionsShareOneWidgetKeyNamespace",
@@ -26542,7 +26533,6 @@
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteCustomOverlaysStackAndHandFocusBack",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteRawOverlayCloseRemovesOnlyItsEntry",
         "internal/codingagent/ext_ui_custom_stack_test.go::TestRemoteRawOverlaysFollowPiShowOverlay",
-        "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogDisplacesFocusedEditorSlotCustom",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesFocusFromFocusedCustomOverlay",
         "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogTakesTerminalFromFocusedRemoteOverlay",
         "test/extension-conformance/overlay_handle_test.go::TestCustomOverlayFocusChangesReachSDKs",
@@ -31734,6 +31724,192 @@
       "tests": [
         "coding/extension/host/subprocess/builder_node_embed_test.go::TestNodeRuntimeEmbedsVendoredPiDistAndDependencies",
         "coding/extension/host/subprocess/runtime_node_vendored_test.go::TestVendoredPiDistMatchesThePinnedPackage"
+      ]
+    },
+    {
+      "id": "BF-9c98038",
+      "title": "An unclosed `$$` or `\\[` display-math block no longer swallows or corrupts every Markdown table after it",
+      "symptom": "An unclosed `$$` or `\\[` display-math block no longer swallows or corrupts every Markdown table after it.",
+      "rootCause": "Port Pi (packages/tui/src/components/markdown.ts containsTableStart, TABLE_DELIMITER_ROW_REGEX, tokenizeBlockLatex, #11159): a block-math token no longer spans a GFM table and the pending-math fallback skips one; a pending \\[ also needs a non-empty body. The eight upstream 'unclosed display math before tables' cases are ported verbatim, with a live-Pi comparison of them and their neighbours.",
+      "rootCauseSource": "commit",
+      "userImpact": "Lost or altered data",
+      "platform": "All platforms",
+      "class": "pi-port",
+      "fixedIn": "Unreleased",
+      "releaseNote": "An unclosed `$$` or `\\[` display-math block no longer swallows or corrupts every Markdown table after it. A display-math block never spans a table, and the streaming pending-math fallback no longer treats a following table as pending math (Pi 2ed3118b, #11159).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "9c980381eb",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "tui/markdown_latex_table_test.go::TestMarkdownContainsTableStart",
+        "tui/markdown_latex_table_test.go::TestMarkdownUnclosedDisplayMathBeforeTables",
+        "tui/markdown_latex_table_test.go::TestMarkdownUnclosedDisplayMathBeforeTablesMatchesPi"
+      ]
+    },
+    {
+      "id": "BF-909581e",
+      "title": "The terminal no longer stays in mouse-tracking, focus-reporting, Kitty keyboard, bracketed-paste or…",
+      "symptom": "The terminal no longer stays in mouse-tracking, focus-reporting, Kitty keyboard, bracketed-paste or alternate-screen mode when pig exits through a path that skips the normal teardown (a direct exit, an emergency exit, an off-loop crash, a panic unwinding through `Main`).",
+      "rootCause": "Port Pi (#11170): Pi's process 'exit' handler writes the mode resets synchronously when stop() did not run. Go has no exit hook, so tui.RestoreTerminalOnExit is that handler and every exit path reachable while a TUI runs (coding/cli exitProcess; emergencyTerminalExit, handleInterruptSignal, uncaughtOffLoop) calls it before os.Exit. Order matches TuiAltScreen: end synchronized output, mouse off, autowrap on, cursor, progress clear, bracketed paste off, Kitty pop, modifyOtherKeys off, then alternate-screen exit and cursor show; cooked mode is restored as libuv does. Registered terminals and alt screens leave on normal stop, so nothing is written twice.",
+      "rootCauseSource": "commit",
+      "userImpact": "Crash, hang or runaway process",
+      "platform": "All platforms",
+      "class": "pi-port",
+      "fixedIn": "Unreleased",
+      "releaseNote": "The terminal no longer stays in mouse-tracking, focus-reporting, Kitty keyboard, bracketed-paste or alternate-screen mode when pig exits through a path that skips the normal teardown (a direct exit, an emergency exit, an off-loop crash, a panic unwinding through `Main`). The modes are restored in Pi's order, once, and not again after a normal stop (Pi 9df819de, #11170).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "909581ef0b",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/cli/exit_restore_paths_test.go::TestEveryExitPathReachableWhileATUIRunsRestoresTheTerminal",
+        "tui/terminal_exit_restore_test.go::TestExitRestoreFixture",
+        "tui/terminal_exit_restore_test.go::TestRestoreTerminalOnExitMainScreenWritesOnceAndRestoresCookedMode",
+        "tui/terminal_exit_restore_test.go::TestTerminalRestoreOnProcessExit",
+        "tui/terminal_exit_restore_test.go::TestTerminalRestoreOnProcessExitDoesNotRepeatAfterStop"
+      ]
+    },
+    {
+      "id": "BF-9be7181",
+      "title": "Pasting in the shell no longer hangs after copying text in pig and suspending it with Ctrl+Z on Linux: the…",
+      "symptom": "Pasting in the shell no longer hangs after copying text in pig and suspending it with Ctrl+Z on Linux: the `wl-copy`, `xclip` or `xsel` process that keeps serving the clipboard now runs in its own session and is not stopped with pig (Pi f8ab362c, #11179).",
+      "rootCause": "Ports Pi (#11179): runClipboardCommand spawns with detached on POSIX, so a wl-copy/xclip/xsel daemon leaves PiG's process group. Ports the outside-process-group test.",
+      "rootCauseSource": "commit",
+      "userImpact": "Crash, hang or runaway process",
+      "platform": "Linux",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "Pasting in the shell no longer hangs after copying text in pig and suspending it with Ctrl+Z on Linux: the `wl-copy`, `xclip` or `xsel` process that keeps serving the clipboard now runs in its own session and is not stopped with pig (Pi f8ab362c, #11179).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "9be7181948",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "internal/codingagent/clipboard_command_pi_test.go::TestRunClipboardCommandRunsOutsideOwnProcessGroup"
+      ]
+    },
+    {
+      "id": "BF-e73e536",
+      "title": "Codemode scripts no longer fail immediately when both codemode workers are busy, for example with parallel…",
+      "symptom": "Codemode scripts no longer fail immediately when both codemode workers are busy, for example with parallel codemode calls or in-process subagents.",
+      "rootCause": "Ports Pi (#11184): scripts wait up to 60 s in arrival order for a free VM, PI_CODEMODE_MAX_WORKERS raises the limit of two, aborts and deadlines count the wait, a launch resuming after its result settled starts no worker, and the reservation is released exactly once.",
+      "rootCauseSource": "commit",
+      "userImpact": "An operation failed or was rejected",
+      "platform": "All platforms",
+      "class": "pi-port",
+      "fixedIn": "Unreleased",
+      "releaseNote": "Codemode scripts no longer fail immediately when both codemode workers are busy, for example with parallel codemode calls or in-process subagents. A script waits up to 60 seconds, in arrival order, for a free worker; the wait counts toward its `timeout_ms` (Pi 885a564b, #11184).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "e73e536f2c",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "codemode/worker_settled_launch_test.go::TestLaunchResumingAfterTheResultSettledTakesNoWorker",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionBoundsSurvivingWorkers",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionDropsAbortedAndTimedOutWaiters",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionIgnoresAnInvalidPICodemodeMaxWorkers",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionQueuesABurstInArrivalOrder",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionReadsTheLimitFromPICodemodeMaxWorkers",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerAdmissionRefusesAnAbortedCallerAtOnce",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestCodemodeWorkerSlotIsReturnedAfterSuccessAndTimeout",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestMaxCodemodeWorkersFollowsNumberOfTheEnvironmentValue",
+        "coding/extension/builtin/codemode/worker_admission_test.go::TestWorkerReservationReleasesExactlyOnce"
+      ]
+    },
+    {
+      "id": "BF-00933e5",
+      "title": "`mcp.json` files that start with a UTF-8 BOM, which Windows PowerShell 5.1 adds when it rewrites a file, load…",
+      "symptom": "`mcp.json` files that start with a UTF-8 BOM, which Windows PowerShell 5.1 adds when it rewrites a file, load their MCP servers again, and `pig mcp add` and `pig mcp remove` work on them (Pi bdd9f039, #11191).",
+      "rootCause": "Ports Pi (#11191): readFile and editMcpServers strip the BOM; the Radius MCP offer reads the file the same way, as Pi does through loadMcpConfig.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "Windows",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "`mcp.json` files that start with a UTF-8 BOM, which Windows PowerShell 5.1 adds when it rewrites a file, load their MCP servers again, and `pig mcp add` and `pig mcp remove` work on them (Pi bdd9f039, #11191).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "00933e586a",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/mcpext/config_test.go::TestMCPConfigReadsAndEditsMcpJSONFilesThatStartWithAUTF8BOM",
+        "internal/codingagent/radius_login_mcp_offer_upstream_test.go::TestRadiusMcpServerConfigReadsAMcpJSONThatStartsWithAUTF8BOM"
+      ]
+    },
+    {
+      "id": "BF-0aa31c4",
+      "title": "Extensions that import `@earendil-works/pi-ai/models` (for example for `clampThinkingLevel`) load in the Node…",
+      "symptom": "Extensions that import `@earendil-works/pi-ai/models` (for example for `clampThinkingLevel`) load in the Node extension runtime, under both the `@earendil-works` and the legacy `@mariozechner` scope (Pi 22dc6c26, #11156).",
+      "rootCause": "Ports Pi (#11156): loader shim table, register-loader and runtime-modules lists, a pi-ai models bundle entry, the host peer, and sdk-ts declarations. Needs make vendor-pi-dist and make generate to produce sdk-bundle/models.js.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "All platforms",
+      "class": "pi-port",
+      "fixedIn": "Unreleased",
+      "releaseNote": "Extensions that import `@earendil-works/pi-ai/models` (for example for `clampThinkingLevel`) load in the Node extension runtime, under both the `@earendil-works` and the legacy `@mariozechner` scope (Pi 22dc6c26, #11156).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "0aa31c48e4",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/extension/host/subprocess/node_pi_ai_models_test.go::TestNodeExtensionImportsPiAiModelsSubpath",
+        "coding/extension/host/subprocess/required_tools_test.go::TestRequiredSDKToolsFailWhenMissing"
+      ]
+    },
+    {
+      "id": "BF-90f6908",
+      "title": "Concurrent extension `select`, `confirm`, `input`, `editor` dialogs and inline `custom()` components in…",
+      "symptom": "Concurrent extension `select`, `confirm`, `input`, `editor` dialogs and inline `custom()` components in interactive mode no longer replace each other: a second dialog used to take the editor slot and leave the first one's promise pending.",
+      "rootCause": "Select, confirm, input, editor and editor-slot custom components (in-process and remote) now share one stack on the owner loop: a new dialog hides the visible one, closing it shows the previous one again, an abort/timeout of a hidden dialog removes only that dialog, and a session replacement disposes every dialog. Ports Pi 38847563 (#11166, #9909); adds a cross-SDK concurrent-dialog conformance row, a host-bridge test and an RPC verification test.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "releaseNote": "Concurrent extension `select`, `confirm`, `input`, `editor` dialogs and inline `custom()` components in interactive mode no longer replace each other: a second dialog used to take the editor slot and leave the first one's promise pending. They stack, the last one is visible, closing it shows the previous one again, and a hidden dialog's abort or timeout removes only itself. `/reload` and session replacement dispose every stacked dialog, and an editor-slot custom component restores the editor text it found (Pi 38847563, #11166, #9909).",
+      "origin": "release note",
+      "commits": [
+        {
+          "hash": "90f69085ce",
+          "date": "2026-10-20"
+        }
+      ],
+      "tests": [
+        "coding/cli/rpc_ui_concurrent_dialogs_test.go::TestRpcConcurrentExtensionDialogsResolveEachByItsOwnID",
+        "internal/codingagent/ext_ui_dialog_bridge_test.go::TestExtensionDialogsFromOneExtensionStackThroughTheHostBridge",
+        "internal/codingagent/ext_ui_dialog_displace_test.go::TestAbortingAHiddenDialogLeavesTheShownDialog",
+        "internal/codingagent/ext_ui_dialog_displace_test.go::TestExtensionDialogStacksOverTheOpenDialog",
+        "internal/codingagent/ext_ui_dialog_focus_test.go::TestExtensionDialogStacksOverFocusedEditorSlotCustom",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogOverACustomComponentLeavesTheDialogShownWhenTheComponentEnds",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogOverARemoteEditorSlotComponentHandsFocusBack",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogTimeoutOfAHiddenDialogLeavesTheVisibleDialog",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogsAnswerASelectInputAndEditorMixInStackOrder",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogsRemoveAHiddenDialogWhenItsSignalAborts",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogsShowAConfirmOpenedFromACustomComponentThenRestoreIt",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogsShowTheEarlierConfirmAgainAfterTheLaterIsAnswered",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestExtensionDialogsStackConcurrentInlineCustomComponents",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestRemoteEditorSlotComponentsStackAndHandFocusBack",
+        "internal/codingagent/ext_ui_dialog_stack_test.go::TestSessionReplacementDisposesEveryExtensionDialog",
+        "test/extension-conformance/ui_concurrent_dialogs_test.go::TestConformance_ConcurrentDialogsAgreeAcrossSDKs"
       ]
     }
   ],

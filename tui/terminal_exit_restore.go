@@ -86,7 +86,8 @@ func RestoreTerminalOnExit() {
 		func() {
 			defer func() { _ = recover() }() // Never throw from an exit handler.
 			before, after := exitRestorePrefix(terminal, altActive, altMouse), exitRestoreSuffix(altActive)
-			terminal.restoreOnExit(before, after)
+			var restorable Terminal = terminal // Terminal.restoreOnExit, as the TUI calls it on the terminal it holds
+			restorable.RestoreOnExit(before, after)
 			if cooked != nil {
 				cooked()
 			}
@@ -120,10 +121,10 @@ func exitRestoreSuffix(altActive bool) string {
 	return altExitAltScreen + "\x1b[?25h"
 }
 
-// restoreOnExit is ProcessTerminal.restoreOnExit: it writes before, then this terminal's own mode resets, then after.
+// RestoreOnExit is Terminal.restoreOnExit (ProcessTerminal.restoreOnExit upstream): it writes before, then this terminal's own mode resets, then after.
 // The write is one synchronous write to the output. It skips the output lock when another goroutine holds it, because
 // that goroutine may be the one stuck on a terminal that went away.
-func (t *ProcessTerminal) restoreOnExit(before, after string) {
+func (t *ProcessTerminal) RestoreOnExit(before, after string) {
 	sequence := before
 	if t.progressActiveForExit() {
 		sequence += terminalProgressClearSeq

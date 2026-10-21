@@ -80,6 +80,12 @@ type Terminal interface {
 	// latest status is sent again when support is confirmed or the terminal restarts.
 	// upstream: terminal.ts Terminal.setProgramStatus
 	SetProgramStatus(status ProgramStatus)
+
+	// RestoreOnExit synchronously writes before, then this terminal's own mode resets, then after, when the process
+	// exits without Stop having run. [RestoreTerminalOnExit] calls it for the started process terminal; a terminal that
+	// owns no process modes writes nothing.
+	// upstream: terminal.ts Terminal.restoreOnExit (Pi 9df819de)
+	RestoreOnExit(before, after string)
 }
 
 // ProcessTerminal is the concrete terminal control implementation backed by
