@@ -18,6 +18,7 @@
  "ai:OpenAICodexResponsesOptions": "ai/types.go#StreamOptions",
  "ai:OpenAICompletionsOptions": "ai/types.go#StreamOptions",
  "ai:OpenAIResponsesOptions": "ai/types.go#StreamOptions",
+ "ai:PI_AI_VERSION": "ai/user_agent.go#ProductVersion",
  "ai:PiMessagesOptions": "ai/types.go#StreamOptions",
  "ai:Provider": "ai/models_runtime.go#ModelsProvider",
  "ai:ProviderAuthInteraction": "ai/auth_interaction.go#AuthInteraction",
