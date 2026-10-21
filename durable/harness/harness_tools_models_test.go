@@ -35,6 +35,9 @@ func TestToolsAndHooksSeeTheHarnessModels(t *testing.T) {
 		t.Fatalf("%d models reads, want one from the hook and one from the tool", len(seen))
 	}
 	// A view of the host's Models that adds the Harness identity, shared by tools and hooks (harness-tools.test.ts: `seen[0]` is `seen[1]`).
+	if seen[0] != seen[1] {
+		t.Fatalf("tools and hooks read different views %v and %v of the Harness's models, want one shared view", seen[0], seen[1])
+	}
 	for index, models := range seen {
 		lister, ok := models.(ai.ModelsLister)
 		if !ok || len(lister.GetModels()) == 0 || len(lister.GetModels()) != len(setup.Models.GetModels()) {
