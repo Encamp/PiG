@@ -5,6 +5,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/MichaelKinsy/PiG/internal/testbudget"
 )
 
 // A call that ends its goroutine, as t.Fatal does in runBedrockRPCOnce, must not stop the pool from running the calls after it. The
@@ -26,7 +28,7 @@ func TestBedrockRunPoolRunsEveryCallAfterCallsThatEndTheirGoroutine(t *testing.T
 	}()
 	select {
 	case <-done:
-	case <-time.After(10 * time.Second):
+	case <-time.After(testbudget.Wait(t)):
 		t.Fatalf("the pool never returned: %d of %d calls started, %d ran to the end", started.Load(), runs, finished.Load())
 	}
 	if started.Load() != runs || finished.Load() != runs-2*workers {
