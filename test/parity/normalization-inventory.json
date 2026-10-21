@@ -5375,7 +5375,7 @@
           "kind": "terminal_crop",
           "configuration": {
             "capture_start": "post-login-state:",
-            "capture_end": "post-login-state: current=github-copilot/gpt-5.4 default=github-copilot/gpt-5.4"
+            "capture_end": "post-login-state: current=github-copilot/gpt-6.1-sol default=github-copilot/gpt-6.1-sol"
           },
           "reason": "Owned visible surface: OAuth login from unknown selects the catalog default and persists it",
           "limitations": "No claim about output outside this crop or transient terminal bytes."
