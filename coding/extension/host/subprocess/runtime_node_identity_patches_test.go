@@ -18,6 +18,19 @@ import (
 // The table is spelled out here independently of the patch script, so a wrong
 // or missing patch fails.
 var vendoredIdentityPatches = map[string][][2]string{
+	"pi-ai/utils/identity.js": {
+		{`export const PI_ATTRIBUTION = { name: "pi", url: "https://pi.dev", categories: ["cli-agent"] };`,
+			`export const PI_ATTRIBUTION = { name: "` + pigidentity.AttributionName + `", url: "` + pigidentity.AttributionURL + `", categories: ["` + pigidentity.AttributionCategory + `"] };`},
+		{"    if (mode === \"short\")\n        return \"pi\";\n    const product = `pi/${getClientVersion(identity)}`;\n    const runtime = runtimeDescription();\n    return runtime ? `${product} (${process.platform}; ${runtime}; ${process.arch})` : `${product} (browser)`;",
+			"// pig divergence (D26, D65): PiG's product identity replaces Pi's; see automation/gen/pi-identity-patches.mjs.\n    if (mode === \"short\")\n        return \"" + pigidentity.UserAgentProduct + "\";\n    return pigUserAgent(\"" + pigidentity.UserAgentProduct + "\", identity?.version);"},
+		{`import { PI_AI_VERSION } from "./version.js";`, "import { PI_AI_VERSION } from \"./version.js\";\nimport { pigUserAgent } from \"../../../pig-identity.mjs\";"},
+	},
+	"pi-coding-agent/core/client-identity.js": {
+		{"        version: VERSION,", "// pig divergence (D26, D65): PiG's product identity replaces Pi's; see automation/gen/pi-identity-patches.mjs.\n        version: process.env.PIG_PRODUCT_VERSION ?? VERSION,"},
+	},
+	"pi-coding-agent/utils/pi-user-agent.js": {
+		{`    return formatUserAgent({ userAgent: "detailed", version });`, "// pig divergence (D26, D65): PiG's product identity replaces Pi's; see automation/gen/pi-identity-patches.mjs.\n    return formatUserAgent({ userAgent: \"detailed\" });"},
+	},
 	"pi-ai/auth/oauth/openai-codex.js": {
 		{`async function createAuthorizationFlow(originator = "pi") {`, `async function createAuthorizationFlow(originator = "` + pigidentity.CodexOriginator + `") {`},
 	},
