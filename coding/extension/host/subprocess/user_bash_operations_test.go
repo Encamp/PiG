@@ -138,38 +138,45 @@ func TestUserBashOperationsExecAbortsWithTheContext(t *testing.T) {
 	}
 }
 
-// The consumer drops the operations object once it has called Exec, and the host releases the extension's handle when the object is collected.
-// An exec in flight keeps the object alive: a collection mid-exec released the handle while the extension's exec still ran.
-func TestUserBashOperationsStayAliveWhileTheirExecRuns(t *testing.T) {
+// The extension's handle is released when the host drops the operations object, never while an exec through it is in flight: the request holds only the handle, so the exec itself keeps the object reachable. A release mid-exec deletes the extension's table entry under the running command.
+func TestUserBashOperationsAreNotReleasedWhileAnExecRuns(t *testing.T) {
 	conn, peer := userBashOperationsRig(t)
-	typed, ok := userBashOperationsResult(conn, json.RawMessage(`{"operations":{"handle":"bash-9"}}`))
+	typed, ok := userBashOperationsResult(conn, json.RawMessage(`{"operations":{"handle":"bash-4"}}`))
 	if !ok {
 		t.Fatal("no operations result")
 	}
-	finished := make(chan error, 1)
-	func() {
-		operations := typed.Operations
-		typed = nil
-		go func() {
-			_, err := operations.Exec(t.Context(), "sleep", "/work", extension.BashOperationsExecOptions{})
-			finished <- err
-		}()
-	}()
+	done := make(chan error, 1)
+	go func(operations extension.BashOperations) {
+		_, err := operations.Exec(t.Context(), "sleep", "/work", extension.BashOperationsExecOptions{})
+		done <- err
+	}(typed.Operations)
+	typed = nil
 	request, err := tryReadFramed(peer)
 	if err != nil || request.Request == nil || request.Request.Method != RequestUserBashExec {
 		t.Fatalf("request = %+v, %v, want user_bash_exec", request, err)
 	}
-	for range 3 {
+	frames := make(chan Envelope, 1)
+	go func() {
+		env, err := tryReadFramed(peer)
+		if err == nil {
+			frames <- env
+		}
+	}()
+	deadline := time.After(200 * time.Millisecond)
+	for {
 		runtime.GC()
-		time.Sleep(20 * time.Millisecond)
-	}
-	_ = peer.SetReadDeadline(time.Now().Add(200 * time.Millisecond))
-	var prefix [4]byte
-	if n, err := peer.Read(prefix[:]); err == nil {
-		t.Fatalf("a frame (%d bytes) arrived while the exec ran; the handle was released under it", n)
-	}
-	writeFramed(t, peer, Envelope{Type: MsgResponse, ID: request.ID, Response: &ResponsePayload{Result: json.RawMessage(`{"exitCode":0}`)}})
-	if err := <-finished; err != nil {
-		t.Fatalf("Exec = %v", err)
+		select {
+		case env := <-frames:
+			t.Fatalf("frame while the exec runs = %+v, want none (the handle was released under the running exec)", env)
+		case err := <-done:
+			t.Fatalf("Exec returned %v before the extension's exec settled", err)
+		case <-deadline:
+			writeFramed(t, peer, Envelope{Type: MsgResponse, ID: request.ID, Response: &ResponsePayload{}})
+			if err := <-done; err != nil {
+				t.Fatalf("Exec error = %v", err)
+			}
+			return
+		case <-time.After(5 * time.Millisecond):
+		}
 	}
 }
