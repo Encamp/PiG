@@ -295,7 +295,6 @@
     "packages/coding-agent/test/runtime-credentials.test.ts",
     "packages/coding-agent/test/scoped-models-selector.test.ts",
     "packages/coding-agent/test/scrollbar-theme.test.ts",
-    "packages/coding-agent/test/sdk-openrouter-attribution.test.ts",
     "packages/coding-agent/test/sdk-session-manager.test.ts",
     "packages/coding-agent/test/sdk-skills.test.ts",
     "packages/coding-agent/test/sdk-stream-options.test.ts",
