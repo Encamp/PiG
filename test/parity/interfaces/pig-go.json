@@ -4033,6 +4033,17 @@
       "shapeHash": "sha256:fef0cde9385bca18a20b6c4fa0c5dafb2e35de69e2d84f1cb753bf80e148f005"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/agent#ToolReplayError",
+      "package": "github.com/MichaelKinsy/PiG/agent",
+      "name": "ToolReplayError",
+      "kind": "function",
+      "exported": true,
+      "shape": {
+        "type": "func(messages []AgentMessage) error"
+      },
+      "shapeHash": "sha256:7094d342bd025c3eff23f86255b3aa581cf580e549b4c5528fa2aa4ac8e0b511"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/agent#ToolResultMessage",
       "package": "github.com/MichaelKinsy/PiG/agent",
       "name": "ToolResultMessage",
@@ -41230,9 +41241,9 @@
       "kind": "variable",
       "exported": false,
       "shape": {
-        "type": "[77]ModelCompat"
+        "type": "[76]ModelCompat"
       },
-      "shapeHash": "sha256:045ae8e56836001bc960deb08dc5c7e8de502f911d26ee072bce511c37fa481f"
+      "shapeHash": "sha256:a283a5329ee2d05cf0f0fb114f62bd66d64c47903b211108f734dc601ea791c4"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#generatedFalse",
@@ -41285,9 +41296,9 @@
       "kind": "variable",
       "exported": false,
       "shape": {
-        "type": "[61]map[ModelThinkingLevel]*string"
+        "type": "[59]map[ModelThinkingLevel]*string"
       },
-      "shapeHash": "sha256:3483d45543ed98c185a10ac346ca12ef5d0a4563a9d6a60df39cb4624998c99e"
+      "shapeHash": "sha256:bc14e7e197818eb868a666c3d9299fc8247a02a0e406ec33075c1ae138c934a4"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/ai#generatedToolCallID",
@@ -254256,9 +254267,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(ctx context.Context, messages []github.com/MichaelKinsy/PiG/agent.AgentMessage, model *github.com/MichaelKinsy/PiG/ai.Model, reserveTokens int, apiKey string, headers map[string]string, env map[string]string, thinkingLevel github.com/MichaelKinsy/PiG/ai.ModelThinkingLevel, completer SimpleCompleter, streamFn StreamFn, retry *github.com/MichaelKinsy/PiG/ai.RetryPolicy, callbacks github.com/MichaelKinsy/PiG/ai.RetryCallbacks, sessionID string) (string, *github.com/MichaelKinsy/PiG/ai.Usage, error)"
+        "type": "func(ctx context.Context, messages []github.com/MichaelKinsy/PiG/agent.AgentMessage, model *github.com/MichaelKinsy/PiG/ai.Model, reserveTokens int, apiKey string, headers map[string]string, env map[string]string, thinkingLevel github.com/MichaelKinsy/PiG/ai.ModelThinkingLevel, completer SimpleCompleter, streamFn StreamFn, retry *github.com/MichaelKinsy/PiG/ai.RetryPolicy, callbacks github.com/MichaelKinsy/PiG/ai.RetryCallbacks, sessionID string, customInstructions string) (string, *github.com/MichaelKinsy/PiG/ai.Usage, error)"
       },
-      "shapeHash": "sha256:382d92f8bf127efd9dd86f11f82bff8023846dccfa5577c8c465796e6ceeaf10"
+      "shapeHash": "sha256:9f9e0fb8102de031b0b792d07baff471b5ea447f42944de3aded06bec2ddf51b"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/internal/codingagent/compaction#getAssistantUsage",
