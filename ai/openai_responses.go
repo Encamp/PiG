@@ -122,10 +122,17 @@ func NewOpenAIResponsesProvider(cfg OpenAIResponsesConfig) Provider {
 
 const chatGPTUsageURL = "https://chatgpt.com/settings/usage"
 
-// withChatGPTUsageLink points a Sign in with ChatGPT user at their usage page: the subscription's usage limit is shared with other apps (openai-responses.ts stream catch).
+// chatGPTWorkspaceLimitHint is openai-responses.ts CHATGPT_WORKSPACE_LIMIT_HINT.
+const chatGPTWorkspaceLimitHint = "You've reached your ChatGPT workspace's usage limit. Ask your workspace admin to increase it at admin.openai.com → Workspace → Usage limits."
+
+// withChatGPTUsageLink points a Sign in with ChatGPT user at their usage page: the subscription's usage limit is shared with other apps.
+// On ChatGPT Business plans the workspace admin also sets a per-user limit, and the hint names the admin (openai-responses.ts stream catch, Pi cedefc5326).
 func withChatGPTUsageLink(message string) string {
 	if strings.Contains(message, "subscription_sharing_usage_limit_exceeded") {
 		return message + "\nCheck your ChatGPT usage: " + chatGPTUsageURL
+	}
+	if strings.Contains(message, "subscription_sharing_workplace_individual_usage_limit_exceeded") {
+		return message + "\n" + chatGPTWorkspaceLimitHint
 	}
 	return message
 }
