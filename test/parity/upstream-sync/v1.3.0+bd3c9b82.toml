@@ -3959,9 +3959,9 @@ rationale = "Pi 2ec55d80 keeps the span on the transaction and resets the transa
 [[files]]
 path = "packages/durable/src/storage/indexeddb.ts"
 change = "added"
-disposition = "pending"
+disposition = "designed-out"
 evidence = []
-rationale = ""
+rationale = "New in Pi 16f5f0af4d (IndexedDbStorage, @earendil-works/pi-durable/storage/indexeddb): a Storage backed by the browser's IndexedDB. The file opens with /// <reference lib=\"dom\" /> and every method drives IDBDatabase, IDBTransaction and IDBKeyRange, which exist only in a browser. PiG is a Go process with no browser or WebAssembly build, so nothing can open it. The Storage contract it implements is the one durable/storage/memory.go, jsonl, sqlite and the Cloudflare SQLite driver satisfy; the package's other backends are ported, and PORT_MAP records this file n/a."
 
 [[files]]
 path = "packages/durable/src/storage/jsonl/index.ts"

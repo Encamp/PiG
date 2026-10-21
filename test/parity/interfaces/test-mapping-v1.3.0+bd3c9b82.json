@@ -2430,8 +2430,14 @@
     },
     {
       "path": "packages/chord/test/sqlite/node.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:0d19d1f9aff5592c695cbc53abff0502b6175bea7d9737037af301f3232a0828"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:0d19d1f9aff5592c695cbc53abff0502b6175bea7d9737037af301f3232a0828",
+      "evidence": [
+        "chord/sqlite/node/sqlite_driver_test.go#TestNodeSqliteDriver",
+        "chord/sqlite/node/database_contract_test.go#TestSqliteDatabaseContractRollsBackAFailedTransactionAndClosesIdempotently",
+        "chord/sqlite/node/database_contract_test.go#TestSqliteDatabaseContractReportsBothErrorsWhenRollbackFails"
+      ],
+      "rationale": "Pi c268154c moved the Node driver cases of durable/test/sqlite-facade.test.ts here. The eight cases (connection defaults, commit and idempotent close, serialized transactions, call order, queueing behind a transaction, synchronous calls from a transaction, a settled handle rejected, rollback failure not preserving the callback error) are subtests of TestNodeSqliteDriver and the two contract tests, moved with the driver to chord/sqlite/node. Pi 89e30958 removed the exclusive() cases with the method; the Go exclusive tests went with Exclusive."
     },
     {
       "path": "packages/chord/test/state-diff.test.ts",
@@ -7145,8 +7151,9 @@
     },
     {
       "path": "packages/durable/test/indexeddb-storage.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:d3da0450f73d1759c0ba663661e6956b0f7af6a60428adb85e970fdbb9a2a538"
+      "disposition": "designed-out",
+      "upstreamTestHash": "sha256:d3da0450f73d1759c0ba663661e6956b0f7af6a60428adb85e970fdbb9a2a538",
+      "rationale": "New in Pi 16f5f0af4d: four cases (IDs minted before a reopen stay minted, table writes roll back when a later document copy fails, entry and head-marker scans follow fork ancestry, one readwrite transaction stays active through many mixed writes) run IndexedDbStorage over fake-indexeddb, the browser storage PORT_MAP records as designed out (packages/durable/src/storage/indexeddb.ts drives IDBDatabase and IDBTransaction, which a Go process has no counterpart of; the last case guards IndexedDB's auto-committing transaction lifetime). The Storage behavior of the first three is the contract durable/storage/memory.go, jsonl, sqlite and the Cloudflare driver are tested against."
     },
     {
       "path": "packages/durable/test/jsonl-storage.test.ts",
