@@ -1526,6 +1526,22 @@ func subprocessStreamOptions(request map[string]any, defaults ai.StreamOptions) 
 		}
 		options.Metadata = object
 	}
+	// upstream: packages/ai/src/utils/identity.ts:ClientIdentity. A Node extension's own request (a Session from createAgentSession, whose core/sdk.ts passes getClientIdentity, or a direct pi-ai call) names how it identifies itself; null or absent leaves the provider's defaults.
+	if value := request["identity"]; value != nil {
+		object, ok := value.(map[string]any)
+		if !ok {
+			return ai.StreamOptions{}, fmt.Errorf("model request.identity must be an object")
+		}
+		data, err := json.Marshal(object)
+		if err != nil {
+			return ai.StreamOptions{}, err
+		}
+		var identity ai.ClientIdentity
+		if err := json.Unmarshal(data, &identity); err != nil {
+			return ai.StreamOptions{}, fmt.Errorf("model request.identity: %w", err)
+		}
+		options.Identity = &identity
+	}
 	return options, nil
 }
 
