@@ -28753,8 +28753,25 @@
     },
     {
       "id": "pkg:ai/.#PI_AI_VERSION",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:6af000d580676dcc76e4cc3289f077cfbb6d5e661aac39b4b236970ae69b9741"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:6af000d580676dcc76e4cc3289f077cfbb6d5e661aac39b4b236970ae69b9741",
+      "rationale": "Derived by the interface gap detector: PI_AI_VERSION is Go ai/user_agent.go#ProductVersion (name rule N4), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/user_agent.go#ProductVersion"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity.go#GetClientVersion"
+      ],
+      "evidence": [
+        "test:internal/codingagent/remote_catalog_provider_upstream_test.go#TestRemoteCatalogProviderUpstream",
+        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
+        "test:ai/identity_test.go#TestFormatUserAgentForms"
+      ]
     },
     {
       "id": "pkg:ai/.#PI_ATTRIBUTION",
@@ -34241,8 +34258,25 @@
     },
     {
       "id": "pkg:ai/.#UserAgentMode",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:406c451b23b8c7b040730ccaeab93b1045ba2e9cf018c661c8b82d42546c6124"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:406c451b23b8c7b040730ccaeab93b1045ba2e9cf018c661c8b82d42546c6124",
+      "rationale": "Derived by the interface gap detector: UserAgentMode is Go ai/identity.go#UserAgentMode (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity.go#UserAgentMode"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/bedrock.go#bedrockUserAgent"
+      ],
+      "evidence": [
+        "test:ai/openai_tool_function_marshal_test.go#TestOpenAIToolFunctionEncodesAsItsMarshalJSON",
+        "test:ai/request_marshal_to_test.go#TestRequestTypesEncodeAsTheirMarshalJSON",
+        "test:agent/message_append_stringify_test.go#TestAgentMessageAppendStringifyMatchesMarshalJSON"
+      ]
     },
     {
       "id": "pkg:ai/.#UserMessage",
@@ -34534,18 +34568,66 @@
     },
     {
       "id": "pkg:ai/.#withClientIdentity",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:2e80709b1469b828a03b3d255f7fede3f4f25594a4cb8a6df97b5479eacf1ee2"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:2e80709b1469b828a03b3d255f7fede3f4f25594a4cb8a6df97b5479eacf1ee2",
+      "rationale": "Derived by the interface gap detector: withClientIdentity is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/.#withClientIdentity::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:2d5ca1004ff48687c467e0fbd2e2c9196821e741bb25bb1642341ca65ae58869"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:2d5ca1004ff48687c467e0fbd2e2c9196821e741bb25bb1642341ca65ae58869",
+      "rationale": "Derived by the interface gap detector: withClientIdentity::call:0 is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/.#withClientIdentity::call:1",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:40a8377bf706b236dcdd93c0ef310317d14e4d84772b581ec7eb77dabae3628e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:40a8377bf706b236dcdd93c0ef310317d14e4d84772b581ec7eb77dabae3628e",
+      "rationale": "Derived by the interface gap detector: withClientIdentity::call:1 is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/.#withoutInitialSystemMessage",
@@ -72522,8 +72604,25 @@
     },
     {
       "id": "pkg:ai/compat#PI_AI_VERSION",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:6af000d580676dcc76e4cc3289f077cfbb6d5e661aac39b4b236970ae69b9741"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:6af000d580676dcc76e4cc3289f077cfbb6d5e661aac39b4b236970ae69b9741",
+      "rationale": "Derived by the interface gap detector: PI_AI_VERSION is Go ai/user_agent.go#ProductVersion (name rule N4), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/user_agent.go#ProductVersion"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity.go#GetClientVersion"
+      ],
+      "evidence": [
+        "test:internal/codingagent/remote_catalog_provider_upstream_test.go#TestRemoteCatalogProviderUpstream",
+        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
+        "test:ai/identity_test.go#TestFormatUserAgentForms"
+      ]
     },
     {
       "id": "pkg:ai/compat#PI_ATTRIBUTION",
@@ -79156,8 +79255,25 @@
     },
     {
       "id": "pkg:ai/compat#UserAgentMode",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:406c451b23b8c7b040730ccaeab93b1045ba2e9cf018c661c8b82d42546c6124"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:406c451b23b8c7b040730ccaeab93b1045ba2e9cf018c661c8b82d42546c6124",
+      "rationale": "Derived by the interface gap detector: UserAgentMode is Go ai/identity.go#UserAgentMode (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity.go#UserAgentMode"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/bedrock.go#bedrockUserAgent"
+      ],
+      "evidence": [
+        "test:ai/openai_tool_function_marshal_test.go#TestOpenAIToolFunctionEncodesAsItsMarshalJSON",
+        "test:ai/request_marshal_to_test.go#TestRequestTypesEncodeAsTheirMarshalJSON",
+        "test:agent/message_append_stringify_test.go#TestAgentMessageAppendStringifyMatchesMarshalJSON"
+      ]
     },
     {
       "id": "pkg:ai/compat#UserMessage",
@@ -79449,18 +79565,66 @@
     },
     {
       "id": "pkg:ai/compat#withClientIdentity",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:2e80709b1469b828a03b3d255f7fede3f4f25594a4cb8a6df97b5479eacf1ee2"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:2e80709b1469b828a03b3d255f7fede3f4f25594a4cb8a6df97b5479eacf1ee2",
+      "rationale": "Derived by the interface gap detector: withClientIdentity is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/compat#withClientIdentity::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:2d5ca1004ff48687c467e0fbd2e2c9196821e741bb25bb1642341ca65ae58869"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:2d5ca1004ff48687c467e0fbd2e2c9196821e741bb25bb1642341ca65ae58869",
+      "rationale": "Derived by the interface gap detector: withClientIdentity::call:0 is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/compat#withClientIdentity::call:1",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:40a8377bf706b236dcdd93c0ef310317d14e4d84772b581ec7eb77dabae3628e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:40a8377bf706b236dcdd93c0ef310317d14e4d84772b581ec7eb77dabae3628e",
+      "rationale": "Derived by the interface gap detector: withClientIdentity::call:1 is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/compat#withoutInitialSystemMessage",
@@ -96947,23 +97111,88 @@
     },
     {
       "id": "pkg:ai/utils/identity#UserAgentMode",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:406c451b23b8c7b040730ccaeab93b1045ba2e9cf018c661c8b82d42546c6124"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:406c451b23b8c7b040730ccaeab93b1045ba2e9cf018c661c8b82d42546c6124",
+      "rationale": "Derived by the interface gap detector: UserAgentMode is Go ai/identity.go#UserAgentMode (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity.go#UserAgentMode"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/bedrock.go#bedrockUserAgent"
+      ],
+      "evidence": [
+        "test:ai/openai_tool_function_marshal_test.go#TestOpenAIToolFunctionEncodesAsItsMarshalJSON",
+        "test:ai/request_marshal_to_test.go#TestRequestTypesEncodeAsTheirMarshalJSON",
+        "test:agent/message_append_stringify_test.go#TestAgentMessageAppendStringifyMatchesMarshalJSON"
+      ]
     },
     {
       "id": "pkg:ai/utils/identity#withClientIdentity",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:2e80709b1469b828a03b3d255f7fede3f4f25594a4cb8a6df97b5479eacf1ee2"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:2e80709b1469b828a03b3d255f7fede3f4f25594a4cb8a6df97b5479eacf1ee2",
+      "rationale": "Derived by the interface gap detector: withClientIdentity is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/utils/identity#withClientIdentity::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:2d5ca1004ff48687c467e0fbd2e2c9196821e741bb25bb1642341ca65ae58869"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:2d5ca1004ff48687c467e0fbd2e2c9196821e741bb25bb1642341ca65ae58869",
+      "rationale": "Derived by the interface gap detector: withClientIdentity::call:0 is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/utils/identity#withClientIdentity::call:1",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:40a8377bf706b236dcdd93c0ef310317d14e4d84772b581ec7eb77dabae3628e"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:40a8377bf706b236dcdd93c0ef310317d14e4d84772b581ec7eb77dabae3628e",
+      "rationale": "Derived by the interface gap detector: withClientIdentity::call:1 is Go ai/identity_models.go#WithClientIdentity (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/identity_models.go#WithClientIdentity"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity_models.go#WithClientIdentity"
+      ],
+      "evidence": [
+        "test:ai/identity_test.go#TestWithClientIdentityKeepsTheOptionalSurfacesItsModelsHave",
+        "test:ai/identity_test.go#TestWithClientIdentityMergesRequestIdentityOverTheWrapperIdentity"
+      ]
     },
     {
       "id": "pkg:ai/utils/json-parse#parseJsonWithRepair",
@@ -99596,8 +99825,25 @@
     },
     {
       "id": "pkg:ai/utils/version#PI_AI_VERSION",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:604d519d6f3dba086b7924793422db5fef556e310f8c6889c9acb9aaa269f7f1"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:604d519d6f3dba086b7924793422db5fef556e310f8c6889c9acb9aaa269f7f1",
+      "rationale": "Derived by the interface gap detector: PI_AI_VERSION is Go ai/user_agent.go#ProductVersion (name rule N4), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/user_agent.go#ProductVersion"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/identity.go#GetClientVersion"
+      ],
+      "evidence": [
+        "test:internal/codingagent/remote_catalog_provider_upstream_test.go#TestRemoteCatalogProviderUpstream",
+        "test:ai/identity_test.go#TestClientIdentityVersionDefaultsToTheProductVersion",
+        "test:ai/identity_test.go#TestFormatUserAgentForms"
+      ]
     },
     {
       "id": "pkg:chord/.#AcceptOptions",
@@ -208415,8 +208661,25 @@
     },
     {
       "id": "pkg:durable/.#HarnessOptions",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:ba22674a010a536b5bca30c4211d2ec32d8dd985d7bcdca359f1c453cfa381e1"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:ba22674a010a536b5bca30c4211d2ec32d8dd985d7bcdca359f1c453cfa381e1",
+      "rationale": "Derived by the interface gap detector: HarnessOptions is Go durable/harness/types.go#HarnessOptions (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/harness/types.go#HarnessOptions"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/harness/harness.go#OpenHarness"
+      ],
+      "evidence": [
+        "test:durable/examples/spec_usage_upstream_test.go#TestSpecUsageRevokedLiveDraftPanics",
+        "test:coding/model_runtime_durable_models_test.go#TestModelRuntimeAnswersDurableHarnessGeneration",
+        "test:durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool"
+      ]
     },
     {
       "id": "pkg:durable/.#HarnessSettings",
