@@ -16,21 +16,6 @@ const identity = JSON.parse(readFileSync(new URL("../../internal/coding/pigident
 const note = "// pig divergence (D26, D65): PiG's product identity replaces Pi's; see automation/gen/pi-identity-patches.mjs.\n";
 
 export const identityPatches = {
-  "pi-coding-agent/core/provider-attribution.js": [
-    ['"HTTP-Referer": "https://pi.dev",', `"HTTP-Referer": "${identity.openRouterReferer}",`],
-    ['"X-OpenRouter-Title": "pi",', `"X-OpenRouter-Title": "${identity.openRouterTitle}",`],
-    ['"X-BILLING-INVOKE-ORIGIN": "Pi",', `"X-BILLING-INVOKE-ORIGIN": "${identity.nvidiaBillingOrigin}",`],
-    ['"User-Agent": "pi-coding-agent",', `"User-Agent": "${identity.cloudflareUserAgent}",`],
-    ['"x-opencode-client": "pi" }', `"x-opencode-client": "${identity.openCodeClient}" }`],
-  ],
-  "pi-coding-agent/utils/pi-user-agent.js": [
-    ["export function getPiUserAgent(version) {\n    const runtime = process.versions.bun ? `bun/${process.versions.bun}` : `node/${process.version}`;\n    return `pi/${version} (${process.platform}; ${runtime}; ${process.arch})`;\n}",
-      `${note}import { pigUserAgent } from "../../../pig-identity.mjs";\nexport function getPiUserAgent(version) {\n    return pigUserAgent("${identity.userAgentProduct}");\n}`],
-  ],
-  "pi-ai/utils/pi-user-agent.js": [
-    ["export function getPiUserAgent() {\n    return nodeOs ? `pi (${nodeOs.platform()} ${nodeOs.release()}; ${nodeOs.arch()})` : \"pi (browser)\";\n}",
-      `${note}import { pigUserAgent } from "../../../pig-identity.mjs";\nexport function getPiUserAgent() {\n    return pigUserAgent("${identity.userAgentProduct}");\n}`],
-  ],
   "pi-ai/auth/oauth/openai-codex.js": [
     ['async function createAuthorizationFlow(originator = "pi") {', `async function createAuthorizationFlow(originator = "${identity.codexOriginator}") {`],
   ],

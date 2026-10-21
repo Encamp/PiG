@@ -1667,7 +1667,7 @@ func (p *openAIResponsesProvider) Stream(ctx context.Context, transcript Transcr
 	}
 	body.prepare(httpReq)
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("User-Agent", PiUserAgent())
+	applyIdentityHeaders(httpReq.Header, ClientIdentityTarget{Provider: p.cfg.ProviderID, BaseURL: p.cfg.BaseURL}, opts.Identity)
 	// The OpenAI SDK's default `accept` header; the Codex transport asks for an event stream.
 	httpReq.Header.Set("Accept", "application/json")
 	if p.cfg.Codex {

@@ -50,6 +50,8 @@ type ImagesOptions struct {
 	// APIKeySet distinguishes an explicit empty key from an omitted override.
 	APIKeySet bool
 	Headers   ProviderHeaders
+	// Identity is how the request identifies the calling app: `User-Agent` and provider attribution headers.
+	Identity  *ClientIdentity
 	Env       map[string]string
 	Metadata  map[string]any
 	TimeoutMs int

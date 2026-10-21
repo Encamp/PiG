@@ -440,7 +440,7 @@ func TestAnthropicOnPayloadReplacesBetas(t *testing.T) {
 }
 
 // TestAnthropicClientUserAgent covers mergeClientHeaders key order: the
-// seeded User-Agent key defaults to PiUserAgent() (D65) and takes an
+// seeded User-Agent key defaults to FormatUserAgent(nil) (D65) and takes an
 // exact-case request value in place, so the OAuth identity's lowercase
 // user-agent key, assigned later, wins over it (Q3: OAuth requests keep
 // claude-cli/2.1.280 regardless of a configured header).
@@ -451,7 +451,7 @@ func TestAnthropicClientUserAgent(t *testing.T) {
 		headers ProviderHeaders
 		want    string
 	}{
-		{name: "api key defaults to PiUserAgent", apiKey: "kimi-key", want: PiUserAgent()},
+		{name: "api key defaults to PiUserAgent", apiKey: "kimi-key", want: FormatUserAgent(nil)},
 		{name: "oauth identity defaults to the Claude Code identity", apiKey: "sk-ant-oat-test", want: "claude-cli/2.1.280"},
 		// anthropic-auth-token.test.ts: lets explicit headers override the default Anthropic Messages User-Agent.
 		{name: "api key keeps a request User-Agent", apiKey: "kimi-key", headers: ProviderHeaders{"User-Agent": new("custom-client")}, want: "custom-client"},

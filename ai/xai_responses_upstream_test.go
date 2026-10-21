@@ -84,7 +84,7 @@ func TestXAIResponsesRequestUpstream(t *testing.T) {
 				t.Errorf("authorization = %q", got)
 			}
 			// D65 changes only product identity; default/override semantics match Pi.
-			if got := headers.Get("User-Agent"); got != PiUserAgent() {
+			if got := headers.Get("User-Agent"); got != FormatUserAgent(nil) {
 				t.Errorf("user-agent = %q", got)
 			}
 			if tc.opts.SessionID != "" && headers.Get("session_id") != tc.opts.SessionID {
@@ -160,7 +160,7 @@ func TestXAIResponsesUserAgentUpstream(t *testing.T) {
 			// D65 preserves the Pi header contract with PiG's approved product identity.
 			want := tc.override
 			if want == "" {
-				want = PiUserAgent()
+				want = FormatUserAgent(nil)
 			}
 			if got := headers.Get("User-Agent"); got != want {
 				t.Fatalf("user-agent = %q, want %q", got, want)
