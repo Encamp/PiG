@@ -41,8 +41,9 @@ func SystemReplayError(messages []AgentMessage) error {
 	return nil
 }
 
-// ToolReplayError returns the TypeError Pi's _restoreToolsFromTranscript throws for the system messages of a whole branch, or nil. It first collects the tools the branch ever added or removed, `[...(message.toolsAdded ?? []), ...(message.toolsRemoved ?? [])].map((tool) => tool.name)` for each message in turn, and then replays them with getCurrentTools; every member getCurrentTools cannot read fails in the first step, so only the first step's errors are reported. Unlike SystemReplayError it never reads a message's content. A spread of a value that is not iterable throws before the elements' names are read, the added list before the removed list; a string spreads into characters that have no name.
+// ToolReplayError returns the TypeError Pi's _restoreToolsFromTranscript throws for the system messages of a whole branch, or nil. It first collects the tools the branch ever added or removed, `systemMessages.flatMap((message) => [...(message.toolsAdded ?? []), ...(message.toolsRemoved ?? [])]).map((tool) => tool.name)`, and then replays them with getCurrentTools; every member getCurrentTools cannot read fails in the first step, so only the first step's errors are reported. Unlike SystemReplayError it never reads a message's content. A spread of a value that is not iterable, in any message, throws before any element's name is read, a message's added list before its removed list; a string spreads into characters that have no name.
 func ToolReplayError(messages []AgentMessage) error {
+	var lists [][]byte
 	for _, message := range messages {
 		if message.System == nil || message.source == nil {
 			continue
@@ -51,7 +52,6 @@ func ToolReplayError(messages []AgentMessage) error {
 		if err != nil {
 			continue
 		}
-		var lists [][]byte
 		for _, member := range []string{"toolsAdded", "toolsRemoved"} {
 			tools, ok := object.Get(member)
 			if !ok || tools[0] == 'n' {
@@ -65,10 +65,11 @@ func ToolReplayError(messages []AgentMessage) error {
 				return errors.New("(message." + member + " ?? []) is not iterable")
 			}
 		}
-		for _, list := range lists {
-			if err := elementError(list, "name"); err != nil {
-				return err
-			}
+	}
+	// The names are read after every message's lists were spread.
+	for _, list := range lists {
+		if err := elementError(list, "name"); err != nil {
+			return err
 		}
 	}
 	return nil
