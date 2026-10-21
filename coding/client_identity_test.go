@@ -2,6 +2,8 @@ package coding
 
 // Ports packages/coding-agent/test/sdk-client-identity.test.ts.
 
+// pi: packages/coding-agent/src/core/client-identity.ts
+
 import (
 	"os"
 	"reflect"
