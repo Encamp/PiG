@@ -250895,6 +250895,17 @@
       "shapeHash": "sha256:80962d03ff70a5bbc961f7f0bf7023259ba3c1845db6bc4c246f9e9069abee90"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/internal/codingagent#subprocessClientIdentity",
+      "package": "github.com/MichaelKinsy/PiG/internal/codingagent",
+      "name": "subprocessClientIdentity",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(object map[string]any) (*github.com/MichaelKinsy/PiG/ai.ClientIdentity, error)"
+      },
+      "shapeHash": "sha256:3f8a40a631adf493ddf944d4c1c8fe92f7b94667ce49f3404fcfdf676b323575"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/internal/codingagent#subprocessDecodeJSON",
       "package": "github.com/MichaelKinsy/PiG/internal/codingagent",
       "name": "subprocessDecodeJSON",

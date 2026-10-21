@@ -15,7 +15,7 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 
 ## Summary
 
-971 bugs. 913 own defects, 29 fixed ahead of Pi, 29 Pi fixes ported. 143 bugs have no recorded test.
+979 bugs. 921 own defects, 29 fixed ahead of Pi, 29 Pi fixes ported. 146 bugs have no recorded test.
 
 | ID | Bug | Source | Platform | Fixed in |
 |---|---|---|---|---|
@@ -987,9 +987,17 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 | [BF-43d2597-2](#bf-43d2597-2) | `/compact <instructions>` applies the instructions to the summary of the start of a turn that compaction… | A fix Pi shipped that PiG ported | All platforms | Unreleased |
 | [BF-43d2597-3](#bf-43d2597-3) | A resumed session and `/tree` navigation activate the extension tools the branch never added or removed, such… | A fix Pi shipped that PiG ported | All platforms | Unreleased |
 | [BF-43d2597-4](#bf-43d2597-4) | Switching to a session whose system message holds a `toolsAdded` or `toolsRemoved` member the loadout restore… | A fix Pi shipped that PiG ported | All platforms | Unreleased |
+| [BF-53385a3](#bf-53385a3) | Registering a large MCP catalog, building a CodeMode sandbox from one, and CodeMode tool discovery were… | PiG's own defect | All platforms | Unreleased |
+| [BF-8a18a6b](#bf-8a18a6b) | A Node extension no longer keeps reading an entry the host refused | PiG's own defect | All platforms | Unreleased |
+| [BF-6d3cfc8](#bf-6d3cfc8) | A user_bash `operations` object from an extension is no longer released while a command is running through it | PiG's own defect | All platforms | Unreleased |
 | [BF-46abed3](#bf-46abed3) | Fix in shipped code | PiG's own defect | All platforms | Unreleased |
 | [BF-a1da44d](#bf-a1da44d) | The durable turn classifier retries on a status code (429, 500, 502, 503, 504, 520, 524) only when it stands… | PiG's own defect | All platforms | Unreleased |
 | [BF-33dc8a0](#bf-33dc8a0) | fix(ai): keep a custom client identity's slash in Bedrock's user agent, as the JavaScript SDK does | PiG's own defect | All platforms | Unreleased |
+| [BF-7f3a71c](#bf-7f3a71c) | fix(durable): the reference Harness wraps a plain Models once too | PiG's own defect | All platforms | Unreleased |
+| [BF-a6932b4](#bf-a6932b4) | fix(coding): pass a Node extension request's client identity to the provider | PiG's own defect | All platforms | Unreleased |
+| [BF-36e192b](#bf-36e192b) | fix(lint): port Kitty chunking in UTF-16 units; clear the codemode, terminal image and exit-restore lint hits | PiG's own defect | All platforms | Unreleased |
+| [BF-b9db06c](#bf-b9db06c) | fix(subprocess): keep a user_bash operations object alive while its exec runs | PiG's own defect | All platforms | Unreleased |
+| [BF-d0c2727](#bf-d0c2727) | fix(codingagent): decode a Node request's client identity from its fields; regenerate the normalization… | PiG's own defect | All platforms | Unreleased |
 
 ## Entries
 
@@ -14486,6 +14494,48 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 - **Tests:** `agent/tool_replay_error_test.go::TestToolReplayErrorMatchesPi`, `coding/cli/rpc_replacement_order_test.go::TestRPCSwitchSessionFailsWithTheSystemReplayTypeError`, `coding/runtime_switch_wrong_typed_system_test.go::TestSwitchSessionRejectsAWrongTypedSystemReplayLikePi`, `coding/session_resume_default_tools_port_test.go::TestResumeRestoresTheRecordedLoadoutPort`, `internal/codingagent/compaction/context_edit_test.go::TestCompactAppliesCustomInstructionsToTheTurnPrefixSummaryOfASplitTurn`, `test/extension-conformance/resume_tools_test.go::TestResumeActivatesExtensionToolsTheBranchNeverMentionedAcrossSDKs`, `tui/autocomplete_upstream_test.go::TestUpstreamAutocompleteFD`, `tui/file_autocomplete_test.go::TestBuildFdPathQuery`
 - **Release note:** Switching to a session whose system message holds a `toolsAdded` or `toolsRemoved` member the loadout restore cannot read fails with the TypeError of Pi's tool-list replay; a system message with an unreadable `content` no longer fails the switch (Pi bd3c9b82).
 
+### BF-53385a3
+
+**Registering a large MCP catalog, building a CodeMode sandbox from one, and CodeMode tool discovery were…**
+
+- **Source:** PiG's own defect
+- **Symptom:** Registering a large MCP catalog, building a CodeMode sandbox from one, and CodeMode tool discovery were quadratic in the number of tools, so a 100,000-tool server took tens of seconds to register after its last `tools/list` page, `NewSandbox` took 27 seconds, and every `searchTools()` or `describeNamespace()` call rescanned the whole host catalog once per tool.
+- **Root cause:** Not recorded.
+- **User impact:** An operation failed or was rejected
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `53385a3d93` (2026-10-21, #268)
+- **Tests:** `codemode/sandbox_scaling_test.go::TestSandboxConstructionKeepsOrderAndRejectsDuplicates`, `coding/extension/builtin/codemode/run_test.go::TestDiscoveryDoesNotKeepReadingTheCatalogAfterCancellation`, `coding/extension/builtin/codemode/run_test.go::TestDiscoveryReadsTheCatalogOnceAndKeepsTheFirstEntryOfAName`, `coding/extension/builtin/codemode/run_test.go::TestDiscoveryStopsWhenItsContextIsCancelled`, `coding/mcpext/extension_test.go::TestAgentSessionMCPNamesCollidingToolsAcrossTheWholeCatalog`
+- **Release note:** Registering a large MCP catalog, building a CodeMode sandbox from one, and CodeMode tool discovery were quadratic in the number of tools, so a 100,000-tool server took tens of seconds to register after its last `tools/list` page, `NewSandbox` took 27 seconds, and every `searchTools()` or `describeNamespace()` call rescanned the whole host catalog once per tool. Tool names are now assigned from a per-server count of the sanitized names, the sandbox keeps a name index beside its tool list, and a discovery call reads the host catalog once and resolves each tool's namespace by lookup. Names, collision suffixes, registration order, duplicate-tool errors and the first-entry-wins namespace of a repeated name are unchanged. Discovery also now stops when its context is cancelled and returns the context's error; before, it kept scanning. Pi resolves the same way for the sandbox (a `Map` by name) but scans per tool in the MCP extension and in codemode discovery; PiG's results match Pi's.
+
+### BF-8a18a6b
+
+**A Node extension no longer keeps reading an entry the host refused**
+
+- **Source:** PiG's own defect
+- **Symptom:** A Node extension no longer keeps reading an entry the host refused.
+- **Root cause:** Fixes #264
+- **User impact:** Lost or altered data
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `8a18a6bb2d` (2026-10-21, #272)
+- **Tests:** `coding/extension/host/subprocess/runtime_node_refused_append_test.go::TestNodeExtensionReadsExactlyTheSessionTheHostHolds`, `coding/extension/host/subprocess/runtime_node_refused_append_test.go::TestNodeRuntimeStopsShowingAnAppendTheHostRefused`, `test/extension-conformance/session_refused_append_test.go::TestSessionMirrorHoldsOnlyWhatTheHostAppendedAcrossSDKs`
+- **Release note:** A Node extension no longer keeps reading an entry the host refused. When the host answers `pi.appendEntry` (or `ctx.sessionManager.appendCustomEntry`) with an error, `getEntries()`, `getBranch()`, `getLeafId()`, `getEntry()` and the other session reads stop showing that entry, also after later calls the host synchronizes; before, the entry stayed in the extension's session reads although the host's log never held it. Only the refused entry is taken back: appends still in flight stay, and an entry the host appended is read with the parent the host linked it to, where the extension could show the refused entry or an older leaf instead. A call that was cancelled or lost with its connection has no answer, so its entry stays until the host's log settles it.
+
+### BF-6d3cfc8
+
+**A user_bash `operations` object from an extension is no longer released while a command is running through it**
+
+- **Source:** PiG's own defect
+- **Symptom:** A user_bash `operations` object from an extension is no longer released while a command is running through it.
+- **Root cause:** The extension's handle is released when the host drops the object, but the running exec did not keep the object reachable, so a garbage collection mid-command could delete the extension's table entry under the command.
+- **User impact:** Behavior differed from Pi
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `6d3cfc863d` (2026-10-21, #278)
+- **Tests:** `coding/extension/host/subprocess/user_bash_operations_test.go::TestUserBashOperationsAreNotReleasedWhileAnExecRuns`
+- **Release note:** A user_bash `operations` object from an extension is no longer released while a command is running through it. The extension's handle is released when the host drops the object, but the running exec did not keep the object reachable, so a garbage collection mid-command could delete the extension's table entry under the command.
+
 ### BF-46abed3
 
 **Fix in shipped code**
@@ -14525,6 +14575,71 @@ This page lists every bug fixed since PiG 0.4.1: what users saw, why it happened
 - **Fixed in:** Unreleased
 - **Fix commits:** `33dc8a0a22` (2026-10-21)
 - **Tests:** `ai/identity_bedrock_oracle_test.go::TestBedrockUserAgentMatchesPi`, `ai/identity_bedrock_test.go::TestBedrockUserAgentCarriesTheClientIdentity`
+
+### BF-7f3a71c
+
+**fix(durable): the reference Harness wraps a plain Models once too**
+
+- **Source:** PiG's own defect
+- **Symptom:** fix(durable): the reference Harness wraps a plain Models once too
+- **Root cause:** Not recorded.
+- **User impact:** Behavior differed from Pi
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `7f3a71c014` (2026-10-21)
+- **Tests:** None recorded.
+
+### BF-a6932b4
+
+**fix(coding): pass a Node extension request's client identity to the provider**
+
+- **Source:** PiG's own defect
+- **Symptom:** fix(coding): pass a Node extension request's client identity to the provider
+- **Root cause:** The model-stream host call decoded no `identity` option, so a Node extension's createAgentSession (core/sdk.ts getClientIdentity) and any pi-ai call that names an identity sent no attribution headers. Decode it as ai.ClientIdentity, including an explicit null attribution.
+- **User impact:** Behavior differed from Pi
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `a6932b4c2b` (2026-10-21)
+- **Tests:** `internal/codingagent/subprocess_identity_options_test.go::TestSubprocessStreamOptionsCarryTheRequestIdentity`
+
+### BF-36e192b
+
+**fix(lint): port Kitty chunking in UTF-16 units; clear the codemode, terminal image and exit-restore lint hits**
+
+- **Source:** PiG's own defect
+- **Symptom:** fix(lint): port Kitty chunking in UTF-16 units; clear the codemode, terminal image and exit-restore lint hits
+- **Root cause:** EncodeKitty measured and sliced the payload in bytes where Pi's encodeKitty uses .length and .slice (UTF-16 units). EncodeITerm2's size is Node's (units * 3) >>> 2. The codemode worker wait is computed in integers, and the doubleclose, numbers, env-stat and bare-recover sites name their Pi counterpart or invariant.
+- **User impact:** Behavior differed from Pi
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `36e192bef8` (2026-10-21)
+- **Tests:** `tui/terminal_image_iterm2_options_test.go::TestEncodeKittyChunksByUTF16Units`
+
+### BF-b9db06c
+
+**fix(subprocess): keep a user_bash operations object alive while its exec runs**
+
+- **Source:** PiG's own defect
+- **Symptom:** fix(subprocess): keep a user_bash operations object alive while its exec runs
+- **Root cause:** The cleanup that releases the extension's operations handle runs when the object is unreachable, and Exec's last use of the object is the request it sends. A collection during the exec released the handle under the running extension exec, and the cancel test read the release notify where it expected the cancel (red: TestUserBashOperationsStayAliveWhileTheirExecRuns).
+- **User impact:** Behavior differed from Pi
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `b9db06c809` (2026-10-21)
+- **Tests:** None recorded.
+
+### BF-d0c2727
+
+**fix(codingagent): decode a Node request's client identity from its fields; regenerate the normalization…**
+
+- **Source:** PiG's own defect
+- **Symptom:** fix(codingagent): decode a Node request's client identity from its fields; regenerate the normalization inventory
+- **Root cause:** It reads userAgent, version and attribution from the decoded fields with the same errors. The test's Pi user-agent pattern no longer uses (?i).
+- **User impact:** Behavior differed from Pi
+- **Platform:** All platforms
+- **Fixed in:** Unreleased
+- **Fix commits:** `d0c2727053` (2026-10-21)
+- **Tests:** None recorded.
 
 ## Divergences from Pi added in this release
 
