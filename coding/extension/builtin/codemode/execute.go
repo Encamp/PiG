@@ -53,6 +53,7 @@ const (
 // set it at runtime. Ports execute.ts maxCodemodeWorkers: `Number.isInteger(value) && value > 0` over `Number(process.env.X)`, which reads
 // the empty string as 0 and an unset variable as NaN.
 func maxCodemodeWorkers() float64 {
+	//perf:ok Pi reads the variable per call so SDK hosts can change it at runtime; this runs once per script start and admission pass, not per event
 	value := jsnumber.Parse(os.Getenv("PI_CODEMODE_MAX_WORKERS"))
 	if value > 0 && value == math.Trunc(value) && !math.IsInf(value, 0) {
 		return value
@@ -145,6 +146,7 @@ func (a *workerAdmission) admit() {
 		a.waiters = slices.Delete(a.waiters, 0, 1)
 		a.active++
 		w.isGrant = true
+		//portlint:allow doubleclose the caller holds mu and the waiter left a.waiters on the line above, so no later pass reaches it and granted is closed once
 		close(w.granted)
 	}
 }
@@ -721,7 +723,11 @@ func Execute(ctx context.Context, toolCallID string, params json.RawMessage, onU
 
 	// The wait for a worker counts toward the script's deadline.
 	waitStartedAt := time.Now()
-	release, admission := codemodeWorkers.reserve(ctx, time.Duration(min(deadline, float64(workerWait/time.Millisecond))*float64(time.Millisecond)))
+	wait := workerWait
+	if limit := parsed.Options.TimeoutMs; limit != nil && *limit < workerWait.Milliseconds() {
+		wait = time.Duration(*limit) * time.Millisecond
+	}
+	release, admission := codemodeWorkers.reserve(ctx, wait)
 	waitedMs := float64(time.Since(waitStartedAt)) / float64(time.Millisecond)
 	if admission != workerReserved {
 		return run.workerUnavailable(ctx, admission, deadline, startedAt), nil

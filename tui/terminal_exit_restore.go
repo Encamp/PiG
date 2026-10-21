@@ -84,7 +84,7 @@ func RestoreTerminalOnExit() {
 	exitRestoreRegistry.mu.Unlock()
 	for terminal, cooked := range terminals {
 		func() {
-			defer func() { _ = recover() }() // Never throw from an exit handler.
+			defer func() { _ = recover() }() // upstream: tui/src/tui.ts:exitRestoreHandler (never throw from an exit handler)
 			before, after := exitRestorePrefix(terminal, altActive, altMouse), exitRestoreSuffix(altActive)
 			var restorable Terminal = terminal // Terminal.restoreOnExit, as the TUI calls it on the terminal it holds
 			restorable.RestoreOnExit(before, after)
