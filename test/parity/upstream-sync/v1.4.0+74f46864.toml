@@ -3721,9 +3721,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/errors.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/errors_pi_oracle_test.go#TestStorageRequestErrorAndSessionFailedMatchPi", "test:durable/errors_pi_test.go#TestDurableErrorNamesMatchPi", "test:durable/errors_pi_test.go#TestDurableErrorMessagesAndCauseMatchErrorsTS", "test:durable/errors_name_test.go#TestErrorNames"]
+rationale = "Pi be14d9732 adds ReadOnlySession(what), message `Read-only Harness: ${what} refused`, name ReadOnlySession. Ported as durable.ReadOnlySession and NewReadOnlySession (durable/errors.go) with Name() and the same message; the Pi oracle test builds the class from Pi's errors.ts for two `what` values and compares name, message, Error-ness and cause. Callers match it with errors.As."
 
 [[files]]
 path = "packages/durable/src/harness/agent.ts"
@@ -3819,9 +3819,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/harness/scheduler.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryStartsEachQueuedInputsRunInItsAdmissionTraceAndLinksInputRootsToTheirCaller", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksTheOtherQueuedInputsToTheFirstInvocationOfTheirSharedRun", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryLinksASteerAdmissionToTheCurrentRunWithoutMovingItsWorkIntoTheSteersTrace", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryRecordsCheckpointsOnlyWhenTheRunningPhaseChanges", "test:durable/harness/harness_telemetry_admission_test.go#TestDurableTelemetryMarksOnlyTheFirstInvocationAfterReopenResumedRetainingItsStoredParent", "test:durable/harness/harness_read_only_test.go#TestReadOnlyHarness"]
+rationale = "Pi 2ec55d80 wraps each phase in a pi.durable.phase span (parents from the stored task trace, links for shared runs and steers, outcome aborted, waiting or sleeping at a wait, restart or close, a resumed mark on the first invocation after reopen) and adds the checkpoint event after the runtime commit. durable/harness/scheduler.go ports it: the phase span covers the handler plus its decision commit and settles before the next phase starts. Go runs each invocation on its own goroutine (D181), so the tests match phases to tasks by task.id. Pi be14d9732 (HarnessOptions.readOnly): TaskSchedulerOptions.ReadOnly makes Open only load live tasks (a running task stays as committed, no restart counted, no reconcile, no wake), Resume fail with ReadOnlySession (Resume panics as resume() throws; TryResume returns it for the callers that are async upstream), Wake always inactive, and scheduleReconcile and scheduleWake do nothing; TestReadOnlyHarness drives each of these from a viewer of a session whose generation runs in another Harness."
 
 [[files]]
 path = "packages/durable/src/harness/submissions.ts"
