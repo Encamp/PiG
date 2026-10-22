@@ -53,9 +53,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/anthropic-messages.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/identity_oracle_test.go#TestAnthropicUserAgentHeaderReplacesTheClaudeCodeIdentityLikePi", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence", "test:ai/openrouter_cost_test.go#TestAnthropicMessagesUsesOpenRouterReportedCost", "test:ai/transcript_tool_changes_test.go#TestTranscriptToolChangesAnthropicHoldsUpdatePastAssistantThatConvertsToNoBlocks"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Anthropic sends the identity headers for API keys and Authorization, and keeps the Claude Code identity for OAuth tokens instead of the client identity; the oracle test compares the request headers with the pinned Pi for API-key and OAuth tokens across anthropic, openrouter, opencode and github-copilot, with and without a request User-Agent. Pi cae8d69e5: the message_delta usage applies OpenRouter's reported cost (ai/anthropic.go). Pi 3bc6eebac (#11091): held system updates are flushed only before an assistant message that is sent (ai/anthropic.go anthConvertMessagesDetailed)."
 
 [[files]]
 path = "packages/ai/src/api/azure-openai-config.ts"
@@ -235,9 +235,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/openai-completions.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_oracle_test.go#TestProviderIdentityHeadersMatchPi", "test:ai/identity_test.go#TestProviderIdentityUserAgents", "test:ai/user_agent_test.go#TestProviderUserAgentOverridePrecedence", "test:ai/openrouter_cost_test.go#TestOpenAICompletionsUsesOpenRouterReportedCost", "test:ai/openrouter_cost_test.go#TestOpenAICompletionsOpenRouterReportedTotalWithoutCatalogRates"]
+rationale = "Pi adc5fa9f and 04a93bad move client identity and attribution into pi-ai: getIdentityHeaders (ai/identity.go) replaces the local getPiUserAgent merge, layered below model and request headers. PiG sends its own product values (D26, D65). Chat Completions merges the identity headers below model.headers, including the OpenRouter, NVIDIA and OpenCode attribution headers; the oracle test compares the custom, openrouter, nvidia, opencode, opencode-go and github-copilot requests with the pinned Pi. Pi cae8d69e5: parseChunkUsage applies OpenRouter's reported cost (ai/openai.go)."
 
 [[files]]
 path = "packages/ai/src/api/openai-decisions.lazy.ts"
@@ -291,9 +291,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/api/openrouter-images.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/images_models_wire_test.go#TestOpenRouterImagesHeaderUndefinedOverride", "test:ai/openrouter_images_cost_test.go#TestOpenRouterImagesUsageCostMatchesUpstream"]
+rationale = "the image request sends the identity headers below model and request headers (ai/openrouter_images.go). Pi 7c22a93d0: the image usage cost carries totalFromProvider false (ai/openrouter_images.go)."
 
 [[files]]
 path = "packages/ai/src/api/pi-messages.lazy.ts"
@@ -571,9 +571,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/models.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/identity_test.go#TestModelsMergeRequestIdentityOverTheModelsIdentity", "test:ai/identity_test.go#TestModelsSendTheOpenCodeSessionHeaderToCustomProvidersPointingAtOpenCode", "test:ai/login_agent_name_oracle_test.go#TestLoginAgentNameMatchesPi", "test:ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream"]
+rationale = "Pi adc5fa9f and 04a93bad add CreateModelsOptions.identity: every request merges the request identity over it field by field, and its attribution name is the default LoginOptions.agentName. Ported in ai/models_runtime*.go; the tests assert the request-over-Models merge, the OpenCode session header and the default login agent name against the pinned Pi. Pi 7c22a93d0: calculateCost sets totalFromProvider false (ai/model_utils.go); the models-runtime case asserts it."
 
 [[files]]
 path = "packages/ai/src/oauth.ts"
@@ -1264,9 +1264,9 @@ rationale = "Pi 2ec55d80 adds the pi.ai.request and pi.ai.poll span schema and o
 [[files]]
 path = "packages/ai/src/types.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/classifier_models_upstream_test.go#TestClassifierModelsUpstream", "test:ai/identity_test.go#TestClientIdentityJSON", "test:ai/identity_test.go#TestMergeClientIdentityFieldByField", "test:ai/usage_json_test.go#TestUsageCostTotalFromProviderWire"]
+rationale = "Pi adc5fa9f adds StreamOptions.identity (ClientIdentity); ai.StreamOptions.Identity carries it, with ClientIdentity JSON and the field-by-field merge locked by the two identity tests. Pi 7f225f25 adds ClassifierModel.compat (SystemOneCompat); ai.ClassifierModel.Compat (ai/model_types.go) carries it through the catalog codec, and the OpenRouter classifier catalog case of TestClassifierModelsUpstream asserts the explicit compat. Pi 7c22a93d0 adds Usage.cost.totalFromProvider; ai.UsageCost.TotalFromProvider (*bool, absent stays absent on the wire) is locked by TestUsageCostTotalFromProviderWire."
 
 [[files]]
 path = "packages/ai/src/utils/abort-signals.ts"
@@ -1369,9 +1369,9 @@ rationale = ""
 [[files]]
 path = "packages/ai/src/utils/openrouter-cost.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:ai/openrouter_cost_test.go#TestApplyOpenRouterReportedCost"]
+rationale = "Pi cae8d69e5 (#10286) adds openrouter-cost.ts; ai/openrouter_cost.go ports isOpenRouterModel and applyOpenRouterReportedCost, including totalFromProvider true. Divergence D124, which carried the earlier unreleased form of this fix, is retired."
 
 [[files]]
 path = "packages/ai/src/utils/overflow.ts"
@@ -2664,9 +2664,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/core/usage-totals.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:internal/usagetotals/usagetotals_test.go#TestCombineUsageMarksTheTotalProviderReportedOnlyWhenBothTotalsAre"]
+rationale = "Pi 7c22a93d0: combineUsage marks a sum provider-reported only when both parts are; internal/usagetotals.CombineUsage does the same."
 
 [[files]]
 path = "packages/coding-agent/src/core/virtual-models.ts"
@@ -3364,9 +3364,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/package-manager-cli.ts"
 change = "added"
-disposition = "pending"
+disposition = "designed-out"
 evidence = []
-rationale = ""
+rationale = "Pi 476a303c1 drops --min-release-age from the managed `npm ci` it runs for a release install. A standalone pig runs no managed `npm ci` for its own update (self-update is the standalone-binary path of D39, whose record now names this commit), so the flag has no counterpart."
 
 [[files]]
 path = "packages/coding-agent/src/rpc-entry.ts"

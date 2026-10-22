@@ -214,8 +214,20 @@
     },
     {
       "path": "packages/ai/test/anthropic-sse-parsing.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:591ec97b9c5ab0ad494a56624aad56e4ebf42091e7371da54efb070d19a44f6c"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:591ec97b9c5ab0ad494a56624aad56e4ebf42091e7371da54efb070d19a44f6c",
+      "evidence": [
+        "ai/anthropic_sse_upstream_test.go#TestAnthropicUpstreamSSEParsing",
+        "ai/anthropic_injected_client_upstream_test.go#TestAnthropicUpstreamSSEParsingInjectedClient",
+        "ai/anthropic_fallback_boundary_upstream_test.go#TestAnthropicFallbackBoundaryUpstream",
+        "ai/anthropic_payload_stream_upstream_test.go#TestAnthropicPayloadReplacementForcesStreamingUpstream",
+        "ai/anthropic_input_transformations_upstream_test.go#TestAnthropicInputTransformationsUpstream",
+        "ai/anthropic_test.go#TestAnthropicSSE_IgnoresUnknownEvents",
+        "ai/anthropic_test.go#TestAnthropicRefusalPreservesExplanation",
+        "ai/provider_stream_events_upstream_test.go#TestProviderStreamEventsUpstream",
+        "ai/openrouter_cost_test.go#TestAnthropicMessagesUsesOpenRouterReportedCost"
+      ],
+      "rationale": "All 14 cases: TestAnthropicUpstreamSSEParsing subtests carry the original inputs, including the 0.99.1 OpenRouter fixture anthropic/claude-haiku-4.5 (:285) and managed betas asserted on the anthropic-beta header. TestAnthropicUpstreamSSEParsingInjectedClient ports the three injected-client cases (:246, :271, :293) through ai.AnthropicClient and asserts params.stream and params.betas as the client receives them. The 0.99.1 'forwards parsed provider stream events in order' case (:113) is TestProviderStreamEventsUpstream/anthropic_forwards_parsed_provider_stream_events_in_order. Pi cae8d69e5 (1.4.0+74f46864, #10286) adds \"uses the total reported by OpenRouter's Anthropic Messages endpoint\" (15 cases in all), ported as TestAnthropicMessagesUsesOpenRouterReportedCost with the same message_delta usage (cost 0.004, is_byok false, upstream_inference_cost 0.003) and the provider openrouter-work; it asserts total 0.004, totalFromProvider true and a component sum that differs from the total."
     },
     {
       "path": "packages/ai/test/anthropic-strict-tool-fallback.test.ts",
@@ -1061,8 +1073,21 @@
     },
     {
       "path": "packages/ai/test/models-runtime.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:8c6a89b2e05919cd0e355e1a6f35b4fa3a0d4953e2c4bf22e5c79c274aa6fe06"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:8c6a89b2e05919cd0e355e1a6f35b4fa3a0d4953e2c4bf22e5c79c274aa6fe06",
+      "evidence": [
+        "ai/models_runtime_credentials_upstream_test.go#TestModelsRuntimeCredentialsUpstream",
+        "ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream",
+        "ai/models_runtime_auth_upstream_test.go#TestModelsRuntimeAuthUpstream",
+        "ai/models_runtime_refresh_upstream_test.go#TestModelsRuntimeRefreshUpstream",
+        "test/parity/scenarios/model-runtime-store-catalog/19-models-runtime.toml",
+        "ai/models_typed_upstream_test.go#keeps chat reads independent from the all-model catalog",
+        "ai/models_runtime_auth_upstream_test.go#persists an OAuth refresh that started before the request was cancelled",
+        "ai/models_runtime_refresh_upstream_test.go#persists an OAuth refresh that started before the model refresh was cancelled",
+        "ai/models_runtime_refresh_upstream_test.go#passes the registered provider's base URL, including wrapper overrides, to refreshModels",
+        "ai/models_runtime_basic_upstream_test.go#marks catalog-derived totals as not provider-reported"
+      ],
+      "rationale": "40 cases. The 39 cases of 1.1.0 stay ported as the prior reviewed row records (same inputs and assertions across credentials, refresh, publication, cancellation, OAuth and stream events). 1.2.0 adds one case, \"passes the registered provider's base URL, including wrapper overrides, to refreshModels\": RefreshModelsContext.BaseURL (ai/models_runtime.go) is set from the registered provider's BaseURL in Models.runProviderRefreshPhase (ai/models_runtime_refresh.go), so a wrapper that copies the provider and overrides BaseURL hands its URL to the inner refresh. TestModelsRuntimeRefreshUpstream ports it with the same provider, override and expected two-call list; dropping BaseURL from the context fails it. Pi 7c22a93d0 (1.4.0+74f46864) adds \"marks catalog-derived totals as not provider-reported\": CalculateCost resets UsageCost.TotalFromProvider to false (ai/model_utils.go); ported as the same-named subtest of TestModelsRuntimeBasicUpstream with the same usage (1,000,000 input tokens, total 9, totalFromProvider true) and expectation (false)."
     },
     {
       "path": "packages/ai/test/node-http-proxy.test.ts",
@@ -1190,8 +1215,14 @@
     },
     {
       "path": "packages/ai/test/openai-completions-provider-stream-event.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:758b563c74ec4f529a5a3c897da4c0b951d33d92da3a3a349778474b80b23c44"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:758b563c74ec4f529a5a3c897da4c0b951d33d92da3a3a349778474b80b23c44",
+      "evidence": [
+        "ai/provider_stream_events_upstream_test.go#TestProviderStreamEventsUpstream",
+        "ai/openrouter_cost_test.go#TestOpenAICompletionsUsesOpenRouterReportedCost",
+        "ai/openrouter_cost_test.go#TestOpenAICompletionsOpenRouterReportedTotalWithoutCatalogRates"
+      ],
+      "rationale": "New in 0.99.1 (unchanged in 0.99.2). The single case \"exposes provider chunks including OpenRouter metadata\" (openai-completions-provider-stream-event.test.ts:58) is ported as the openai-completions subtest of TestProviderStreamEventsUpstream. Pi cae8d69e5 (1.4.0+74f46864, #10286) adds \"uses OpenRouter's reported total without double-counting non-BYOK upstream cost\" (cost toEqual {0,0,0,0,total 0.004,totalFromProvider true}, TestOpenAICompletionsOpenRouterReportedTotalWithoutCatalogRates) and \"includes upstream inference cost for OpenRouter BYOK requests\" (total 0.0032, totalFromProvider true, TestOpenAICompletionsUsesOpenRouterReportedCost)."
     },
     {
       "path": "packages/ai/test/openai-completions-raw-stop-reason.test.ts",
@@ -1457,8 +1488,13 @@
     },
     {
       "path": "packages/ai/test/openrouter-cost.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:2e8d0d645dec66ccace0bea254e0965c5d16e53647e60225b444da95260d4a8e"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:2e8d0d645dec66ccace0bea254e0965c5d16e53647e60225b444da95260d4a8e",
+      "evidence": [
+        "ai/openrouter_cost_test.go#TestApplyOpenRouterReportedCost",
+        "ai/openrouter_api_test.go#TestOpenRouterCostConvertsPricesAndFallsBackOnMissingInvalidAndNegativeRates"
+      ],
+      "rationale": "New in Pi 1.4.0+74f46864 (cae8d69e5, #10286): all 5 cases are ported (isOpenRouterModel is TestOpenRouterCostConvertsPricesAndFallsBackOnMissingInvalidAndNegativeRates' provider/base-URL rows; the four applyOpenRouterReportedCost cases are TestApplyOpenRouterReportedCost with Pi's usage, accounting objects and total/totalFromProvider expectations)."
     },
     {
       "path": "packages/ai/test/openrouter-images.test.ts",
@@ -1821,8 +1857,25 @@
     },
     {
       "path": "packages/ai/test/transcript-tool-changes.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:95e287e77f81bcbd4fb48cc9d18fc7ff48769221d0e40589a994a97cdd84a24c"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:95e287e77f81bcbd4fb48cc9d18fc7ff48769221d0e40589a994a97cdd84a24c",
+      "evidence": [
+        "ai/system_message_replay_test.go",
+        "ai/transcript_tool_changes_test.go",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesKimiCodingAdditions",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesRequests",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesAdditionalToolsItem",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesPoisonedHistory",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesKeepsPrefixAcrossRemovalAndLoads",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesRedefinitionIsNotARemoval",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesStopsListingAToolAsUnavailableOnceDeclaredAgain",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesDoesNotListAToolAsUnavailableBeforeItsRemovalIsAnnounced",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesOpenAIResponsesToolSearchPrefixAcrossLoadsAfterARemoval",
+        "ai/transcript_tool_changes_test.go#TestResolveTranscriptToolsBoundaryPerTransport",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesKimiPrefixAcrossLoadsAfterARemoval",
+        "ai/transcript_tool_changes_test.go#TestTranscriptToolChangesAnthropicHoldsUpdatePastAssistantThatConvertsToNoBlocks"
+      ],
+      "rationale": "The fold tests cover all providers without native support; the integrated serialized-request suite covers Anthropic native capability/tool-list fallbacks, OpenAI developer-message/tool-search/removal fallbacks, and Kimi tool-bearing/system-text anchoring. Together they port all 11 upstream cases. Pi 3daa2028→b06c1f2c: Pi b06c1f2c (#10720) adds 'anchors additions for Kimi Coding k3/k3-256k/kimi-for-coding' and 'keeps Kimi Coding Highspeed additions in top-level tools'; ported in TestTranscriptToolChangesKimiCodingAdditions. Pi fdce48eb (caa6967b, 530015d9, #11142): every OpenAI Responses tool is declared in additional_tools items at its developer message (the table cases 'declares every OpenAI tool...' and 'announces OpenAI removals as text' are the first and fifth rows of TestTranscriptToolChangesOpenAIResponsesRequests); 'redefines an OpenAI tool with additional_tools...' is ...RedefinitionIsNotARemoval; the #10940 prefix cases are ...KeepsPrefixAcrossRemovalAndLoads, ...ToolSearchPrefixAcrossLoadsAfterARemoval and TestTranscriptToolChangesKimiPrefixAcrossLoadsAfterARemoval; 'stops listing a tool as unavailable...' and 'does not list a tool as still unavailable...' keep their names; 'resolves the top-level tool boundary per transport' is TestResolveTranscriptToolsBoundaryPerTransport. The 0.87.1 evidence for the Anthropic and fold cases is unchanged. Pi 3bc6eebac (1.4.0+74f46864, #11091) adds \"holds an Anthropic update past an assistant message that converts to no blocks\", ported as TestTranscriptToolChangesAnthropicHoldsUpdatePastAssistantThatConvertsToNoBlocks with the same transcript and expected role orders."
     },
     {
       "path": "packages/ai/test/transform-messages-copilot-openai-to-anthropic.test.ts",
@@ -3306,8 +3359,16 @@
     },
     {
       "path": "packages/coding-agent/test/compaction-summary-reasoning.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:505e91c6b438e34c19c8fe7061cfcc631b5f96cf419c73c5ecdc151823b3733d"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:505e91c6b438e34c19c8fe7061cfcc631b5f96cf419c73c5ecdc151823b3733d",
+      "evidence": [
+        "internal/codingagent/compaction/compaction_summary_reasoning_test.go",
+        "coding/session_summarization_test.go",
+        "internal/codingagent/compaction/context_edit_test.go#TestCompactAppliesCustomInstructionsToTheTurnPrefixSummaryOfASplitTurn",
+        "test/parity/scenarios/compaction/16-split-turn-custom-instructions.toml",
+        "internal/codingagent/compaction/compaction_summary_reasoning_test.go#TestCompactSummariesSetNoMaxTokens"
+      ],
+      "rationale": "The reasoning suite names the upstream file and covers all ten successful request-shape/result cases; TestSummarizationRejectsIncompleteResponses covers the four history/split-turn tool-call and length-stop rejection cases. Pi 6fcb4867 passes undefined for reserveTokens; summaries set no maxTokens (internal/codingagent/compaction/compaction_summary_reasoning_test.go#TestCompactSummariesSetNoMaxTokens). Pi adfc1446 (#11058): the split-turn prefix summary request carries the custom instructions; ported as TestCompactAppliesCustomInstructionsToTheTurnPrefixSummaryOfASplitTurn and compared with Pi's compact() by scenario 16-split-turn-custom-instructions. Pi 7c22a93d0 (1.4.0+74f46864) changes the expected combined usage of \"combines usage from split-turn summaries\" to cost {total 0, totalFromProvider false}; TestCompactSummariesSetNoMaxTokens expects the same."
     },
     {
       "path": "packages/coding-agent/test/compaction.test.ts",
@@ -3470,8 +3531,13 @@
     },
     {
       "path": "packages/coding-agent/test/export-html-cost.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:06546a88d57fbb81e9ca037c08aeb798bec56a6af461b9cf16c9069407342dfb"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:06546a88d57fbb81e9ca037c08aeb798bec56a6af461b9cf16c9069407342dfb",
+      "evidence": [
+        "internal/codingagent/export/export_cost_total_test.go#TestExportHTMLCostUsesRecordedTotals",
+        "internal/codingagent/export/upstream_test.go#TestExportHTMLPinnedAssets"
+      ],
+      "rationale": "New in Pi 1.4.0+74f46864 (cae8d69e5): the one case \"uses recorded totals while falling back to component sums for old sessions\" runs computeStats of the export template with Pi's two entries; TestExportHTMLPinnedAssets pins PiG's template.js to Pi's file byte for byte (D124 retired), so the function is Pi's."
     },
     {
       "path": "packages/coding-agent/test/export-html-skill-block.test.ts",
@@ -6579,8 +6645,12 @@
     },
     {
       "path": "packages/coding-agent/test/usage-totals.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:20341fdd3788144e78cbc9f0e9c65762f57049c0451c44e9aea1895783c1e542"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:20341fdd3788144e78cbc9f0e9c65762f57049c0451c44e9aea1895783c1e542",
+      "evidence": [
+        "internal/usagetotals/usagetotals_test.go#TestCombineUsageMarksTheTotalProviderReportedOnlyWhenBothTotalsAre"
+      ],
+      "rationale": "New in Pi 1.4.0+74f46864 (7c22a93d0): the one case \"marks the combined total as provider-reported only when both totals are\" is ported with the same four usages (true/true, true/absent, absent/true, absent/absent) and expectations (total 3 with totalFromProvider true, then false), plus the explicit-false rows."
     },
     {
       "path": "packages/coding-agent/test/user-message.test.ts",
