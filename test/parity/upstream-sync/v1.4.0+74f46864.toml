@@ -1481,9 +1481,9 @@ rationale = "aa9cf15b (a hold whose input the token places on another host is in
 [[files]]
 path = "packages/chord/src/context/index.ts"
 change = "added"
-disposition = "pending"
+disposition = "designed-out"
 evidence = []
-rationale = ""
+rationale = "Pi 92ab5360 reorders traceIn to (options, fn, context) so the Context is the last argument, like every other Pi API that takes one. Go passes context.Context first by convention, and chord/context.TraceIn(ctx, options, fn) already keeps it there for every other function in the package; the move is a signature-order change with no behavior change, so there is nothing to port. TestContextIsolatesConcurrentTraceInBranchesAndPreservesCallbackResultsAndErrors still drives TraceIn."
 
 [[files]]
 path = "packages/chord/src/contract.ts"
@@ -3770,9 +3770,9 @@ rationale = "Pi 2ec55d80 passes the phase span as the Telemetry option of genera
 [[files]]
 path = "packages/durable/src/harness/harness.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_read_only_test.go#TestReadOnlyHarness", "test:durable/harness/harness_task_graph_test.go", "test:durable/harness/harness_view_test.go"]
+rationale = "Pi be14d9732 and 92ab5360. The Harness passes options.readOnly to the Session and the task scheduler (TestReadOnlyHarness). 92ab5360 removes Conversation.viewState and Harness.taskGraph, the disposable-state variants: durable/harness/harness.go no longer has them, and the view and task-graph tests drive the watch form only. The added async keywords on compact, abort, waitForTask and waitForIdle only make a synchronous throw reject; Go returns the error, so there is no separate behavior."
 
 [[files]]
 path = "packages/durable/src/harness/inbox.ts"
@@ -3854,9 +3854,9 @@ rationale = "Pi 2ec55d80 passes the phase span through tool and nested tool call
 [[files]]
 path = "packages/durable/src/harness/types.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_read_only_test.go#TestReadOnlyHarness", "test:durable/harness/harness_task_graph_test.go", "test:durable/harness/harness_view_test.go"]
+rationale = "Pi be14d9732 adds HarnessOptions.readOnly (durable/harness/types.go HarnessOptions.ReadOnly, TestReadOnlyHarness); 92ab5360 imports WatchHandle from chord and drops ConversationHarness.viewState and Harness.taskGraph (the watch forms remain, and the Go interfaces drop both), and rewords the document-retention comment to name watches only."
 
 [[files]]
 path = "packages/durable/src/harness/usage.ts"
@@ -3931,9 +3931,9 @@ rationale = "Declares Photon's WebAssembly import for TypeScript. The Go process
 [[files]]
 path = "packages/durable/src/index.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/harness/harness_read_only_test.go#TestReadOnlyHarness", "test:durable/watch_handle_contract_test.go#TestWatchHandleContract"]
+rationale = "Pi be14d9732 exports ReadOnlySession (durable.ReadOnlySession, thrown by TestReadOnlyHarness); 92ab5360 re-exports WatchEnd and WatchHandle from chord (the Go surface is chord.WatchHandle and chord.WatchEnd, TestWatchHandleContract) and drops the DocumentState export (durable.DocumentState is removed)."
 
 [[files]]
 path = "packages/durable/src/search.ts"
@@ -3959,9 +3959,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/session/session.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/session/session_adoption_test.go#TestSessionAdoptionInsideStorageCommit", "test:durable/session/session_adoption_internal_test.go#TestSessionFailsWithItsOwnAdoptionErrorWhichNeverReachesStorage", "test:durable/session/observation_internal_test.go#TestCommittedWatchRetireDeliversTheLastFrameThenEndsRetired", "test:durable/harness/harness_read_only_test.go#TestReadOnlyHarness"]
+rationale = "Pi 92ab5360: the Session passes Storage.commit an adopt callback and adopts the batch inside it, keeping its own error away from Storage and failing the Session when a commit resolves without adopting (TestSessionAdoptionInsideStorageCommit, TestSessionFailsWithItsOwnAdoptionErrorWhichNeverReachesStorage); documentState is removed and every watch is a CommittedWatch that delivers retirement explicitly (TestCommittedWatchRetireDeliversTheLastFrameThenEndsRetired). Pi be14d9732: a read-only Session refuses a commit with writes with ReadOnlySession before Storage (TestReadOnlyHarness)."
 
 [[files]]
 path = "packages/durable/src/session/transaction.ts"
@@ -3973,9 +3973,9 @@ rationale = "Pi 2ec55d80 keeps the span on the transaction and resets the transa
 [[files]]
 path = "packages/durable/src/storage/indexeddb.ts"
 change = "added"
-disposition = "pending"
+disposition = "designed-out"
 evidence = []
-rationale = ""
+rationale = "IndexedDbStorage is browser-only (IndexedDB) and is not ported; see the earlier rationale. Pi 92ab5360 only adds the adopt callback to its commit, called after the transaction completes, which is the same contract the Go backends implement and the conformance suite checks (memory, JSONL, SQLite)."
 
 [[files]]
 path = "packages/durable/src/storage/jsonl/index.ts"
@@ -3994,16 +3994,16 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/storage/jsonl/storage.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/storage/jsonl/jsonl_storage_test.go#TestJsonlStorageConformance"]
+rationale = "Pi 92ab5360: JsonlStorage.commit calls adopt(seq) once the marker is appended and before sidecar reclamation (durable/storage/jsonl/storage.go). The conformance case adopts a durable commit once before resolving, and never a failed one runs on JSONL through TestJsonlStorageConformance."
 
 [[files]]
 path = "packages/durable/src/storage/memory.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/storage/memory_storage_test.go#TestMemoryStorageConformance"]
+rationale = "Pi 92ab5360: MemoryStorage.commit applies the prepared commit, calls adopt(seq), then resolves (durable/storage/memory.go). The conformance case adopts a durable commit once before resolving, and never a failed one runs through TestMemoryStorageConformance."
 
 [[files]]
 path = "packages/durable/src/storage/scan.ts"
@@ -4057,9 +4057,9 @@ rationale = "Pi 4c25119f (replicate storages as a commit log) changes this file 
 [[files]]
 path = "packages/durable/src/storage/sqlite/storage.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/storage/sqlite/sqlite_storage_test.go#TestSqliteStorageConformance"]
+rationale = "Pi 92ab5360: SqliteStorage.commit calls adopt(seq) after COMMIT returns (durable/storage/sqlite/storage.go). The conformance case adopts a durable commit once before resolving, and never a failed one runs on SQLite through TestSqliteStorageConformance."
 
 [[files]]
 path = "packages/durable/src/tasks.ts"
@@ -4225,9 +4225,9 @@ rationale = ""
 [[files]]
 path = "packages/durable/src/types.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/session/session_adoption_test.go#TestSessionAdoptionInsideStorageCommit", "test:durable/storage/memory_storage_test.go#TestMemoryStorageConformance", "test:durable/watch_handle_contract_test.go#TestWatchHandleContract"]
+rationale = "Pi 92ab5360: Storage.commit takes an adopt callback (durable.Storage.Commit(ctx, writes, adopt); the contract is run by the conformance case adopts a durable commit once before resolving, on every backend), DocumentState and the Session.documentState overloads are removed, and WatchEnd and WatchHandle move to chord (chord/watch.go, TestWatchHandleContract; DocumentWatch is a chord.WatchHandle)."
 
 [[files]]
 path = "packages/env/src/connection.ts"
