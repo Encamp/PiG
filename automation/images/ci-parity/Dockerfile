@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 ARG GO_BUILDER=cgr.dev/chainguard/go:latest-dev@sha256:72f9b391f511f88e7154aaaa5ee1e27fb6594575d9a406940f49786b30172803
-ARG WOLFI_BASE=cgr.dev/chainguard/wolfi-base:latest@sha256:a31344ab2cb8618db84f535eec56f76f6178b142cb92cb2e48676cc2dcebea72
+ARG WOLFI_BASE=cgr.dev/chainguard/wolfi-base:latest@sha256:81211e15a86ea1d5357f284482af45730c51de45eaf10ad9ce205d6bfc2df323
 
 # GO_VERSION must equal .go-version; make compliance checks it.
 ARG GO_VERSION=1.27.3
@@ -33,8 +33,8 @@ RUN apk update \
 FROM toolchain-base AS pi-oracle
 # PI_VERSION must equal the pin's package version and PI_COMMIT the pin's commit when the pin is a commit
 # (empty for a release tag); `make pin-sync` writes both and make compliance checks them.
-ARG PI_VERSION=1.3.0
-ARG PI_COMMIT=1402973a9dbe8c627341e04c9744c54953e285ca
+ARG PI_VERSION=1.4.0
+ARG PI_COMMIT=
 COPY automation/images/ci-parity/package.json automation/images/ci-parity/package-lock.json /opt/pig/pi/
 RUN test -z "${PI_COMMIT}" || { echo "this image installs the published Pi ${PI_VERSION}; it cannot be the build of Pi commit ${PI_COMMIT} yet (a commit pin needs the oracle built from source, automation/pin/oracle.py)" >&2; exit 1; } \
   && npm ci --prefix /opt/pig/pi --omit=dev --ignore-scripts --no-audit --no-fund \

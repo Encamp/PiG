@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -191,7 +192,7 @@ type promptLoader struct {
 
 func (l promptLoader) GetSystemPrompt() (string, bool) { return l.prompt, true }
 
-// sdk.ts createAgentSession (Pi 1.1.0): the options name the cwd, the agent directory and the loader; the services are built from them, the
+// sdk.ts:194-206 createAgentSession (Pi 1.1.0): the options name the cwd, the agent directory and the loader; the services are built from them, the
 // defaultTools setting under that agent directory selects the tools (default-tools-setting.test.ts), and the resourceLoader option is the one the
 // session builds its system prompt from.
 func TestCreateAgentSessionBuildsItsServicesFromTheOptions(t *testing.T) {
@@ -245,7 +246,7 @@ type extensionsLoader struct {
 
 func (l extensionsLoader) GetExtensions() LoadExtensionsResult { return l.loaded }
 
-// sdk.ts:480-486: createAgentSession returns resourceLoader.getExtensions() as its result's extensionsResult.
+// sdk.ts:472-476: createAgentSession returns resourceLoader.getExtensions() as its result's extensionsResult.
 func TestCreateAgentSessionReturnsTheLoadersExtensionsResult(t *testing.T) {
 	services := servicesWithDefaultTools(t, nil)
 	loaded := LoadExtensionsResult{Errors: []ExtensionLoadError{{Path: "broken.ts", Error: "boom"}}, Warnings: []ExtensionLoadWarning{{Path: "old.ts", Warning: "deprecated"}}}
@@ -378,5 +379,70 @@ func TestCreateAgentSessionForwardsTheSessionOptions(t *testing.T) {
 	t.Cleanup(func() { _ = builtinLess.Session.Close() })
 	if got := builtinLess.Session.ActiveToolNames(); !slices.Equal(got, []string{"custom_tool"}) {
 		t.Errorf("noTools builtin: active tools = %v, want only the custom tool", got)
+	}
+}
+
+// agent-session.ts _bindExtensionCore binds the Session to its extensions in every mode, and createAgentSession over a DefaultResourceLoader that loads an extension gives that extension a context that reads the Session: its model, scopedModels and idle state, with no UI. A library caller gets what a child session an extension creates gets: the extension runs in the loader's Extension Host, which the Session binds to.
+func TestCreateAgentSessionBindsItsStateToTheExtensionsOfItsLoader(t *testing.T) {
+	root := t.TempDir()
+	cwd, agentDir := filepath.Join(root, "project"), filepath.Join(root, "agent")
+	logFile := filepath.Join(root, "ctx.json")
+	probe := filepath.Join(root, "probe.ts")
+	writeExtensionFiles(t, map[string]string{
+		probe:                      "import { writeFileSync } from \"node:fs\";\nexport default function (pi) { pi.on(\"session_start\", async (_event, ctx) => { writeFileSync(" + strconv.Quote(logFile) + ", JSON.stringify({ hasUI: ctx.hasUI, model: ctx.model?.id ?? null, scoped: ctx.scopedModels.map(s => s.model.id + \"@\" + s.thinkingLevel), isIdle: ctx.isIdle(), name: pi.getSessionName() ?? null, tools: pi.getActiveTools().length > 0 })); }); }\n",
+		filepath.Join(cwd, "keep"): "",
+	})
+	loader := NewDefaultResourceLoader(DefaultResourceLoaderOptions{CWD: cwd, AgentDir: agentDir, NoExtensions: true, AdditionalExtensionPaths: []string{probe}})
+	t.Cleanup(loader.Close)
+	if err := loader.Reload(); err != nil {
+		t.Fatal(err)
+	}
+	model := fakeModel()
+	result, err := CreateAgentSession(CreateAgentSessionOptions{
+		CWD: cwd, AgentDir: agentDir, ResourceLoader: loader, Model: model,
+		ScopedModels: []ScopedModel{{Model: model, ThinkingLevel: "high"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = result.Session.Close() })
+	if err := result.Session.BindExtensions(t.Context(), ExtensionBindings{}); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(logFile)
+	if err != nil {
+		t.Fatalf("the extension never received session_start: %v", err)
+	}
+	var got struct {
+		HasUI  bool     `json:"hasUI"`
+		Model  *string  `json:"model"`
+		Scoped []string `json:"scoped"`
+		IsIdle bool     `json:"isIdle"`
+		Tools  bool     `json:"tools"`
+	}
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatal(err)
+	}
+	if got.HasUI || got.Model == nil || *got.Model != "fake-1" || !slices.Equal(got.Scoped, []string{"fake-1@high"}) || !got.IsIdle || !got.Tools {
+		t.Fatalf("the extension's context = %s, want hasUI false, model fake-1, scopedModels [fake-1@high], idle, the session's tools", raw)
+	}
+}
+
+// A child session's excludeTools travels as an omitted member when it is empty (ChildSessionCreate), so an empty denylist must select what an absent one does.
+func TestResolveSDKToolSelectionEmptyExcludeToolsIsAbsent(t *testing.T) {
+	settings := servicesWithDefaultTools(t, []string{"read", "bash"}).SettingsManager()
+	for _, tools := range [][]string{nil, {"read"}} {
+		absent := resolveSDKToolSelection(settings, tools, nil, "")
+		empty := resolveSDKToolSelection(settings, tools, []string{}, "")
+		if !slices.Equal(absent.initialActive, empty.initialActive) {
+			t.Errorf("tools %v: active %v with no denylist, %v with an empty one", tools, absent.initialActive, empty.initialActive)
+		}
+		absentFilter := extension.NewToolFilter(absent.allowed, absent.excluded)
+		emptyFilter := extension.NewToolFilter(empty.allowed, empty.excluded)
+		for _, name := range []string{"read", "bash", "edit", "mcp__server__tool"} {
+			if absentFilter.Allows(name) != emptyFilter.Allows(name) {
+				t.Errorf("tools %v: %s is kept differently by an empty denylist", tools, name)
+			}
+		}
 	}
 }

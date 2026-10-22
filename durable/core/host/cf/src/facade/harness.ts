@@ -33,8 +33,31 @@ import { errorMessage, reviveError, SessionFailed, StorageRequestError } from ".
 import { contained } from "./session/session.ts"
 import { structuredOutputError } from "./structured.ts"
 import { validateToolArguments } from "@earendil-works/pi-ai/utils/validation"
+import { type ClientIdentity, mergeClientIdentity, PI_ATTRIBUTION } from "@earendil-works/pi-ai/utils/identity"
 
 const errorText = errorMessage
+
+/** Request identity of a Harness's model requests: pi-ai's defaults with provider attribution to pi (harness.ts DEFAULT_HARNESS_IDENTITY). */
+export const DEFAULT_HARNESS_IDENTITY: ClientIdentity = { attribution: PI_ATTRIBUTION }
+
+/** The request methods pi-ai's withClientIdentity gives the identity to (identity.ts); each takes its options last. */
+const IDENTITY_METHODS = new Set<PropertyKey>(["stream", "complete", "streamSimple", "completeSimple", "streamDeferred", "fetchDeferred", "cancelDeferred", "generateImages", "classify"])
+
+/**
+ * pi-ai's `withClientIdentity(models, identity)` over the subset of `Models` the host holds (`ModelsLike` is partial, and a method the models lacks stays
+ * absent): a request's options become `{ ...options, identity: mergeClientIdentity(identity, options?.identity) }`, so `identity` is their last key and
+ * a request's own identity overrides the Harness's field by field. Everything else is delegated unchanged.
+ */
+function withHarnessIdentity(models: ModelsLike, identity: ClientIdentity): ModelsLike {
+  return new Proxy(models, {
+    get(target, key) {
+      const value = Reflect.get(target, key, target)
+      if (typeof value !== "function") return value
+      if (!IDENTITY_METHODS.has(key)) return value.bind(target)
+      return (model: unknown, context: unknown, options?: object) => value.call(target, model, context, { ...options, identity: mergeClientIdentity(identity, (options as { identity?: ClientIdentity } | undefined)?.identity) })
+    },
+  })
+}
 
 export const ROOT_CONVERSATION_ID = 1
 const decoder = new TextDecoder()
@@ -56,6 +79,12 @@ export function useStorageProfile(map: Partial<Record<StorageProfile, StoragePro
 
 export interface FacadeOptions {
   models: ModelsLike
+  /**
+   * How model requests identify the app to providers, merged field by field over `DEFAULT_HARNESS_IDENTITY` (provider attribution to pi).
+   * It applies to every request through the Harness's models, including hooks and tools, and overrides the identity the `models` was
+   * created with; a request's own `identity` overrides it. Pass `{ attribution: null }` to send no attribution headers (types.ts HarnessOptions.identity).
+   */
+  identity?: ClientIdentity
   registry: HostRegistrySource
   settings?: any
   env?: EffectRuntime["env"]
@@ -150,6 +179,8 @@ export class Harness {
     // harness.ts constructor: `onReport` cannot fail what reports to it, and a clock that throws falls back to Date.now (reported once).
     const reported = safeReport(rawOptions.onReport)
     const options: FacadeOptions = { ...rawOptions, onReport: reported, now: safeNow(rawOptions.now, reported) }
+    // harness.ts currentModels: a Harness reaches its models through withClientIdentity, so each request carries `identity` as its last option. A Session has no models.
+    if (options.mode !== "session") options.models = withHarnessIdentity(options.models, mergeClientIdentity(DEFAULT_HARNESS_IDENTITY, options.identity) ?? DEFAULT_HARNESS_IDENTITY)
     // A Session has no built-in tasks: only a Harness needs them in its registry.
     const missing = options.mode === "session" ? [] : ["pi.generation", "pi.tool", "pi.compaction"].filter(name => options.registry.snapshot().task(name) === undefined)
     if (missing.length > 0) throw new Error(`Registry lacks built-in tasks ${missing.join(", ")}; create it with createRegistry()`)
@@ -646,6 +677,21 @@ export class Harness {
     this.resumeQueued = true
     // scheduler.ts #kick drains in a microtask: what the caller does synchronously after resume() reads the state before any task starts.
     queueMicrotask(() => { this.resumeQueued = false; if (!this.shut && this.host.discarded === undefined) this.host.send(EVENT.resume) })
+  }
+
+  /** harness.ts wake :282-285: assertUsable, then scheduler.ts wake(), synchronous and from memory. The core answers api `wake` inside the send, so the reply is read as it arrives. */
+  wake(): { active: boolean; at?: number } {
+    this.assertOpen()
+    let wake: { active: boolean; at?: number } | undefined
+    this.client.apiNow<{ active: boolean; at?: number }>("wake", {}, value => (wake = value))
+    if (wake === undefined) throw this.failure !== undefined ? new SessionFailed(this.failure.error) : new Error("the core did not answer wake at once")
+    return wake
+  }
+
+  /** harness.ts retryTask :324-327: assertUsable (a synchronous throw), then scheduler.ts retry(): a commit on the Session line that clears a parked task's restart count (an error for an unknown task), then resume(). The promise is the core's answer as it is. */
+  retryTask(id: number, context: Context): Promise<void> {
+    this.assertOpen()
+    return awaitWithContext(this.client.api<void>("retryTask", { taskId: id }, () => undefined), context)
   }
 
   // Not async: harness.ts root :314-319 and createConversation :326-329 return #create's promise itself.

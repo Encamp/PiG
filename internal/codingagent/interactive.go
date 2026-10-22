@@ -81,22 +81,19 @@ type SubprocessHost interface {
 	IsShuttingDown() bool
 }
 
+// extensionDialog is one entry of the editor-slot dialog stack (interactive-mode.ts extensionDialogs). The owner loop
+// pushes and removes entries; the last one is shown and focused.
 type extensionDialog struct {
 	component tui.Component
-	handle    func(data string)
-	// dispose stops the dialog's countdown (nil for none), as Pi's hide calls the component's dispose.
+	// handle receives the keys of a select, confirm, input or editor dialog. It is nil for a custom component, which
+	// takes its keys through terminal focus.
+	handle func(data string)
+	// dispose stops the dialog's countdown or disposes the custom component (nil for none), as Pi calls the component's
+	// dispose when it resets the extension UI.
 	dispose func()
+	// blocked is what the program reports while the entry is shown; nil reports none.
+	blocked *BlockedStatus
 }
-
-// extensionDialogKind names the InteractiveMode field Pi keeps each extension dialog in (extensionSelector,
-// extensionInput, extensionEditor); its hide method disposes and clears only that field.
-type extensionDialogKind int
-
-const (
-	extensionSelectorDialog extensionDialogKind = iota
-	extensionInputDialog
-	extensionEditorDialog
-)
 
 type expandableCustomMessageComponent interface {
 	tui.Component
@@ -417,6 +414,8 @@ type InteractiveMode struct {
 	toolOrder     []*tui.ToolExecutionComponent
 	bashOrder     []*tui.BashExecutionComponent // row 2.8a: Ctrl+O drives bash blocks too
 	toolsExpanded bool
+	// toolsExpandedChanged reports a toggle of toolsExpanded to the extension host, whose runtimes replicate it. Guarded by toolMu.
+	toolsExpandedChanged func()
 	// builtInHeaderExpanded starts from verbose || toolsExpanded, then follows explicit expansion and restoration. Guarded by toolMu.
 	builtInHeaderExpanded bool
 	// builtInHeaderLogo is the clickable logo of the built-in header as last rendered; the render loop writes it and the
@@ -540,11 +539,13 @@ type InteractiveMode struct {
 	// call. The input pump selects on it while holding a chunk for the main
 	// loop so an arming modal can reclaim that chunk instead of the pump
 	// deadlocking on the unbuffered readCh that a busy main loop cannot drain.
-	modalChangedCh  chan struct{}
-	extensionDialog *extensionDialog
-	// extensionDialogs holds the last dialog of each kind that opened and was not hidden (interactive-mode.ts
-	// extensionSelector, extensionInput, extensionEditor). A displaced dialog stays here until its kind is hidden.
-	extensionDialogs [3]*extensionDialog
+	modalChangedCh chan struct{}
+	// extensionDialogs is the stack of dialogs shown in the editor slot (select, confirm, input, editor and an editor-slot
+	// custom component); the last entry is visible. Only the owner loop touches it (interactive-mode.ts extensionDialogs).
+	extensionDialogs []*extensionDialog
+	// awaitedDialogs are the dialogs an owner-loop caller waits on (awaitOwnerDialog), by the cancel that dismisses each one.
+	// Only the owner loop touches it.
+	awaitedDialogs map[*awaitedDialog]struct{}
 
 	// Inference timing for the spinner. workStart is the wall-clock
 	// time the current LLM call began; zero when idle.
@@ -656,7 +657,7 @@ type InteractiveMode struct {
 	activeSelectorDispose func()
 }
 
-// loadRemainingHighlightLanguages loads every syntax grammar on a task the mode owns, then repaints on the owner loop, so code highlighted with the startup grammars picks up the rest. A mode that has stopped repaints nothing.
+// loadRemainingHighlightLanguages registers every syntax language on a task the mode owns (a grammar is decoded when its language is first used), then repaints on the owner loop, so code highlighted with the startup grammars picks up the rest. A mode that has stopped repaints nothing.
 // upstream: packages/coding-agent/src/modes/interactive/interactive-mode.ts:init
 func (m *InteractiveMode) loadRemainingHighlightLanguages() {
 	ctx := m.backgroundCtx
@@ -666,6 +667,8 @@ func (m *InteractiveMode) loadRemainingHighlightLanguages() {
 			m.tuiInst.Invalidate()
 			m.tuiInst.RequestRender()
 		})
+		// After the repaint is queued, so the collection never delays it.
+		releaseStartupHeap()
 	})
 }
 

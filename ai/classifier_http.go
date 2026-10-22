@@ -13,6 +13,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -125,6 +126,10 @@ func classifierPost(ctx context.Context, options ClassifierOptions, label, targe
 	}
 	response, err := classifierHTTPClient(options.Fetch).Do(request)
 	if err != nil {
+		// Pi's fetch rejection is the error itself ("fetch failed" for a transport failure); the Go client's "Post <url>:" decoration is not part of it.
+		if requestError, ok := err.(*url.Error); ok { //nolint:errorlint // Only the direct client.Do decoration is stripped.
+			err = requestError.Err
+		}
 		return fail(err)
 	}
 	defer func() { _ = response.Body.Close() }()
@@ -159,7 +164,7 @@ func PostClassifierRequest(ctx context.Context, label, target string, model Clas
 	if err != nil {
 		return nil, err
 	}
-	headers := providerHeadersToRecord(ProviderHeadersFromStrings(map[string]string{"authorization": "Bearer " + options.APIKey, "content-type": "application/json"}), ProviderHeadersFromStrings(model.Headers), options.Headers)
+	headers := providerHeadersToRecord(identityProviderHeaders(ClientIdentityTarget{Provider: model.Provider, BaseURL: model.BaseURL}, options.Identity), ProviderHeadersFromStrings(map[string]string{"authorization": "Bearer " + options.APIKey, "content-type": "application/json"}), ProviderHeadersFromStrings(model.Headers), options.Headers)
 	response, err := retryClassifierRequest(ctx, options, func() (classifierResponse, error) {
 		response, err := classifierPost(ctx, options, label, target, headers, body)
 		if err == nil {

@@ -399,12 +399,6 @@ count = 2
 
 [[hit]]
 check = "clock"
-file = "internal/codingagent/interactive_extensions.go"
-func = "InteractiveMode.wireSubprocessHostCallbacks"
-snippet = "\"timestamp\":  time.Now().UnixMilli(),"
-
-[[hit]]
-check = "clock"
 file = "internal/codingagent/interactive_helpers.go"
 func = "debugLog"
 snippet = "_, _ = fmt.Fprintf(f, \"[%s] \", time.Now().Format(\"15:04:05.000\"))"
@@ -515,13 +509,7 @@ snippet = "now := func() float64 { return float64(time.Now().UnixMilli()) }"
 [[hit]]
 check = "clock"
 file = "internal/codingagent/session.go"
-func = "NewSession"
-snippet = "Timestamp:     time.Now().UTC().Format(\"2006-01-02T15:04:05.000Z\"),"
-
-[[hit]]
-check = "clock"
-file = "internal/codingagent/session.go"
-func = "Session.AppendCompaction"
+func = "Session.appendCompaction"
 snippet = "now := time.Now().UTC()"
 
 [[hit]]
@@ -1400,12 +1388,6 @@ count = 2
 
 [[hit]]
 check = "emptydrop"
-file = "coding/cli/rpc_ui.go"
-func = "(decl)"
-snippet = "Options         []string    `json:\"options,omitempty\"`"
-
-[[hit]]
-check = "emptydrop"
 file = "coding/extension/aggregated_results.go"
 func = "(decl)"
 snippet = "Messages []CustomMessageRef `json:\"messages,omitempty\"`"
@@ -2023,18 +2005,6 @@ check = "golifetime"
 file = "ai/auth_store.go"
 func = "InMemoryAuthStorage.withLockAsync"
 snippet = "go s.runPending()"
-
-[[hit]]
-check = "golifetime"
-file = "ai/provider_streams.go"
-func = "LazyStream"
-snippet = "return startLazyStream(ctx, model, setup, func(body func()) { go body() })"
-
-[[hit]]
-check = "golifetime"
-file = "ai/provider_streams.go"
-func = "LazyStreamSync"
-snippet = "return startLazyStreamSync(ctx, model, setup, func(body func()) { go body() })"
 
 [[hit]]
 check = "golifetime"
@@ -2751,39 +2721,18 @@ check = "mapkeyorder"
 file = "coding/extension/host/subprocess/ui_bridge.go"
 func = "UIBridge.handleSelect"
 snippet = "result, _ := json.Marshal(map[string]any{\"selected\": \"\", \"ok\": false})"
-count = 2
-
-[[hit]]
-check = "mapkeyorder"
-file = "coding/extension/host/subprocess/ui_bridge.go"
-func = "UIBridge.handleSelect"
-snippet = "result, _ := json.Marshal(map[string]any{\"selected\": selected, \"ok\": true})"
 
 [[hit]]
 check = "mapkeyorder"
 file = "coding/extension/host/subprocess/ui_bridge.go"
 func = "UIBridge.handleConfirm"
 snippet = "result, _ := json.Marshal(map[string]any{\"confirmed\": false})"
-count = 2
-
-[[hit]]
-check = "mapkeyorder"
-file = "coding/extension/host/subprocess/ui_bridge.go"
-func = "UIBridge.handleConfirm"
-snippet = "result, _ := json.Marshal(map[string]any{\"confirmed\": confirmed})"
 
 [[hit]]
 check = "mapkeyorder"
 file = "coding/extension/host/subprocess/ui_bridge.go"
 func = "UIBridge.handleInput"
 snippet = "result, _ := json.Marshal(map[string]any{\"text\": \"\", \"ok\": false})"
-count = 2
-
-[[hit]]
-check = "mapkeyorder"
-file = "coding/extension/host/subprocess/ui_bridge.go"
-func = "UIBridge.handleInput"
-snippet = "result, _ := json.Marshal(map[string]any{\"text\": text, \"ok\": true})"
 
 [[hit]]
 check = "mapkeyorder"
@@ -2796,13 +2745,6 @@ check = "mapkeyorder"
 file = "coding/extension/host/subprocess/ui_bridge.go"
 func = "UIBridge.handleEditor"
 snippet = "result, _ := json.Marshal(map[string]any{\"text\": \"\", \"ok\": false})"
-count = 2
-
-[[hit]]
-check = "mapkeyorder"
-file = "coding/extension/host/subprocess/ui_bridge.go"
-func = "UIBridge.handleEditor"
-snippet = "result, _ := json.Marshal(map[string]any{\"text\": text, \"ok\": true})"
 
 [[hit]]
 check = "mapkeyorder"
@@ -4539,32 +4481,6 @@ snippet = "if providerID == \"github-copilot\" && !resolvedAuth {"
 
 [[hit]]
 check = "providerliteral"
-file = "coding/model.go"
-func = "mergeProviderAttributionHeaders"
-snippet = "if sessionID != \"\" && (providerID == \"opencode\" || providerID == \"opencode-go\" || matchesProviderHost(baseURL, openCodeHost)) {"
-count = 2
-
-[[hit]]
-check = "providerliteral"
-file = "coding/model.go"
-func = "mergeProviderAttributionHeaders"
-snippet = "case providerID == \"openrouter\" || strings.Contains(baseURL, openRouterHost):"
-
-[[hit]]
-check = "providerliteral"
-file = "coding/model.go"
-func = "mergeProviderAttributionHeaders"
-snippet = "case providerID == \"nvidia\" || matchesProviderHost(baseURL, nvidiaNIMHost):"
-
-[[hit]]
-check = "providerliteral"
-file = "coding/model.go"
-func = "mergeProviderAttributionHeaders"
-snippet = "case providerID == \"cloudflare-workers-ai\" || providerID == \"cloudflare-ai-gateway\" || matchesProviderHost(baseURL, cloudflareAPIHost) || matchesProviderHost(baseURL, cloudflareGatewayHost):"
-count = 2
-
-[[hit]]
-check = "providerliteral"
 file = "internal/codingagent/auth_warnings.go"
 func = "InteractiveMode.canWarnAboutAnthropicSubscriptionAuth"
 snippet = "return model != nil && model.Provider != nil && model.Provider.ID() == \"anthropic\""
@@ -5682,12 +5598,6 @@ check = "ctxbackground"
 file = "coding/cli/self_update.go"
 func = "applyStandaloneUpdate"
 snippet = "ctx, cancel := context.WithTimeout(context.Background(), selfUpdateTimeout)"
-
-[[hit]]
-check = "ctxbackground"
-file = "coding/cli/session_extension_actions.go"
-func = "bindSessionExtensionActions"
-snippet = "return extension.ExecCommand(context.Background(), cwd, command, args, opts)"
 
 [[hit]]
 check = "ctxbackground"
@@ -7194,30 +7104,6 @@ check = "jsonclone"
 file = "internal/codingagent/export/tool_renderer.go"
 func = "parseToolResultImages"
 snippet = "if err := json.Unmarshal(data, &images); err != nil {"
-
-[[hit]]
-check = "jsonclone"
-file = "internal/codingagent/extension_model_operations.go"
-func = "extensionClassify"
-snippet = "_ = json.Unmarshal(encodedModel, &wire)"
-
-[[hit]]
-check = "jsonclone"
-file = "internal/codingagent/extension_model_operations.go"
-func = "extensionClassify"
-snippet = "if err := json.Unmarshal(encodedOptions, &wireOptions); err != nil {"
-
-[[hit]]
-check = "jsonclone"
-file = "internal/codingagent/extension_model_operations.go"
-func = "extensionGenerateImages"
-snippet = "_ = json.Unmarshal(encodedModel, &wire)"
-
-[[hit]]
-check = "jsonclone"
-file = "internal/codingagent/extension_model_operations.go"
-func = "extensionGenerateImages"
-snippet = "if err := json.Unmarshal(encodedOptions, &wireOptions); err != nil {"
 
 [[hit]]
 check = "jsonclone"

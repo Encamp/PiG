@@ -3,6 +3,7 @@ package ai
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,6 +20,7 @@ import (
 
 	"github.com/MichaelKinsy/PiG/internal/coding/pigidentity"
 	"github.com/MichaelKinsy/PiG/internal/nodeurl"
+	"github.com/MichaelKinsy/PiG/internal/tlsdistrust"
 )
 
 const (
@@ -314,13 +316,13 @@ func codexWebSocketHref(endpoint string) (string, error) {
 	return href, nil
 }
 
-func codexWebSocketHeaders(base map[string]string, options ProviderHeaders, token, accountID, requestID string) http.Header {
+func codexWebSocketHeaders(target ClientIdentityTarget, identity *ClientIdentity, base map[string]string, options ProviderHeaders, token, accountID, requestID string) http.Header {
 	headers := make(http.Header, len(base)+7)
 	// Defaults first so model and caller headers override them (buildBaseCodexHeaders, #10429).
 	// pig divergence (D26): PiG names itself as the Codex originator.
 	headers.Set("originator", pigidentity.CodexOriginator)
-	// pig divergence (D65): the default User-Agent is PiG's product identity.
-	headers.Set("User-Agent", PiUserAgent())
+	// Codex expects an originator on every request; it is not attribution (openai-codex-responses.ts identityHeaders).
+	applyIdentityHeaders(headers, target, identity)
 	for name, value := range base {
 		headers.Set(name, value)
 	}
@@ -352,6 +354,12 @@ func optionTimeout(value *int) time.Duration {
 		return 0
 	}
 	return time.Duration(*value) * time.Millisecond
+}
+
+// codexWebSocketTLSConfig is the WebSocket handshake's TLS configuration.
+// pig additive (D191): its chain is checked like every other TLS peer's.
+func codexWebSocketTLSConfig() *tls.Config {
+	return tlsdistrust.Harden(&tls.Config{MinVersion: tls.VersionTLS12})
 }
 
 func acquireCodexWebSocket(ctx context.Context, endpoint string, headers http.Header, sessionID, accountID string, connectTimeout time.Duration) (*acquiredCodexWebSocket, error) {
@@ -406,7 +414,7 @@ func acquireCodexWebSocket(ctx context.Context, endpoint string, headers http.He
 	}
 	var connectionMu sync.Mutex
 	var dialingConnection net.Conn
-	dialer := websocket.Dialer{Proxy: proxyFromEnvironment, HandshakeTimeout: connectTimeout}
+	dialer := websocket.Dialer{Proxy: proxyFromEnvironment, HandshakeTimeout: connectTimeout, TLSClientConfig: codexWebSocketTLSConfig()}
 	dialer.NetDialContext = func(dialCtx context.Context, network, address string) (net.Conn, error) {
 		connection, dialErr := (&net.Dialer{}).DialContext(dialCtx, network, address)
 		connectionMu.Lock()
@@ -726,7 +734,7 @@ func (p *openAIResponsesProvider) startCodexWebSocketAttempt(ctx context.Context
 		}
 		requestID = id
 	}
-	headers := codexWebSocketHeaders(p.cfg.ExtraHeaders, opts.Headers, apiKey, accountID, requestID)
+	headers := codexWebSocketHeaders(ClientIdentityTarget{Provider: p.cfg.ProviderID, BaseURL: p.cfg.BaseURL}, opts.Identity, p.cfg.ExtraHeaders, opts.Headers, apiKey, accountID, requestID)
 	connectTimeout := codexWebSocketConnectTimeout
 	if opts.WebSocketConnectTimeoutMs != nil {
 		connectTimeout = time.Duration(*opts.WebSocketConnectTimeoutMs) * time.Millisecond
@@ -970,7 +978,7 @@ func (p *openAIResponsesProvider) consumeCodexWebSocket(ctx context.Context, acq
 	result := builder.stream.Result()
 	keep := result != nil && result.StopReason != StopReasonError && result.StopReason != StopReasonAborted
 	if keep && useCachedContext && acquired.entry != nil && result.ResponseID != "" {
-		responseItems, err := p.convertAnchoredMessages([]Message{*result}, grammarProps, false)
+		responseItems, err := p.convertMessages([]Message{*result}, grammarProps)
 		baseline := make([]json.RawMessage, len(request.input), len(request.input)+len(responseItems))
 		copy(baseline, request.input)
 		// Each response item as the next request's body writes it: JSON.stringify text, compared byte for byte.

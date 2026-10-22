@@ -24,6 +24,7 @@ import (
 
 	"github.com/MichaelKinsy/PiG/coding/extension"
 	"github.com/MichaelKinsy/PiG/coding/piglogin"
+	"github.com/MichaelKinsy/PiG/coding/source"
 	"github.com/MichaelKinsy/PiG/extensions/sdk/frontend"
 	"github.com/MichaelKinsy/PiG/tui"
 	"github.com/MichaelKinsy/PiG/tui/widthx"
@@ -278,7 +279,6 @@ func dialogTimeout(opts extension.ExtensionUIDialogOptions) time.Duration {
 
 func (u *ExtUIContext) runDialog(
 	ctx context.Context,
-	kind extensionDialogKind,
 	component tui.Component,
 	handle func(string),
 	result func() (value string, done, cancelled bool),
@@ -301,8 +301,9 @@ func (u *ExtUIContext) runDialog(
 
 	resultCh := make(chan extensionDialogResult, 1)
 	// pending is true from installation until the dialog resolves; only the UI loop reads or writes it. Pi removes the
-	// abort listener when the dialog resolves (interactive-mode.ts:2711-2719), so only a pending dialog's abort hides.
+	// abort listener when the dialog resolves (interactive-mode.ts showExtensionSelector finish), so only a pending dialog's abort hides.
 	pending := false
+	var dialog *extensionDialog
 	u.m.runOnMain(ctx, func() {
 		if err := ctx.Err(); err != nil {
 			resultCh <- extensionDialogResult{cancelled: true}
@@ -310,31 +311,29 @@ func (u *ExtUIContext) runDialog(
 		}
 
 		finish := func() {
+			if !pending {
+				return
+			}
 			value, done, cancelled := result()
 			if !done {
 				u.m.tuiInst.Render()
 				return
 			}
 			pending = false
-			u.m.hideExtensionDialog(kind)
+			u.m.finishExtensionDialog(dialog)
 			resultCh <- extensionDialogResult{value: value, cancelled: cancelled}
 		}
-		// A dialog never waits for another or for a focused custom component: as Pi's showExtension* does, it takes the editor slot and
-		// focus, and a dialog it displaces stays pending (interactive-mode.ts:2724-2730, 2806-2811, 2850-2855). A remote custom component
-		// that had focus stops reading the terminal until focus returns to it.
-		u.m.setExtensionDialogViewMode(true, u.m.extensionDialogLines(component))
-		u.m.takeEditorSlot(component)
-		u.m.tuiInst.SetFocus(component)
-		dialog := &extensionDialog{component: component, dispose: countdown.dispose}
+		// A dialog never waits for another or for a focused custom component: as Pi's showExtension* does, it joins the stack,
+		// takes the editor slot and focus, and the dialog it hides stays pending and shows again once this one is closed
+		// (interactive-mode.ts pushExtensionDialog). A remote custom component that had focus stops reading the terminal until
+		// focus returns to it.
+		dialog = &extensionDialog{component: component, dispose: countdown.dispose, blocked: &blocked}
 		dialog.handle = func(data string) {
 			handle(data)
 			finish()
 		}
-		u.m.extensionDialogs[kind] = dialog
-		u.m.extensionDialog = dialog
+		u.m.pushExtensionDialog(dialog)
 		pending = true
-		// Extension dialogs share the editor slot: opening one replaces the status of a displaced one (interactive-mode.ts:2729).
-		u.m.programStatusReporter().SetBlocked("extension-dialog", &blocked)
 		if countdown.timeout > 0 {
 			// Each second runs on this loop, so expiry replaces the dialog
 			// before any frame shows a zero countdown.
@@ -364,33 +363,17 @@ func (u *ExtUIContext) runDialog(
 		if cleanupCtx == nil {
 			cleanupCtx = context.Background()
 		}
-		// Pi's abort listener calls its kind's hide, which restores the editor whatever dialog is shown
-		// (interactive-mode.ts:2702-2705, 2784-2787).
+		// Pi's abort listener finishes its own dialog: it disposes it and removes it from the stack, wherever it sits
+		// (interactive-mode.ts showExtensionSelector/showExtensionInput onAbort), so a hidden dialog's abort leaves the
+		// visible one alone.
 		u.m.runOnMain(cleanupCtx, func() {
 			if pending {
 				pending = false
-				u.m.hideExtensionDialog(kind)
+				u.m.finishExtensionDialog(dialog)
 			}
 		})
 		return "", ctx.Err()
 	}
-}
-
-// hideExtensionDialog is Pi's hideExtensionSelector, hideExtensionInput and hideExtensionEditor
-// (interactive-mode.ts:2737-2745, 2818-2826, 2862-2869): it disposes the dialog of its kind, puts the editor back in the
-// slot and focuses it, whichever dialog the slot shows. A custom overlay whose focus the dialog took gets it back instead
-// (tui.ts:616-627 resumes the overlay once the dialog that blocked its restore is unmounted).
-func (m *InteractiveMode) hideExtensionDialog(kind extensionDialogKind) {
-	if dialog := m.extensionDialogs[kind]; dialog != nil && dialog.dispose != nil {
-		dialog.dispose()
-	}
-	m.extensionDialogs[kind] = nil
-	m.extensionDialog = nil
-	m.programStatusReporter().SetBlocked("extension-dialog", nil)
-	m.editorContainer.SetChildren(m.editor)
-	m.setExtensionDialogViewMode(false, 0)
-	m.tuiInst.SetFocus(m.editor)
-	m.tuiInst.RequestRender()
 }
 
 // ─── Interactive dialogs ─────────────────────────────────────────────────────
@@ -408,7 +391,7 @@ func (u *ExtUIContext) Select(ctx context.Context, title string, options []strin
 // selectWithStatus is showExtensionSelector(title, options, opts, blocked): blocked is what the program reports while the selector waits.
 func (u *ExtUIContext) selectWithStatus(ctx context.Context, title string, options []string, opts extension.ExtensionUIDialogOptions, blocked BlockedStatus) (string, error) {
 	sel := tui.NewExtensionSelectorComponent(title, options, nil, nil, tui.ExtensionSelectorOptions{OnToggleToolsExpanded: u.m.toggleAllTools})
-	return u.runDialog(ctx, extensionSelectorDialog, sel, sel.HandleInput, func() (string, bool, bool) {
+	return u.runDialog(ctx, sel, sel.HandleInput, func() (string, bool, bool) {
 		return sel.SelectedValue(), sel.Done(), sel.Cancelled()
 	}, dialogCountdown{timeout: dialogTimeout(opts), start: sel.StartCountdown, dispose: sel.Dispose}, blocked)
 }
@@ -433,7 +416,7 @@ func (u *ExtUIContext) Confirm(ctx context.Context, title, message string, opts 
 // down in the title and cancels the input when it expires.
 func (u *ExtUIContext) Input(ctx context.Context, title, placeholder string, opts extension.ExtensionUIDialogOptions) (string, error) {
 	input := tui.NewExtensionInputComponent(title, placeholder, nil, nil)
-	return u.runDialog(ctx, extensionInputDialog, input, input.HandleInput, func() (string, bool, bool) {
+	return u.runDialog(ctx, input, input.HandleInput, func() (string, bool, bool) {
 		return input.Text(), input.Done(), input.Cancelled()
 	}, dialogCountdown{timeout: dialogTimeout(opts), start: input.StartCountdown, dispose: input.Dispose}, BlockedStatus{Kind: tui.ProgramStatusKindQuestion, Message: title})
 }
@@ -452,7 +435,7 @@ func (u *ExtUIContext) Editor(ctx context.Context, title, prefill string) (strin
 	ed.SetExternalEditor(func(command, content string, apply func(string)) {
 		u.m.openExternalEditorBuffer(ctx, command, content, apply)
 	})
-	return u.runDialog(ctx, extensionEditorDialog, ed, ed.HandleInput, func() (string, bool, bool) {
+	return u.runDialog(ctx, ed, ed.HandleInput, func() (string, bool, bool) {
 		return value, done, cancelled
 	}, dialogCountdown{}, BlockedStatus{Kind: tui.ProgramStatusKindQuestion, Message: title})
 }
@@ -727,14 +710,15 @@ func (u *ExtUIContext) RunRemoteOverlay(opts extension.RemoteOverlayOptions, hos
 			// upstream: interactive-mode.ts:2999 close() hides this overlay through its own handle, not the topmost one (Pi #10999).
 			cleanup = h.Hide
 		} else {
-			// Match upstream ctx.ui.custom(): replace the editor slot directly
-			// rather than wrapping the component in a second modal shell.
-			u.m.takeEditorSlot(overlay)
-			// upstream: packages/coding-agent/src/modes/interactive/interactive-mode.ts:showExtensionCustom
-			u.m.tuiInst.SetFocus(overlay)
+			// Match upstream ctx.ui.custom(): the component joins the editor-slot dialog stack directly
+			// rather than being wrapped in a second modal shell (interactive-mode.ts pushExtensionDialog).
+			// upstream: showExtensionCustom restoreEditor puts back the editor text saved when the component opened.
+			savedText := u.m.editor.Text()
+			entry := &extensionDialog{component: overlay}
+			u.m.pushExtensionDialog(entry)
 			cleanup = func() {
-				u.m.editorContainer.SetChildren(u.m.editor)
-				u.m.tuiInst.SetFocus(u.m.editor)
+				u.m.removeExtensionDialog(entry)
+				u.m.editor.SetText(savedText)
 			}
 		}
 		route, _ := overlay.inputRoute()
@@ -983,6 +967,8 @@ func (u *ExtUIContext) GetEditorComponent() extension.EditorFactory {
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 
+func init() { extension.SetNoopUITheme(ActiveExtensionTheme) }
+
 func (u *ExtUIContext) Theme() extension.Theme { return ActiveExtensionTheme() }
 
 // ActiveExtensionTheme is the active theme as extensions see it
@@ -1012,6 +998,9 @@ type extensionThemeWireKey struct {
 	mode       tui.TerminalColorMode
 	appearance tui.ThemeAppearance
 	path       string
+	// info is the theme's SourceInfo as the resource loader set it (theme.ts Theme.sourceInfo), and hasInfo whether it set one.
+	info    source.SourceInfo
+	hasInfo bool
 }
 
 // ActiveExtensionThemeWire is the active theme as the host encodes it for a subprocess extension. The palette is shared between calls while none of its inputs changes, so the caller must not modify it; use ActiveExtensionTheme for a palette an extension handler receives.
@@ -1026,6 +1015,9 @@ func ActiveExtensionThemeWire() extension.Theme {
 	}
 	colors := theme.Colors()
 	key := extensionThemeWireKey{theme: theme, colors: reflect.ValueOf(colors).Pointer(), modifiers: chalkModifiersEnabled(), mode: theme.GetColorMode(), appearance: theme.Appearance(), path: path}
+	if theme.SourceInfo != nil {
+		key.info, key.hasInfo = *theme.SourceInfo, true
+	}
 	extensionThemeWire.Lock()
 	defer extensionThemeWire.Unlock()
 	if extensionThemeWire.palette == nil || extensionThemeWire.key != key {
@@ -1034,6 +1026,20 @@ func ActiveExtensionThemeWire() extension.Theme {
 		extensionThemeWire.colors = colors
 	}
 	return extensionThemeWire.palette
+}
+
+// LoadExtensionTheme is the palette of the theme pi-coding-agent's initTheme(name) installs in an extension's process: the registered theme of that name in the terminal's color
+// mode, or the system theme for an absent name or one no theme has (theme.ts initTheme falls back to it silently).
+func LoadExtensionTheme(name *string) any {
+	reg := tui.ActiveThemeRegistry()
+	var theme *tui.Theme
+	if name != nil {
+		theme = reg.Get(*name)
+	}
+	if theme == nil {
+		theme = reg.Get(tui.SystemThemeName)
+	}
+	return ExtensionThemePalette(theme.WithColorMode(tui.GetTerminalColorMode()))
 }
 
 // ExtensionThemePalette is the palette extensions receive for theme (ctx.ui.theme): its resolved escape sequences, and the host-resolved appearance and concrete colors.
@@ -1059,6 +1065,10 @@ func ExtensionThemePalette(theme *tui.Theme) extension.Theme {
 	}
 	if path != "" {
 		palette["sourcePath"] = path
+	}
+	// sourceInfo is upstream Theme.sourceInfo: where the resource loader found the theme, absent for a theme it did not load.
+	if theme.SourceInfo != nil {
+		palette["sourceInfo"] = *theme.SourceInfo
 	}
 	return palette
 }
@@ -1162,6 +1172,13 @@ func (u *ExtUIContext) SetTheme(selection extension.ThemeSelection) extension.Se
 }
 
 // ─── Tools state ─────────────────────────────────────────────────────────────
+
+// Bell rings the terminal bell between frames (extension.TerminalBeller).
+func (u *ExtUIContext) Bell() {
+	if !u.m.runOnMainOK(func() { u.m.writeTerminal("\a") }) {
+		u.m.writeTerminal("\a")
+	}
+}
 
 func (u *ExtUIContext) GetToolsExpanded() bool {
 	u.m.toolMu.Lock()

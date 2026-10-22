@@ -9,6 +9,7 @@ import { existsSync, readFileSync, rmSync } from "node:fs"
 import { join } from "node:path"
 import { test } from "node:test"
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context"
+import { createModels } from "@earendil-works/pi-ai/models"
 import * as pi from "@earendil-works/pi-durable"
 import { SQLITE_MIGRATIONS, SqliteStorage, type SqliteDatabase, type SqliteExecutor } from "@earendil-works/pi-durable/storage/sqlite"
 import { openNodeSqliteDatabase } from "@earendil-works/pi-durable/storage/sqlite/node"
@@ -22,7 +23,8 @@ import { root, tempDir, toolchain } from "./helpers.ts"
 
 const wasm = join(root, "dist", `core-${toolchain}.wasm`)
 const context = BACKGROUND_CONTEXT
-const noModels = { getModel: () => undefined, streamSimple: () => { throw new Error("a Session has no models") } }
+// A Harness reaches its models through pi-ai's withClientIdentity (v1.4.0 harness.ts currentModels), which delegates to the whole `Models` surface: a bare stub no longer opens.
+const noModels = createModels()
 
 /** The adapter's rename: `durable_schema` and every name a migration creates, on word boundaries, outside string literals. */
 function prefixer(prefix: string) {
@@ -65,7 +67,7 @@ type Api = { Harness: { open(storage: unknown, options: unknown, context: unknow
 
 /** Commit, close and reopen twice; returns the document's items after each open. */
 async function reopenTwice(api: Api, open: () => Promise<unknown>, options: Record<string, unknown>) {
-  const Live = api.defineDoc<{ items: number[] }>({ kind: "prefixed.live", version: 1, scope: "conversation", history: "latest", fork: "initial", initial: () => ({ items: [] }) })
+  const Live = api.defineDoc<{ items: number[] }>({ kind: "prefixed.live", checkpointWhen: () => false, version: 1, scope: "conversation", history: "latest", fork: "initial", initial: () => ({ items: [] }) })
   const registry = api.createRegistry()
   const seen: (number[] | undefined)[] = []
   let id: unknown

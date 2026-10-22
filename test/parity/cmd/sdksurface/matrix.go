@@ -134,6 +134,7 @@ type matrix struct {
 	rows       []matrixRow
 	exceptions []exceptionSpec
 	unused     []string // map keys naming no surface
+	syms       *sdkSymbols
 }
 
 // sdkSymbols holds every runtime's detected symbols and the host's decoding
@@ -198,6 +199,9 @@ func loadSymbols(root string, probe *probeResult) (*sdkSymbols, error) {
 		return nil, fmt.Errorf("python sdk: %w", err)
 	}
 	if err := addKitSymbols(root, goSDK.symbols, rs, py); err != nil {
+		return nil, err
+	}
+	if err := addSubpackageSymbols(root, goSDK.symbols, rs, py); err != nil {
 		return nil, err
 	}
 	// The Node runtime's objects come from the runtime probe; the properties
@@ -278,7 +282,7 @@ func buildMatrix(root string) (*matrix, error) {
 		}
 		specs[s.Key] = s
 	}
-	m := &matrix{exceptions: ef.Exceptions}
+	m := &matrix{exceptions: ef.Exceptions, syms: syms}
 	known := map[string]bool{}
 	for _, r := range surface {
 		if known[r.Key] {
@@ -513,7 +517,7 @@ func defaultSymbols(r surfaceRow, sdk string) []string {
 		if sdk == "node" {
 			return []string{"RuntimeSessionManager." + n}
 		}
-		return qualify([]string{"SessionManager", "Context"}, []string{"SessionManager", "Context"}, []string{"SessionManager", "Context"})
+		return qualify([]string{"ReadonlySessionManager", "Context"}, []string{"ReadonlySessionManager", "Context"}, []string{"ReadonlySessionManager", "Context"})
 	case "modelRegistry":
 		if sdk == "node" {
 			return []string{"RuntimeModelRegistry." + n}
@@ -729,7 +733,7 @@ func (m *matrix) render() []byte {
 	w("- `implemented`: the symbol and any checked wire fields exist; this is not behavioral proof. See `docs/extension-api-parity.md` and the conformance tests.\n")
 	w("- `stand-in/partial`: the symbol exists; the note says what differs and why.\n")
 	w("- `missing`: no symbol. Each missing cell is listed in [`%s`](../%s) with its reviewed reason, and `go test ./test/parity/cmd/sdksurface` fails on any other.\n\n", exceptionsPath, exceptionsPath)
-	w("The package sections list every runtime export of the modules Pi serves to extensions (`pi-coding-agent`, `pi-tui`, `pi-ai`, `pi-ai/compat`, `pi-ai/providers/all`, `pi-agent-core`), from the compiler-derived inventory of Pi's `.d.ts` files (`test/parity/interfaces/upstream-v%s.json`), and every public instance member of each exported class represented by that inventory. Static factories and overload-specific reachability are outside this probe. ", coding.UpstreamVersion)
+	w("The package sections list every runtime export of the modules Pi serves to extensions (`pi-coding-agent`, `pi-tui`, `pi-ai`, `pi-ai/compat`, `pi-ai/models`, `pi-ai/providers/all`, `pi-agent-core`), from the compiler-derived inventory of Pi's `.d.ts` files (`test/parity/interfaces/upstream-v%s.json`), and every public instance member of each exported class represented by that inventory. Static factories and overload-specific reachability are outside this probe. ", coding.UpstreamVersion)
 	w("Only the Node runtime imports these modules. The probe loads each module the runtime serves and classifies every value by where its code lives, using the V8 inspector's function locations:\n\n")
 	w("- `Pi's own code`: the function originates in the vendored pinned modules or their dependencies; host import rewrites can still affect behavior (D73).\n")
 	w("- `bridged`: PiG's implementation in the extension runtime, a line-for-line port or a host bridge, locked by the D73 tests (`TestNodeRuntimeShimsExportEveryPinnedPiValue`, `TestPiTuiComponentsMatchThePinnedPackage`, `TestPiAiUtilitiesMatchThePinnedPackage`, `TestPiThemeHelpersMatchThePinnedPackage`).\n")

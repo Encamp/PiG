@@ -1482,6 +1482,61 @@ func makeInprocFixture(ui extension.UIContext, actions *[]string) extension.Exte
 				},
 				Source: inprocFixtureName,
 			},
+			"order_probe": {
+				Definition: extension.ToolDefinition{
+					Name:        "order_probe",
+					Description: "Make a host call and an update in the first tick",
+					Parameters:  json.RawMessage(`{"type":"object","properties":{"n":{"type":"number"}}}`),
+					Execute: func(context.Context, string, json.RawMessage, extension.AgentToolUpdateCallback) (extension.AgentToolResult, error) {
+						return agent.AgentToolResult{Content: []ai.ToolResultMessageContent{ai.TextContent{Text: "order-done"}}}, nil
+					},
+				},
+				Source: inprocFixtureName,
+			},
+			"mutation_order_probe": {
+				Definition: extension.ToolDefinition{
+					Name:        "mutation_order_probe",
+					Description: "Take the file mutation queue in the first statement and append a tag to the file",
+					Parameters:  json.RawMessage(`{"type":"object","properties":{"file":{"type":"string"},"tag":{"type":"string"}}}`),
+					Execute: func(context.Context, string, json.RawMessage, extension.AgentToolUpdateCallback) (extension.AgentToolResult, error) {
+						return agent.AgentToolResult{Content: []ai.ToolResultMessageContent{ai.TextContent{Text: "mutation-done"}}}, nil
+					},
+				},
+				Source: inprocFixtureName,
+			},
+			"timer_defer": {
+				Definition: extension.ToolDefinition{
+					Name:        "timer_defer",
+					Description: "Notify inline and from deferred work",
+					Parameters:  json.RawMessage(`{"type":"object"}`),
+					Execute: func(context.Context, string, json.RawMessage, extension.AgentToolUpdateCallback) (extension.AgentToolResult, error) {
+						return agent.AgentToolResult{Content: []ai.ToolResultMessageContent{ai.TextContent{Text: "queued"}}}, nil
+					},
+				},
+				Source: inprocFixtureName,
+			},
+			"timer_stale": {
+				Definition: extension.ToolDefinition{
+					Name:        "timer_stale",
+					Description: "Await a host call made through an earlier request's context",
+					Parameters:  json.RawMessage(`{"type":"object"}`),
+					Execute: func(context.Context, string, json.RawMessage, extension.AgentToolUpdateCallback) (extension.AgentToolResult, error) {
+						return agent.AgentToolResult{Content: []ai.ToolResultMessageContent{ai.TextContent{Text: "applied"}}}, nil
+					},
+				},
+				Source: inprocFixtureName,
+			},
+			"timer_release": {
+				Definition: extension.ToolDefinition{
+					Name:        "timer_release",
+					Description: "Release the deferred work",
+					Parameters:  json.RawMessage(`{"type":"object"}`),
+					Execute: func(context.Context, string, json.RawMessage, extension.AgentToolUpdateCallback) (extension.AgentToolResult, error) {
+						return agent.AgentToolResult{Content: []ai.ToolResultMessageContent{ai.TextContent{Text: "released"}}}, nil
+					},
+				},
+				Source: inprocFixtureName,
+			},
 			"throw_probe": {
 				Definition: extension.ToolDefinition{
 					Name:        "throw_probe",
@@ -1848,6 +1903,11 @@ func makeInprocFixture(ui extension.UIContext, actions *[]string) extension.Exte
 				Handler: func(context.Context, string) error { return nil },
 			},
 			// The in-process reference for exec_rejection_test.go's SDK rows: the host's own ExecCommand.
+			// The in-process reference for exec_abort_test.go's SDK rows: the host's own ExecCommand under a cancelled context, which that test runs itself.
+			"exec-abort-probe": {
+				Name: "exec-abort-probe", Description: "Abort a running exec through its signal",
+				Handler: func(context.Context, string) error { return nil },
+			},
 			"exec-reject-probe": {
 				Name: "exec-reject-probe", Description: "Report exec outcomes",
 				Handler: func(ctx context.Context, args string) error {
@@ -1948,6 +2008,34 @@ func makeInprocFixture(ui extension.UIContext, actions *[]string) extension.Exte
 						}
 					}
 					ui.Notify("signal:"+state, "info")
+					return nil
+				},
+			},
+			"signal-abort": {
+				Name:        "signal-abort",
+				Description: "Abort the run and report ctx.signal",
+				Handler: func(ctx context.Context, _ string) error {
+					state := func(signal context.Context) string {
+						switch {
+						case signal == nil:
+							return "none"
+						case signal.Err() != nil:
+							return "aborted"
+						}
+						return "live"
+					}
+					held, err := extension.FromContext(ctx).Signal()
+					if err != nil {
+						return err
+					}
+					if err := extension.FromContext(ctx).Abort(); err != nil {
+						return err
+					}
+					after, err := extension.FromContext(ctx).Signal()
+					if err != nil {
+						return err
+					}
+					ui.Notify("abort:"+state(held)+":"+state(after), "info")
 					return nil
 				},
 			},
@@ -2061,6 +2149,63 @@ func makeInprocFixture(ui extension.UIContext, actions *[]string) extension.Exte
 					}
 					ui.Notify(fmt.Sprintf("select=%s input=%s editor=%s confirm=%t",
 						selected, input, edited, confirmed), "info")
+					return nil
+				},
+			},
+			"dialog-stack-probe": {
+				Name:        "dialog-stack-probe",
+				Description: "Open concurrent dialogs from one command",
+				Handler: func(ctx context.Context, scenario string) error {
+					dialogs := commandUI(ctx, ui)
+					// A dismissed dialog answers "cancelled" (a confirm "false"), as the SDK fixtures report it.
+					text := func(value string, err error) (string, error) {
+						if errors.Is(err, context.Canceled) {
+							return "cancelled", nil
+						}
+						return value, err
+					}
+					confirm := func(title string) (string, error) {
+						confirmed, err := dialogs.Confirm(ctx, title, "message", extension.ExtensionUIDialogOptions{})
+						if errors.Is(err, context.Canceled) {
+							return "false", nil
+						}
+						return strconv.FormatBool(confirmed), err
+					}
+					open := map[string]func() (string, error){
+						"A": func() (string, error) {
+							return text(dialogs.Select(ctx, "A", []string{"a1", "a2"}, extension.ExtensionUIDialogOptions{}))
+						},
+						"B": func() (string, error) { return confirm("B") },
+						"S": func() (string, error) {
+							return text(dialogs.Select(ctx, "S", []string{"s1", "s2"}, extension.ExtensionUIDialogOptions{}))
+						},
+						"C": func() (string, error) { return confirm("C") },
+						"I": func() (string, error) {
+							return text(dialogs.Input(ctx, "I", "placeholder", extension.ExtensionUIDialogOptions{}))
+						},
+						"E": func() (string, error) { return text(dialogs.Editor(ctx, "E", "prefill")) },
+					}
+					names := []string{"A", "B"}
+					if scenario == "mix" {
+						names = []string{"S", "C", "I", "E"}
+					}
+					errs := make([]error, len(names))
+					var wg sync.WaitGroup
+					for index, name := range names {
+						wg.Go(func() {
+							value, err := open[name]()
+							if err != nil {
+								errs[index] = err
+								return
+							}
+							ui.Notify("stack settled "+name+"="+value, "info")
+						})
+					}
+					wg.Wait()
+					if err := errors.Join(errs...); err != nil {
+						return err
+					}
+					ui.Notify("stack done", "info")
 					return nil
 				},
 			},
@@ -2394,6 +2539,9 @@ type recordingUI struct {
 	editor        extension.RemoteEditor
 	toolsExpanded bool
 
+	// dialogs, when a test sets it, holds every select, confirm, input and editor the host receives until the test answers or dismisses it.
+	dialogs *dialogGate
+
 	// terminalInput captures the raw-input handler an extension registers, so
 	// the conformance gate can feed keystrokes through each transport.
 	terminalInputMu sync.Mutex
@@ -2420,15 +2568,25 @@ func newRecordingUI(notify, status *[]string) *recordingUI {
 	return &recordingUI{notify: notify, status: status}
 }
 
-func (u *recordingUI) Select(context.Context, string, []string, extension.ExtensionUIDialogOptions) (string, error) {
+func (u *recordingUI) Select(ctx context.Context, title string, _ []string, _ extension.ExtensionUIDialogOptions) (string, error) {
+	if u.dialogs != nil {
+		return u.dialogs.hold(ctx, "select", title)
+	}
 	return "second", nil
 }
 
-func (u *recordingUI) Confirm(context.Context, string, string, extension.ExtensionUIDialogOptions) (bool, error) {
+func (u *recordingUI) Confirm(ctx context.Context, title, _ string, _ extension.ExtensionUIDialogOptions) (bool, error) {
+	if u.dialogs != nil {
+		answer, err := u.dialogs.hold(ctx, "confirm", title)
+		return answer == "true", err
+	}
 	return true, nil
 }
 
-func (u *recordingUI) Input(context.Context, string, string, extension.ExtensionUIDialogOptions) (string, error) {
+func (u *recordingUI) Input(ctx context.Context, title, _ string, _ extension.ExtensionUIDialogOptions) (string, error) {
+	if u.dialogs != nil {
+		return u.dialogs.hold(ctx, "input", title)
+	}
 	return "typed", nil
 }
 
@@ -2662,7 +2820,10 @@ func (u *recordingUI) GetEditorText() string {
 	defer u.recordMu.Unlock()
 	return u.editorText
 }
-func (u *recordingUI) Editor(context.Context, string, string) (string, error) {
+func (u *recordingUI) Editor(ctx context.Context, title, _ string) (string, error) {
+	if u.dialogs != nil {
+		return u.dialogs.hold(ctx, "editor", title)
+	}
 	return "edited", nil
 }
 func (u *recordingUI) AddAutocompleteProvider(extension.AutocompleteProviderFactory) error {
