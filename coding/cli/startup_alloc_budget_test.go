@@ -172,13 +172,15 @@ const (
 )
 
 // startupVersionRuns is how many `pig --version` runs the budget may measure to find one within budget. The Go runtime starts one more OS
-// thread in some Windows process starts than in others: runtime.main locks the main goroutine to the main thread and blocks it waiting for
-// the GC workers, and when no idle M is parked yet the scheduler hands its P to a new M, which costs 6 objects and 5,096 bytes (m, g0, gsignal
-// and the profiling stack). A Go program that only reads runtime.MemStats measured 190 objects / 47,616 bytes in 21 of 30 starts under Wine
-// and 196 / 52,712 in the other 8; pig --version measured 756.6-756.8 KB or 761.6-761.9 KB the same way, with the same binary. The GitHub
-// runner read 822,488 bytes at the 0.5.2 batch head and 827,800 at its merge, 5,312 apart, with no pig change that allocates at startup between
-// them. The budget gates pig's own allocations, so a run over budget is measured again, up to this many times: noise passes in a later run,
-// while a regression is over budget in every run.
+// thread in some Windows process starts than in others: runtime.main locks the main goroutine to the main thread and blocks it in gcenable
+// waiting for the GC workers, and when no idle M is parked yet schedule -> stoplockedm -> handoffp -> startm -> newm hands its P to a new M.
+// That M costs 6 objects and 5,096 bytes (m, g0, gsignal and the profiling stack), whatever pig does. Under Wine on a Linux host, a Go program
+// that only reads runtime.MemStats measured 190 objects / 47,616 bytes in 21 of 30 starts and 196 / 52,712 in the other 8; pig --version
+// measured 756.6-756.8 KB or 761.6-761.9 KB the same way, with the same binary, and a heap profile put the doubled allocations under
+// runtime.newm <- startm <- handoffp <- stoplockedm. The GitHub runner read 822,488 bytes at the 0.5.2 batch head and 827,800 at its merge,
+// 5,312 apart, with no pig change that allocates at startup between them. The budget gates pig's own allocations, so a run over budget is
+// measured again, up to this many times, and the test judges one whole run (never the minimum bytes of one run with the minimum objects of
+// another). Noise passes in a later run; a regression is over budget in every run and fails with the smallest run's numbers.
 const startupVersionRuns = 10
 
 // startupLevelCeilingFor is the per-level budget of goos.
@@ -300,16 +302,21 @@ func (f *startupFixture) warmPrompt(ctx context.Context, t *testing.T, cwd strin
 	return best
 }
 
-// version measures pig --version from cwd until a run is within budget, or startupVersionRuns runs have not been: it returns the smallest bytes
-// and the smallest objects seen. A run that is over budget is measured again, because the runtime start itself moves the count (see
-// startupVersionRuns); a regression is over budget in every run and still fails.
+// version measures pig --version from cwd and returns one whole run: the first whose bytes and objects are both within budget, else the run
+// with the fewest bytes (its own objects with it), after startupVersionRuns runs. A run over budget is measured again because the Go runtime's
+// start moves the count (see startupVersionRuns). Every run is logged, so the two modes stay visible in CI logs.
 func (f *startupFixture) version(ctx context.Context, t *testing.T, cwd string, budget startupAllocBudget) profiling.ProcessMetrics {
 	t.Helper()
-	best := f.measure(ctx, t, cwd, "--version")
-	for run := 1; run < startupVersionRuns && (best.AllocBytes > budget.versionBytes || best.AllocObjects > budget.versionObjects); run++ {
-		next := f.measure(ctx, t, cwd, "--version")
-		best.AllocBytes = min(best.AllocBytes, next.AllocBytes)
-		best.AllocObjects = min(best.AllocObjects, next.AllocObjects)
+	var best profiling.ProcessMetrics
+	for run := 1; run <= startupVersionRuns; run++ {
+		current := f.measure(ctx, t, cwd, "--version")
+		t.Logf("pig --version run %d: %d bytes, %d objects", run, current.AllocBytes, current.AllocObjects)
+		if run == 1 || current.AllocBytes < best.AllocBytes {
+			best = current
+		}
+		if current.AllocBytes <= budget.versionBytes && current.AllocObjects <= budget.versionObjects {
+			return current
+		}
 	}
 	return best
 }
