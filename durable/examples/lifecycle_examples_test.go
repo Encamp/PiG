@@ -213,7 +213,9 @@ func TestExample20LateJoin(t *testing.T) {
 	viewMu.Lock()
 	defer viewMu.Unlock()
 	for _, shown := range viewOutputs {
-		if !strings.HasPrefix(shown, "1\n2\n3\n4\n5\n") {
+		// The view is acquired while the tool is already running, so its first frame may hold fewer lines than the
+		// poll above waits for; whatever it shows is the start of the count, never a restart of it.
+		if !strings.HasPrefix(everything, shown) {
 			t.Fatalf("view output %q restarted", shown)
 		}
 	}
