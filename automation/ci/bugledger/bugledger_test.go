@@ -1570,3 +1570,18 @@ func TestAMergedFixOlderThanCommittedFixesOfTheSameTitleStaysAnEntry(t *testing.
 		t.Fatal("a second regeneration with no new commit changed the ledger")
 	}
 }
+
+// A fragment the fold into CHANGELOG.md reworded is matched to the fragments by word overlap. Two fragments that score alike and were written in
+// the same second must not be told apart by the order a map lists them in: the same history must give the same ledger on every run.
+func TestLocateDoesNotDependOnTheOrderOfAMap(t *testing.T) {
+	first := map[string]intro{
+		"The loop no longer hangs on exit.":  {Hash: "aaaaaaaaaa", Fragment: true},
+		"The loop no longer stalls on exit.": {Hash: "bbbbbbbbbb", Fragment: true},
+	}
+	b := &builder{order: map[string]int{"aaaaaaaaaa": 7, "bbbbbbbbbb": 7}}
+	for range 100 {
+		if got := b.locate(first, "The loop no longer freezes on exit."); got != "aaaaaaaaaa" {
+			t.Fatalf("locate = %q, want the fragment that sorts first, aaaaaaaaaa", got)
+		}
+	}
+}
