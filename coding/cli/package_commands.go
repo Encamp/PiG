@@ -304,7 +304,7 @@ func reportSettingsErrors(sm *codingagent.SettingsManager, context string) {
 func init() {
 	// pig additive (D18): Piglets materialize Package/direct sources through
 	// the core installer without mutating Package settings.
-	installresolver.SetMaterializer(func(cwd, source, scope string, stdout, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(cwd, source, scope string, options installresolver.MaterializeOptions, stdout, _ io.Writer) (string, error) {
 		local := scope == "project"
 		if scope != "user" && scope != "project" {
 			return "", fmt.Errorf("unknown package materialization scope %q", scope)
@@ -317,6 +317,11 @@ func init() {
 			return "", errors.New("Project is not trusted; refusing to access project package storage")
 		}
 		source = strings.TrimSpace(source)
+		// pig additive (D194): Piglet resolution installs Packages without running lifecycle scripts unless the user opts in.
+		var installOptions []packagemanager.InstallOption
+		if !options.AllowInstallScripts {
+			installOptions = append(installOptions, packagemanager.WithIgnoreScripts())
+		}
 		kind := packagemanager.DetectSourceKind(source)
 		switch kind {
 		case "local":
@@ -330,12 +335,12 @@ func init() {
 			return root, nil
 		case "npm":
 			_, _ = fmt.Fprintf(stdout, "[%s] fetching %s\n", scope, source)
-			if err := packagemanager.InstallManagedNPM(cwd, sm.AgentDir(), sm, source, local); err != nil {
+			if err := packagemanager.InstallManagedNPM(cwd, sm.AgentDir(), sm, source, local, installOptions...); err != nil {
 				return "", err
 			}
 		case "git":
 			_, _ = fmt.Fprintf(stdout, "[%s] fetching %s\n", scope, source)
-			if err := packagemanager.InstallManagedGit(cwd, sm.AgentDir(), sm, source, local); err != nil {
+			if err := packagemanager.InstallManagedGit(cwd, sm.AgentDir(), sm, source, local, installOptions...); err != nil {
 				return "", err
 			}
 		default:

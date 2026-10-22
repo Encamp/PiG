@@ -862,7 +862,7 @@ printf '%s\n' '{"lockfileVersion":3,"packages":{"node_modules/demo":{"version":"
 		t.Fatal(err)
 	}
 
-	root, err := installresolver.Materialize(cwd, "npm:demo", "user", io.Discard, io.Discard)
+	root, err := installresolver.Materialize(cwd, "npm:demo", "user", installresolver.MaterializeOptions{}, io.Discard, io.Discard)
 	if err != nil {
 		t.Fatal(err)
 	}

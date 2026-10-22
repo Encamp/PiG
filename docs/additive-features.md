@@ -1557,3 +1557,22 @@ Remove when: the operating system trust stores and the Go standard library drop 
 
 Approval: owner order, 2026-10-21 (security patch for the eMudhra CA compromise, relayed by Main).
 SCRUTINIZED:approved
+
+## D194 Piglet resolution installs npm and Git Packages with lifecycle scripts disabled unless the command opts in
+
+Stock disposition: explicit unsafe opt-in. The capability that stays off is a Package's lifecycle scripts during a Piglet's install; `--allow-install-scripts` turns it on for one `pig piglet validate` or `pig piglet add` command, is visible in the command line, and no Piglet or PiG Standard can select it.
+
+What: Resolving a Piglet installs each npm Package, each Git Package's dependencies, and the npm or Git package of a Piglet source that `pig piglet add npm:<name>` or `git:<repo>` fetches, with `--ignore-scripts`, so no `preinstall`, `install`, `postinstall` or `prepare` script of the Package or of its dependencies runs. npm, pnpm and bun read the same flag. `pig piglet validate` and `pig piglet add` accept `--allow-install-scripts`, which installs as Pi does for that one command. The choice is not stored: `pig piglet build`, `pig piglet publish` and `pig --piglet` resolve with scripts disabled and have no opt-in, and files that an opted-in install already built stay in place (`TestPigletResolutionKeepsFilesBuiltByAnOptedInInstall`).
+
+Pi source: `packages/coding-agent/src/core/package-manager.ts` `getNpmInstallArgs` (1851-1872), `installNpm` (1874-1877) and `getGitDependencyInstallArgs` (1827-1848) pass no `--ignore-scripts`, so `pi install npm:<name>` runs lifecycle scripts. Pi has no Piglet. PiG's `pig install`, `pig update` and the temporary `-e npm:` source keep Pi's arguments: `packagemanager.WithIgnoreScripts` is an option of `InstallManagedNPM`, `InstallManagedGit` and their helpers, and only the Piglet materializer passes it (`TestPackageInstallKeepsPisLifecycleScripts`).
+
+Why: `pig piglet validate <name>` and `pig piglet add <source>` are commands people run to look at a Piglet before they use it, and with Pi's arguments they executed a publisher's `postinstall` first. A Piglet names Packages the user did not write, and a published Piglet can be copied into a command another person pastes. A Package is code that runs when the Piglet starts, so disabling install scripts does not make a Package safe; it removes the code that ran before the user decided to use it.
+
+Call-site markers: `internal/packagemanager/install_options.go`, `coding/extension/installresolver/registry.go`, `coding/cli/package_commands.go` (the materializer), `coding/piglet/extends.go`, `coding/piglet/origins.go` and `coding/piglet/main.go`.
+
+Locked by: `TestPigletCommandsInstallNPMPackagesWithoutRunningScripts` (validate, add of a local source and add of an npm source: a real npm against a local registry, with a postinstall in the Package, in its dependency and in the Piglet source package, each writing a sentinel; none is written by default and all are written with the flag), `TestPigletValidateInstallsGitPackagesWithoutRunningScripts`, `TestPackageInstallKeepsPisLifecycleScripts`, `TestInstallArgsIgnoreScriptsOnlyWhenAsked`, `TestPigletMaterializationCarriesTheInstallScriptsChoice`.
+
+Remove when: Pi installs Packages with lifecycle scripts disabled, or Pi gives its Package installs an explicit script opt-in that Piglet resolution can share.
+
+Approval: owner, Piglet builder port decision D8 (`PIGLETS-BUILDER-PORT-REQUESTS.md`, section 5.3, approved as recommended 2026-10-22).
+SCRUTINIZED:approved
