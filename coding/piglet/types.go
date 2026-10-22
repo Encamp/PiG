@@ -598,6 +598,19 @@ func (p *Piglet) Validate() error {
 // slotIDs are the slots a Piglet can fill.
 var slotIDs = []string{"frontend"}
 
+// The closed value sets of the Piglet vocabulary that are not a registry. piglet.schema.json lists the same values;
+// TestSchemaVocabularyMatchesParser fails when the two differ.
+var (
+	// discoverySources are the ambient Resource scopes discovery.extensions and discovery.skills may name.
+	discoverySources = []string{"workspace", "user"}
+	// agentRuntimeModes are the agentEnv.pigRuntime.mode values.
+	agentRuntimeModes = []string{"inject", "image"}
+	// agentPolicyPresets are the agentEnv.policy.preset values.
+	agentPolicyPresets = []string{"minimal", "standard", "elevated"}
+	// extensionRealizations are the build.extensionRealization values.
+	extensionRealizations = []string{"fused"}
+)
+
 // validateSlots checks that each member is a relative path inside the
 // Piglet's directory and that extends.remove.slots names known slots.
 func validateSlots(slots *Slots, extends *ExtendsSpec) error {
@@ -660,7 +673,7 @@ func validateDiscovery(discovery *Discovery) error {
 	} {
 		seen := make(map[string]struct{}, len(entry.sources))
 		for i, source := range entry.sources {
-			if source != "workspace" && source != "user" {
+			if !slices.Contains(discoverySources, source) {
 				return fmt.Errorf("discovery.%s[%d] must be workspace or user, got %q", entry.kind, i, source)
 			}
 			if _, exists := seen[source]; exists {
@@ -724,14 +737,14 @@ func validateAgentEnvironment(environment *AgentEnvironment) error {
 		}
 	}
 	if environment.PigRuntime != nil {
-		if environment.PigRuntime.Mode != "" && environment.PigRuntime.Mode != "inject" && environment.PigRuntime.Mode != "image" {
+		if environment.PigRuntime.Mode != "" && !slices.Contains(agentRuntimeModes, environment.PigRuntime.Mode) {
 			return fmt.Errorf("agentEnv.pigRuntime.mode must be inject or image")
 		}
 		if strings.ContainsAny(environment.PigRuntime.Version, " \t\r\n") {
 			return fmt.Errorf("agentEnv.pigRuntime.version must not contain whitespace")
 		}
 	}
-	if environment.Policy != nil && environment.Policy.Preset != "" && environment.Policy.Preset != "minimal" && environment.Policy.Preset != "standard" && environment.Policy.Preset != "elevated" {
+	if environment.Policy != nil && environment.Policy.Preset != "" && !slices.Contains(agentPolicyPresets, environment.Policy.Preset) {
 		return fmt.Errorf("agentEnv.policy.preset must be minimal, standard, or elevated")
 	}
 	if err := validateAgentWorkspace(environment.Workspace); err != nil {
@@ -837,7 +850,7 @@ func validateBuildSpec(build *BuildSpec) error {
 		}
 		seenTargets[target] = struct{}{}
 	}
-	if build.ExtensionRealization != "" && build.ExtensionRealization != "fused" {
+	if build.ExtensionRealization != "" && !slices.Contains(extensionRealizations, build.ExtensionRealization) {
 		return fmt.Errorf("build.extensionRealization %q must be fused", build.ExtensionRealization)
 	}
 	if build.OutputName != "" {

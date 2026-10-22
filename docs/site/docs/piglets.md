@@ -576,7 +576,7 @@ FAIL: Piglet /home/you/project/agents/reviewer.yaml: parse piglet YAML: yaml: un
   line 3: field system not found in type piglet.Piglet
 ```
 
-`systemPrompt` takes `text` or `file`. A skill needs an origin: `FAIL: skill "commit": no origin specified`. `pig piglet schema` prints every accepted field.
+`systemPrompt` takes `text` or `file`. A skill needs an origin: `FAIL: skill "commit": no origin specified`. `pig piglet schema` prints every accepted field. It lists the same values the parser accepts for the built-in tools (including `powershell`), the strip IDs, the discovery scopes, the `agentEnv` runtime modes and policy presets, and `build.extensionRealization`, and a test fails when the two differ.
 
 ## Related documentation
 

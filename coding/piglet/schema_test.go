@@ -68,6 +68,8 @@ func TestAC1SchemaParserAgreement(t *testing.T) {
 		{"remove strip", "name: x\nextends:\n  source: local:./base.yaml\n  allowWiden: true\n  remove:\n    strip:\n      tools: [grep]\n", true},
 		{"remove a slot and a strip entry", "name: x\nextends:\n  source: local:./base.yaml\n  allowWiden: true\n  remove:\n    slots: [frontend]\n    strip:\n      extensions: [mcp]\n", true},
 		{"unknown strip field", "name: x\nstrip:\n  renderer: ansi\n", false},
+		{"powershell is a built-in tool", "name: x\ntools: [powershell, read]\n", true},
+		{"unknown built-in tool", "name: x\ntools: [pwsh]\n", false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

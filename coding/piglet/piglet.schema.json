@@ -11,7 +11,8 @@
   "properties": {
     "name": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
     },
     "description": {
       "type": "string"
@@ -46,10 +47,11 @@
       "items": {
         "type": "string",
         "enum": [
-          "bash",
           "read",
-          "write",
+          "bash",
+          "powershell",
           "edit",
+          "write",
           "grep",
           "find",
           "ls"
@@ -99,7 +101,8 @@
       "properties": {
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
         },
         "from": {
           "$ref": "#/$defs/secretSource"
@@ -116,7 +119,8 @@
           ],
           "properties": {
             "env": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
             }
           }
         },
@@ -140,7 +144,8 @@
           ],
           "properties": {
             "ref": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*:\\S+$"
             }
           }
         }
@@ -223,44 +228,122 @@
         "tools": {
           "type": "array",
           "items": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "#/$defs/stripToolId"
           },
           "uniqueItems": true
         },
         "commands": {
           "type": "array",
           "items": {
-            "type": "string",
-            "pattern": "^/\\S+$"
+            "$ref": "#/$defs/stripCommandId"
           },
           "uniqueItems": true
         },
         "extensions": {
           "type": "array",
           "items": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "#/$defs/stripExtensionId"
           },
           "uniqueItems": true
         },
         "apis": {
           "type": "array",
           "items": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "#/$defs/stripApiId"
           },
           "uniqueItems": true
         },
         "features": {
           "type": "array",
           "items": {
-            "type": "string",
-            "minLength": 1
+            "$ref": "#/$defs/stripFeatureId"
           },
           "uniqueItems": true
         }
-      }
+      },
+      "$comment": "The ID enums (stripToolId and the four defs after it) are written by `make piglet-strip-ids` from the registrations."
+    },
+    "stripToolId": {
+      "type": "string",
+      "enum": [
+        "bash",
+        "edit",
+        "find",
+        "grep",
+        "ls",
+        "powershell",
+        "read",
+        "write"
+      ]
+    },
+    "stripCommandId": {
+      "type": "string",
+      "enum": [
+        "/bug",
+        "/changelog",
+        "/clone",
+        "/compact",
+        "/copy",
+        "/debug",
+        "/export",
+        "/fork",
+        "/hotkeys",
+        "/import",
+        "/login",
+        "/logout",
+        "/model",
+        "/name",
+        "/new",
+        "/piglet",
+        "/quit",
+        "/reload",
+        "/resume",
+        "/scoped-models",
+        "/session",
+        "/settings",
+        "/share",
+        "/thinking",
+        "/tree",
+        "/trust"
+      ]
+    },
+    "stripExtensionId": {
+      "type": "string",
+      "enum": [
+        "codemode",
+        "llama.cpp",
+        "mcp",
+        "pig-login",
+        "tool-search"
+      ]
+    },
+    "stripApiId": {
+      "type": "string",
+      "enum": [
+        "bedrock-converse-stream",
+        "google-vertex",
+        "mistral-conversations"
+      ]
+    },
+    "stripFeatureId": {
+      "type": "string",
+      "enum": [
+        "changelog",
+        "docs",
+        "export-html",
+        "extension-sdk-go",
+        "extension-sdk-python",
+        "extension-sdk-rust",
+        "mermaid",
+        "node-extensions",
+        "piglet-builder",
+        "prompt-templates",
+        "self-update",
+        "skills",
+        "syntax-highlight",
+        "themes",
+        "word-dictionaries"
+      ]
     },
     "skillEntry": {
       "oneOf": [
@@ -404,7 +487,39 @@
             "$ref": "#/$defs/agentSecretBinding"
           }
         }
-      }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "image"
+          ],
+          "properties": {
+            "image": {
+              "pattern": "\\S"
+            }
+          }
+        },
+        {
+          "required": [
+            "devContainer"
+          ],
+          "properties": {
+            "devContainer": {
+              "pattern": "\\S"
+            }
+          }
+        },
+        {
+          "required": [
+            "source"
+          ],
+          "properties": {
+            "source": {
+              "pattern": "\\S"
+            }
+          }
+        }
+      ]
     },
     "agentSecretBinding": {
       "type": "object",
@@ -425,7 +540,8 @@
           ],
           "properties": {
             "env": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
             }
           }
         }
@@ -436,7 +552,11 @@
       "additionalProperties": false,
       "properties": {
         "mode": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "inject",
+            "image"
+          ]
         },
         "version": {
           "type": "string"
@@ -448,7 +568,12 @@
       "additionalProperties": false,
       "properties": {
         "preset": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "minimal",
+            "standard",
+            "elevated"
+          ]
         }
       }
     },
@@ -472,12 +597,17 @@
           "type": "string"
         },
         "target": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^/"
         },
         "readonly": {
           "type": "boolean"
         }
-      }
+      },
+      "required": [
+        "source",
+        "target"
+      ]
     },
     "modelConfig": {
       "type": "object",
@@ -504,11 +634,20 @@
         "targets": {
           "type": "array",
           "items": {
-            "type": "string"
-          }
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*/[a-z0-9][a-z0-9_-]*$"
+          },
+          "uniqueItems": true
         },
         "outputName": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^/\\\\]*$",
+          "not": {
+            "enum": [
+              ".",
+              ".."
+            ]
+          }
         },
         "extensionRealization": {
           "enum": [
@@ -544,7 +683,9 @@
       "additionalProperties": false,
       "properties": {
         "version": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^((0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*)){0,2}|(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?)?$",
+          "description": "Semantic Version; the Go parser also accepts the short forms 1 and 1.2."
         }
       }
     }

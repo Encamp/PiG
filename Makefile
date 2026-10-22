@@ -244,10 +244,10 @@ changelog-fold: ## Fold the changelog.d fragments into the VERSION section of CH
 	@test -n "$(VERSION)" || { echo "usage: make changelog-fold VERSION=x.y.z" >&2; exit 2; }
 	@go run ./automation/ci/changelogfrag -fold=$(VERSION)
 
-piglet-strip-ids: ## Regenerate the Piglet strip ID table from the tool, command, extension and feature registrations
+piglet-strip-ids: ## Regenerate the Piglet strip ID table and the strip ID enums of the Piglet JSON Schema from the tool, command, extension and feature registrations
 	@go run ./coding/piglet/internal/genstripids
 
-piglet-strip-ids-drift: ## Fail when the Piglet strip ID table differs from the registrations
+piglet-strip-ids-drift: ## Fail when the Piglet strip ID table or the schema strip ID enums differ from the registrations
 	@go run ./coding/piglet/internal/genstripids -check
 
 piglet-strip-build: ## Vet every package and build cmd/pig with every Piglet strip build tag (D92)
