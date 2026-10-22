@@ -59,7 +59,7 @@ Entries are listed by ID. The page carries no totals, so a pull request that add
 | [BF-0bbe365](#bf-0bbe365) | fix(codingagent): footer context usage refreshes on a context_edit entry (Pi getContextUsage) | PiG's own defect | All platforms | Unreleased |
 | [BF-0bc05bf](#bf-0bc05bf) | Fixed `!` and RPC `bash` output keeping fragments of color codes, such as a stray `m`, when a code was split… | PiG's own defect | All platforms | 0.5.0 |
 | [BF-0ce459e](#bf-0ce459e) | `/login` offers a provider object's own login methods (Pi's `registerNativeProvider`, the… | PiG's own defect | All platforms | 0.5.0 |
-| [BF-0d0a3ef](#bf-0d0a3ef) | A turn through OpenRouter (Chat Completions or Anthropic Messages) now reports the cost OpenRouter billed… | A Pi defect that PiG fixed first | All platforms | 0.5.0 |
+| [BF-0d0a3ef](#bf-0d0a3ef) | A turn through OpenRouter (Chat Completions or Anthropic Messages) now reports the cost OpenRouter billed… | PiG's own defect | All platforms | 0.5.0 |
 | [BF-0d13b01](#bf-0d13b01) | `SettingsManager.getTransport` and fifteen sibling getters (settings-manager.ts: getSteeringMode… | PiG's own defect | All platforms | 0.5.0 |
 | [BF-0d1c973](#bf-0d1c973) | `tui.Box` no longer invalidates its children when a child is added or removed or the box is cleared | PiG's own defect | All platforms | 0.5.0 |
 | [BF-0d55b30](#bf-0d55b30) | A panicking notify while MCP reports startup problems is shown as "MCP failed to load" instead of ending the… | PiG's own defect | All platforms | 0.5.0 |
@@ -1704,14 +1704,12 @@ Entries are listed by ID. The page carries no totals, so a pull request that add
 
 **A turn through OpenRouter (Chat Completions or Anthropic Messages) now reports the cost OpenRouter billed…**
 
-- **Source:** A Pi defect that PiG fixed first (divergence D124)
+- **Source:** PiG's own defect
 - **Symptom:** A turn through OpenRouter (Chat Completions or Anthropic Messages) now reports the cost OpenRouter billed, including the upstream cost of BYOK requests, instead of the catalog-rate estimate; the HTML export shows the recorded total.
 - **Root cause:** Ports pi-mono commit (branch open-router-cost): utils/openrouter-cost.ts, parseChunkUsage in openai-completions.ts, message_delta usage in anthropic-messages.ts, export-html template.js cost.total.
 - **User impact:** Wrong output or ordering
 - **Platform:** All platforms
 - **Fixed in:** 0.5.0
-- **Pi issue:** https://github.com/earendil-works/pi/issues/9980
-- **Removed when Pi fixes it:** pi-mono merges `open-router-cost` (the divergence then becomes the pinned Pi behavior).
 - **Fix commits:** `0d0a3efd10` (2026-10-09), `1cad63426b` (2026-10-10), `6875edf3a8` (2026-10-10)
 - **Tests:** `ai/openai_test.go::TestParseChunkUsage_PromptCacheHitTokens`, `ai/openai_test.go::TestParseChunkUsage_PromptTokensDetailsPreferred`, `ai/openrouter_cost_test.go::TestAnthropicMessagesUsesOpenRouterReportedCost`, `ai/openrouter_cost_test.go::TestApplyOpenRouterReportedCost`, `ai/openrouter_cost_test.go::TestIsOpenRouterModel`, `ai/openrouter_cost_test.go::TestOpenAICompletionsUsesOpenRouterReportedCost`, `internal/codingagent/export/export_cost_total_test.go::TestExportHTMLCostUsesRecordedTotals`, `internal/codingagent/export/upstream_test.go::TestExportHTMLPinnedAssets`
 - **Release note:** A turn through OpenRouter (Chat Completions or Anthropic Messages) now reports the cost OpenRouter billed, including the upstream cost of BYOK requests, instead of the catalog-rate estimate; the HTML export shows the recorded total. This ports pi-mono's unmerged `open-router-cost` branch (D124, pi-mono #9980).
