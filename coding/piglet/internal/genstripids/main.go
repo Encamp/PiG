@@ -171,6 +171,7 @@ func schemaDefs(t table) []struct {
 // renderSchema rewrites the ID enum of each strip ID def in the Piglet JSON Schema and leaves every other byte alone.
 func renderSchema(schema []byte, t table) ([]byte, error) {
 	for _, entry := range schemaDefs(t) {
+		//perf:ok go generate tool: runs once per schema vocabulary table, never in the product
 		pattern := regexp.MustCompile(`(?s)("` + entry.def + `": \{\s*"type": "string",\s*"enum": )\[[^\]]*\]`)
 		if !pattern.Match(schema) {
 			return nil, fmt.Errorf("piglet.schema.json has no %s def with a string enum", entry.def)
