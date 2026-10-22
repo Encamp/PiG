@@ -558,7 +558,7 @@ func (s *heldStorage) holdCommits() *gate {
 	return g
 }
 
-func (s *heldStorage) Commit(ctx context.Context, writes []durable.StorageWrite) (durable.Seq, error) {
+func (s *heldStorage) Commit(ctx context.Context, writes []durable.StorageWrite, adopt func(durable.Seq)) (durable.Seq, error) {
 	s.mu.Lock()
 	held, fail := s.held, s.fail
 	s.fail = nil
@@ -571,7 +571,7 @@ func (s *heldStorage) Commit(ctx context.Context, writes []durable.StorageWrite)
 			return 0, err
 		}
 	}
-	return s.MemoryStorage.Commit(ctx, writes)
+	return s.MemoryStorage.Commit(ctx, writes, adopt)
 }
 
 // detailsOf is the details of the code mode call's result entry.

@@ -1,0 +1,7 @@
+pkg:durable/.#HarnessOptions	durable	type-mismatch	durable/harness/types.go#HarnessOptions
+pkg:durable/.#ReadOnlySession	durable	no-go-symbol	
+pkg:durable/.#ReadOnlySession::construct:0	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:cause	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:message	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:name	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:stack	durable	child-gap	

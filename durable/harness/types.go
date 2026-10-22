@@ -255,9 +255,7 @@ type Conversation interface {
 	Abort(ctx context.Context, options *durable.ConversationAbortOptions) error
 	// WaitForIdle returns when the ordinary ownership scope has no live non-background task.
 	WaitForIdle(ctx context.Context) error
-	// ViewState returns the structural view (spec §9.3) as a disposable read-only Chord state.
-	ViewState(ctx context.Context) (durable.AttachedReplicatedState[ConversationView], error)
-	// Watch returns the structural view as a serialized exact-frame watch with bounded pending frames.
+	// Watch returns the structural view (spec §9.3) as a serialized exact-frame watch with bounded pending frames.
 	Watch(ctx context.Context) (ConversationWatch, error)
 }
 
@@ -296,9 +294,8 @@ type Harness interface {
 	WaitForIdle(ctx context.Context) error
 	// Usage is the Session total: every conversation's pi.usage summed.
 	Usage(ctx context.Context) (UsageState, error)
-	// TaskGraph returns every live task with its owner edge, status, and owned conversations (spec §9.5), as a disposable Chord state.
-	TaskGraph(ctx context.Context) (durable.AttachedReplicatedState[TaskGraph], error)
-	// WatchTaskGraph returns the task graph as a serialized exact-frame watch with bounded pending frames.
+	// WatchTaskGraph returns every live task with its owner edge, status, and owned conversations (spec §9.5), as a
+	// serialized exact-frame watch with bounded pending frames.
 	WatchTaskGraph(ctx context.Context) (TaskGraphWatch, error)
 }
 

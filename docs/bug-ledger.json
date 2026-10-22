@@ -1895,14 +1895,14 @@
       ],
       "tests": [
         "ai/system_message_sections_test.go::TestSystemMessageWritesAnEmptySectionsObjectButNotAnAbsentOne",
-        "durable/examples/tasks_compaction_examples_test.go::TestExample25Compaction",
+        "durable/examples/tasks_compaction_examples_test.go::TestExample24Compaction",
         "durable/interop/interop_test.go::TestGoOpensAndResumesAStoreWrittenByPiDurable",
         "durable/interop/interop_test.go::TestPiDurableOpensAndResumesAStoreWrittenByGo",
         "durable/interop/interop_test.go::TestScriptedSessionJsonlFilesMatchPiDurable",
         "durable/interop/interop_test.go::TestScriptedSessionStoresMatchPiDurable",
         "durable/interop/interop_test.go::TestScriptedSessionsViewIdentically",
         "durable/interop/interop_test.go::TestSecondScriptedSessionStoresMatchPiDurable",
-        "durable/session/watch_doc_typed_test.go::TestDocumentStateOfDecodesRevisionsAndRetirement",
+        "durable/session/watch_doc_typed_test.go::TestWatchDocTypedDecodesRevisionsAndReportsRetirementAsNil",
         "internal/codingagent/prompts/hidden_tools_upstream_test.go::TestUpstreamSystemPromptHiddenTools"
       ]
     },
@@ -17319,7 +17319,7 @@
         "chord/replicated_state_delivery_upstream_test.go::TestReplicatedStatePublicDelivery",
         "chord/replicated_state_upstream_test.go::TestAuthoritativeReplicatedStateSources",
         "chord/replicated_state_upstream_test.go::TestTransactionalReplicatedState",
-        "durable/session/session_states_test.go::TestDocumentStateListenerFailureReachesTheSessionReport",
+        "durable/session/session_watches_test.go::TestSessionDocumentWatches",
         "internal/goroutineid/goroutineid_test.go::TestCurrentIdentifiesTheCallingGoroutine"
       ]
     },

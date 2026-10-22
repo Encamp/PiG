@@ -5832,6 +5832,15 @@
       "rationale": "New in 1.0.2; area and tags follow the sibling tests under packages/durable/test/. It asserts the provider session ID that reaches the Provider request, a production path."
     },
     {
+      "path": "packages/durable/test/session-adoption.test.ts",
+      "upstreamTestHash": "sha256:125ee969ca0087154f0139254e9014b4371c306156227606887361a0d23f3822",
+      "area": "sessions",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "New in Pi 92ab5360; area and tags follow the sibling tests under packages/durable/test/ until the production-path review."
+    },
+    {
       "path": "packages/durable/test/session-checkpoints-migrations.test.ts",
       "upstreamTestHash": "sha256:9111c73cbb0f7d653d08dd099181d81a75cba6e3198bce34bf3da2733d3cf5e3",
       "area": "cli",
