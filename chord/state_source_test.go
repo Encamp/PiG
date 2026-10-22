@@ -37,6 +37,7 @@ func (source *numberSource) emit(cursor int, value float64) {
 
 // upstream: state.ts attachReplicatedStateSource: the attachment's snapshot is the first value (a hydration), each next-cursor frame is an update, and a cursor gap disposes the attachment and reports the failure.
 // Pi source: packages/chord/src/state.ts (attachReplicatedStateSource)
+// Pi: packages/chord/src/state.ts:77 (ReplicatedStateSource.attach), :57 (the attachment snapshot), :63 (activate), :65 (dispose)
 // mutation-checked: a wrong expected cursor, or not disposing on a gap, each fail it
 // mutation-checked: dropping the reads and writes of ReplicatedStateDelivery.Kind, ReplicatedStateSourceOptions.OnError fails it
 // mutation-checked: zeroing the results of AttachedReplicatedState.Value fails it

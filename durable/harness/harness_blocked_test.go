@@ -32,7 +32,7 @@ type failOnceCommit struct {
 	err    error
 }
 
-func (s *failOnceCommit) Commit(ctx context.Context, writes []durable.StorageWrite) (durable.Seq, error) {
+func (s *failOnceCommit) Commit(ctx context.Context, writes []durable.StorageWrite, adopt func(durable.Seq)) (durable.Seq, error) {
 	s.mu.Lock()
 	fail := !s.failed
 	s.failed = true
@@ -40,7 +40,7 @@ func (s *failOnceCommit) Commit(ctx context.Context, writes []durable.StorageWri
 	if fail {
 		return 0, s.err
 	}
-	return s.Storage.Commit(ctx, writes)
+	return s.Storage.Commit(ctx, writes, adopt)
 }
 
 func TestBlockedTasksOnTheReference(t *testing.T) {
@@ -70,7 +70,7 @@ func TestBlockedTasksOnTheReference(t *testing.T) {
 		completing := *record
 		completing.Memos = nil
 		completing.State = durable.TaskState[durable.JsonValue, durable.JsonValue]{Status: durable.TaskCompleting, Outcome: &durable.TaskOutcome[durable.JsonValue]{Status: durable.OutcomeCompleted, Result: &completed}}
-		if _, err := raw.Commit(testContext, []durable.StorageWrite{durable.TaskWrite{Value: completing}}); err != nil {
+		if _, err := raw.Commit(testContext, []durable.StorageWrite{durable.TaskWrite{Value: completing}}, func(durable.Seq) {}); err != nil {
 			t.Fatal(err)
 		}
 		if err := raw.Close(testContext); err != nil {

@@ -1719,9 +1719,9 @@ rationale = ""
 [[files]]
 path = "packages/chord/src/watch.ts"
 change = "added"
-disposition = "pending"
-evidence = []
-rationale = ""
+disposition = "ported"
+evidence = ["test:durable/session/observation_internal_test.go#TestCommittedWatchRetireDeliversTheLastFrameThenEndsRetired", "test:durable/session/committed_watch_retired_pi_test.go#TestCommittedWatchRejectsASecondCancellationObserver", "test:durable/session/observation_internal_test.go#TestCommittedWatchEndsRetiredOnlyOnItsSourcesRetirement"]
+rationale = "New in Pi 92ab5360: WatchEnd (the reasons stopped, cancelled, retired, ended, listener_error and failed, the last two carrying the error) and WatchHandle (value, closed, start, stop, observeCancellation) move from Durable to Chord, and Durable re-exports them. Ported as chord/watch.go (WatchHandle, WatchEnd, the WatchStopped, WatchCancelled, WatchRetired, WatchEnded, WatchListenerError and WatchFailed reasons); durable/types.go aliases them, and the session CommittedWatch implements the handle. session_closed and session_failed are now ended and failed."
 
 [[files]]
 path = "packages/chord/src/websocket.ts"

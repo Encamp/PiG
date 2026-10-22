@@ -187,7 +187,9 @@ func TestExample24ChildTasks(t *testing.T) {
 	// aborts every payment (each refunds itself) before the checkout ends aborted.
 	id = checkout(root, "visa-5", "visa-6", "visa-7", "visa-8")
 	opened.Resume()
-	graph := must(opened.TaskGraph(background))
+	graph := must(opened.WatchTaskGraph(background))
+	// A started watch keeps its value current.
+	graph.Start(func(context.Context, harness.TaskGraph, []durable.Op) error { return nil })
 	eventually(t, func() bool {
 		nodes := graph.Value().Tasks
 		node, ok := nodes[idKey(id)]
@@ -206,7 +208,7 @@ func TestExample24ChildTasks(t *testing.T) {
 	if tree[idKey(id)].Owner != nil || tree[idKey(id)].State.Policy != durable.JoinFailFast {
 		t.Fatalf("checkout node: %+v", tree[idKey(id)])
 	}
-	graph.Dispose()
+	must(graph.Stop())
 	if _, err := opened.AbortTask(background, id); err != nil {
 		t.Fatal(err)
 	}

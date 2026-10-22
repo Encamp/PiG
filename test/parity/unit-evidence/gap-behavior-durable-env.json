@@ -78,16 +78,6 @@
   },
   {
     "upstream": "packages/durable/src/session/observation.ts",
-    "package": "./durable/session",
-    "tests": [
-      "TestCommittedObservationHarnessSurface",
-      "TestSessionSourceAttachmentIsolatesListenerFailure"
-    ],
-    "upstream_reference": "packages/durable/src/session/observation.ts:119 (Dispose); packages/durable/src/session/observation.ts:1-302",
-    "mutation": "durable/session/observation.go:316 `attachment.disposed = true` -> `attachment.disposed = false` (TestSessionSourceAttachmentIsolatesListenerFailure FAIL); durable/session/observation.go:542 `if err != nil {` -> `if err == nil {` (TestCommittedObservationHarnessSurface FAIL); compiled test FAIL (go test -overlay without -cover), baseline PASS"
-  },
-  {
-    "upstream": "packages/durable/src/session/observation.ts",
     "package": "./durable/harness",
     "tests": [
       "TestCompactionAndTheInbox"

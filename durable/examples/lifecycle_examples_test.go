@@ -14,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/MichaelKinsy/PiG/ai"
-	"github.com/MichaelKinsy/PiG/chord"
 	"github.com/MichaelKinsy/PiG/chord/delta"
 	"github.com/MichaelKinsy/PiG/durable"
 	"github.com/MichaelKinsy/PiG/durable/env"
@@ -56,7 +55,7 @@ func liveState(t *testing.T, view harness.ConversationView) harness.LiveState {
 // 21-late-join.ts: a client attaches while a run is already underway. It gets the current state first, the
 // conversation view or the snapshot event, and then only what changes after that.
 // Pi source: packages/durable/src/harness/events.ts, packages/durable/src/harness/types.ts
-// mutation-checked: zeroing the results of AgentEventStream.Start, Conversation.ViewState fails it
+// mutation-checked: zeroing the results of AgentEventStream.Start, Conversation.Watch fails it
 // mutation-checked: dropping the reads and writes of AgentEventStream.Snapshot fails it
 func TestExample21LateJoin(t *testing.T) {
 	// The tool prints "1\n" to "5\n", waits at the gate (upstream's 500 ms pause is the join), then prints "6\n"
@@ -97,7 +96,17 @@ func TestExample21LateJoin(t *testing.T) {
 	submission := must(root.Submit(background, durable.SubmissionDraft{Type: durable.SubmissionTypeInput, Content: ai.UserText("Count to ten, then tell me.")}))
 
 	// Join while the tool is halfway through: the view holds the running tool's output.
-	view := must(root.ViewState(background))
+	view := must(root.Watch(background))
+	var viewOutputs []string
+	var viewMu sync.Mutex
+	view.Start(func(_ context.Context, value harness.ConversationView, _ []durable.Op) error {
+		if tools := liveState(t, value).Tools; len(tools) == 1 && tools[0].Status == harness.ToolSlotRunning && tools[0].Output != nil {
+			viewMu.Lock()
+			viewOutputs = append(viewOutputs, *tools[0].Output)
+			viewMu.Unlock()
+		}
+		return nil
+	})
 	var slot harness.ToolSlot
 	eventually(t, func() bool {
 		tools := liveState(t, view.Value()).Tools
@@ -115,16 +124,6 @@ func TestExample21LateJoin(t *testing.T) {
 		kinds = append(kinds, entry.Kind)
 	}
 	expectEqual(t, "view entries", kinds, []string{"pi.user", "pi.system", "pi.assistant"})
-
-	var viewOutputs []string
-	var viewMu sync.Mutex
-	unsubscribe := view.Subscribe(func(value harness.ConversationView, _ context.Context, _ chord.ReplicatedStateDelivery) {
-		if tools := liveState(t, value).Tools; len(tools) == 1 && tools[0].Status == harness.ToolSlotRunning && tools[0].Output != nil {
-			viewMu.Lock()
-			viewOutputs = append(viewOutputs, *tools[0].Output)
-			viewMu.Unlock()
-		}
-	})
 
 	// Event client: the snapshot event carries the same state; later events apply on top of it.
 	stream := must(harness.WatchEvents(background, opened, root.Id()))
@@ -192,8 +191,7 @@ func TestExample21LateJoin(t *testing.T) {
 	if _, err := stream.Stop(); err != nil {
 		t.Fatal(err)
 	}
-	unsubscribe()
-	view.Dispose()
+	must(view.Stop())
 
 	mu.Lock()
 	defer mu.Unlock()

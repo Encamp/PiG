@@ -1,0 +1,26 @@
+pkg:ai/.#Usage	ai	child-gap	ai/types.go#Usage
+pkg:ai/.#Usage::property:cost	ai	type-mismatch	ai/types.go#Usage.Cost
+pkg:ai/.#calculateCost	ai	child-gap	ai/model_utils.go#CalculateCost
+pkg:ai/.#calculateCost::call:0	ai	signature-mismatch	ai/model_utils.go#CalculateCost
+pkg:ai/compat#Usage	ai	child-gap	ai/types.go#Usage
+pkg:ai/compat#Usage::property:cost	ai	type-mismatch	ai/types.go#Usage.Cost
+pkg:ai/compat#calculateCost	ai	child-gap	ai/model_utils.go#CalculateCost
+pkg:ai/compat#calculateCost::call:0	ai	signature-mismatch	ai/model_utils.go#CalculateCost
+pkg:ai/models#calculateCost	ai	child-gap	ai/model_utils.go#CalculateCost
+pkg:ai/models#calculateCost::call:0	ai	signature-mismatch	ai/model_utils.go#CalculateCost
+pkg:chord/.#ReplicatedStateSource	chord	child-gap	chord/state.go#ReplicatedStateSource
+pkg:chord/.#ReplicatedStateSource::property:attach	chord	not-exercised	chord/state.go#ReplicatedStateSource.Attach
+pkg:chord/.#ReplicatedStateSource::property:attach::call:0	chord	not-exercised	chord/state.go#ReplicatedStateSource.Attach
+pkg:chord/.#ReplicatedStateSourceAttachment	chord	not-exercised	chord/state.go#ReplicatedStateSourceAttachment
+pkg:chord/.#ReplicatedStateSourceAttachment::property:activate	chord	not-exercised	chord/state.go#ReplicatedStateSourceAttachment.Activate
+pkg:chord/.#ReplicatedStateSourceAttachment::property:activate::call:0	chord	not-exercised	chord/state.go#ReplicatedStateSourceAttachment.Activate
+pkg:chord/.#ReplicatedStateSourceAttachment::property:dispose	chord	not-exercised	chord/state.go#ReplicatedStateSourceAttachment.Dispose
+pkg:chord/.#ReplicatedStateSourceAttachment::property:dispose::call:0	chord	not-exercised	chord/state.go#ReplicatedStateSourceAttachment.Dispose
+pkg:chord/.#ReplicatedStateSourceAttachment::property:snapshot	chord	not-exercised	chord/state.go#ReplicatedStateSourceAttachment.Snapshot
+pkg:durable/.#HarnessOptions	durable	type-mismatch	durable/harness/types.go#HarnessOptions
+pkg:durable/.#ReadOnlySession	durable	no-go-symbol	
+pkg:durable/.#ReadOnlySession::construct:0	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:cause	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:message	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:name	durable	child-gap	
+pkg:durable/.#ReadOnlySession::property:stack	durable	child-gap	

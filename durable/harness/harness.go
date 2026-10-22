@@ -129,10 +129,6 @@ func (conversation *conversationImpl) WaitForIdle(ctx context.Context) error {
 	return conversation.host.tasks.WaitForIdle(ctx, &id)
 }
 
-func (conversation *conversationImpl) ViewState(ctx context.Context) (durable.AttachedReplicatedState[ConversationView], error) {
-	return conversation.host.views.State(ctx, conversation.id)
-}
-
 func (conversation *conversationImpl) Watch(ctx context.Context) (ConversationWatch, error) {
 	return conversation.host.views.Watch(ctx, conversation.id)
 }
@@ -300,10 +296,6 @@ func (harness *harnessImpl) Usage(ctx context.Context) (UsageState, error) {
 		}
 	}
 	return total, nil
-}
-
-func (harness *harnessImpl) TaskGraph(ctx context.Context) (durable.AttachedReplicatedState[TaskGraph], error) {
-	return harness.taskGraph.State(ctx)
 }
 
 func (harness *harnessImpl) WatchTaskGraph(ctx context.Context) (TaskGraphWatch, error) {
