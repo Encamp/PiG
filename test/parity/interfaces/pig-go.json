@@ -150214,9 +150214,20 @@
       "kind": "function",
       "exported": true,
       "shape": {
-        "type": "func(cwd string, source string, scope string, stdout io.Writer, stderr io.Writer) (string, error)"
+        "type": "func(cwd string, source string, scope string, options MaterializeOptions, stdout io.Writer, stderr io.Writer) (string, error)"
       },
-      "shapeHash": "sha256:9d810461eafb1e3520c11099ca8805e5f587f9b4dfc2f5d901a39c4a031a7008"
+      "shapeHash": "sha256:b89e862829ad1afe8a3ec27678b7e9fb8ef9eaca6f5f9b51d356a697130e1974"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/extension/installresolver#MaterializeOptions",
+      "package": "github.com/MichaelKinsy/PiG/coding/extension/installresolver",
+      "name": "MaterializeOptions",
+      "kind": "type",
+      "exported": true,
+      "shape": {
+        "type": "MaterializeOptions"
+      },
+      "shapeHash": "sha256:92cbe87a56fdd140e8b2cae9a4abcd67b9f1ac23f9691dfbce0bafb47d92b64d"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/coding/extension/installresolver#Materializer",
@@ -163078,6 +163089,28 @@
       "shapeHash": "sha256:20a1be48f9dad79005c144e525a94842391a6a99243fda9d3bc2afa1f83cb916"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#agentPolicyPresets",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet",
+      "name": "agentPolicyPresets",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "[]string"
+      },
+      "shapeHash": "sha256:a1c330895d4124c2ac5e7956eaa7a61082b08546669578b38030562429ad3b1e"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#agentRuntimeModes",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet",
+      "name": "agentRuntimeModes",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "[]string"
+      },
+      "shapeHash": "sha256:a1c330895d4124c2ac5e7956eaa7a61082b08546669578b38030562429ad3b1e"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#allPigletDirs",
       "package": "github.com/MichaelKinsy/PiG/coding/piglet",
       "name": "allPigletDirs",
@@ -163087,6 +163120,17 @@
         "type": "func() []string"
       },
       "shapeHash": "sha256:9f921b0d645d262778fe26bdf2928fddc34adea94eefae075778b323fc6302de"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#allowInstallScriptsFlag",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet",
+      "name": "allowInstallScriptsFlag",
+      "kind": "constant",
+      "exported": false,
+      "shape": {
+        "type": "untyped string"
+      },
+      "shapeHash": "sha256:7eabd192b9f1c379102c8dc793881875f1f949f6b752e15a20b93080cb0b311d"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#allowlistWidens",
@@ -163458,9 +163502,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(args []string, stdout io.Writer, stderr io.Writer) int"
+        "type": "func(args []string, allowInstallScripts bool, stdout io.Writer, stderr io.Writer) int"
       },
-      "shapeHash": "sha256:bab0e5ace95d5f2ceb0d72a95d8b031c60d0da9d88a05b835eaa5205ea4f1d16"
+      "shapeHash": "sha256:3aecb8d8119537b011097cf84c5decc061ce883adcaa8fe280ca8da28262e8b1"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#cmdKeygen",
@@ -163793,6 +163837,17 @@
       "shapeHash": "sha256:cb6f0731b3bfee71af0d1ed416989182d01376309345bf3bc57221742adecd8b"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#discoverySources",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet",
+      "name": "discoverySources",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "[]string"
+      },
+      "shapeHash": "sha256:a1c330895d4124c2ac5e7956eaa7a61082b08546669578b38030562429ad3b1e"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#discoveryWidens",
       "package": "github.com/MichaelKinsy/PiG/coding/piglet",
       "name": "discoveryWidens",
@@ -163846,6 +163901,17 @@
         "type": "func(path string) string"
       },
       "shapeHash": "sha256:864bd81dd802775a1a082d7f99fe261c8f3185dea2a3f45bbeae79e27ef91e07"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#extensionRealizations",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet",
+      "name": "extensionRealizations",
+      "kind": "variable",
+      "exported": false,
+      "shape": {
+        "type": "[]string"
+      },
+      "shapeHash": "sha256:a1c330895d4124c2ac5e7956eaa7a61082b08546669578b38030562429ad3b1e"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#extensionWidens",
@@ -165350,9 +165416,9 @@
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(raw string, stdout io.Writer, stderr io.Writer) (resolvedPigletAddSource, error)"
+        "type": "func(raw string, allowInstallScripts bool, stdout io.Writer, stderr io.Writer) (resolvedPigletAddSource, error)"
       },
-      "shapeHash": "sha256:9be7f6f3ab8227bbb90aafcf27a2bca4585364e449eb59bff7752e459233fc0d"
+      "shapeHash": "sha256:e1062831d62304ff0ebe3460762bc3c7a727b34ae4440104977507b94cf785f9"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet#resolveSecretDeclaration",
@@ -166862,6 +166928,17 @@
       "shapeHash": "sha256:7eabd192b9f1c379102c8dc793881875f1f949f6b752e15a20b93080cb0b311d"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids#defaultSchema",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids",
+      "name": "defaultSchema",
+      "kind": "constant",
+      "exported": false,
+      "shape": {
+        "type": "untyped string"
+      },
+      "shapeHash": "sha256:7eabd192b9f1c379102c8dc793881875f1f949f6b752e15a20b93080cb0b311d"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids#main",
       "package": "github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids",
       "name": "main",
@@ -166895,15 +166972,37 @@
       "shapeHash": "sha256:836b7169583a01ba934f8049a875d519fcee251a0c40ec9fc8dcc56fae3f98bb"
     },
     {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids#renderSchema",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids",
+      "name": "renderSchema",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(schema []byte, t table) ([]byte, error)"
+      },
+      "shapeHash": "sha256:0a66591dd7023e67322a018702077eb0168d3f87143e90e74be70165cb205b01"
+    },
+    {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids#run",
       "package": "github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids",
       "name": "run",
       "kind": "function",
       "exported": false,
       "shape": {
-        "type": "func(output string, check bool) error"
+        "type": "func(output string, schema string, check bool) error"
       },
-      "shapeHash": "sha256:5cadff91302cfdfc34eb5812209c73aad58dc43a6ad7657c141b000542d3b117"
+      "shapeHash": "sha256:18ebb20943bda0cd1c56efd456d8b6b3ce89aa0ccd54328788f9c12bf558c721"
+    },
+    {
+      "id": "go:github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids#schemaDefs",
+      "package": "github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids",
+      "name": "schemaDefs",
+      "kind": "function",
+      "exported": false,
+      "shape": {
+        "type": "func(t table) []struct{def string; ids []string}"
+      },
+      "shapeHash": "sha256:b1421104cdc7ce413524e1a42cfde80c92793e6548d1d35159618e34cacc180b"
     },
     {
       "id": "go:github.com/MichaelKinsy/PiG/coding/piglet/internal/genstripids#sorted",

@@ -264408,8 +264408,8 @@
       ],
       "evidence": [
         "test:internal/codingagent/interactive_tui_factory_upstream_test.go#TestInteractiveTuiShowsConfiguredJumpShortcut",
-        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi",
-        "test:tui/bordered_loader_input_oracle_test.go#TestBorderedLoaderHandleInputMatchesPi"
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
+        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi"
       ]
     },
     {
@@ -264495,9 +264495,9 @@
         "call:tui/keybindings.go#TUIKeybindingDefinitionsFor"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/auth_url_oracle_test.go#TestAuthURLRendersLikePi",
-        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager",
-        "test:coding/mcpext/manager_test.go#TestMcpManagerViewSignInScreenCopiesTheAuthorizationURL"
+        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager"
       ]
     },
     {
@@ -264517,9 +264517,9 @@
         "call:tui/keybindings.go#TUIKeybindingDefinitionsFor"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/auth_url_oracle_test.go#TestAuthURLRendersLikePi",
-        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager",
-        "test:coding/mcpext/manager_test.go#TestMcpManagerViewSignInScreenCopiesTheAuthorizationURL"
+        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager"
       ]
     },
     {
@@ -264582,8 +264582,8 @@
       ],
       "evidence": [
         "test:internal/codingagent/interactive_tui_factory_upstream_test.go#TestInteractiveTuiShowsConfiguredJumpShortcut",
-        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi",
-        "test:tui/bordered_loader_input_oracle_test.go#TestBorderedLoaderHandleInputMatchesPi"
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
+        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi"
       ]
     },
     {
@@ -265317,9 +265317,9 @@
         "call:tui/editor.go#Editor.HandleInput"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/editor_kill_undo_upstream_test.go#TestUpstreamEditorUndo",
-        "test:internal/codingagent/keybindings_platform_test.go#TestKeybindingDefinitionsApplyPlatformDefaults",
-        "test:internal/codingagent/keybindings_platform_test.go#TestKeybindingsManagerInstallsAppDefinitionsInTUIRegistry"
+        "test:internal/codingagent/keybindings_platform_test.go#TestKeybindingDefinitionsApplyPlatformDefaults"
       ]
     },
     {
@@ -267468,9 +267468,9 @@
         "call:tui/keybindings.go#MatchesKeyID"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/keys_oracle_test.go#TestParseAndMatchKeyMatchPiOnSeededInput",
-        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream",
-        "test:tui/stdin_buffer_first_half_upstream_test.go#TestStdinBufferFirstHalfTimers"
+        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream"
       ]
     },
     {
@@ -267490,9 +267490,9 @@
         "call:tui/keybindings.go#MatchesKeyID"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/keys_oracle_test.go#TestParseAndMatchKeyMatchPiOnSeededInput",
-        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream",
-        "test:tui/stdin_buffer_first_half_upstream_test.go#TestStdinBufferFirstHalfTimers"
+        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream"
       ]
     },
     {

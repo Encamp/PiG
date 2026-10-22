@@ -222,7 +222,8 @@ func (p *Piglet) materialize(source string, bare sourceref.BarePolicy) (string, 
 		}
 		source = expandOriginPath(canonicalPath(baseDir), ref.Locator)
 	}
-	return installresolver.Materialize(cwd, source, scope, io.Discard, io.Discard)
+	// pig additive (D194): Piglet resolution installs Packages without running lifecycle scripts unless the user opts in.
+	return installresolver.Materialize(cwd, source, scope, installresolver.MaterializeOptions{AllowInstallScripts: p.installScripts}, io.Discard, io.Discard)
 }
 
 func (p *Piglet) materializationContext() (string, string) {

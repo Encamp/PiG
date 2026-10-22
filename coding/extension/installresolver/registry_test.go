@@ -80,12 +80,12 @@ func TestPigletSourceResolverUsesExactRegisteredScheme(t *testing.T) {
 
 func TestMaterializerCallback(t *testing.T) {
 	resetForTest(t)
-	if _, err := Materialize("/cwd", "src", "user", io.Discard, io.Discard); err == nil {
+	if _, err := Materialize("/cwd", "src", "user", MaterializeOptions{}, io.Discard, io.Discard); err == nil {
 		t.Fatal("Materialize without a registered callback must fail")
 	}
 	want := errors.New("sentinel")
-	SetMaterializer(func(_, _, _ string, _, _ io.Writer) (string, error) { return "", want })
-	if _, err := Materialize("/cwd", "src", "user", io.Discard, io.Discard); !errors.Is(err, want) {
+	SetMaterializer(func(_, _, _ string, _ MaterializeOptions, _, _ io.Writer) (string, error) { return "", want })
+	if _, err := Materialize("/cwd", "src", "user", MaterializeOptions{}, io.Discard, io.Discard); !errors.Is(err, want) {
 		t.Fatalf("Materialize = %v, want sentinel", err)
 	}
 }

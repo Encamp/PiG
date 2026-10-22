@@ -350,6 +350,21 @@ PiG reads the Piglet path from the `pig.piglet` field of the package's `package.
 
 A remote Piglet must be portable. PiG refuses a Git URL that contains credentials. The command fails before it fetches anything when `PIG_OFFLINE` or `PI_OFFLINE` is set.
 
+### Package install scripts
+
+An npm or Git Package that a Piglet names can carry lifecycle scripts (`preinstall`, `install`, `postinstall`, `prepare`), and so can the packages it depends on. PiG installs those Packages with scripts disabled whenever it resolves a Piglet: `pig piglet validate`, `pig piglet add`, `pig piglet build` and `pig --piglet` pass `--ignore-scripts` to npm (and to pnpm and bun, which read the same flag). Validating or adding a Piglet therefore does not run a publisher's code. The same applies to the npm or Git package of a Piglet source that `pig piglet add npm:<name>` or `git:<repo>` fetches.
+
+A Package whose files exist only after a script ran needs the opt-in:
+
+```bash
+pig piglet validate research --allow-install-scripts
+pig piglet add npm:@acme/review@1.0.0 --allow-install-scripts
+```
+
+`--allow-install-scripts` applies to that one command. It runs the scripts of every npm and Git Package the Piglet names and of their dependencies, with your permissions, so review the Piglet and its Packages first. PiG does not remember the choice: a Piglet that needs the scripts at every resolution fails to resolve without them, and `pig piglet build` and `pig --piglet` have no opt-in.
+
+This applies to Piglet resolution only. `pig install npm:<name>`, `pig update` and the other Package commands install as Pi does, and run lifecycle scripts, because Pi passes no `--ignore-scripts`. A Package can still run code when the Piglet starts, since a Package is an extension; disabled install scripts do not make a Package safe.
+
 ### Add from a monorepo
 
 Select a repository subdirectory with the existing Git source selector and a full lowercase commit SHA (D18). Replace `<full-commit-sha>` with the reviewed commit:
@@ -561,7 +576,7 @@ FAIL: Piglet /home/you/project/agents/reviewer.yaml: parse piglet YAML: yaml: un
   line 3: field system not found in type piglet.Piglet
 ```
 
-`systemPrompt` takes `text` or `file`. A skill needs an origin: `FAIL: skill "commit": no origin specified`. `pig piglet schema` prints every accepted field.
+`systemPrompt` takes `text` or `file`. A skill needs an origin: `FAIL: skill "commit": no origin specified`. `pig piglet schema` prints every accepted field. It lists the same values the parser accepts for the built-in tools (including `powershell`), the strip IDs, the discovery scopes, the `agentEnv` runtime modes and policy presets, and `build.extensionRealization`, and a test fails when the two differ.
 
 ## Related documentation
 

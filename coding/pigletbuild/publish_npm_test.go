@@ -32,7 +32,9 @@ func npmPublishEnv(t *testing.T) (*npmtest.Fake, string) {
 	for _, name := range []string{"TMPDIR", "TMP", "TEMP"} {
 		t.Setenv(name, tmp)
 	}
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) { return source, nil })
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
+		return source, nil
+	})
 	t.Cleanup(func() { installresolver.SetMaterializer(nil) })
 	return fake, tmp
 }
@@ -329,7 +331,9 @@ func TestPublishNPMUsesTheGitHubReleaseThisMachinePublished(t *testing.T) {
 	gh, _ := publishTestEnv(t)
 	fake := npmtest.Install(t)
 	fake.Seed("@acme/review", "1.2.0")
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) { return source, nil })
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
+		return source, nil
+	})
 	t.Cleanup(func() { installresolver.SetMaterializer(nil) })
 	source := writeNPMPiglet(t, reviewPackageJSON)
 	keyPath, _, keyID := writePublishKey(t)
