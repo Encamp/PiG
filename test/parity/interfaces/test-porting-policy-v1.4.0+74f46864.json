@@ -5633,6 +5633,15 @@
       "rationale": "New in 0.99.1; area and tags follow the sibling tests under packages/durable/test/ until the production-path review."
     },
     {
+      "path": "packages/durable/test/harness-read-only.test.ts",
+      "upstreamTestHash": "sha256:18a7cb17058c1129effa37e03e9a5157396defb49057b304291a1061fe4291d7",
+      "area": "cli",
+      "tags": [
+        "hot-path"
+      ],
+      "rationale": "New in Pi 1.4.0+74f46864; area and tags follow the sibling tests under packages/durable/test/ until the production-path review."
+    },
+    {
       "path": "packages/durable/test/harness-registry.test.ts",
       "upstreamTestHash": "sha256:6b473080d955d5b4edcdae09a5ceaddbf56c8340c27ae0f26d7d8a3bff764a81",
       "area": "cli",
