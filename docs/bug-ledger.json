@@ -7575,6 +7575,25 @@
       ]
     },
     {
+      "id": "BF-4e204f4",
+      "title": "fix(sdk-py): clear bandit's findings in the 0.5.2 Python SDK code",
+      "symptom": "fix(sdk-py): clear bandit's findings in the 0.5.2 Python SDK code",
+      "rootCause": "BuiltinTool.execute checked its spec with assert, which python -O strips; it now raises RuntimeError instead.",
+      "rootCauseSource": "commit",
+      "userImpact": "Behavior differed from Pi",
+      "platform": "All platforms",
+      "class": "own",
+      "fixedIn": "Unreleased",
+      "origin": "commit",
+      "commits": [
+        {
+          "hash": "4e204f4f23",
+          "date": "2026-10-22"
+        }
+      ],
+      "tests": []
+    },
+    {
       "id": "BF-4e47260",
       "title": "A lazy line joins a list item as written (indentation kept), four spaces after the marker make the first line…",
       "symptom": "A lazy line joins a list item as written (indentation kept), four spaces after the marker make the first line indented code that no lazy line continues, the break test uses the content indent to limit rules/headings/fences, a blank-after-slice line no longer ends the item, a lazy line inside an item's fence stays in the fence, and a LaTeX block that takes the end of the text leaves no trailing space row.",
