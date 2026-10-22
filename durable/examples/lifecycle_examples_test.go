@@ -1,5 +1,5 @@
-// Ports packages/durable/test/examples/21-late-join.ts, 22-subagent-foreground.ts, 29-sandbox-per-conversation.ts and
-// 31-reload-and-restart.ts. Upstream's scripts pace themselves with timers and print; each Go example gates the work
+// Ports packages/durable/test/examples/20-late-join.ts, 21-subagent-foreground.ts, 28-sandbox-per-conversation.ts and
+// 30-reload-and-restart.ts. Upstream's scripts pace themselves with timers and print; each Go example gates the work
 // it observes and asserts what the script prints.
 
 package examples_test
@@ -52,12 +52,12 @@ func liveState(t *testing.T, view harness.ConversationView) harness.LiveState {
 	return must(durable.FromJsonValue[harness.LiveState](raw))
 }
 
-// 21-late-join.ts: a client attaches while a run is already underway. It gets the current state first, the
+// 20-late-join.ts: a client attaches while a run is already underway. It gets the current state first, the
 // conversation view or the snapshot event, and then only what changes after that.
 // Pi source: packages/durable/src/harness/events.ts, packages/durable/src/harness/types.ts
 // mutation-checked: zeroing the results of AgentEventStream.Start, Conversation.Watch fails it
 // mutation-checked: dropping the reads and writes of AgentEventStream.Snapshot fails it
-func TestExample21LateJoin(t *testing.T) {
+func TestExample20LateJoin(t *testing.T) {
 	// The tool prints "1\n" to "5\n", waits at the gate (upstream's 500 ms pause is the join), then prints "6\n"
 	// to "10\n".
 	joined := make(chan struct{})
@@ -220,7 +220,7 @@ func TestExample21LateJoin(t *testing.T) {
 	closeSession(t, opened)
 }
 
-// subagentExtension is 22-subagent-foreground.ts's tool: the parent's tool call creates a child conversation it
+// subagentExtension is 21-subagent-foreground.ts's tool: the parent's tool call creates a child conversation it
 // owns, runs one task there, and returns the child's answer.
 func subagentExtension() *durable.Extension {
 	var subagent *durable.Extension
@@ -296,7 +296,7 @@ func subagentExtension() *durable.Extension {
 	return subagent
 }
 
-// 22-subagent-foreground.ts: the parent delegates, the child answers, and the parent reports. A UI finds the child
+// 21-subagent-foreground.ts: the parent delegates, the child answers, and the parent reports. A UI finds the child
 // through the tool's running details and shows its events under the call.
 //
 // The tool does not wait for the UI's callback, which runs on a goroutine of its own after the commit that published the
@@ -306,7 +306,7 @@ func subagentExtension() *durable.Extension {
 // the parent settled, so the child has answered by then on every schedule and only the snapshot can show the answer.
 //
 // mutation-checked: a UI that shows nothing from AgentEventStream.Snapshot fails the second run
-func TestExample22SubagentForeground(t *testing.T) {
+func TestExample21SubagentForeground(t *testing.T) {
 	t.Run("attached as the details arrive", func(t *testing.T) { subagentForeground(t, false) })
 	t.Run("attached after the parent settled", func(t *testing.T) { subagentForeground(t, true) })
 }
@@ -444,9 +444,9 @@ type sandbox struct {
 	Path string `json:"path,omitempty"`
 }
 
-// 29-sandbox-per-conversation.ts: the app records each conversation's sandbox in its own document, and the Harness
+// 28-sandbox-per-conversation.ts: the app records each conversation's sandbox in its own document, and the Harness
 // environment function looks it up for every tool call. A sandbox is a directory.
-func TestExample29SandboxPerConversation(t *testing.T) {
+func TestExample28SandboxPerConversation(t *testing.T) {
 	// `fork: "initial"`: a fork gets no sandbox until the app assigns one.
 	sandboxDoc := durable.DefineDoc(durable.DocDefinition[sandbox]{
 		CommonDocDefinition: durable.CommonDocDefinition[sandbox]{Kind: "app.sandbox", Version: 1, Initial: func() sandbox { return sandbox{} }, CheckpointWhen: func(sandbox, []durable.Op, durable.CheckpointInfo) bool { return false }},
@@ -501,10 +501,10 @@ func TestExample29SandboxPerConversation(t *testing.T) {
 	closeSession(t, opened)
 }
 
-// 31-reload-and-restart.ts: reload an extension while a call runs, then restart the process. Running work finishes
+// 30-reload-and-restart.ts: reload an extension while a call runs, then restart the process. Running work finishes
 // on the code it started with; stored choices are names, so they survive a restart and bind to whatever code the new
 // process installs.
-func TestExample31ReloadAndRestart(t *testing.T) {
+func TestExample30ReloadAndRestart(t *testing.T) {
 	// Stand-in for code loaded from disk: each call builds the extension as the file currently reads.
 	started := make(chan struct{}, 4)
 	var gateMu sync.Mutex
@@ -603,13 +603,13 @@ func TestExample31ReloadAndRestart(t *testing.T) {
 	closeSession(t, opened)
 }
 
-// 16-real-model.ts: stream an answer and watch it arrive through the conversation's pi.live document. While the
+// 15-real-model.ts: stream an answer and watch it arrive through the conversation's pi.live document. While the
 // answer streams, generation commits throttled partials to pi.live; the watch sees only committed values. Upstream
 // streams from OpenAI when OPENAI_API_KEY is set and prints "skipped" otherwise; the OpenAI provider is outside
 // durable, so this example drives the same Harness path with a slowly streaming faux model.
 // Pi source: packages/durable/src/types.ts
 // mutation-checked: zeroing the results of WatchHandle.Start fails it
-func TestExample16RealModel(t *testing.T) {
+func TestExample15RealModel(t *testing.T) {
 	registry := harness.CreateRegistry()
 	untagged := false
 	installed(t, registry, new(durable.Extension{Name: "concise", Sections: []*durable.PromptSection{

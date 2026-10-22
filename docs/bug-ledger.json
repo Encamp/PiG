@@ -1895,7 +1895,7 @@
       ],
       "tests": [
         "ai/system_message_sections_test.go::TestSystemMessageWritesAnEmptySectionsObjectButNotAnAbsentOne",
-        "durable/examples/tasks_compaction_examples_test.go::TestExample25Compaction",
+        "durable/examples/tasks_compaction_examples_test.go::TestExample24Compaction",
         "durable/interop/interop_test.go::TestGoOpensAndResumesAStoreWrittenByPiDurable",
         "durable/interop/interop_test.go::TestPiDurableOpensAndResumesAStoreWrittenByGo",
         "durable/interop/interop_test.go::TestScriptedSessionJsonlFilesMatchPiDurable",

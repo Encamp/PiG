@@ -1,4 +1,4 @@
-// Ports packages/durable/test/examples/00-conversation.ts through 05-watches.ts.
+// Ports packages/durable/test/examples/00-conversation.ts through 04-watches.ts.
 
 package examples_test
 
@@ -182,8 +182,8 @@ func TestExample03OwnedConversations(t *testing.T) {
 	closeSession(t, session)
 }
 
-// 05-watches.ts: a watch serializes asynchronous document work from one stable acquisition revision.
-func TestExample05Watches(t *testing.T) {
+// 04-watches.ts: a watch serializes asynchronous document work from one stable acquisition revision.
+func TestExample04Watches(t *testing.T) {
 	session := newSession(t)
 	chat := commit(t, session, func(tx durable.Tx) (durable.ConversationRecord, error) {
 		conversation, err := tx.CreateConversation(ownerless)

@@ -2006,7 +2006,7 @@ Entries are listed by ID. The page carries no totals, so a pull request that add
 - **Platform:** All platforms
 - **Fixed in:** 0.5.0
 - **Fix commits:** `0e8761be47` (2026-10-05), `b728733998` (2026-10-05)
-- **Tests:** `ai/system_message_sections_test.go::TestSystemMessageWritesAnEmptySectionsObjectButNotAnAbsentOne`, `durable/examples/tasks_compaction_examples_test.go::TestExample25Compaction`, `durable/interop/interop_test.go::TestGoOpensAndResumesAStoreWrittenByPiDurable`, `durable/interop/interop_test.go::TestPiDurableOpensAndResumesAStoreWrittenByGo`, `durable/interop/interop_test.go::TestScriptedSessionJsonlFilesMatchPiDurable`, `durable/interop/interop_test.go::TestScriptedSessionStoresMatchPiDurable`, `durable/interop/interop_test.go::TestScriptedSessionsViewIdentically`, `durable/interop/interop_test.go::TestSecondScriptedSessionStoresMatchPiDurable` and 2 more in docs/bug-ledger.json
+- **Tests:** `ai/system_message_sections_test.go::TestSystemMessageWritesAnEmptySectionsObjectButNotAnAbsentOne`, `durable/examples/tasks_compaction_examples_test.go::TestExample24Compaction`, `durable/interop/interop_test.go::TestGoOpensAndResumesAStoreWrittenByPiDurable`, `durable/interop/interop_test.go::TestPiDurableOpensAndResumesAStoreWrittenByGo`, `durable/interop/interop_test.go::TestScriptedSessionJsonlFilesMatchPiDurable`, `durable/interop/interop_test.go::TestScriptedSessionStoresMatchPiDurable`, `durable/interop/interop_test.go::TestScriptedSessionsViewIdentically`, `durable/interop/interop_test.go::TestSecondScriptedSessionStoresMatchPiDurable` and 2 more in docs/bug-ledger.json
 - **Release note:** A system message with an empty sections object is stored as `"sections": {}`, as Pi stores it after a reset.
 
 ### BF-0ef8071
