@@ -20,9 +20,19 @@ import (
 // registered by source scheme and receives the opaque locator after the colon.
 type PigletSourceResolver func(cwd, locator string) (root string, err error)
 
+// MaterializeOptions selects how one source is installed.
+type MaterializeOptions struct {
+	// AllowInstallScripts lets the package manager run the lifecycle scripts of
+	// an npm or Git Package and of its dependencies. The zero value installs
+	// with scripts disabled.
+	//
+	// pig additive (D194): Piglet resolution installs Packages without running lifecycle scripts unless the user opts in.
+	AllowInstallScripts bool
+}
+
 // Materializer resolves one source to a local root without adding it to Package
 // settings or activating any resources. Piglets use this path for dependencies.
-type Materializer func(cwd, source, scope string, stdout, stderr io.Writer) (root string, err error)
+type Materializer func(cwd, source, scope string, options MaterializeOptions, stdout, stderr io.Writer) (root string, err error)
 
 // Installer reinstalls one recorded package source through the core install
 // pipeline.
@@ -112,14 +122,14 @@ func SetMaterializer(materializer Materializer) {
 }
 
 // Materialize resolves one source without mutating Package settings.
-func Materialize(cwd, source, scope string, stdout, stderr io.Writer) (string, error) {
+func Materialize(cwd, source, scope string, options MaterializeOptions, stdout, stderr io.Writer) (string, error) {
 	registry.RLock()
 	materializer := registry.materializer
 	registry.RUnlock()
 	if materializer == nil {
 		return "", fmt.Errorf("package materializer callback is not registered")
 	}
-	return materializer(cwd, source, scope, stdout, stderr)
+	return materializer(cwd, source, scope, options, stdout, stderr)
 }
 
 // SetInstaller supplies the core package installer callback used when a

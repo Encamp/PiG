@@ -111,6 +111,7 @@ type Piglet struct {
 	Strip            *StripSpec          `yaml:"strip,omitempty"` // pig additive (D92): built-ins this Piglet disables at runtime.
 	sourceDir        string              // Parse(path) anchor for relative origins; never serialized.
 	sourcePath       string              // Canonical parsed Piglet path; never serialized.
+	installScripts   bool                // lets the package manager run lifecycle scripts while the Packages install; never serialized.
 	packageMu        sync.Mutex
 	packageResults   map[string]packageResolution
 	present          map[string]bool // authored top-level fields; never serialized

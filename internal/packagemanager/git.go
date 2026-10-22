@@ -41,7 +41,7 @@ func GitUpdateMarkerPath(checkout string) string {
 	return filepath.Join(filepath.Dir(checkout), "."+filepath.Base(checkout)+".pi-update-incomplete")
 }
 
-func EnsureGitRef(checkout, packageRoot string, sm *codingagent.SettingsManager, target GitUpdateTarget) error {
+func EnsureGitRef(checkout, packageRoot string, sm *codingagent.SettingsManager, target GitUpdateTarget, opts ...InstallOption) error {
 	if err := RunPackageProcess(checkout, "git", target.fetchArgs...); err != nil {
 		return err
 	}
@@ -57,9 +57,9 @@ func EnsureGitRef(checkout, packageRoot string, sm *codingagent.SettingsManager,
 	marker := GitUpdateMarkerPath(checkout)
 	if local == remote {
 		if _, err := os.Stat(marker); err == nil {
-			return CleanAndInstallGitDependencies(checkout, packageRoot, marker, sm)
+			return CleanAndInstallGitDependencies(checkout, packageRoot, marker, sm, opts...)
 		}
-		return RepairMissingGitDependencies(packageRoot, sm)
+		return RepairMissingGitDependencies(packageRoot, sm, opts...)
 	}
 	if err := os.WriteFile(marker, nil, 0o644); err != nil {
 		return err
@@ -67,10 +67,10 @@ func EnsureGitRef(checkout, packageRoot string, sm *codingagent.SettingsManager,
 	if err := RunPackageProcess(checkout, "git", "reset", "--hard", commitRef); err != nil {
 		return err
 	}
-	return CleanAndInstallGitDependencies(checkout, packageRoot, marker, sm)
+	return CleanAndInstallGitDependencies(checkout, packageRoot, marker, sm, opts...)
 }
 
-func InstallGitDependencies(packageRoot string, sm *codingagent.SettingsManager) error {
+func InstallGitDependencies(packageRoot string, sm *codingagent.SettingsManager, opts ...InstallOption) error {
 	if _, err := os.Stat(filepath.Join(packageRoot, "package.json")); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil
@@ -79,7 +79,7 @@ func InstallGitDependencies(packageRoot string, sm *codingagent.SettingsManager)
 	}
 	command := DefaultNpmCommand(sm)
 	args := append([]string{}, command[1:]...)
-	installArgs, err := GetGitDependencyInstallArgs(sm)
+	installArgs, err := GetGitDependencyInstallArgs(sm, opts...)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func InstallGitDependencies(packageRoot string, sm *codingagent.SettingsManager)
 	return RunPackageProcess(packageRoot, command[0], args...)
 }
 
-func RepairMissingGitDependencies(packageRoot string, sm *codingagent.SettingsManager) error {
+func RepairMissingGitDependencies(packageRoot string, sm *codingagent.SettingsManager, opts ...InstallOption) error {
 	data, err := os.ReadFile(filepath.Join(packageRoot, "package.json"))
 	if err != nil {
 		return nil
@@ -105,22 +105,22 @@ func RepairMissingGitDependencies(packageRoot string, sm *codingagent.SettingsMa
 			continue
 		}
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			return InstallGitDependencies(packageRoot, sm)
+			return InstallGitDependencies(packageRoot, sm, opts...)
 		}
 	}
 	return nil
 }
 
-func CleanAndInstallGitDependencies(checkout, packageRoot, marker string, sm *codingagent.SettingsManager) error {
+func CleanAndInstallGitDependencies(checkout, packageRoot, marker string, sm *codingagent.SettingsManager, opts ...InstallOption) error {
 	if err := RunPackageProcess(checkout, "git", "clean", "-fdx"); err != nil {
 		// upstream: packages/coding-agent/src/core/package-manager.ts:cleanAndInstallGitDependencies
-		_ = RepairMissingGitDependencies(packageRoot, sm)
+		_ = RepairMissingGitDependencies(packageRoot, sm, opts...)
 		return err
 	}
 	if err := RequireGitSubdirectoryWithinCheckout(checkout, packageRoot); err != nil {
 		return err
 	}
-	if err := InstallGitDependencies(packageRoot, sm); err != nil {
+	if err := InstallGitDependencies(packageRoot, sm, opts...); err != nil {
 		return err
 	}
 	return RemoveGitUpdateMarker(marker)

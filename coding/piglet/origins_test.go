@@ -23,7 +23,7 @@ func TestResolveAgentEnvironmentFromPackageSource(t *testing.T) {
 	if err := os.WriteFile(definition, []byte(`{"image":"golang:1.26"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	installresolver.SetMaterializer(func(_, source, scope string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, source, scope string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		if source != "npm:@acme/dev@1" || scope != "user" {
 			t.Fatalf("materialize source/scope = %q/%q", source, scope)
 		}
@@ -51,7 +51,7 @@ func TestPigletMaterializationUsesWorkspaceScopeAndTypedLocalSource(t *testing.T
 	}
 	t.Chdir(workspace)
 	canonicalWorkspace := canonicalPath(workspace)
-	installresolver.SetMaterializer(func(cwd, source, scope string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(cwd, source, scope string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		want := filepath.Join(canonicalWorkspace, "resources", "base")
 		if cwd != canonicalWorkspace || source != want || scope != "project" {
 			t.Fatalf("materialize = cwd:%q source:%q scope:%q, want %q", cwd, source, scope, want)
@@ -85,7 +85,7 @@ func TestResolvePackageMembersMaterializesOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	calls := 0
-	installresolver.SetMaterializer(func(_, source, scope string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, source, scope string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		calls++
 		if source != "npm:@acme/base@1.0.0" || scope != "user" {
 			t.Fatalf("materialize = %q/%q", source, scope)
@@ -124,7 +124,7 @@ func TestResolvePackageOriginFallsBackToTypedLocal(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(direct, "SKILL.md"), []byte("---\nname: review\n---\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		if source == "npm:empty" {
 			return packageRoot, nil
 		}
@@ -214,7 +214,7 @@ func TestResolveExtensionsContributedSource(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(extensionDir, "index.js"), []byte("export default function extension(pi) {}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		if source != scheme+":catalog/subagent" {
 			t.Fatalf("source = %q", source)
 		}

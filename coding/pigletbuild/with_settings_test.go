@@ -115,7 +115,7 @@ func TestAC55BinaryBakePreservesPackageAliasesThroughResolution(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		if source != resolvedPackageDir {
 			t.Fatalf("materializer source = %q, want %q", source, resolvedPackageDir)
 		}

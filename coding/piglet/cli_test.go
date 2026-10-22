@@ -240,7 +240,9 @@ func TestRunCommandAddRejectsRelativeLocalPackageSource(t *testing.T) {
 	if err := os.WriteFile(source, []byte("name: games\npackages:\n  games: local:./packages/games\nextensions:\n  - name: runner\n    origins: [package:games]\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) { return source, nil })
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
+		return source, nil
+	})
 	t.Cleanup(func() { installresolver.SetMaterializer(nil) })
 
 	var stdout, stderr strings.Builder
@@ -281,7 +283,9 @@ func TestRunCommandAddRejectsAbsoluteLocalPackageSource(t *testing.T) {
 	}
 
 	// The loader rejects the absolute Package source, so the source itself does not validate.
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) { return source, nil })
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
+		return source, nil
+	})
 	t.Cleanup(func() { installresolver.SetMaterializer(nil) })
 	var stdout, stderr strings.Builder
 	if code := RunCommand([]string{"piglet", "validate", source}, &stdout, &stderr); code == 0 || !strings.Contains(stdout.String()+stderr.String(), "must be a relative piglet: path") {
@@ -415,7 +419,7 @@ func TestRunCommandAddRemoteSourcesWritesOriginAndListsIt(t *testing.T) {
 				runGit("-c", "user.name=Pig Test", "-c", "user.email=pig@example.test", "commit", "-q", "-m", "fixture")
 				wantCommit = runGit("rev-parse", "HEAD")
 			}
-			installresolver.SetMaterializer(func(_, source, scope string, _, _ io.Writer) (string, error) {
+			installresolver.SetMaterializer(func(_, source, scope string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 				if source != tc.source || scope != "user" {
 					t.Fatalf("materialize = %q/%q", source, scope)
 				}
@@ -484,7 +488,7 @@ func TestRunCommandAddRemoteRejectsNonPortablePiglet(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "piglet.yaml"), []byte(pigletData), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	installresolver.SetMaterializer(func(_, _, _ string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, _, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		return root, nil
 	})
 	t.Cleanup(func() { installresolver.SetMaterializer(nil) })
@@ -505,7 +509,7 @@ func TestRunCommandAddRemoteRejectsCredentialBearingGitURL(t *testing.T) {
 	t.Setenv("PI_OFFLINE", "")
 	const credential = "origin-token-must-not-persist"
 	called := false
-	installresolver.SetMaterializer(func(_, _, _ string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, _, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		called = true
 		return "", nil
 	})
@@ -565,7 +569,7 @@ func TestRunCommandAddRemoteOfflineFailsBeforeMaterialization(t *testing.T) {
 	t.Setenv("PIG_OFFLINE", "1")
 	t.Setenv("PI_OFFLINE", "")
 	called := false
-	installresolver.SetMaterializer(func(_, _, _ string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, _, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		called = true
 		return "", nil
 	})
