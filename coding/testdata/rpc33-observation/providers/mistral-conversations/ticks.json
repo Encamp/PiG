@@ -1,6 +1,6 @@
 {
   "piVersion": "1.4.0+74f46864",
-  "node": "v24.22.1",
+  "node": "v24.19.0",
   "scenarios": [
     {
       "name": "oneChunk",
@@ -191,7 +191,7 @@
         "stopReason": "toolUse",
         "responseId": "r1",
         "rawStopReason": "tool_calls",
-        "durationMs": 32
+        "durationMs": 30
       }
     },
     {
