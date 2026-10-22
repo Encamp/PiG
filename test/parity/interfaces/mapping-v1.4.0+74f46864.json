@@ -208818,8 +208818,8 @@
       ],
       "evidence": [
         "test:durable/entries_behavior_test.go#TestDefineEntryGuardsByKindAndDecodesTypedData",
-        "test:durable/harness/harness_submissions_test.go#TestSubmissions",
-        "test:durable/task_entry_test.go#TestTaskEntryNarrowsToTheTokenKind"
+        "test:durable/harness/harness_read_only_test.go#TestReadOnlyHarness",
+        "test:durable/harness/harness_submissions_test.go#TestSubmissions"
       ]
     },
     {
@@ -209421,8 +209421,25 @@
     },
     {
       "id": "pkg:durable/.#HarnessOptions",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:ba22674a010a536b5bca30c4211d2ec32d8dd985d7bcdca359f1c453cfa381e1"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:ba22674a010a536b5bca30c4211d2ec32d8dd985d7bcdca359f1c453cfa381e1",
+      "rationale": "Derived by the interface gap detector: HarnessOptions is Go durable/harness/types.go#HarnessOptions (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/harness/types.go#HarnessOptions"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/harness/harness.go#OpenHarness"
+      ],
+      "evidence": [
+        "test:durable/examples/spec_usage_upstream_test.go#TestSpecUsageRevokedLiveDraftPanics",
+        "test:coding/model_runtime_durable_models_test.go#TestModelRuntimeAnswersDurableHarnessGeneration",
+        "test:durable/codemode/telemetry_replay_test.go#TestDurableTelemetryEmitsReplayForACodemodeJournalResultWithoutRerunningItsNestedTool"
+      ]
     },
     {
       "id": "pkg:durable/.#HarnessSettings",
@@ -211562,33 +211579,109 @@
     },
     {
       "id": "pkg:durable/.#ReadOnlySession",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:c06358b1885212223f7d68ff7c6f3af9ad82ecf6becdc46c26f638bc4bab8bb4"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:c06358b1885212223f7d68ff7c6f3af9ad82ecf6becdc46c26f638bc4bab8bb4",
+      "rationale": "Derived by the interface gap detector: ReadOnlySession is Go durable/errors.go#ReadOnlySession (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/errors.go#ReadOnlySession"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/errors.go#NewReadOnlySession"
+      ],
+      "evidence": [
+        "test:durable/errors_pi_oracle_test.go#TestStorageRequestErrorAndSessionFailedMatchPi",
+        "test:durable/errors_name_test.go#TestErrorNames",
+        "test:durable/errors_pi_test.go#TestDurableErrorMessagesAndCauseMatchErrorsTS"
+      ]
     },
     {
       "id": "pkg:durable/.#ReadOnlySession::construct:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:20272db960d710228effc5697a4bc0441f3ff7a67b1ea41165e8aaacb656a2ec"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:20272db960d710228effc5697a4bc0441f3ff7a67b1ea41165e8aaacb656a2ec",
+      "rationale": "Derived by the interface gap detector: ReadOnlySession::construct:0 is Go durable/errors.go#NewReadOnlySession (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/errors.go#NewReadOnlySession"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/errors.go#NewReadOnlySession"
+      ],
+      "evidence": [
+        "test:durable/errors_pi_oracle_test.go#TestStorageRequestErrorAndSessionFailedMatchPi",
+        "test:durable/errors_name_test.go#TestErrorNames",
+        "test:durable/errors_pi_test.go#TestDurableErrorMessagesAndCauseMatchErrorsTS"
+      ]
     },
     {
       "id": "pkg:durable/.#ReadOnlySession::property:cause",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:0ded3a5da484c0bd945c74e50b05b90f5fca69d849d99b4d1caa17e429415054",
+      "rationale": "Error.cause is unset: no constructor of the class passes ErrorOptions, so Pi's .cause is always undefined (Pi 1.4.0+74f46864) and no Pi reader sees a value; the Go error wraps nothing, and callers match the error by its Go type with errors.As. Designed out as reason class a of the design-out audit (no Pi reader, proven by a probe of the 1.4.0+74f46864 source); D103 maps a cause that a Go error does carry to Unwrap().",
+      "pigTargets": [
+        "durable/errors.go#ReadOnlySession"
+      ]
     },
     {
       "id": "pkg:durable/.#ReadOnlySession::property:message",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:5bd47aec3aecfce7ba3ec63891a63e2d3d8ca86ae60ed8cb239a7b77a8e612ec"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:5bd47aec3aecfce7ba3ec63891a63e2d3d8ca86ae60ed8cb239a7b77a8e612ec",
+      "rationale": "Derived by the interface gap detector: ReadOnlySession::property:message is Go durable/errors.go#ReadOnlySession.Error (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/errors.go#ReadOnlySession.Error"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/errors.go#ReadOnlySession.Error"
+      ],
+      "evidence": [
+        "test:durable/errors_pi_test.go#TestDurableErrorMessagesAndCauseMatchErrorsTS",
+        "test:durable/error_classes_test.go#TestDurableErrorClassesCarryNameAndCause",
+        "test:env/error_classes_test.go#TestEnvErrorClassesCarryTheirNames"
+      ]
     },
     {
       "id": "pkg:durable/.#ReadOnlySession::property:name",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:801e53f1d388232eae4e330db41edb2aab932c0909e2849026eeebfd0e76ec51"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:801e53f1d388232eae4e330db41edb2aab932c0909e2849026eeebfd0e76ec51",
+      "rationale": "Derived by the interface gap detector: ReadOnlySession::property:name is Go durable/errors.go#ReadOnlySession.Name (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "durable/errors.go#ReadOnlySession.Name"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:durable/errors.go#ReadOnlySession.Name"
+      ],
+      "evidence": [
+        "test:durable/errors_name_test.go#TestErrorNames",
+        "test:durable/errors_pi_test.go#TestDurableErrorNamesMatchPi",
+        "test:durable/errors_pi_oracle_test.go#TestStorageRequestErrorAndSessionFailedMatchPi"
+      ]
     },
     {
       "id": "pkg:durable/.#ReadOnlySession::property:stack",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:6a90573a6dc1303048aed8fb94dcc54bd7b496721ad2983fdcfebd7133feef8c"
+      "disposition": "designed-out",
+      "upstreamShapeHash": "sha256:6a90573a6dc1303048aed8fb94dcc54bd7b496721ad2983fdcfebd7133feef8c",
+      "rationale": "Error.stack is a JavaScript runtime capture; a Go error carries no stack and callers match the error by its Go type with errors.As. Designed out under D103 (JS Error.stack is not modelled; SCRUTINIZED:approved, owner decision of 2026-10-06).",
+      "pigTargets": [
+        "durable/errors.go#ReadOnlySession"
+      ]
     },
     {
       "id": "pkg:durable/.#Registry",
@@ -219073,8 +219166,8 @@
       ],
       "evidence": [
         "test:durable/harness/harness_generation_test.go#TestGeneration",
-        "test:durable/harness/harness_submissions_test.go#TestSubmissionDraftIgnoresTheFieldsOfTheOtherType",
-        "test:durable/harness/harness_submissions_test.go#TestSubmissions"
+        "test:durable/harness/harness_read_only_test.go#TestReadOnlyHarness",
+        "test:durable/harness/harness_submissions_test.go#TestSubmissionDraftIgnoresTheFieldsOfTheOtherType"
       ]
     },
     {
@@ -264518,8 +264611,8 @@
       ],
       "evidence": [
         "test:internal/codingagent/interactive_tui_factory_upstream_test.go#TestInteractiveTuiShowsConfiguredJumpShortcut",
-        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi",
-        "test:tui/bordered_loader_input_oracle_test.go#TestBorderedLoaderHandleInputMatchesPi"
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
+        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi"
       ]
     },
     {
@@ -264605,9 +264698,9 @@
         "call:tui/keybindings.go#TUIKeybindingDefinitionsFor"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/auth_url_oracle_test.go#TestAuthURLRendersLikePi",
-        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager",
-        "test:coding/mcpext/manager_test.go#TestMcpManagerViewSignInScreenCopiesTheAuthorizationURL"
+        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager"
       ]
     },
     {
@@ -264627,9 +264720,9 @@
         "call:tui/keybindings.go#TUIKeybindingDefinitionsFor"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/auth_url_oracle_test.go#TestAuthURLRendersLikePi",
-        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager",
-        "test:coding/mcpext/manager_test.go#TestMcpManagerViewSignInScreenCopiesTheAuthorizationURL"
+        "test:tui/keybinding_definitions_upstream_test.go#TestKeybindingDefinitionsDriveManager"
       ]
     },
     {
@@ -264692,8 +264785,8 @@
       ],
       "evidence": [
         "test:internal/codingagent/interactive_tui_factory_upstream_test.go#TestInteractiveTuiShowsConfiguredJumpShortcut",
-        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi",
-        "test:tui/bordered_loader_input_oracle_test.go#TestBorderedLoaderHandleInputMatchesPi"
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
+        "test:tui/bash_execution_oracle_test.go#TestBashExecutionComponentMatchesPi"
       ]
     },
     {
@@ -265427,9 +265520,9 @@
         "call:tui/editor.go#Editor.HandleInput"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/editor_kill_undo_upstream_test.go#TestUpstreamEditorUndo",
-        "test:internal/codingagent/keybindings_platform_test.go#TestKeybindingDefinitionsApplyPlatformDefaults",
-        "test:internal/codingagent/keybindings_platform_test.go#TestKeybindingsManagerInstallsAppDefinitionsInTUIRegistry"
+        "test:internal/codingagent/keybindings_platform_test.go#TestKeybindingDefinitionsApplyPlatformDefaults"
       ]
     },
     {
@@ -267578,9 +267671,9 @@
         "call:tui/keybindings.go#MatchesKeyID"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/keys_oracle_test.go#TestParseAndMatchKeyMatchPiOnSeededInput",
-        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream",
-        "test:tui/stdin_buffer_first_half_upstream_test.go#TestStdinBufferFirstHalfTimers"
+        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream"
       ]
     },
     {
@@ -267600,9 +267693,9 @@
         "call:tui/keybindings.go#MatchesKeyID"
       ],
       "evidence": [
+        "test:test/extension-conformance/component_kit_widgets_test.go#TestKitStepKeysPressThePlatformsUndoKey",
         "test:tui/keys_oracle_test.go#TestParseAndMatchKeyMatchPiOnSeededInput",
-        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream",
-        "test:tui/stdin_buffer_first_half_upstream_test.go#TestStdinBufferFirstHalfTimers"
+        "test:tui/keys_shifted_symbols_upstream_test.go#TestShiftedSymbolsMatchByTheirProducedCharacterUpstream"
       ]
     },
     {
