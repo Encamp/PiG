@@ -3364,9 +3364,9 @@ rationale = ""
 [[files]]
 path = "packages/coding-agent/src/package-manager-cli.ts"
 change = "added"
-disposition = "pending"
+disposition = "designed-out"
 evidence = []
-rationale = ""
+rationale = "Pi 476a303c1 drops --min-release-age from the managed `npm ci` it runs for a release install. A standalone pig runs no managed `npm ci` for its own update (self-update is the standalone-binary path of D39, whose record now names this commit), so the flag has no counterpart."
 
 [[files]]
 path = "packages/coding-agent/src/rpc-entry.ts"
