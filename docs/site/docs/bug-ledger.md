@@ -117,6 +117,7 @@ Entries are listed by ID. The page carries no totals, so a pull request that add
 | [BF-2165463](#bf-2165463) | On Windows, saving credentials to `auth.json`, `models.json` or the MCP OAuth store no longer fails at once… | PiG's own defect | Windows | 0.5.0 |
 | [BF-2280bf8](#bf-2280bf8) | The per-API stream entry points (`ai.AnthropicMessagesAPI()` through `ai.PiMessagesAPI()` and the deprecated… | PiG's own defect | All platforms | 0.5.0 |
 | [BF-2309604](#bf-2309604) | Tool schemas in OpenAI Completions, OpenAI Responses, Codex and Mistral request bodies keep the members in… | PiG's own defect | All platforms | 0.5.0 |
+| [BF-2316fe3](#bf-2316fe3) | The Piglet JSON Schema that `pig piglet schema` prints rejected `powershell` in `tools`, which `pig piglet… | PiG's own defect | Windows | Unreleased |
 | [BF-24872ab](#bf-24872ab) | Extensions receive each model (`ctx.model`, `model_select`, `ctx.modelRegistry` reads, scoped models… | PiG's own defect | All platforms | 0.5.0 |
 | [BF-24a821d](#bf-24a821d) | The openai stream decoder follows openai 7.19.0, the version packages/ai declares: the stream ends at [DONE]… | PiG's own defect | All platforms | 0.5.0 |
 | [BF-24a9b69](#bf-24a9b69) | fix(hljs): a resumed run counts the scan iterations before its checkpoint | PiG's own defect | All platforms | Unreleased |
@@ -2499,6 +2500,20 @@ Entries are listed by ID. The page carries no totals, so a pull request that add
 - **Fix commits:** `2309604d80` (2026-10-10), `c10cde302d` (2026-10-10), `f29e906cb3` (2026-10-10), `fe16108cc7` (2026-10-10)
 - **Tests:** `agent/assistant_member_order_oracle_test.go::TestAssistantLateMembersFollowPiCreationOrder`, `ai/anthropic_messages_payload_oracle_test.go::TestAnthropicMessagesPayloadMatchesPi`, `ai/constrained_sampling_oracle_test.go::TestConstrainedSamplingMatchesPi`, `ai/openai_request_key_order_oracle_test.go::TestOpenAICompletionsRequestKeysFollowPiAssignmentOrder`, `ai/openai_responses_request_key_order_oracle_test.go::TestOpenAIResponsesRequestKeysFollowPiAssignmentOrder`, `ai/perf_gate_norace_test.go::TestProviderRequestHistoryAllocationGate`, `ai/request_body_escaping_test.go::TestProviderRequestBodiesWriteCharactersAsJSONStringifyDoes`, `coding/cli/rpc_assistant_member_order_test.go::TestRPCAssistantMessageMembersMatchTheSessionLineOrder` and 2 more in docs/bug-ledger.json
 - **Release note:** Tool schemas in OpenAI Completions, OpenAI Responses, Codex and Mistral request bodies keep the members in the order the tool declares them. Strict schemas add `required` and then `additionalProperties`, as Pi does. `cache_control` comes after the members of the tool or text part that carries it.
+
+### BF-2316fe3
+
+**The Piglet JSON Schema that `pig piglet schema` prints rejected `powershell` in `tools`, which `pig piglet…**
+
+- **Source:** PiG's own defect
+- **Symptom:** The Piglet JSON Schema that `pig piglet schema` prints rejected `powershell` in `tools`, which `pig piglet validate` accepts as a built-in tool, and stated nothing for most of the other closed vocabulary.
+- **Root cause:** The schema listed seven built-in tools while the parser accepts eight, so it rejected a Piglet that used powershell. An audit of every enum and field found more drift: the agentEnv runtime modes and policy presets, the strip IDs, the name, build target, output name, release version and secret patterns, the required keys of a mount, and the exactly-one agentEnv form were all unstated.
+- **User impact:** Credential or permission exposure
+- **Platform:** Windows
+- **Fixed in:** Unreleased
+- **Fix commits:** `2316fe38fb` (2026-10-22)
+- **Tests:** `coding/piglet/internal/genstripids/main_test.go::TestCommittedSchemaStripEnumsMatchRegistrations`, `coding/piglet/schema_test.go::TestAC1SchemaParserAgreement`, `coding/piglet/schema_vocabulary_test.go::TestSchemaAcceptsEveryPigletTheRepositoryShips`, `coding/piglet/schema_vocabulary_test.go::TestSchemaAgreesWithParserOnEveryValueOfASet`, `coding/piglet/schema_vocabulary_test.go::TestSchemaEnumsMatchParserSets`, `coding/piglet/schema_vocabulary_test.go::TestSchemaFieldsMatchParserFields`, `coding/piglet/schema_vocabulary_test.go::TestSchemaNeverRejectsWhatTheParserAccepts`
+- **Release note:** The Piglet JSON Schema that `pig piglet schema` prints rejected `powershell` in `tools`, which `pig piglet validate` accepts as a built-in tool, and stated nothing for most of the other closed vocabulary. It now lists all eight built-in tools, the strip IDs of each strip list, the `agentEnv` runtime modes (`inject`, `image`) and policy presets (`minimal`, `standard`, `elevated`), and carries the parser's name, build target, output name, release version and secret patterns, the required `source` and `target` of a mount, and the rule that `agentEnv` names exactly one of `image`, `devContainer` and `source`. `make piglet-strip-ids` writes the strip ID enums, and tests that read the parser's sets from code fail when the schema and the parser disagree.
 
 ### BF-24872ab
 
