@@ -7082,25 +7082,6 @@
       "tests": []
     },
     {
-      "id": "BF-46abed3-2",
-      "title": "Fix in shipped code",
-      "symptom": "Fix in shipped code",
-      "rootCause": "",
-      "rootCauseSource": "",
-      "userImpact": "Behavior differed from Pi",
-      "platform": "All platforms",
-      "class": "own",
-      "fixedIn": "Unreleased",
-      "origin": "commit",
-      "commits": [
-        {
-          "hash": "46abed3453",
-          "date": "2026-10-21"
-        }
-      ],
-      "tests": []
-    },
-    {
       "id": "BF-471c46e",
       "title": "An MCP tool or resource link with an explicit empty `title` keeps it, as Pi does, instead of falling back to…",
       "symptom": "An MCP tool or resource link with an explicit empty `title` keeps it, as Pi does, instead of falling back to the annotation title or the name.",
