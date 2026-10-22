@@ -52,6 +52,8 @@ type Hooks struct {
 	Report func(ctx context.Context, err error, info durable.ReportInfo)
 	// SetTimer arms the timers that evict idle documents (HarnessOptions.SetTimer); nil selects Go timers.
 	SetTimer durable.SetTimer
+	// ReadOnly refuses every commit with writes (HarnessOptions.ReadOnly).
+	ReadOnly bool
 }
 
 type commitListener struct {
@@ -893,6 +895,12 @@ func (session *SessionImpl) runCommit(ctx context.Context, change func(tx *Trans
 		tx.discard()
 		session.sweepDocuments()
 		return result, nil
+	}
+	if session.hooks.ReadOnly {
+		// Refused before Storage: the Session stays healthy, and the caller sees why.
+		tx.discard()
+		session.sweepDocuments()
+		return nil, durable.NewReadOnlySession("a commit with writes")
 	}
 	// Storage adopts the batch synchronously once it is durable, before its next commit; a panic here would reach
 	// Storage, so the callback keeps its own error.

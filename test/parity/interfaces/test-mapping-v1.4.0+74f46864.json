@@ -7116,8 +7116,12 @@
     },
     {
       "path": "packages/durable/test/harness-read-only.test.ts",
-      "disposition": "pending",
-      "upstreamTestHash": "sha256:18a7cb17058c1129effa37e03e9a5157396defb49057b304291a1061fe4291d7"
+      "disposition": "ported",
+      "upstreamTestHash": "sha256:18a7cb17058c1129effa37e03e9a5157396defb49057b304291a1061fe4291d7",
+      "evidence": [
+        "durable/harness/harness_read_only_test.go#TestReadOnlyHarness"
+      ],
+      "rationale": "Pi be14d9732 (HarnessOptions.readOnly): the 4 cases are the subtests of TestReadOnlyHarness under Pi's names, with Pi's inputs and expectations: a viewer of a session with a running generation reads it, leaves the running task as committed, writes nothing (next_seq unchanged), reports an inactive wake, paused scheduling and no onWake call; commits with writes, submit, abort, createConversation and waitForIdle reject with ReadOnlySession and resume() throws it (a panic in Go), while a commit that writes nothing succeeds and nothing is reported; the root of an empty storage is refused; the next writable open recovers the task once (pending, restarts 1). The core (durable/core) refuses ReadOnly with ErrUnsupported; the reference Harness serves it."
     },
     {
       "path": "packages/durable/test/harness-registry.test.ts",

@@ -177,6 +177,12 @@ type HarnessOptions struct {
 	// Session (ReportSessionFailed, often a platform reset) from a faulted task (ReportTaskFaulted) or a parked one
 	// (ReportTaskParked). A panic of its own is dropped.
 	OnReport func(err error, info durable.ReportInfo)
+	// ReadOnly opens for reading only, as a viewer of a session that another process drives, for example a synced copy on a
+	// device that only shows it. Open recovers nothing: a running task stays as committed. Every commit with writes fails
+	// with *durable.ReadOnlySession before it reaches Storage, and so does Resume (a panic, as it throws upstream) and every
+	// call that enables scheduling; the Harness stays usable for reads and watches. Wake is always inactive, and OnWake is
+	// never called. Reopen without it to write.
+	ReadOnly bool
 }
 
 // Wake is when a Session next needs a running process (Harness.Wake). Active: some task can run now or is running, so a
@@ -262,7 +268,7 @@ type Conversation interface {
 // Harness is a durable agent harness over one Session.
 type Harness interface {
 	durable.Session
-	// Resume enables task scheduling. It is idempotent and panics after close. Calls that ask for progress enable it too: Conversation.Submit, Compact, Abort, WaitForIdle, Submission.Wait, WaitForTask, and Harness.WaitForIdle. Read-only viewers never do.
+	// Resume enables task scheduling. It is idempotent; it panics after close, and with *durable.ReadOnlySession on a read-only Harness. Calls that ask for progress enable it too: Conversation.Submit, Compact, Abort, WaitForIdle, Submission.Wait, WaitForTask, and Harness.WaitForIdle. Read-only viewers never do.
 	Resume()
 	// Wake is when this Session next needs a running process, from the scheduler's memory: Active while some task can run
 	// now or is running, At for the earliest sleep. Answers also while scheduling is paused. A host that wakes the
