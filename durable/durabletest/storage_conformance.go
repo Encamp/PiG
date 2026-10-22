@@ -279,17 +279,35 @@ func CreateStorageConformance(options StorageConformanceOptions) []StorageConfor
 			rootId := createRoot(storage)
 			var events []any
 			entryId := mint[durable.EntryId](storage)
-			var read *durable.EntryAt
-			var readErr error
+			type entryRead struct {
+				found *durable.EntryAt
+				err   error
+			}
+			read := make(chan entryRead, 1)
 			seq := must(storage.Commit(ctx, []durable.StorageWrite{entryWrite(entry(entryId, rootId, "message"))}, func(adopted durable.Seq) {
 				events = append(events, fmt.Sprintf("adopt %d", adopted))
-				// The batch is durable when it is adopted: a read started now observes it.
-				read, readErr = storage.Entry(ctx, entryId)
+				// The batch is durable when it is adopted: a read started now observes it. It runs on its own goroutine, as
+				// upstream's read is a promise started inside adopt, since adopt runs inside the commit.
+				//portlint:allow asyncorder upstream starts the read inside adopt without awaiting it (storage-conformance.ts:157, `read = storage.entry(entryId, context)`) and awaits it only after the commit resolved (:166); adopt runs inside Commit, so a synchronous read would deadlock on the storage lock, and the channel read below is the join
+				go func() {
+					found, err := storage.Entry(ctx, entryId)
+					read <- entryRead{found, err}
+				}()
 			}))
 			events = append(events, fmt.Sprintf("resolve %d", seq))
 			expect(events).toEqual([]any{fmt.Sprintf("adopt %d", seq), fmt.Sprintf("resolve %d", seq)})
-			check(readErr)
-			expect(read.CommitSeq).toBe(seq)
+			// A storage that never adopted has failed the check above and started no read to wait for.
+			var started entryRead
+			select {
+			case started = <-read:
+			default:
+				if len(events) == 1 {
+					return
+				}
+				started = <-read
+			}
+			check(started.err)
+			expect(started.found.CommitSeq).toBe(seq)
 
 			events = nil
 			rejects(
