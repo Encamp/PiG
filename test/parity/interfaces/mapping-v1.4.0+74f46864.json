@@ -10368,13 +10368,47 @@
     },
     {
       "id": "pkg:ai/.#calculateCost",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:9c3e5da57b4758fbff01dc7a59efd41be20f43a76784b8b5acd140136d388791"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:9c3e5da57b4758fbff01dc7a59efd41be20f43a76784b8b5acd140136d388791",
+      "rationale": "Derived by the interface gap detector: calculateCost is Go ai/model_utils.go#CalculateCost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/model_utils.go#CalculateCost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/model_utils.go#CalculateCost"
+      ],
+      "evidence": [
+        "test:ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostAcceptsAnyModelType",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostNilModelsAndUsage"
+      ]
     },
     {
       "id": "pkg:ai/.#calculateCost::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:befbadd27d1e9ec1da7a008539c8eb5b4252c86923175700097a295a4cae27aa"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:befbadd27d1e9ec1da7a008539c8eb5b4252c86923175700097a295a4cae27aa",
+      "rationale": "Derived by the interface gap detector: calculateCost::call:0 is Go ai/model_utils.go#CalculateCost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/model_utils.go#CalculateCost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/model_utils.go#CalculateCost"
+      ],
+      "evidence": [
+        "test:ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostAcceptsAnyModelType",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostNilModelsAndUsage"
+      ]
     },
     {
       "id": "pkg:ai/.#ChatTemplateKwargValue",
@@ -34128,8 +34162,25 @@
     },
     {
       "id": "pkg:ai/.#Usage",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:8a7bcee0bd41b2b0aebf3d4686c021018b3b234becf65641fd78aa25123aac5b"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:8a7bcee0bd41b2b0aebf3d4686c021018b3b234becf65641fd78aa25123aac5b",
+      "rationale": "Derived by the interface gap detector: Usage is Go ai/types.go#Usage (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/types.go#Usage"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/anthropic.go#anthropicProvider.parseAnthropicSSE"
+      ],
+      "evidence": [
+        "test:agent/agent_loop_upstream_test.go#TestAgentLoop_HandlesToolCallsAndResults",
+        "test:agent/proxy_upstream_test.go#TestStreamProxyPreservesToolCallMetadataReceivedOnlyOnToolCallEnd",
+        "test:agent/proxy_upstream_test.go#TestStreamProxyProcessesTerminalMetadataWhenTheEventIsNotNewlineTerminated"
+      ]
     },
     {
       "id": "pkg:ai/.#Usage::property:cacheRead",
@@ -34196,8 +34247,25 @@
     },
     {
       "id": "pkg:ai/.#Usage::property:cost",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:a731944f109251f6bd13f021107d853d76af36389f7d1ffd243534320e723256"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:a731944f109251f6bd13f021107d853d76af36389f7d1ffd243534320e723256",
+      "rationale": "Derived by the interface gap detector: Usage::property:cost is Go ai/types.go#Usage.Cost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/types.go#Usage.Cost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/decoded_form.go#DecodedFormUsage"
+      ],
+      "evidence": [
+        "test:agent/agent_loop_upstream_test.go#TestAgentLoop_HandlesToolCallsAndResults",
+        "test:ai/anthropic_sse_upstream_test.go#TestAnthropicUpstreamSSEParsing",
+        "test:ai/cloudflare_workers_ai_system_one_upstream_test.go#TestCloudflareWorkersAISystemOneUpstream"
+      ]
     },
     {
       "id": "pkg:ai/.#Usage::property:input",
@@ -53241,13 +53309,47 @@
     },
     {
       "id": "pkg:ai/compat#calculateCost",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:9c3e5da57b4758fbff01dc7a59efd41be20f43a76784b8b5acd140136d388791"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:9c3e5da57b4758fbff01dc7a59efd41be20f43a76784b8b5acd140136d388791",
+      "rationale": "Derived by the interface gap detector: calculateCost is Go ai/model_utils.go#CalculateCost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/model_utils.go#CalculateCost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/model_utils.go#CalculateCost"
+      ],
+      "evidence": [
+        "test:ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostAcceptsAnyModelType",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostNilModelsAndUsage"
+      ]
     },
     {
       "id": "pkg:ai/compat#calculateCost::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:befbadd27d1e9ec1da7a008539c8eb5b4252c86923175700097a295a4cae27aa"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:befbadd27d1e9ec1da7a008539c8eb5b4252c86923175700097a295a4cae27aa",
+      "rationale": "Derived by the interface gap detector: calculateCost::call:0 is Go ai/model_utils.go#CalculateCost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/model_utils.go#CalculateCost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/model_utils.go#CalculateCost"
+      ],
+      "evidence": [
+        "test:ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostAcceptsAnyModelType",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostNilModelsAndUsage"
+      ]
     },
     {
       "id": "pkg:ai/compat#ChatTemplateKwargValue",
@@ -79278,8 +79380,25 @@
     },
     {
       "id": "pkg:ai/compat#Usage",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:8a7bcee0bd41b2b0aebf3d4686c021018b3b234becf65641fd78aa25123aac5b"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:8a7bcee0bd41b2b0aebf3d4686c021018b3b234becf65641fd78aa25123aac5b",
+      "rationale": "Derived by the interface gap detector: Usage is Go ai/types.go#Usage (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/types.go#Usage"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/anthropic.go#anthropicProvider.parseAnthropicSSE"
+      ],
+      "evidence": [
+        "test:agent/agent_loop_upstream_test.go#TestAgentLoop_HandlesToolCallsAndResults",
+        "test:agent/proxy_upstream_test.go#TestStreamProxyPreservesToolCallMetadataReceivedOnlyOnToolCallEnd",
+        "test:agent/proxy_upstream_test.go#TestStreamProxyProcessesTerminalMetadataWhenTheEventIsNotNewlineTerminated"
+      ]
     },
     {
       "id": "pkg:ai/compat#Usage::property:cacheRead",
@@ -79346,8 +79465,25 @@
     },
     {
       "id": "pkg:ai/compat#Usage::property:cost",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:a731944f109251f6bd13f021107d853d76af36389f7d1ffd243534320e723256"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:a731944f109251f6bd13f021107d853d76af36389f7d1ffd243534320e723256",
+      "rationale": "Derived by the interface gap detector: Usage::property:cost is Go ai/types.go#Usage.Cost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/types.go#Usage.Cost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/decoded_form.go#DecodedFormUsage"
+      ],
+      "evidence": [
+        "test:agent/agent_loop_upstream_test.go#TestAgentLoop_HandlesToolCallsAndResults",
+        "test:ai/anthropic_sse_upstream_test.go#TestAnthropicUpstreamSSEParsing",
+        "test:ai/cloudflare_workers_ai_system_one_upstream_test.go#TestCloudflareWorkersAISystemOneUpstream"
+      ]
     },
     {
       "id": "pkg:ai/compat#Usage::property:input",
@@ -79869,13 +80005,47 @@
     },
     {
       "id": "pkg:ai/models#calculateCost",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:9c3e5da57b4758fbff01dc7a59efd41be20f43a76784b8b5acd140136d388791"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:9c3e5da57b4758fbff01dc7a59efd41be20f43a76784b8b5acd140136d388791",
+      "rationale": "Derived by the interface gap detector: calculateCost is Go ai/model_utils.go#CalculateCost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/model_utils.go#CalculateCost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/model_utils.go#CalculateCost"
+      ],
+      "evidence": [
+        "test:ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostAcceptsAnyModelType",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostNilModelsAndUsage"
+      ]
     },
     {
       "id": "pkg:ai/models#calculateCost::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:befbadd27d1e9ec1da7a008539c8eb5b4252c86923175700097a295a4cae27aa"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:befbadd27d1e9ec1da7a008539c8eb5b4252c86923175700097a295a4cae27aa",
+      "rationale": "Derived by the interface gap detector: calculateCost::call:0 is Go ai/model_utils.go#CalculateCost (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "ai/model_utils.go#CalculateCost"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "complete",
+        "shape": "complete"
+      },
+      "production": [
+        "call:ai/model_utils.go#CalculateCost"
+      ],
+      "evidence": [
+        "test:ai/models_runtime_basic_upstream_test.go#TestModelsRuntimeBasicUpstream",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostAcceptsAnyModelType",
+        "test:ai/calculate_cost_any_model_test.go#TestCalculateCostNilModelsAndUsage"
+      ]
     },
     {
       "id": "pkg:ai/models#clampThinkingLevel",
@@ -101762,9 +101932,9 @@
       "id": "pkg:chord/.#copyJson",
       "disposition": "ported",
       "upstreamShapeHash": "sha256:6ec5e68b40c73a182466a4c674b178c20b4dcf28caf9ed93975e69bd65fe1bd4",
-      "rationale": "Derived by the interface gap detector: copyJson is Go chord/json.go#CopyJSON (name rule N2), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "rationale": "Derived by the interface gap detector: copyJson is Go durable/json.go#CopyJson (name rule N1), every shape rule holds, and it is exercised by a function reachable from cmd/pig. The row is re-derived on every run of make interface-gaps-update.",
       "pigTargets": [
-        "chord/json.go#CopyJSON"
+        "durable/json.go#CopyJson"
       ],
       "layers": {
         "behavior": "complete",
@@ -101772,12 +101942,10 @@
         "shape": "complete"
       },
       "production": [
-        "call:chord/json.go#CopyJSON"
+        "call:durable/json.go#CopyJson"
       ],
       "evidence": [
-        "test:chord/json_test.go#TestCopyJSONDetachesSharedAliases",
-        "test:chord/json_test.go#TestCopyJSONNormalizesNumbersAndKeepsObjectRoot",
-        "test:chord/json_test.go#TestCopyJSONRejectsNonStrictValues"
+        "reach:durable/json.go#CopyJson"
       ]
     },
     {
@@ -106944,48 +107112,184 @@
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSource",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:6d57fe56f04b02566504351eda41b8d01ac1f16cdc5987d153465a25e6d2e441"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:6d57fe56f04b02566504351eda41b8d01ac1f16cdc5987d153465a25e6d2e441",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSource is Go chord/state.go#ReplicatedStateSource (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSource"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSource"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract",
+        "test:chord/replicated_state_upstream_test.go#TestAuthoritativeReplicatedStateSources"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSource::property:attach",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:6e133ac07e281900f6509e14f5f814917352955f7ffac239c6acba6278189d7d"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:6e133ac07e281900f6509e14f5f814917352955f7ffac239c6acba6278189d7d",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSource::property:attach is Go chord/state.go#ReplicatedStateSource.Attach (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSource.Attach"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSource.Attach"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSource::property:attach::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:a8f1f9c4de739100a11a76e529971c672e5e51ddac4ceefc4a197d8f4a376b02"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:a8f1f9c4de739100a11a76e529971c672e5e51ddac4ceefc4a197d8f4a376b02",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSource::property:attach::call:0 is Go chord/state.go#ReplicatedStateSource.Attach (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSource.Attach"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSource.Attach"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSourceAttachment",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:13f8f5f94d826268a17b34b3552b7aa5fcca1ae5b4ca41e122f7ff5090d10a56"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:13f8f5f94d826268a17b34b3552b7aa5fcca1ae5b4ca41e122f7ff5090d10a56",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSourceAttachment is Go chord/state.go#ReplicatedStateSourceAttachment (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSourceAttachment"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSourceAttachment"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSourceAttachment::property:activate",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:b9bba2afb21834444caf7022462dc34423709fe955fc30e2169d0f19409cec89"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:b9bba2afb21834444caf7022462dc34423709fe955fc30e2169d0f19409cec89",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSourceAttachment::property:activate is Go chord/state.go#ReplicatedStateSourceAttachment.Activate (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSourceAttachment.Activate"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSourceAttachment.Activate"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSourceAttachment::property:activate::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:bef291efb5465e588e25872fd1c9e9f4d650483117357c2d3e26f0204fe68637"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:bef291efb5465e588e25872fd1c9e9f4d650483117357c2d3e26f0204fe68637",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSourceAttachment::property:activate::call:0 is Go chord/state.go#ReplicatedStateSourceAttachment.Activate (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSourceAttachment.Activate"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSourceAttachment.Activate"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSourceAttachment::property:dispose",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:38ae7b309a81dcb42836da521f0ee31861d5a3d387d7b590f32ae4bef2920bf7"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:38ae7b309a81dcb42836da521f0ee31861d5a3d387d7b590f32ae4bef2920bf7",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSourceAttachment::property:dispose is Go chord/state.go#ReplicatedStateSourceAttachment.Dispose (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSourceAttachment.Dispose"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSourceAttachment.Dispose"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSourceAttachment::property:dispose::call:0",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:9ca6a314a982a3e688c5c5ffde6bd32f25f07554352674c9e2234fc7f4b40b92"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:9ca6a314a982a3e688c5c5ffde6bd32f25f07554352674c9e2234fc7f4b40b92",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSourceAttachment::property:dispose::call:0 is Go chord/state.go#ReplicatedStateSourceAttachment.Dispose (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSourceAttachment.Dispose"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSourceAttachment.Dispose"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSourceAttachment::property:snapshot",
-      "disposition": "pending",
-      "upstreamShapeHash": "sha256:d9ce56f2fda3b8fe49a20ca89477ae0a0db34827cd7e37ded706145d7477b374"
+      "disposition": "ported",
+      "upstreamShapeHash": "sha256:d9ce56f2fda3b8fe49a20ca89477ae0a0db34827cd7e37ded706145d7477b374",
+      "rationale": "Derived by the interface gap detector: ReplicatedStateSourceAttachment::property:snapshot is Go chord/state.go#ReplicatedStateSourceAttachment.Snapshot (name rule N1), every shape rule holds, and it is exercised by an asserting Go test. The row is re-derived on every run of make interface-gaps-update.",
+      "pigTargets": [
+        "chord/state.go#ReplicatedStateSourceAttachment.Snapshot"
+      ],
+      "layers": {
+        "behavior": "complete",
+        "production": "public-api-tested",
+        "shape": "complete"
+      },
+      "production": [
+        "public-api:chord/state.go#ReplicatedStateSourceAttachment.Snapshot"
+      ],
+      "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
+      ]
     },
     {
       "id": "pkg:chord/.#ReplicatedStateSourceFrame",
@@ -107004,9 +107308,9 @@
         "public-api:chord/state.go#ReplicatedStateSourceFrame"
       ],
       "evidence": [
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract",
         "test:chord/replicated_state_delivery_upstream_test.go#TestAttachedReplicatedStateListenerErrors",
-        "test:chord/replicated_state_delivery_upstream_test.go#TestReplicatedStatePublicDelivery",
-        "test:chord/replicated_state_upstream_test.go#TestAuthoritativeReplicatedStateSources"
+        "test:chord/replicated_state_delivery_upstream_test.go#TestReplicatedStatePublicDelivery"
       ]
     },
     {
@@ -107086,7 +107390,7 @@
         "public-api:chord/state.go#ReplicatedStateSourceFrame.Value"
       ],
       "evidence": [
-        "test:chord/replicated_state_delivery_upstream_test.go#TestAttachedReplicatedStateListenerErrors"
+        "test:chord/state_source_test.go#TestConformanceReplicatedStateSourceContract"
       ]
     },
     {

@@ -354,10 +354,7 @@ func (watch *CommittedWatch[T]) takeLocked() (watchFrame[T], func(context.Contex
 // drain delivers frame, which takeLocked took, then every frame buffered behind it until the watch ends.
 func (watch *CommittedWatch[T]) drain(frame watchFrame[T], listener func(context.Context, T, []durable.Op) error) {
 	watch.mu.Lock()
-	for {
-		if listener == nil {
-			break
-		}
+	for listener != nil {
 		watch.mu.Unlock()
 		err := callWatchListener(listener, frame)
 		watch.mu.Lock()

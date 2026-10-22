@@ -78,3 +78,33 @@ func TestAttachReplicatedStateSourceReturnsTheAttachError(t *testing.T) {
 		t.Fatalf("got (%v, %v), want the attach error and no state", state, err)
 	}
 }
+
+// TestConformanceReplicatedStateSourceContract drives a source through the interface members Pi's chord/src/state.ts declares:
+// packages/chord/src/state.ts:77 ReplicatedStateSource.attach returns an attachment that captured its snapshot at the attach
+// boundary (:57), packages/chord/src/state.ts:63 activate installs the sole listener and every later committed frame reaches it in
+// order, and packages/chord/src/state.ts:65 dispose is idempotent and stops delivery.
+func TestConformanceReplicatedStateSourceContract(t *testing.T) {
+	source := &numberSource{value: 3, cursor: 7}
+	var contract ReplicatedStateSource[float64] = source
+	attachment, err := contract.Attach()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if snapshot := attachment.Snapshot(); snapshot.Value != 3 || snapshot.Cursor != 7 {
+		t.Fatalf("snapshot %+v, want value 3 at cursor 7", snapshot)
+	}
+	var seen []float64
+	if err := attachment.Activate(func(frame ReplicatedStateSourceFrame[float64]) { seen = append(seen, frame.Value) }); err != nil {
+		t.Fatal(err)
+	}
+	source.emit(8, 4)
+	source.emit(9, 5)
+	attachment.Dispose()
+	attachment.Dispose()
+	if len(seen) != 2 || seen[0] != 4 || seen[1] != 5 {
+		t.Fatalf("frames %v, want [4 5]", seen)
+	}
+	if source.disposed != 2 {
+		t.Fatalf("disposed %d times, want the two calls to reach the attachment", source.disposed)
+	}
+}

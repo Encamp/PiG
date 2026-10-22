@@ -6,6 +6,7 @@ package session
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strings"
 	"sync"
@@ -98,7 +99,7 @@ func TestSessionFailsWithItsOwnAdoptionErrorWhichNeverReachesStorage(t *testing.
 	if !slices.Equal(tail, []string{"adopt", "adopted", "resolve"}) {
 		t.Fatalf("storage order tail %v, want [adopt adopted resolve]", tail)
 	}
-	if failure := kernel.Failure(); failure == nil || failure != err || strings.Contains(failure.Error(), "without adopting") {
+	if failure := kernel.Failure(); failure == nil || !errors.Is(failure, err) || strings.Contains(failure.Error(), "without adopting") {
 		t.Fatalf("session failure %v, want the adoption error %v", failure, err)
 	}
 }
