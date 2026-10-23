@@ -272,3 +272,11 @@ commit = "2719b6854d8fb4a81f69a6ef4bd3be561daa6f86"
 class = "NOBEHAVIOR"
 cite = ""
 reason = "Tests of PiG's own changelog tooling, not of a Pi behavior: a legacy fragment stays exempt from the reachability checks but now needs a fix marker, because the 0.5.2 fold carried 42 unmarked Fixed bullets from legacy-exempted fragments into CHANGELOG.md and the bug ledger refused them. The expected values follow that rule change."
+
+[[entry]]
+path = "coding/extension/exec_tree_test.go"
+commit = "f014bfd354d44aa2c0e1468e46eb0c8fd86574d0"
+class = "NOBEHAVIOR"
+cite = ""
+reason = "exec.go gains only a context hook through which a test installs childwait.Hooks; every product call still measures the post-exit grace on the wall clock, so ExecCommand behaves as before and as Pi's waitForChildProcess does. The test stops pacing a descendant against the real 100 ms grace: it owns the grace (childwait.Hooks.GraceTimer) and fires it after the readers hold the last tick, as Pi's own regression test for this case drives its grace, so the output it expects is exactly PRE, HEAD, EOF and POST1..POST15 (before: PRE ticks of any number around HEAD, then EOF and the POST ticks), a stricter assertion decided by the test instead of by host load."
+
