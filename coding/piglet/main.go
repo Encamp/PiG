@@ -102,9 +102,10 @@ const pigletUsageText = `Usage:
   pig piglet list [--json]         List source and Piglet Binary facets
   pig piglet show <name>           Show source/effective Piglet details and records
   pig piglet show --record <path>   Validate and show a Piglet record
-  pig piglet validate <name|path>  Validate schema and resolve every origin
+  pig piglet validate <name|path> [--allow-install-scripts]
+                                   Validate schema and resolve every origin
   pig piglet schema                Print the published Piglet JSON Schema v1
-  pig piglet add <path|npm:ref|git:ref>
+  pig piglet add <path|npm:ref|git:ref> [--allow-install-scripts]
                                       Install one validated Piglet source
   pig piglet update <name>          Update an installed signed GitHub Binary release
   pig piglet pull <release-ref>      Install one signed Piglet Binary release
@@ -775,12 +776,15 @@ func cmdValidate(args []string, stdout, stderr io.Writer) int {
 	jsonMode := false
 	nameOrPath := ""
 	workspace := ""
+	allowInstallScripts := false
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		switch arg {
 		case "--json":
 			jsonMode = true
 		case "--no-input":
+		case allowInstallScriptsFlag:
+			allowInstallScripts = true
 		case "--workspace":
 			if i+1 >= len(args) {
 				_, _ = fmt.Fprintln(stderr, "error: --workspace requires a directory")
@@ -789,18 +793,18 @@ func cmdValidate(args []string, stdout, stderr io.Writer) int {
 			i++
 			workspace = args[i]
 		case "-h", "--help":
-			_, _ = fmt.Fprintln(stdout, "Usage: pig piglet validate <name-or-path> [--workspace <dir>] [--json] [--no-input]")
+			_, _ = fmt.Fprintln(stdout, "Usage: pig piglet validate <name-or-path> [--workspace <dir>] [--allow-install-scripts] [--json] [--no-input]")
 			return 0
 		default:
 			if strings.HasPrefix(arg, "-") || nameOrPath != "" {
-				_, _ = fmt.Fprintln(stderr, "Usage: pig piglet validate <name-or-path> [--workspace <dir>] [--json] [--no-input]")
+				_, _ = fmt.Fprintln(stderr, "Usage: pig piglet validate <name-or-path> [--workspace <dir>] [--allow-install-scripts] [--json] [--no-input]")
 				return 2
 			}
 			nameOrPath = arg
 		}
 	}
 	if nameOrPath == "" {
-		_, _ = fmt.Fprintln(stderr, "Usage: pig piglet validate <name-or-path> [--workspace <dir>] [--json] [--no-input]")
+		_, _ = fmt.Fprintln(stderr, "Usage: pig piglet validate <name-or-path> [--workspace <dir>] [--allow-install-scripts] [--json] [--no-input]")
 		return 2
 	}
 	output := pigletValidationOutput{Extensions: []pigletResolvedResource{}, Skills: []pigletResolvedResource{}, Errors: []string{}}
@@ -813,7 +817,7 @@ func cmdValidate(args []string, stdout, stderr io.Writer) int {
 	if workspace == "" {
 		workspace, _ = os.Getwd()
 	}
-	resolution, err := ResolveEffectiveWithOptions(resolved, ResolveOptions{Workspace: workspace})
+	resolution, err := ResolveEffectiveWithOptions(resolved, ResolveOptions{Workspace: workspace, AllowInstallScripts: allowInstallScripts})
 	if err != nil {
 		output.Errors = append(output.Errors, err.Error())
 		return renderPigletValidation(output, jsonMode, stdout, stderr)
@@ -905,9 +909,16 @@ type resolvedPigletAddSource struct {
 	originSource     string
 	materializedRoot string
 	bundled          bool
+	// installScripts lets the package manager run lifecycle scripts while the Piglet's Packages install.
+	installScripts bool
 }
 
-func resolvePigletAddSource(raw string, stdout, stderr io.Writer) (resolvedPigletAddSource, error) {
+// allowInstallScriptsFlag opts a Piglet command in to the lifecycle scripts of the npm and Git Packages it installs.
+//
+// pig additive (D194): Piglet resolution installs Packages without running lifecycle scripts unless the user opts in.
+const allowInstallScriptsFlag = "--allow-install-scripts"
+
+func resolvePigletAddSource(raw string, allowInstallScripts bool, stdout, stderr io.Writer) (resolvedPigletAddSource, error) {
 	expanded := expandPath(raw)
 	if _, err := os.Stat(expanded); err == nil {
 		return resolvedPigletAddSource{path: expanded}, nil
@@ -935,7 +946,7 @@ func resolvePigletAddSource(raw string, stdout, stderr io.Writer) (resolvedPigle
 		if remotePigletAddOffline() {
 			return resolvedPigletAddSource{}, fmt.Errorf("cannot add remote Piglet %q while offline; unset PIG_OFFLINE and PI_OFFLINE to allow fetching", raw)
 		}
-		materializedRoot, err := installresolver.Materialize(cwd, raw, "user", stdout, stderr)
+		materializedRoot, err := installresolver.Materialize(cwd, raw, "user", installresolver.MaterializeOptions{AllowInstallScripts: allowInstallScripts}, stdout, stderr)
 		if err != nil {
 			return resolvedPigletAddSource{}, err
 		}
@@ -1096,10 +1107,13 @@ func cmdAdd(args []string, stdout, stderr io.Writer) int {
 	jsonMode := slices.Contains(args, "--json")
 	var filtered []string
 	help := false
+	allowInstallScripts := false
 	var parseErr error
 	for _, arg := range args {
 		switch arg {
 		case "--json", "--no-input":
+		case allowInstallScriptsFlag:
+			allowInstallScripts = true
 		case "-h", "--help":
 			help = true
 		default:
@@ -1119,28 +1133,29 @@ func cmdAdd(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if help {
-		_, _ = fmt.Fprintln(stdout, "Usage: pig piglet add <path|npm:ref|git:ref|catalog-ref> [--json] [--no-input]")
+		_, _ = fmt.Fprintln(stdout, "Usage: pig piglet add <path|npm:ref|git:ref|catalog-ref> [--allow-install-scripts] [--json] [--no-input]")
 		return 0
 	}
 	if !jsonMode {
-		return cmdAddHuman(filtered, stdout, stderr)
+		return cmdAddHuman(filtered, allowInstallScripts, stdout, stderr)
 	}
 	var humanOut, humanErr strings.Builder
-	code := cmdAddHuman(filtered, &humanOut, &humanErr)
+	code := cmdAddHuman(filtered, allowInstallScripts, &humanOut, &humanErr)
 	writePigletCommandJSON(pigletCommandOutput{Command: "add", Success: code == 0, Output: strings.TrimSpace(humanOut.String()), Error: strings.TrimSpace(humanErr.String())}, stdout)
 	return code
 }
 
-func cmdAddHuman(args []string, stdout, stderr io.Writer) int {
+func cmdAddHuman(args []string, allowInstallScripts bool, stdout, stderr io.Writer) int {
 	if len(args) != 1 {
 		_, _ = fmt.Fprintln(stderr, "Usage: pig piglet add <path|npm:ref|git:ref|catalog-ref>")
 		return 2
 	}
-	source, err := resolvePigletAddSource(args[0], stdout, stderr)
+	source, err := resolvePigletAddSource(args[0], allowInstallScripts, stdout, stderr)
 	if err != nil {
 		_, _ = fmt.Fprintf(stderr, "error: %v\n", err)
 		return 1
 	}
+	source.installScripts = allowInstallScripts
 	pigletsDir := codingagent.PigletsDir()
 	candidate, err := planPigletAdd(source, pigletsDir)
 	if err != nil {
@@ -1172,6 +1187,7 @@ func planPigletAdd(source resolvedPigletAddSource, pigletsDir string) (pigletAdd
 	if err != nil {
 		return pigletAddCandidate{}, err
 	}
+	p.installScripts = source.installScripts
 	if p.Extends != nil {
 		return pigletAddCandidate{}, fmt.Errorf("Piglet add cannot copy an extends dependency closure; run the Piglet from its source path")
 	}

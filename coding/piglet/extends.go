@@ -51,6 +51,10 @@ type lineageVisit struct {
 // identity.
 type ResolveOptions struct {
 	Workspace string
+	// AllowInstallScripts lets the package manager run the lifecycle scripts of the npm and Git Packages the Piglet names. The zero value installs them with scripts disabled.
+	//
+	// pig additive (D194): Piglet resolution installs Packages without running lifecycle scripts unless the user opts in.
+	AllowInstallScripts bool
 }
 
 // ResolveEffective resolves with no workspace anchor. Piglets that require a
@@ -84,6 +88,7 @@ func resolveEffectiveRoot(canonical string, options ResolveOptions) (*EffectiveR
 	}
 	resolved.GraphDigest = digestPigletBytes([]byte(graph.String()))
 	resolved.EffectiveDigest = digestPigletBytes([]byte("effective-v1\x00" + resolved.GraphDigest))
+	resolved.Piglet.installScripts = options.AllowInstallScripts
 	resolved.Piglet.lineage = slices.Clone(resolved.Lineage)
 	resolved.Piglet.effectiveDigest = resolved.EffectiveDigest
 	resolved.Piglet.graphDigest = resolved.GraphDigest

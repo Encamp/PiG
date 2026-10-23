@@ -45,7 +45,9 @@ func TestPublishNPMBinariesReferencePullsTheSignedRelease(t *testing.T) {
 			gh, _ := publishTestEnv(t)
 			fake := npmtest.Install(t)
 			fake.Seed(tc.packageName, tc.packageVersion)
-			installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) { return source, nil })
+			installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
+				return source, nil
+			})
 			t.Cleanup(func() { installresolver.SetMaterializer(nil) })
 			client := githubReleaseClient(t, gh, tc.repository)
 			source := writeNamedNPMPiglet(t, tc.piglet, tc.version, `{"name":"`+tc.packageName+`","version":"`+tc.packageVersion+`","pi":{"extensions":["extensions/*"]}}`)

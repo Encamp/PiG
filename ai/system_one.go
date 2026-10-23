@@ -63,6 +63,7 @@ func (a SystemOneImageAssets) Get(name string) (SystemOneImageAsset, bool) {
 }
 
 func (a SystemOneImageAssets) MarshalJSON() ([]byte, error) {
+	//perf:ok once per image asset of a classifier request, which makes an HTTP call
 	return writeJSONObject(len(a.Names), func(i int) string { return a.Names[i] }, func(i int) ([]byte, error) { return a.Assets[i].MarshalJSON() })
 }
 
@@ -89,6 +90,7 @@ func (r SystemOneWireRequest) MarshalJSON() ([]byte, error) {
 	if r.Images != nil {
 		wire.Images = &r.Images
 	}
+	//perf:ok once per classifier request, which makes an HTTP call
 	return json.Marshal(wire)
 }
 
@@ -369,6 +371,7 @@ func addSystemOneImages(label string, model ClassifierModel, input SystemOneImag
 		if !ok {
 			return fmt.Errorf("%s accepts PNG and JPEG images for %s, got %s", label, model.ID, image.MimeType)
 		}
+		//perf:ok once per image of a classifier request, which makes an HTTP call
 		assets.Names = append(assets.Names, fmt.Sprintf("<image-%d>", i+1))
 		assets.Assets = append(assets.Assets, SystemOneImageAsset{Format: format, DataBase64: image.Data})
 	}

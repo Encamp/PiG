@@ -41,7 +41,9 @@ func newNPMFixture(t *testing.T, packageJSON, header string) npmFixture {
 	writeFile(t, filepath.Join(root, "LICENSE"), "MIT License\n")
 	path := filepath.Join(root, "reviewer.yaml")
 	writeFile(t, path, header+"packages:\n  review: local:./packages/review\nextensions:\n  - name: runner\n    origins: [package:review]\n")
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) { return source, nil })
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
+		return source, nil
+	})
 	t.Cleanup(func() { installresolver.SetMaterializer(nil) })
 	return npmFixture{root: root, piglet: path}
 }

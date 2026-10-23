@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/MichaelKinsy/PiG/coding/extension/installresolver"
@@ -304,7 +305,7 @@ func reportSettingsErrors(sm *codingagent.SettingsManager, context string) {
 func init() {
 	// pig additive (D18): Piglets materialize Package/direct sources through
 	// the core installer without mutating Package settings.
-	installresolver.SetMaterializer(func(cwd, source, scope string, stdout, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(cwd, source, scope string, options installresolver.MaterializeOptions, stdout, _ io.Writer) (string, error) {
 		local := scope == "project"
 		if scope != "user" && scope != "project" {
 			return "", fmt.Errorf("unknown package materialization scope %q", scope)
@@ -317,6 +318,11 @@ func init() {
 			return "", errors.New("Project is not trusted; refusing to access project package storage")
 		}
 		source = strings.TrimSpace(source)
+		// pig additive (D194): Piglet resolution installs Packages without running lifecycle scripts unless the user opts in.
+		var installOptions []packagemanager.InstallOption
+		if !options.AllowInstallScripts {
+			installOptions = append(installOptions, packagemanager.WithIgnoreScripts())
+		}
 		kind := packagemanager.DetectSourceKind(source)
 		switch kind {
 		case "local":
@@ -330,12 +336,14 @@ func init() {
 			return root, nil
 		case "npm":
 			_, _ = fmt.Fprintf(stdout, "[%s] fetching %s\n", scope, source)
-			if err := packagemanager.InstallManagedNPM(cwd, sm.AgentDir(), sm, source, local); err != nil {
+			// pig additive (D194): npm reinstalls a Package whose --prefix runs through a symbolic link, which would
+			// drop the files an opted-in install built, so the install root is the real path.
+			if err := packagemanager.InstallManagedNPM(canonicalExistingPrefix(cwd), canonicalExistingPrefix(sm.AgentDir()), sm, source, local, installOptions...); err != nil {
 				return "", err
 			}
 		case "git":
 			_, _ = fmt.Fprintf(stdout, "[%s] fetching %s\n", scope, source)
-			if err := packagemanager.InstallManagedGit(cwd, sm.AgentDir(), sm, source, local); err != nil {
+			if err := packagemanager.InstallManagedGit(cwd, sm.AgentDir(), sm, source, local, installOptions...); err != nil {
 				return "", err
 			}
 		default:
@@ -547,4 +555,25 @@ func packageManagerFor(cwd string, sm *codingagent.SettingsManager, progress pac
 	manager := packagemanager.NewPackageManager(packagemanager.PackageManagerOptions{CWD: cwd, SettingsManager: sm})
 	manager.SetProgressCallback(progress)
 	return manager
+}
+
+// canonicalExistingPrefix resolves the symbolic links of the longest existing prefix of path and keeps the rest as
+// written, so a directory that is not created yet still gets the real path of its parent.
+func canonicalExistingPrefix(path string) string {
+	absolute, err := filepath.Abs(path)
+	if err != nil {
+		return path
+	}
+	rest := ""
+	for current := absolute; ; {
+		if real, err := filepath.EvalSymlinks(current); err == nil {
+			return filepath.Join(real, rest)
+		}
+		parent := filepath.Dir(current)
+		if parent == current {
+			return absolute
+		}
+		rest = filepath.Join(filepath.Base(current), rest)
+		current = parent
+	}
 }

@@ -27,6 +27,23 @@ func TestCommittedStripIDsMatchRegistrations(t *testing.T) {
 	}
 }
 
+// TestCommittedSchemaStripEnumsMatchRegistrations fails when the strip ID enums
+// of the Piglet JSON Schema differ from the registrations.
+func TestCommittedSchemaStripEnumsMatchRegistrations(t *testing.T) {
+	t.Setenv(parityHarnessEnv, "")
+	committed, err := os.ReadFile("../../piglet.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rendered, err := renderSchema(committed, collect())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(committed, rendered) {
+		t.Fatal("coding/piglet/piglet.schema.json strip ID enums are stale; run `make piglet-strip-ids`")
+	}
+}
+
 // TestCollectReadsEveryRegistrationKind pins that each list comes from its
 // registration: a known member of each registry appears in its list.
 func TestCollectReadsEveryRegistrationKind(t *testing.T) {

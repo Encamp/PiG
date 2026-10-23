@@ -18,7 +18,6 @@ import (
 	"github.com/MichaelKinsy/PiG/coding/extension/installresolver"
 	sourceref "github.com/MichaelKinsy/PiG/coding/source"
 	"github.com/MichaelKinsy/PiG/internal/codingagent"
-	"github.com/MichaelKinsy/PiG/internal/crossspawn"
 	"github.com/MichaelKinsy/PiG/internal/nodeurl"
 	"github.com/MichaelKinsy/PiG/internal/resolvepath"
 )
@@ -33,21 +32,23 @@ type ConfiguredPackage struct {
 
 // GetGitDependencyInstallArgs selects the install arguments of a Git package's dependencies from the package manager the npmCommand names, without auto-installing peer dependencies.
 // Ports .upstream/v0.99.1/packages/coding-agent/src/core/package-manager.ts:1821-1838 (getGitDependencyInstallArgs).
-func GetGitDependencyInstallArgs(sm *codingagent.SettingsManager) ([]string, error) {
+func GetGitDependencyInstallArgs(sm *codingagent.SettingsManager, opts ...InstallOption) ([]string, error) {
 	manager, err := PackageManagerName(DefaultNpmCommand(sm))
 	if err != nil {
 		return nil, err
 	}
+	var args []string
 	switch manager {
 	case "bun":
-		return []string{"install", "--omit=dev", "--omit=peer"}, nil
+		args = []string{"install", "--omit=dev", "--omit=peer"}
 	case "pnpm":
-		return []string{"install", "--prod", "--config.auto-install-peers=false", "--config.strict-peer-dependencies=false", "--config.strict-dep-builds=false"}, nil
+		args = []string{"install", "--prod", "--config.auto-install-peers=false", "--config.strict-peer-dependencies=false", "--config.strict-dep-builds=false"}
 	case "npm":
-		return []string{"install", "--omit=dev", "--legacy-peer-deps"}, nil
+		args = []string{"install", "--omit=dev", "--legacy-peer-deps"}
 	default:
-		return []string{"install"}, nil
+		args = []string{"install"}
 	}
+	return append(args, resolveInstallOptions(opts).ignoreScriptsArgs()...), nil
 }
 
 // SettingsBaseDir is the directory a scope's package sources resolve against: the project config directory below cwd, or the agent directory (package-manager.ts getBaseDirForScope).
@@ -364,7 +365,7 @@ func ParseNpmInstallRef(source string) (sourceref.Ref, error) {
 	return ref, nil
 }
 
-func InstallManagedNPM(cwd, agentDir string, sm *codingagent.SettingsManager, source string, local bool) error {
+func InstallManagedNPM(cwd, agentDir string, sm *codingagent.SettingsManager, source string, local bool, opts ...InstallOption) error {
 	ref, err := ParseNpmInstallRef(source)
 	if err != nil {
 		return err
@@ -379,11 +380,11 @@ func InstallManagedNPM(cwd, agentDir string, sm *codingagent.SettingsManager, so
 	if err != nil {
 		return err
 	}
-	args = append(args, NpmInstallArgs(manager, ref.Locator, installRoot, ref.NPMRegistry)...)
+	args = append(args, NpmInstallArgs(manager, ref.Locator, installRoot, ref.NPMRegistry, opts...)...)
 	return RunPackageProcess("", command[0], args...)
 }
 
-func NpmInstallArgs(manager, spec, installRoot, registry string) []string {
+func NpmInstallArgs(manager, spec, installRoot, registry string, opts ...InstallOption) []string {
 	var args []string
 	switch manager {
 	case "bun":
@@ -401,7 +402,7 @@ func NpmInstallArgs(manager, spec, installRoot, registry string) []string {
 	if registry != "" {
 		args = append(args, "--registry", registry)
 	}
-	return args
+	return append(args, resolveInstallOptions(opts).ignoreScriptsArgs()...)
 }
 
 // requireAbsoluteManagedPath rejects a managed package path that is not absolute. Pi resolves its agentDir and cwd to absolute paths
@@ -438,7 +439,7 @@ func EnsureManagedPackageRoot(root string) error {
 	return nil
 }
 
-func InstallManagedGit(cwd, agentDir string, sm *codingagent.SettingsManager, source string, local bool) (err error) {
+func InstallManagedGit(cwd, agentDir string, sm *codingagent.SettingsManager, source string, local bool, opts ...InstallOption) (err error) {
 	ref, err := sourceref.Parse(source, sourceref.Options{Bare: sourceref.BareReject})
 	if err != nil || ref.Kind != sourceref.KindGit {
 		return fmt.Errorf("invalid Git package source: %s", source)
@@ -452,11 +453,11 @@ func InstallManagedGit(cwd, agentDir string, sm *codingagent.SettingsManager, so
 	if err != nil {
 		return err
 	}
-	return InstallGitCheckout(sm, ref, checkout, packageRoot, root)
+	return InstallGitCheckout(sm, ref, checkout, packageRoot, root, opts...)
 }
 
 // InstallGitCheckout shares update, dependency repair, and failed-clone cleanup between installed and temporary sources. An empty root leaves temporary-cache parents intact, as Pi does.
-func InstallGitCheckout(sm *codingagent.SettingsManager, ref sourceref.Ref, checkout, packageRoot, root string) (err error) {
+func InstallGitCheckout(sm *codingagent.SettingsManager, ref sourceref.Ref, checkout, packageRoot, root string, opts ...InstallOption) (err error) {
 	if err := requireAbsoluteManagedPath(checkout); err != nil {
 		return err
 	}
@@ -471,7 +472,7 @@ func InstallGitCheckout(sm *codingagent.SettingsManager, ref sourceref.Ref, chec
 				return err
 			}
 		}
-		return EnsureGitRef(checkout, packageRoot, sm, target)
+		return EnsureGitRef(checkout, packageRoot, sm, target, opts...)
 	} else if !os.IsNotExist(statErr) {
 		return statErr
 	}
@@ -513,7 +514,7 @@ func InstallGitCheckout(sm *codingagent.SettingsManager, ref sourceref.Ref, chec
 	if err := RequireGitSubdirectoryWithinCheckout(checkout, packageRoot); err != nil {
 		return err
 	}
-	return InstallGitDependencies(packageRoot, sm)
+	return InstallGitDependencies(packageRoot, sm, opts...)
 }
 
 func GitCheckoutPath(cwd, agentDir, source string, local bool) (string, error) {
@@ -530,17 +531,22 @@ func GitCheckoutPath(cwd, agentDir, source string, local bool) (string, error) {
 }
 
 // GitCheckoutRelative is a Git source's checkout directory below the install
-// root: its host, then its repository path. Windows cannot name a directory
-// with ':', so there a file:// source's leading drive (C:) becomes the segment
-// C, and any other segment containing ':' is refused, since NTFS reads
-// name:stream as an alternate data stream.
+// root: its host, then its repository path, as Pi lays it out.
+//
+// pig additive (D18): a file:// source is not a Pi source, and nesting its
+// whole absolute path under the install root can push $GIT_DIR past Git for
+// Windows' own PATH_MAX, which core.longpaths does not lift. Its checkout is
+// <host>/<12 hex of sha256(absolute repo path)>/<basename> instead; the leaf stays the repository name because a direct extension takes its identity from its directory name. An older
+// nested file:// checkout is not read or migrated; it is cloned again.
+//
+// Windows cannot name a directory with ':', and NTFS reads name:stream as an
+// alternate data stream, so there any segment containing ':' is refused.
 func GitCheckoutRelative(goos, root string, ref sourceref.Ref) (string, error) {
 	segments := append([]string{ref.GitHost}, strings.Split(ref.GitPath, "/")...)
+	if strings.HasPrefix(strings.ToLower(ref.GitRepo), "file://") {
+		segments = append([]string{ref.GitHost}, fileCheckoutSegments(ref.GitPath)...)
+	}
 	if goos == "windows" {
-		// pig additive (D18): a Windows file URL's drive is a checkout segment.
-		if strings.HasPrefix(strings.ToLower(ref.GitRepo), "file://") && IsDriveSegment(segments[1]) {
-			segments[1] = segments[1][:1]
-		}
 		for _, segment := range segments {
 			if strings.Contains(segment, ":") {
 				return "", fmt.Errorf("Refusing to use path outside package install root: %s", filepath.Join(append([]string{root}, segments...)...))
@@ -556,6 +562,19 @@ func GitCheckoutRelative(goos, root string, ref sourceref.Ref) (string, error) {
 		return "", err
 	}
 	return filepath.Rel(absoluteRoot, resolved)
+}
+
+// fileCheckoutSegments names a file:// repository's checkout below its host:
+// a digest of its normalized absolute path (drive letter upper case), so equal
+// basenames in different directories stay apart, then the basename.
+func fileCheckoutSegments(repoPath string) []string {
+	segments := strings.Split(repoPath, "/")
+	if IsDriveSegment(segments[0]) {
+		segments[0] = strings.ToUpper(segments[0])
+	}
+	normalized := "/" + strings.Join(segments, "/")
+	digest := sha256.Sum256([]byte(normalized))
+	return []string{fmt.Sprintf("%x", digest[:6]), segments[len(segments)-1]}
 }
 
 // GitCloneRepo is the URL git clones for repo. Git for Windows reads
@@ -649,7 +668,7 @@ func RunCmd(name string, args ...string) (string, error) {
 
 // RunCmdInDir is Pi's runCommandSync. It starts the command as upstream's spawnProcess does, so a Windows .cmd shim such as npm.cmd receives its arguments exactly, and returns the trimmed stdout, or stderr when stdout is empty, so a warning on stderr cannot corrupt a reported path.
 func RunCmdInDir(dir, name string, args ...string) (string, error) {
-	cmd := crossspawn.Command(context.Background(), dir, name, args...)
+	cmd := packageCommand(context.Background(), dir, name, args...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
 	if err := cmd.Run(); err != nil {

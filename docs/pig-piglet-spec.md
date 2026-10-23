@@ -117,7 +117,7 @@ CLI/platform inputs never silently widen a Piglet. Slash commands and shortcuts 
 
 ## Strip lists
 
-`strip` disables built-ins (D92). It has five lists: `tools`, `commands` (with the leading slash; `/piglet` included), `extensions`, `apis` (model API implementations), and `features`. `internal/pigstrip/ids_generated.go` holds the valid IDs, and `make piglet-strip-ids` regenerates it. A list is in deny mode (the IDs it names are stripped) or in keep mode through `strip.keep.<list>` (every ID it does not name is stripped, including IDs a later PiG adds). One file cannot use both modes for one list.
+`strip` disables built-ins (D92). It has five lists: `tools`, `commands` (with the leading slash; `/piglet` included), `extensions`, `apis` (model API implementations), and `features`. `internal/pigstrip/ids_generated.go` holds the valid IDs, and `make piglet-strip-ids` regenerates it and the matching ID enums of `coding/piglet/piglet.schema.json`. A list is in deny mode (the IDs it names are stripped) or in keep mode through `strip.keep.<list>` (every ID it does not name is stripped, including IDs a later PiG adds). One file cannot use both modes for one list.
 
 Strip lists inherit through `extends`. `extends.remove.strip` re-enables IDs and requires `extends.allowWiden`. A child can narrow keep mode but cannot leave it. Validation refuses a strip list that removes every built-in tool together with `/quit`.
 

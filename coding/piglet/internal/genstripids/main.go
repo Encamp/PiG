@@ -1,5 +1,6 @@
 // Command genstripids writes internal/pigstrip/ids_generated.go, the table of
-// stable IDs a Piglet strip list may name. It reads the IDs from the
+// stable IDs a Piglet strip list may name, and the matching ID enums of
+// coding/piglet/piglet.schema.json. It reads the IDs from the
 // registrations themselves: the built-in tool registry, the built-in slash
 // command list with the Piglet extension's /piglet command, the built-in
 // extension list, the strippable API list and the strippable feature list.
@@ -18,6 +19,7 @@ import (
 	"fmt"
 	"go/format"
 	"os"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -29,7 +31,10 @@ import (
 	"github.com/MichaelKinsy/PiG/internal/pigstrip"
 )
 
-const defaultOutput = "internal/pigstrip/ids_generated.go"
+const (
+	defaultOutput = "internal/pigstrip/ids_generated.go"
+	defaultSchema = "coding/piglet/piglet.schema.json"
+)
 
 // parityHarnessEnv adds parity probe commands to the built-in command list. The
 // table describes the shipped command set, so the generator clears it.
@@ -38,23 +43,33 @@ const parityHarnessEnv = "PIG_PARITY_HARNESS"
 func main() {
 	check := flag.Bool("check", false, "fail when the committed table differs from the registrations")
 	output := flag.String("out", defaultOutput, "generated Go file")
+	schema := flag.String("schema", defaultSchema, "Piglet JSON Schema whose strip ID enums are generated")
 	printTags := flag.Bool("print-tags", false, "print the build tags of every strip ID a Piglet Binary compiles out")
 	flag.Parse()
 	if *printTags {
 		fmt.Println(strings.Join(piglet.StripBuildTags(), ","))
 		return
 	}
-	if err := run(*output, *check); err != nil {
+	if err := run(*output, *schema, *check); err != nil {
 		fmt.Fprintln(os.Stderr, "genstripids:", err)
 		os.Exit(1)
 	}
 }
 
-func run(output string, check bool) error {
+func run(output, schema string, check bool) error {
 	if err := os.Unsetenv(parityHarnessEnv); err != nil {
 		return err
 	}
-	rendered, err := render(collect())
+	ids := collect()
+	rendered, err := render(ids)
+	if err != nil {
+		return err
+	}
+	currentSchema, err := os.ReadFile(schema)
+	if err != nil {
+		return err
+	}
+	renderedSchema, err := renderSchema(currentSchema, ids)
 	if err != nil {
 		return err
 	}
@@ -66,9 +81,15 @@ func run(output string, check bool) error {
 		if !bytes.Equal(current, rendered) {
 			return fmt.Errorf("%s is stale; run `make piglet-strip-ids`", output)
 		}
+		if !bytes.Equal(currentSchema, renderedSchema) {
+			return fmt.Errorf("%s is stale; run `make piglet-strip-ids`", schema)
+		}
 		return nil
 	}
-	return os.WriteFile(output, rendered, 0o644)
+	if err := os.WriteFile(output, rendered, 0o644); err != nil {
+		return err
+	}
+	return os.WriteFile(schema, renderedSchema, 0o644)
 }
 
 type table struct {
@@ -128,4 +149,44 @@ func render(t table) ([]byte, error) {
 	}
 	b.WriteString("}\n")
 	return format.Source(b.Bytes())
+}
+
+// schemaDefs maps each strip list to the $defs entry of piglet.schema.json that holds its ID enum.
+func schemaDefs(t table) []struct {
+	def string
+	ids []string
+} {
+	return []struct {
+		def string
+		ids []string
+	}{
+		{"stripToolId", t.tools},
+		{"stripCommandId", t.commands},
+		{"stripExtensionId", t.extensions},
+		{"stripApiId", t.apis},
+		{"stripFeatureId", t.features},
+	}
+}
+
+// renderSchema rewrites the ID enum of each strip ID def in the Piglet JSON Schema and leaves every other byte alone.
+func renderSchema(schema []byte, t table) ([]byte, error) {
+	for _, entry := range schemaDefs(t) {
+		//perf:ok go generate tool: runs once per schema vocabulary table, never in the product
+		pattern := regexp.MustCompile(`(?s)("` + entry.def + `": \{\s*"type": "string",\s*"enum": )\[[^\]]*\]`)
+		if !pattern.Match(schema) {
+			return nil, fmt.Errorf("piglet.schema.json has no %s def with a string enum", entry.def)
+		}
+		var enum bytes.Buffer
+		enum.WriteString("[\n")
+		for i, id := range entry.ids {
+			fmt.Fprintf(&enum, "        %q", id)
+			if i < len(entry.ids)-1 {
+				enum.WriteByte(',')
+			}
+			enum.WriteByte('\n')
+		}
+		enum.WriteString("      ]")
+		schema = pattern.ReplaceAll(schema, append([]byte("${1}"), enum.Bytes()...))
+	}
+	return schema, nil
 }

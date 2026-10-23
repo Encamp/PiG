@@ -46,6 +46,12 @@ import (
 // literals that the engine copy doubled. The table is now package-level data and the TLS config is static: init allocations 4,031 against
 // 4,001 at 0.5.1 (4,123 before), --version 726,896-732,472 bytes / 3,801-3,808 objects in three runs, so the linux object budget is 3,808
 // plus under 2%. The Windows budgets keep their values until the runner measures them.
+//
+// The Windows runner then read 827,800 bytes / 5,744 objects (every run of ten, 827,800-828,280), over its 824,000, on main and on the train alike.
+// internal/nodeerrno built libuv's code table and the errno names at every start, 9,480 bytes in 16 allocations
+// (GODEBUG=inittrace=1, Windows build under Wine) of a table only an error path reads. They are built on first use: init 616,296 -> 607,112
+// bytes, pig --version 756.5-761.9 KB -> 747.8-753.2 KB under Wine, Linux 717,952-723,688 bytes / 3,794-3,802 objects in two runs, so the
+// linux byte budget is 723,688 plus under 2%.
 type startupAllocBudget struct{ versionBytes, versionObjects, promptBytes, promptObjects uint64 }
 
 func startupAllocBudgetFor(goos string) startupAllocBudget {
@@ -55,7 +61,7 @@ func startupAllocBudgetFor(goos string) startupAllocBudget {
 	if goos == "darwin" {
 		return startupAllocBudget{versionBytes: 760_000, versionObjects: 4_240, promptBytes: 2_970_000, promptObjects: 20_200}
 	}
-	return startupAllocBudget{versionBytes: 741_000, versionObjects: 3_880, promptBytes: 2_589_000, promptObjects: 16_820}
+	return startupAllocBudget{versionBytes: 738_000, versionObjects: 3_880, promptBytes: 2_589_000, promptObjects: 16_820}
 }
 
 func TestStartupAllocationBudget(t *testing.T) {
@@ -66,7 +72,7 @@ func TestStartupAllocationBudget(t *testing.T) {
 	fixture := newStartupFixture(t)
 	ctx := testbudget.Context(t)
 
-	version := fixture.measure(ctx, t, fixture.cwd, "--version")
+	version := fixture.version(ctx, t, fixture.cwd, budget)
 	if version.AllocBytes > budget.versionBytes || version.AllocObjects > budget.versionObjects {
 		startupBudgetError(t, "pig --version allocated %d bytes in %d objects, budget %d bytes in %d objects", version.AllocBytes, version.AllocObjects, budget.versionBytes, budget.versionObjects)
 	}
@@ -170,6 +176,18 @@ const (
 	windowsLevelObjectsCeiling = 33
 	windowsLevelBytesCeiling   = 6_690
 )
+
+// startupVersionRuns is how many `pig --version` runs the budget may measure to find one within budget. The Go runtime starts one more OS
+// thread in some Windows process starts than in others: runtime.main locks the main goroutine to the main thread and blocks it in gcenable
+// waiting for the GC workers, and when no idle M is parked yet schedule -> stoplockedm -> handoffp -> startm -> newm hands its P to a new M.
+// That M costs 6 objects and 5,096 bytes (m, g0, gsignal and the profiling stack), whatever pig does. Under Wine on a Linux host, a Go program
+// that only reads runtime.MemStats measured 190 objects / 47,616 bytes in 21 of 30 starts and 196 / 52,712 in the other 8; pig --version
+// measured 756.6-756.8 KB or 761.6-761.9 KB the same way, with the same binary, and a heap profile put the doubled allocations under
+// runtime.newm <- startm <- handoffp <- stoplockedm. The GitHub runner read 822,488 bytes at the 0.5.2 batch head and 827,800 at its merge,
+// 5,312 apart, with no pig change that allocates at startup between them. The budget gates pig's own allocations, so a run over budget is
+// measured again, up to this many times, and the test judges one whole run (never the minimum bytes of one run with the minimum objects of
+// another). Noise passes in a later run; a regression is over budget in every run and fails with the smallest run's numbers.
+const startupVersionRuns = 10
 
 // startupLevelCeilingFor is the per-level budget of goos.
 func startupLevelCeilingFor(goos string) (objects, bytes uint64) {
@@ -286,6 +304,25 @@ func (f *startupFixture) warmPrompt(ctx context.Context, t *testing.T, cwd strin
 		next := f.measure(ctx, t, cwd, startupPrompt...)
 		best.AllocBytes = min(best.AllocBytes, next.AllocBytes)
 		best.AllocObjects = min(best.AllocObjects, next.AllocObjects)
+	}
+	return best
+}
+
+// version measures pig --version from cwd and returns one whole run: the first whose bytes and objects are both within budget, else the run
+// with the fewest bytes (its own objects with it), after startupVersionRuns runs. A run over budget is measured again because the Go runtime's
+// start moves the count (see startupVersionRuns). Every run is logged, so the two modes stay visible in CI logs.
+func (f *startupFixture) version(ctx context.Context, t *testing.T, cwd string, budget startupAllocBudget) profiling.ProcessMetrics {
+	t.Helper()
+	var best profiling.ProcessMetrics
+	for run := 1; run <= startupVersionRuns; run++ {
+		current := f.measure(ctx, t, cwd, "--version")
+		t.Logf("pig --version run %d: %d bytes, %d objects", run, current.AllocBytes, current.AllocObjects)
+		if run == 1 || current.AllocBytes < best.AllocBytes {
+			best = current
+		}
+		if current.AllocBytes <= budget.versionBytes && current.AllocObjects <= budget.versionObjects {
+			return current
+		}
 	}
 	return best
 }

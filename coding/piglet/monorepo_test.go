@@ -45,7 +45,7 @@ func TestAddMonorepoPinnedClosure(t *testing.T) {
 	git("add", "piglets")
 	git("-c", "user.name=Test", "-c", "user.email=test@example.com", "-c", "core.autocrlf=false", "commit", "-qm", "fixture")
 	commit := git("rev-parse", "HEAD")
-	installresolver.SetMaterializer(func(_, source, _ string, _, _ io.Writer) (string, error) {
+	installresolver.SetMaterializer(func(_, source, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
 		ref, err := sourceref.Parse(source, sourceref.Options{Bare: sourceref.BareReject})
 		if err != nil {
 			return "", err
@@ -112,23 +112,25 @@ func TestAddMonorepoPinnedClosure(t *testing.T) {
 		t.Fatalf("removal affected sibling: %v", err)
 	}
 	for _, selector := range []string{"main", "v1.0.0", "abcdef"} {
-		if _, err := resolvePigletAddSource("git:https://github.com/acme/piglets.git@"+selector+"#subdirectory=piglets%2Falpha", io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "full lowercase commit") {
+		if _, err := resolvePigletAddSource("git:https://github.com/acme/piglets.git@"+selector+"#subdirectory=piglets%2Falpha", false, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "full lowercase commit") {
 			t.Fatalf("unpinned %s=%v", selector, err)
 		}
 	}
 	wrongCommit := strings.Repeat("0", 40)
-	if _, err := resolvePigletAddSource("git:https://github.com/acme/piglets.git@"+wrongCommit+"#subdirectory=piglets%2Falpha", io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "does not match pinned commit") {
+	if _, err := resolvePigletAddSource("git:https://github.com/acme/piglets.git@"+wrongCommit+"#subdirectory=piglets%2Falpha", false, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "does not match pinned commit") {
 		t.Fatalf("wrong commit=%v", err)
 	}
 	if err := os.WriteFile(filepath.Join(repo, "piglets", "alpha", "prompt.md"), []byte("modified checkout"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	raw := "git:https://github.com/acme/piglets.git@" + commit + "#subdirectory=piglets%2Falpha"
-	if _, err := resolvePigletAddSource(raw, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "modified or untracked") {
+	if _, err := resolvePigletAddSource(raw, false, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "modified or untracked") {
 		t.Fatalf("dirty checkout=%v", err)
 	}
-	installresolver.SetMaterializer(func(_, _, _ string, _, _ io.Writer) (string, error) { return repo, nil })
-	if _, err := resolvePigletAddSource(raw, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "does not match selected") {
+	installresolver.SetMaterializer(func(_, _, _ string, _ installresolver.MaterializeOptions, _, _ io.Writer) (string, error) {
+		return repo, nil
+	})
+	if _, err := resolvePigletAddSource(raw, false, io.Discard, io.Discard); err == nil || !strings.Contains(err.Error(), "does not match selected") {
 		t.Fatalf("root fallback=%v", err)
 	}
 }
