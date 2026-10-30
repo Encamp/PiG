@@ -27,6 +27,7 @@ func RaceWithAbortSignal[T any](signal context.Context, operation func() (T, err
 	}
 	settled := make(chan outcome, 1)
 	go func() {
+		defer recoverStream("operation", func(err error) { settled <- outcome{err: err} })
 		value, err := operation()
 		settled <- outcome{value, err}
 	}()

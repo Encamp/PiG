@@ -19,13 +19,13 @@ type LazyAPICapabilities struct {
 // LazyStream returns before setup runs. Setup starts in the first promise reaction after the call, as the continuation of an async function whose first statement awaits; use LazyStreamSync when Pi's setup has no await before its provider call. The producer owns cancellation and its final event/result; forwarding never replaces an established terminal value with an iterator cancellation.
 func LazyStream(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), observer ...LazyStreamObserver) *AssistantMessageEventStream {
 	//portlint:allow asyncorder the continuation queue inside startLazyStream is the ordering point: body runs on the queue, and the observer is called from that queue
-	return startLazyStream(ctx, model, setup, func(body func()) { go body() }, newLazyObservation(observer)) //portlint:allow golifetime the setup goroutine is owned by ctx and the producer (see the doc comment), which ends the stream
+	return startLazyStream(ctx, model, setup, nil, newLazyObservation(observer)) //portlint:allow golifetime the setup goroutine is owned by ctx and the producer (see the doc comment), which ends the stream
 }
 
 // LazyStreamSync is LazyStream for a setup that never awaits before it returns its stream. Like an async function without an await, setup runs to completion in the caller's synchronous prefix, before LazyStreamSync returns, and only the forwarding reaction is queued (packages/ai/src/api/lazy.ts:48-50). A caller that already owns the shared continuation queue runs setup inline; any other caller first acquires the queue.
 func LazyStreamSync(ctx context.Context, model *Model, setup func(context.Context) (*AssistantMessageEventStream, error), observer ...LazyStreamObserver) *AssistantMessageEventStream {
 	//portlint:allow asyncorder the continuation queue inside startLazyStreamSync is the ordering point: body runs on the queue, and the observer is called from that queue
-	return startLazyStreamSync(ctx, model, setup, func(body func()) { go body() }, newLazyObservation(observer)) //portlint:allow golifetime the setup goroutine is owned by ctx and the producer (see the doc comment), which ends the stream
+	return startLazyStreamSync(ctx, model, setup, nil, newLazyObservation(observer)) //portlint:allow golifetime the setup goroutine is owned by ctx and the producer (see the doc comment), which ends the stream
 }
 
 // LazyStreamObserver is a synchronous, read-only observation of the stream's existing forwarding path (lazy.ts LazyStreamObserver). OnEvent runs after each event is pushed to the outer stream, and OnResult once after the outer stream ends; a nil member is an omitted method, and OnResult receives nil for Pi's undefined result.
@@ -63,6 +63,27 @@ func (o *lazyObservation) onResult(result *AssistantMessage) {
 	}
 }
 
+// launchLazy owns panic recovery for the producer and forwarding reaction, including injected launchers.
+func launchLazy(launch func(func()), outer *AssistantMessageEventStream, model *Model, body func()) {
+	var api API
+	var provider, id string
+	if model != nil {
+		api, provider, id = model.ProviderMeta.API, modelProviderID(model), model.ID
+	}
+	fail := func(err error) { failStreamPanic(outer, api, provider, id, err) }
+	if launch == nil {
+		go func() {
+			defer recoverStream(provider, fail)
+			body()
+		}()
+		return
+	}
+	launch(func() {
+		defer recoverStream(provider, fail)
+		body()
+	})
+}
+
 type lazySetupResult struct {
 	stream *AssistantMessageEventStream
 	err    error
@@ -76,7 +97,7 @@ func startLazyStream(ctx context.Context, model *Model, setup func(context.Conte
 	turn := executor.newTurn()
 	// Without an observer the closures capture nothing for it, so the unobserved path allocates as it did before observers existed.
 	if observation == nil {
-		launch(func() {
+		launchLazy(launch, outer, model, func() {
 			turn.run(func(turn *continuationTurn) {
 				inner, err := setup(context.WithValue(ctx, continuationTurnKey{}, turn))
 				settled := newContinuationPromise[lazySetupResult](executor)
@@ -87,7 +108,7 @@ func startLazyStream(ctx context.Context, model *Model, setup func(context.Conte
 		})
 		return outer
 	}
-	launch(func() {
+	launchLazy(launch, outer, model, func() {
 		turn.run(func(turn *continuationTurn) {
 			inner, err := setup(context.WithValue(ctx, continuationTurnKey{}, turn))
 			settled := newContinuationPromise[lazySetupResult](executor)
@@ -120,14 +141,14 @@ func startLazyStreamSync(ctx context.Context, model *Model, setup func(context.C
 		executor.run(func(turn *continuationTurn) { run(context.WithValue(ctx, continuationTurnKey{}, turn)) })
 	}
 	if observation == nil {
-		launch(func() {
+		launchLazy(launch, outer, model, func() {
 			forward.run(func(turn *continuationTurn) {
 				forwardLazySetup(ctx, turn, executor, outer, model, prepared.stream, prepared.err, nil)
 			})
 		})
 		return outer
 	}
-	launch(func() {
+	launchLazy(launch, outer, model, func() {
 		forward.run(func(turn *continuationTurn) {
 			forwardLazySetup(ctx, turn, executor, outer, model, prepared.stream, prepared.err, observation)
 		})

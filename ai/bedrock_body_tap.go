@@ -18,7 +18,9 @@ import (
 //
 // An HTTP/2 stream, a caller-supplied HTTP client and every non-200 response reach the SDK unchanged: their reads cannot report buffered state, which the executor treats as always pending.
 type bedrockBodyTap struct {
-	inner bedrockHTTPClient
+	inner      bedrockHTTPClient
+	failStream func(error)
+	provider   string
 
 	mu            sync.Mutex
 	owner         *bodyReadOwner
@@ -41,7 +43,7 @@ func (tap *bedrockBodyTap) Do(request *http.Request) (*http.Response, error) {
 	var wroteOnce sync.Once
 	if request.Body != nil && request.Body != http.NoBody {
 		// smithy-go's ClientHandler closes the request body as soon as Do returns (transport/http/client.go:112-117). A response that arrives before the transport finished writing would then fail the write, and the transport closes the connection for a failed write, ending the stream. Closing after the write completes keeps the transport's own contract.
-		request.Body = &bedrockRequestBody{ReadCloser: request.Body, wrote: wrote, done: request.Context().Done()}
+		request.Body = &bedrockRequestBody{ReadCloser: request.Body, wrote: wrote, done: request.Context().Done(), failStream: tap.failStream, provider: tap.provider}
 	}
 	trace := &httptrace.ClientTrace{
 		WroteRequest: func(httptrace.WroteRequestInfo) { wroteOnce.Do(func() { close(wrote) }) },
@@ -123,9 +125,11 @@ func bedrockObservedDial(dial func(context.Context, string, string) (net.Conn, e
 // bedrockRequestBody defers Close until the transport has finished writing the request or the request is canceled.
 type bedrockRequestBody struct {
 	io.ReadCloser
-	wrote <-chan struct{}
-	done  <-chan struct{}
-	once  sync.Once
+	wrote      <-chan struct{}
+	done       <-chan struct{}
+	once       sync.Once
+	failStream func(error)
+	provider   string
 }
 
 func (body *bedrockRequestBody) Close() error {
@@ -135,6 +139,11 @@ func (body *bedrockRequestBody) Close() error {
 	default:
 	}
 	go func() {
+		defer recoverStream(body.provider, func(err error) {
+			if body.failStream != nil {
+				body.failStream(err)
+			}
+		})
 		select {
 		case <-body.wrote:
 		case <-body.done:

@@ -215,7 +215,7 @@ func (p *BedrockProvider) Stream(ctx context.Context, transcript TranscriptConte
 
 // streamResponse sends the request and runs the stream loop. A body the transport can observe is read by the provider as an executor turn; any other body is read by the SDK's event-stream reader.
 func (p *BedrockProvider) streamResponse(ctx, requestContext context.Context, converse func(context.Context, *bedrockruntime.ConverseStreamInput, ...func(*bedrockruntime.Options)) (*bedrockruntime.ConverseStreamOutput, error), input *bedrockruntime.ConverseStreamInput, opts StreamOptions, modelMeta *Model, builder *assistantStreamBuilder) {
-	tap := &bedrockBodyTap{}
+	tap := &bedrockBodyTap{failStream: builder.failPanic, provider: p.ID()}
 	defer tap.close()
 	resp, err := converse(requestContext, input, tap.option, func(options *bedrockruntime.Options) {
 		if opts.OnResponse != nil {

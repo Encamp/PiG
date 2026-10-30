@@ -9,6 +9,7 @@ import (
 	"iter"
 	"net"
 	"sync"
+	"sync/atomic"
 
 	"github.com/MichaelKinsy/PiG/internal/goroutineid"
 )
@@ -24,6 +25,8 @@ type bodyReadiness interface {
 // bodyReadSize is the most one body read asks for.
 const bodyReadSize = bufio.MaxScanTokenSize
 
+const responseBodyReader = "response-body"
+
 var bodyReadBuffers = sync.Pool{New: func() any {
 	buffer := make([]byte, bodyReadSize)
 	return &buffer
@@ -38,12 +41,16 @@ type bodyReadBuffer struct {
 
 // read reads once into the buffer and returns a copy of the bytes read, so a chunk the stream queues costs its own length rather than the read
 // size. A read that fails or ends the body returns the buffer to the pool.
-func (buffer *bodyReadBuffer) read(body io.Reader) ([]byte, error) {
+func (buffer *bodyReadBuffer) read(body io.Reader) (data []byte, err error) {
+	defer recoverStream(responseBodyReader, func(failure error) {
+		buffer.release()
+		data, err = nil, failure
+	})
 	if buffer.buffer == nil {
 		buffer.buffer = bodyReadBuffers.Get().(*[]byte)
 	}
 	count, err := body.Read(*buffer.buffer)
-	data := []byte{}
+	data = []byte{}
 	if count > 0 {
 		data = bytes.Clone((*buffer.buffer)[:count])
 	}
@@ -71,8 +78,9 @@ type observedBodyReadiness struct {
 	next func() (bodyReadSignal, bool)
 	stop func()
 	// waits hands a read suspended at its network wait to waitBody with its delivery. Only one read is outstanding, so a send never blocks.
-	waits  chan func(bodyReadSignal)
-	joined chan struct{}
+	waits    chan func(bodyReadSignal)
+	joined   chan struct{}
+	inFlight func(bodyReadSignal)
 	// release, when set, closes the body in place of body.Close: a reader whose request owns the body's close.
 	release func()
 	close   sync.Once
@@ -113,12 +121,22 @@ func (readiness *observedBodyReadiness) reads(yield func(bodyReadSignal) bool) {
 
 // waitBody finishes each read that waits for the network and delivers it. A delivery may drain the executor's jobs on this goroutine, and a job may start the next read: that read runs in the coroutine, and if it waits too it is queued on waits for this loop.
 func (readiness *observedBodyReadiness) waitBody() {
-	//portlint:allow doubleclose only waitBody closes joined, once, when it returns
-	defer close(readiness.joined)
+	defer recoverStream(responseBodyReader, func(err error) {
+		defer close(readiness.joined)
+		if readiness.inFlight != nil {
+			readiness.inFlight(bodyReadSignal{err: err})
+		}
+		for deliver := range readiness.waits {
+			deliver(bodyReadSignal{err: err})
+		}
+	})
 	for deliver := range readiness.waits {
+		readiness.inFlight = deliver
 		signal, _ := readiness.next()
 		deliver(signal)
+		readiness.inFlight = nil
 	}
+	close(readiness.joined)
 }
 
 //perf:hot
@@ -152,11 +170,12 @@ func (readiness *observedBodyReadiness) Close() error {
 
 // opaqueBodyReadiness reads a body that cannot report its buffer state, such as an HTTP/2 stream or a caller-supplied fetch body. Every read is an external completion, as it is for a network body in Node.
 type opaqueBodyReadiness struct {
-	body    io.ReadCloser
-	buffer  bodyReadBuffer
-	readers sync.WaitGroup
-	close   sync.Once
-	err     error
+	body     io.ReadCloser
+	buffer   bodyReadBuffer
+	readers  sync.WaitGroup
+	panicked atomic.Pointer[error]
+	close    sync.Once
+	err      error
 }
 
 func newOpaqueBodyReadiness(body io.ReadCloser) *opaqueBodyReadiness {
@@ -164,8 +183,22 @@ func newOpaqueBodyReadiness(body io.ReadCloser) *opaqueBodyReadiness {
 }
 
 func (readiness *opaqueBodyReadiness) begin(deliver func(bodyReadSignal)) (bodyReadSignal, bool) {
+	if failed := readiness.panicked.Load(); failed != nil {
+		return bodyReadSignal{err: *failed}, true
+	}
+	delivered := false
 	readiness.readers.Go(func() {
+		defer recoverStream(responseBodyReader, func(err error) {
+			readiness.panicked.CompareAndSwap(nil, &err)
+			if !delivered {
+				deliver(bodyReadSignal{err: err})
+			}
+		})
 		data, err := readiness.buffer.read(readiness.body)
+		if err != nil {
+			readiness.panicked.CompareAndSwap(nil, &err)
+		}
+		delivered = true
 		deliver(bodyReadSignal{data: data, err: err})
 	})
 	return bodyReadSignal{}, false

@@ -94,7 +94,12 @@ func (p *piMessagesProvider) Stream(ctx context.Context, transcript TranscriptCo
 		model := providerEventModel(p.cfg.ModelMetadata, APIPiMessages, p.cfg.ProviderID, p.cfg.Model)
 		convert.observe = func(data any) error { return opts.OnProviderStreamEvent(ctx, data, model) }
 	}
-	go p.run(ctx, transcript, opts, stream, convert)
+	go func() {
+		defer recoverStream(p.cfg.ProviderID, func(err error) {
+			failStreamPanic(stream, APIPiMessages, p.cfg.ProviderID, p.cfg.Model, err)
+		})
+		p.run(ctx, transcript, opts, stream, convert)
+	}()
 	return stream, nil
 }
 
