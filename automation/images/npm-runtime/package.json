@@ -4,14 +4,14 @@
   "version": "0.0.0",
   "dependencies": {
     "brace-expansion": "5.0.12",
-    "ip-address": "10.7.2",
+    "ip-address": "10.7.4",
     "npm": "12.1.0",
     "tar": "7.5.22",
     "undici": "6.28.1"
   },
   "overrides": {
     "brace-expansion": "5.0.12",
-    "ip-address": "10.7.2",
+    "ip-address": "10.7.4",
     "tar": "7.5.22",
     "undici": "6.28.1"
   }
